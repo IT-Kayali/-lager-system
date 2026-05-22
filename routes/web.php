@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OfferPdfController;
 use App\Http\Controllers\DocumentTemplateController;
 use App\Http\Controllers\OfferController;
+use App\Http\Controllers\OfferStatusController;
 use App\Http\Controllers\PriceController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\BatchController;
@@ -58,7 +59,7 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE)
         ->name('offers.update');
 
-    Route::put('/offers/{offer}/status', [OfferController::class, 'updateStatus'])
+    Route::put('/offers/{offer}/status', [OfferStatusController::class, 'update'])
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE)
         ->name('offers.status');
 
