@@ -94,7 +94,7 @@
                             </td>
                             <td>
                                 <div class="premium-actions">
-                                    <a class="premium-icon-btn" href="{{ route('batches.index') }}" title="Buchen">
+                                    <a class="premium-icon-btn" href="{{ route('batches.create', ['product_id' => $product->id]) }}" title="Buchen">
                                         <i class="bi bi-columns-gap"></i>
                                     </a>
 

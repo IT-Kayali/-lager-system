@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\BatchController;
 use App\Http\Controllers\ProductController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -16,9 +17,17 @@ Route::middleware(['auth'])->group(function () {
         ->except(['show'])
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE . ',' . User::ROLE_WAREHOUSE);
 
-    Route::view('/batches', 'pages.batches.index')
+    Route::get('/batches/fifo-out', [BatchController::class, 'fifoOutForm'])
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE)
-        ->name('batches.index');
+        ->name('batches.fifo-out.form');
+
+    Route::post('/batches/fifo-out', [BatchController::class, 'fifoOut'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE)
+        ->name('batches.fifo-out.store');
+
+    Route::resource('batches', BatchController::class)
+        ->except(['show'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE);
 
     Route::view('/offers', 'pages.documents.index')
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE)
