@@ -282,13 +282,15 @@ class OfferController extends Controller
                 back()->withInput()->with('error', 'Keine passende Preisstaffel für ' . $product->product_code . ' bei ' . number_format($item['quantity'], 3, ',', '.') . ' Gramm.')->throwResponse();
             }
 
-            $lineTotal = (float) $tier->price;
+            $unitPrice = (float) $tier->price;
+            $quantity = (float) $item['quantity'];
+            $lineTotal = round($quantity * $unitPrice, 2);
 
             $prepared[] = [
                 'product' => $product,
                 'tier' => $tier,
-                'quantity' => $item['quantity'],
-                'unit_price' => $lineTotal,
+                'quantity' => $quantity,
+                'unit_price' => $unitPrice,
                 'line_total' => $lineTotal,
             ];
         }
