@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProductController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -11,9 +12,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', DashboardController::class)
         ->name('dashboard');
 
-    Route::view('/products', 'pages.products.index')
-        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE . ',' . User::ROLE_WAREHOUSE)
-        ->name('products.index');
+    Route::resource('products', ProductController::class)
+        ->except(['show'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE . ',' . User::ROLE_WAREHOUSE);
 
     Route::view('/batches', 'pages.batches.index')
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE)
