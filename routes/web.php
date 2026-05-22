@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\BatchController;
 use App\Http\Controllers\ProductController;
 use App\Models\User;
@@ -33,9 +34,9 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE)
         ->name('offers.index');
 
-    Route::view('/customers', 'pages.customers.index')
-        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE)
-        ->name('customers.index');
+    Route::resource('customers', CustomerController::class)
+        ->except(['show'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE);
 
     Route::view('/prices', 'pages.prices.index')
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE)
