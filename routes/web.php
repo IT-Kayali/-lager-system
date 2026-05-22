@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SystemUserController;
+use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\WarningController;
 use App\Http\Controllers\OfferPdfController;
 use App\Http\Controllers\DocumentTemplateController;
@@ -96,9 +98,29 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:' . User::ROLE_MANAGER)
         ->name('statistics.index');
 
-    Route::view('/security', 'pages.security.index')
+    Route::get('/security', [SecurityController::class, 'index'])
         ->middleware('role:' . User::ROLE_MANAGER)
         ->name('security.index');
+
+    Route::get('/security/users/create', [SystemUserController::class, 'create'])
+        ->middleware('role:' . User::ROLE_MANAGER)
+        ->name('security.users.create');
+
+    Route::post('/security/users', [SystemUserController::class, 'store'])
+        ->middleware('role:' . User::ROLE_MANAGER)
+        ->name('security.users.store');
+
+    Route::get('/security/users/{user}/edit', [SystemUserController::class, 'edit'])
+        ->middleware('role:' . User::ROLE_MANAGER)
+        ->name('security.users.edit');
+
+    Route::put('/security/users/{user}', [SystemUserController::class, 'update'])
+        ->middleware('role:' . User::ROLE_MANAGER)
+        ->name('security.users.update');
+
+    Route::delete('/security/users/{user}', [SystemUserController::class, 'destroy'])
+        ->middleware('role:' . User::ROLE_MANAGER)
+        ->name('security.users.destroy');
     Route::get('/document-templates', [DocumentTemplateController::class, 'index'])
         ->middleware('role:' . User::ROLE_MANAGER)
         ->name('document-templates.index');
