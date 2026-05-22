@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\SystemUserController;
 use App\Http\Controllers\SecurityController;
@@ -78,6 +79,10 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/offers/{offer}', [OfferController::class, 'destroy'])
         ->middleware('role:' . User::ROLE_MANAGER)
         ->name('offers.destroy');
+
+    Route::resource('suppliers', SupplierController::class)
+        ->except(['show'])
+        ->middleware('role:' . User::ROLE_MANAGER);
 
     Route::resource('customers', CustomerController::class)
         ->except(['show'])

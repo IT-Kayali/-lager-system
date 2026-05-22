@@ -12,14 +12,29 @@
     <section class="premium-card">
         <div class="premium-toolbar">
             <form method="GET" action="{{ route('customers.index') }}" class="premium-search">
-                <input name="search" value="{{ $search }}" class="premium-input" style="min-width:280px;" placeholder="Kunde suchen...">
+                <input
+                    name="search"
+                    value="{{ $search }}"
+                    class="premium-input"
+                    style="min-width:280px;"
+                    placeholder="Suchen nach Nummer, Name, E-Mail, Telefon..."
+                >
+
+                <select name="group" class="premium-select" style="max-width: 190px;">
+                    <option value="">Alle Gruppen</option>
+                    @foreach ($groups as $group)
+                        <option value="{{ $group->slug }}" @selected($selectedGroup === $group->slug)>
+                            {{ $group->name }}
+                        </option>
+                    @endforeach
+                </select>
 
                 <button class="premium-btn" type="submit">
                     <i class="bi bi-search"></i>
                     Suchen
                 </button>
 
-                @if ($search)
+                @if ($search || $selectedGroup)
                     <a href="{{ route('customers.index') }}" class="premium-btn">
                         <i class="bi bi-x-lg"></i>
                         Zurücksetzen
@@ -28,7 +43,7 @@
             </form>
 
             <a href="{{ route('customers.create') }}" class="premium-btn gold">
-                <i class="bi bi-plus-lg"></i>
+                <i class="bi bi-person-plus"></i>
                 Kunde hinzufügen
             </a>
         </div>
@@ -38,11 +53,13 @@
                 <thead>
                     <tr>
                         <th>Kundennummer</th>
-                        <th>Kunde</th>
+                        <th>Name / Firma</th>
                         <th>Gruppe</th>
-                        <th>Kontakt</th>
+                        <th>E-Mail</th>
+                        <th>Telefon / WhatsApp</th>
                         <th>Stadt</th>
                         <th>USt-Nummer</th>
+                        <th>Erstellt</th>
                         <th>Aktionen</th>
                     </tr>
                 </thead>
@@ -50,30 +67,22 @@
                     @forelse ($customers as $customer)
                         <tr>
                             <td><span class="premium-code">{{ $customer->customer_number }}</span></td>
-
                             <td>
                                 <strong>{{ $customer->company_name }}</strong>
                                 @if ($customer->notes)
-                                    <div class="premium-muted">{{ \Illuminate\Support\Str::limit($customer->notes, 60) }}</div>
+                                    <div class="premium-muted">Notiz vorhanden</div>
                                 @endif
                             </td>
-
                             <td>
-                                <span class="premium-badge ok">{{ $customer->group?->name ?? '—' }}</span>
+                                <span class="premium-badge ok">
+                                    {{ $customer->group?->name ?? '—' }}
+                                </span>
                             </td>
-
-                            <td>
-                                <div>{{ $customer->email ?: '—' }}</div>
-
-                                @if ($customer->phone)
-                                    <x-whatsapp-link :number="$customer->phone" :label="$customer->phone" />
-                                @endif
-                            </td>
-
+                            <td>{{ $customer->email ?: '—' }}</td>
+                            <td>{{ $customer->phone ?: '—' }}</td>
                             <td>{{ $customer->billing_city ?: $customer->delivery_city ?: $customer->city ?: '—' }}</td>
-
                             <td>{{ $customer->vat_number ?: '—' }}</td>
-
+                            <td>{{ $customer->created_at?->format('d.m.Y') }}</td>
                             <td>
                                 <div class="premium-actions">
                                     <a class="premium-icon-btn" href="{{ route('customers.edit', $customer) }}" title="Bearbeiten">
@@ -92,7 +101,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7">
+                            <td colspan="9">
                                 <div class="premium-muted">Noch keine Kunden vorhanden.</div>
                             </td>
                         </tr>
@@ -101,7 +110,7 @@
             </table>
         </div>
 
-        <div style="margin-top:18px;">
+        <div style="margin-top: 18px;">
             {{ $customers->links() }}
         </div>
     </section>

@@ -36,13 +36,6 @@
             'roles' => ['manager', 'wholesale'],
         ],
         [
-            'label' => 'Lieferanten',
-            'route' => 'suppliers.index',
-            'active' => 'suppliers.*',
-            'icon' => 'bi-truck',
-            'roles' => ['manager'],
-        ],
-        [
             'label' => 'Preise',
             'route' => 'prices.index',
             'active' => 'prices.*',

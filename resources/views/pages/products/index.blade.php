@@ -80,7 +80,7 @@
                                     @default {{ $product->unit }}
                                 @endswitch
                             </td>
-                            <td>{{ $product->supplier ?: '—' }}</td>
+                            <td>{{ $product->supplierRecord?->company_name ?: $product->supplier ?: '—' }}</td>
                             <td>{{ $product->storage_location ?: '—' }}</td>
                             <td>{{ $firstBatch?->batch_number ?: '—' }}</td>
                             <td>{{ number_format($product->total_stock, 3, ',', '.') }}</td>

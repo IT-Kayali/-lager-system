@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Supplier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -100,6 +101,7 @@ class ProductController extends Controller
             'serial_number' => ['nullable', 'string', 'max:255'],
             'unit' => ['required', Rule::in(array_keys($this->units()))],
             'supplier' => ['nullable', 'string', 'max:255'],
+            'supplier_id' => ['nullable', 'integer', 'exists:suppliers,id'],
             'storage_location' => ['nullable', 'string', 'max:255'],
             'minimum_stock' => ['required', 'numeric', 'min:0', 'max:999999999'],
             'description' => ['nullable', 'string', 'max:5000'],

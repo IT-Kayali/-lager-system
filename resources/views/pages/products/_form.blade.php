@@ -1,5 +1,12 @@
 @csrf
 
+@if (($suppliers ?? collect())->isEmpty())
+    <div class="premium-alert" style="border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.10); color:#92400e;">
+        Noch keine Lieferanten vorhanden. Du kannst das Produkt trotzdem speichern, aber empfohlen ist zuerst einen Lieferanten anzulegen.
+        <a href="{{ route('suppliers.create') }}" style="font-weight:900; color:#92400e;">Lieferant hinzufügen</a>
+    </div>
+@endif
+
 <div class="premium-form-grid">
     <div class="premium-form-field">
         <label for="name">Produktname *</label>
@@ -22,8 +29,8 @@
     <div class="premium-form-field">
         <label for="unit">Einheit *</label>
         <select id="unit" name="unit" class="premium-select" required>
-            @foreach ($units as $value => $label)
-                <option value="{{ $value }}" @selected(old('unit', $product->unit ?: 'gram') === $value)>
+            @foreach (['gram' => 'Gramm', 'liter' => 'Liter', 'piece' => 'Stück'] as $value => $label)
+                <option value="{{ $value }}" @selected(old('unit', $product->unit) === $value)>
                     {{ $label }}
                 </option>
             @endforeach
@@ -32,9 +39,16 @@
     </div>
 
     <div class="premium-form-field">
-        <label for="supplier">Lieferant</label>
-        <input id="supplier" name="supplier" class="premium-input" value="{{ old('supplier', $product->supplier) }}">
-        @error('supplier') <div class="premium-error">{{ $message }}</div> @enderror
+        <label for="supplier_id">Lieferant</label>
+        <select id="supplier_id" name="supplier_id" class="premium-select">
+            <option value="">Kein Lieferant ausgewählt</option>
+            @foreach (($suppliers ?? collect()) as $supplier)
+                <option value="{{ $supplier->id }}" @selected((string) old('supplier_id', $product->supplier_id) === (string) $supplier->id)>
+                    {{ $supplier->supplier_number }} — {{ $supplier->company_name }}
+                </option>
+            @endforeach
+        </select>
+        @error('supplier_id') <div class="premium-error">{{ $message }}</div> @enderror
     </div>
 
     <div class="premium-form-field">
@@ -43,16 +57,10 @@
         @error('storage_location') <div class="premium-error">{{ $message }}</div> @enderror
     </div>
 
-    <div class="premium-form-field">
+    <div class="premium-form-field full">
         <label for="minimum_stock">Mindestbestand *</label>
-        <input id="minimum_stock" name="minimum_stock" type="number" step="0.001" min="0" class="premium-input" value="{{ old('minimum_stock', $product->minimum_stock ?? 0) }}" required>
+        <input id="minimum_stock" name="minimum_stock" type="number" step="0.001" min="0" class="premium-input" value="{{ old('minimum_stock', $product->minimum_stock) }}" required>
         @error('minimum_stock') <div class="premium-error">{{ $message }}</div> @enderror
-    </div>
-
-    <div class="premium-form-field">
-        <label for="image">Produktbild optional</label>
-        <input id="image" name="image" type="file" accept="image/*" class="premium-input">
-        @error('image') <div class="premium-error">{{ $message }}</div> @enderror
     </div>
 
     <div class="premium-form-field full">

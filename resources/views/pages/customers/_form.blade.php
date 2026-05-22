@@ -135,4 +135,8 @@
         <i class="bi bi-arrow-left"></i>
         Zurück
     </a>
+<a href="{{ route('suppliers.index') }}" class="premium-btn">
+        <i class="bi bi-arrow-left"></i>
+        Zurück
+    </a>
 </div>

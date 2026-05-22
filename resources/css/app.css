@@ -1653,3 +1653,21 @@ body.itk-auth-v2::after {
         border-radius: 25px !important;
     }
 }
+
+.premium-whatsapp-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #16a34a !important;
+    font-weight: 900;
+    text-decoration: none;
+    line-height: 1.4;
+}
+
+.premium-whatsapp-link i {
+    font-size: 16px;
+}
+
+.premium-whatsapp-link:hover {
+    text-decoration: underline;
+}
