@@ -7,11 +7,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use App\Services\ReservationReleaseService;
 
 class ProductController extends Controller
 {
     public function index(Request $request): View
     {
+        app(\App\Services\ReservationReleaseService::class)->releaseExpired();
+
         $search = trim((string) $request->query('search'));
 
         $products = Product::query()

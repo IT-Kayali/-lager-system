@@ -17,6 +17,8 @@ class OfferController extends Controller
 {
     public function index(Request $request): View
     {
+        app(\App\Services\ReservationReleaseService::class)->releaseExpired();
+
         $search = trim((string) $request->query('search'));
         $status = trim((string) $request->query('status'));
 
