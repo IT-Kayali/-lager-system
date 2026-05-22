@@ -1,3 +1,4 @@
+import './searchable-selects';
 import Chart from 'chart.js/auto';
 
 window.Chart = Chart;
