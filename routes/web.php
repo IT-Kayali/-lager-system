@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\WarningController;
 use App\Http\Controllers\OfferPdfController;
 use App\Http\Controllers\DocumentTemplateController;
 use App\Http\Controllers\OfferController;
@@ -87,7 +88,7 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:' . User::ROLE_MANAGER)
         ->name('prices.update');
 
-    Route::view('/warnings', 'pages.warnings.index')
+    Route::get('/warnings', [WarningController::class, 'index'])
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE)
         ->name('warnings.index');
 

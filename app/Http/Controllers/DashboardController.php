@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\Offer;
+use App\Models\Product;
 use App\Models\User;
 use App\Services\ReservationReleaseService;
 use Illuminate\Support\Facades\DB;
@@ -15,16 +17,28 @@ class DashboardController extends Controller
     {
         $reservationReleaseService->releaseExpired();
 
+        $products = Schema::hasTable('products')
+            ? Product::query()->get()
+            : collect();
+
+        $criticalProducts = $products->filter(fn (Product $product) => $product->stock_status === 'critical')->count();
+        $lowProducts = $products->filter(fn (Product $product) => $product->stock_status === 'low')->count();
+
         $stats = [
-            'products' => Schema::hasTable('products') ? DB::table('products')->count() : 0,
+            'products' => $products->count(),
             'reservations' => Schema::hasTable('offers')
                 ? DB::table('offers')->whereIn('status', Offer::RESERVING_STATUSES)->count()
                 : 0,
             'offers' => Schema::hasTable('offers') ? DB::table('offers')->count() : 0,
-            'critical' => 0,
+            'critical' => $criticalProducts,
+            'low' => $lowProducts,
             'users' => User::count(),
         ];
 
-        return view('dashboard', compact('stats'));
+        $latestActivities = Schema::hasTable('activity_logs')
+            ? ActivityLog::query()->with('user')->latest()->limit(8)->get()
+            : collect();
+
+        return view('dashboard', compact('stats', 'latestActivities'));
     }
 }
