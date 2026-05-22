@@ -105,6 +105,60 @@
     </style>
 </head>
 <body>
+    @php
+        $companyAddressLines = [];
+
+        if ($template->company_street || $template->company_house_number) {
+            $companyAddressLines[] = trim(($template->company_street ?? '') . ' ' . ($template->company_house_number ?? ''));
+        }
+
+        if ($template->company_postal_code || $template->company_city) {
+            $companyAddressLines[] = trim(($template->company_postal_code ?? '') . ' ' . ($template->company_city ?? ''));
+        }
+
+        if ($template->company_country) {
+            $companyAddressLines[] = $template->company_country;
+        }
+
+        if (empty($companyAddressLines) && $template->company_address) {
+            $companyAddressLines = explode("\n", $template->company_address);
+        }
+
+        $customerAddressLines = [];
+
+        if ($offer->customer?->billing_street || $offer->customer?->billing_house_number) {
+            $customerAddressLines[] = trim(($offer->customer->billing_street ?? '') . ' ' . ($offer->customer->billing_house_number ?? ''));
+        }
+
+        if ($offer->customer?->billing_postal_code || $offer->customer?->billing_city) {
+            $customerAddressLines[] = trim(($offer->customer->billing_postal_code ?? '') . ' ' . ($offer->customer->billing_city ?? ''));
+        }
+
+        if ($offer->customer?->billing_country) {
+            $customerAddressLines[] = $offer->customer->billing_country;
+        }
+
+        if (empty($customerAddressLines)) {
+            if ($offer->customer?->delivery_street || $offer->customer?->delivery_house_number) {
+                $customerAddressLines[] = trim(($offer->customer->delivery_street ?? '') . ' ' . ($offer->customer->delivery_house_number ?? ''));
+            }
+
+            if ($offer->customer?->delivery_postal_code || $offer->customer?->delivery_city) {
+                $customerAddressLines[] = trim(($offer->customer->delivery_postal_code ?? '') . ' ' . ($offer->customer->delivery_city ?? ''));
+            }
+
+            if ($offer->customer?->delivery_country) {
+                $customerAddressLines[] = $offer->customer->delivery_country;
+            }
+        }
+
+        if (empty($customerAddressLines) && $offer->customer?->billing_address) {
+            $customerAddressLines = explode("\n", $offer->customer->billing_address);
+        } elseif (empty($customerAddressLines) && $offer->customer?->delivery_address) {
+            $customerAddressLines = explode("\n", $offer->customer->delivery_address);
+        }
+    @endphp
+
     <div class="header">
         <div class="header-left">
             @if ($template->show_logo && $logoDataUri)
@@ -113,10 +167,15 @@
 
             @if ($template->show_company_details)
                 <strong>{{ $template->company_name }}</strong><br>
-                {!! nl2br(e($template->company_address)) !!}<br>
+
+                @foreach ($companyAddressLines as $line)
+                    {{ $line }}<br>
+                @endforeach
+
                 @if ($template->company_phone)
                     Tel.: {{ $template->company_phone }}<br>
                 @endif
+
                 @if ($template->company_email)
                     E-Mail: {{ $template->company_email }}
                 @endif
@@ -139,13 +198,16 @@
         <strong>{{ $offer->customer?->company_name }}</strong><br>
         Kundennummer: {{ $offer->customer?->customer_number }}<br>
         Kundengruppe: {{ $offer->customer?->group?->name }}<br>
-        @if ($offer->customer?->billing_address)
-            <br>{!! nl2br(e($offer->customer->billing_address)) !!}
-        @elseif ($offer->customer?->delivery_address)
-            <br>{!! nl2br(e($offer->customer->delivery_address)) !!}
+
+        @if (! empty($customerAddressLines))
+            <br>
+            @foreach ($customerAddressLines as $line)
+                {{ $line }}<br>
+            @endforeach
         @endif
+
         @if ($offer->customer?->vat_number)
-            <br>USt-Nummer: {{ $offer->customer->vat_number }}
+            USt-Nummer: {{ $offer->customer->vat_number }}
         @endif
     </div>
 

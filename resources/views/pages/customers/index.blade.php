@@ -80,7 +80,7 @@
                             </td>
                             <td>{{ $customer->email ?: '—' }}</td>
                             <td>{{ $customer->phone ?: '—' }}</td>
-                            <td>{{ $customer->city ?: '—' }}</td>
+                            <td>{{ $customer->billing_city ?: $customer->delivery_city ?: $customer->city ?: '—' }}</td>
                             <td>{{ $customer->vat_number ?: '—' }}</td>
                             <td>{{ $customer->created_at?->format('d.m.Y') }}</td>
                             <td>

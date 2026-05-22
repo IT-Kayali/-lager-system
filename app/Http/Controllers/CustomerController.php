@@ -107,8 +107,21 @@ class CustomerController extends Controller
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:255'],
+
+            'delivery_street' => ['nullable', 'string', 'max:255'],
+            'delivery_house_number' => ['nullable', 'string', 'max:50'],
+            'delivery_postal_code' => ['nullable', 'string', 'max:50'],
+            'delivery_city' => ['nullable', 'string', 'max:255'],
+            'delivery_country' => ['nullable', 'string', 'max:255'],
             'delivery_address' => ['nullable', 'string', 'max:3000'],
+
+            'billing_street' => ['nullable', 'string', 'max:255'],
+            'billing_house_number' => ['nullable', 'string', 'max:50'],
+            'billing_postal_code' => ['nullable', 'string', 'max:50'],
+            'billing_city' => ['nullable', 'string', 'max:255'],
+            'billing_country' => ['nullable', 'string', 'max:255'],
             'billing_address' => ['nullable', 'string', 'max:3000'],
+
             'vat_number' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:5000'],
         ]);

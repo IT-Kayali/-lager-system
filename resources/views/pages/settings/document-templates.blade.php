@@ -36,10 +36,40 @@
                             @error('company_name') <div class="premium-error">{{ $message }}</div> @enderror
                         </div>
 
-                        <div class="premium-form-field">
-                            <label>Adresse</label>
-                            <textarea name="company_address" rows="3" class="premium-textarea">{{ old('company_address', $template->company_address) }}</textarea>
-                            @error('company_address') <div class="premium-error">{{ $message }}</div> @enderror
+                        <div class="premium-card" style="box-shadow:none;">
+                            <h3 style="font-size:18px; font-weight:900; margin:0 0 14px;">Firmenadresse</h3>
+
+                            <div class="premium-form-grid">
+                                <div class="premium-form-field">
+                                    <label>Straße</label>
+                                    <input name="company_street" class="premium-input" value="{{ old('company_street', $template->company_street) }}">
+                                    @error('company_street') <div class="premium-error">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div class="premium-form-field">
+                                    <label>Hausnummer</label>
+                                    <input name="company_house_number" class="premium-input" value="{{ old('company_house_number', $template->company_house_number) }}">
+                                    @error('company_house_number') <div class="premium-error">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div class="premium-form-field">
+                                    <label>PLZ</label>
+                                    <input name="company_postal_code" class="premium-input" value="{{ old('company_postal_code', $template->company_postal_code) }}">
+                                    @error('company_postal_code') <div class="premium-error">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div class="premium-form-field">
+                                    <label>Stadt</label>
+                                    <input name="company_city" class="premium-input" value="{{ old('company_city', $template->company_city) }}">
+                                    @error('company_city') <div class="premium-error">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div class="premium-form-field full">
+                                    <label>Land</label>
+                                    <input name="company_country" class="premium-input" value="{{ old('company_country', $template->company_country ?: 'Deutschland') }}">
+                                    @error('company_country') <div class="premium-error">{{ $message }}</div> @enderror
+                                </div>
+                            </div>
                         </div>
 
                         <div class="premium-form-field">
