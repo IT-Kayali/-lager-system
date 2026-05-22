@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 class Product extends Model
 {
@@ -67,6 +68,11 @@ class Product extends Model
         return $this->hasMany(ProductPriceTier::class);
     }
 
+    public function offerItems(): HasMany
+    {
+        return $this->hasMany(OfferItem::class);
+    }
+
     public function getTotalStockAttribute(): float
     {
         return (float) $this->batches()->sum('quantity');
@@ -74,7 +80,15 @@ class Product extends Model
 
     public function getReservedStockAttribute(): float
     {
-        return 0.0;
+        if (! Schema::hasTable('offers') || ! Schema::hasTable('offer_items')) {
+            return 0.0;
+        }
+
+        return (float) DB::table('offer_items')
+            ->join('offers', 'offers.id', '=', 'offer_items.offer_id')
+            ->where('offer_items.product_id', $this->id)
+            ->whereIn('offers.status', Offer::RESERVING_STATUSES)
+            ->sum('offer_items.quantity');
     }
 
     public function getAvailableStockAttribute(): float

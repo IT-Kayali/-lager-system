@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\OfferController;
 use App\Http\Controllers\PriceController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\BatchController;
@@ -31,9 +32,21 @@ Route::middleware(['auth'])->group(function () {
         ->except(['show'])
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE);
 
-    Route::view('/offers', 'pages.documents.index')
+    Route::get('/offers', [OfferController::class, 'index'])
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE)
         ->name('offers.index');
+
+    Route::get('/offers/create', [OfferController::class, 'create'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE)
+        ->name('offers.create');
+
+    Route::post('/offers', [OfferController::class, 'store'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE)
+        ->name('offers.store');
+
+    Route::post('/offers/{offer}/cancel', [OfferController::class, 'cancel'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE)
+        ->name('offers.cancel');
 
     Route::resource('customers', CustomerController::class)
         ->except(['show'])
