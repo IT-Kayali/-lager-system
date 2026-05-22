@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\OfferPdfController;
+use App\Http\Controllers\DocumentTemplateController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\PriceController;
 use App\Http\Controllers\CustomerController;
@@ -44,6 +46,26 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE)
         ->name('offers.store');
 
+    Route::get('/offers/{offer}', [OfferController::class, 'show'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE)
+        ->name('offers.show');
+
+    Route::get('/offers/{offer}/edit', [OfferController::class, 'edit'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE)
+        ->name('offers.edit');
+
+    Route::put('/offers/{offer}', [OfferController::class, 'update'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE)
+        ->name('offers.update');
+
+    Route::put('/offers/{offer}/status', [OfferController::class, 'updateStatus'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE)
+        ->name('offers.status');
+
+    Route::get('/offers/{offer}/pdf/{type}', [OfferPdfController::class, 'stream'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE)
+        ->name('offers.pdf');
+
     Route::post('/offers/{offer}/cancel', [OfferController::class, 'cancel'])
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE)
         ->name('offers.cancel');
@@ -71,6 +93,14 @@ Route::middleware(['auth'])->group(function () {
     Route::view('/security', 'pages.security.index')
         ->middleware('role:' . User::ROLE_MANAGER)
         ->name('security.index');
+    Route::get('/document-templates', [DocumentTemplateController::class, 'index'])
+        ->middleware('role:' . User::ROLE_MANAGER)
+        ->name('document-templates.index');
+
+    Route::put('/document-templates/{documentTemplate}', [DocumentTemplateController::class, 'update'])
+        ->middleware('role:' . User::ROLE_MANAGER)
+        ->name('document-templates.update');
+
 });
 
 if (file_exists(__DIR__ . '/auth.php')) {
