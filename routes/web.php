@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\SystemUserController;
 use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\WarningController;
@@ -94,7 +95,7 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE)
         ->name('warnings.index');
 
-    Route::view('/statistics', 'pages.statistics.index')
+    Route::get('/statistics', [StatisticsController::class, 'index'])
         ->middleware('role:' . User::ROLE_MANAGER)
         ->name('statistics.index');
 

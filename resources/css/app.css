@@ -513,3 +513,35 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+.premium-progress {
+    width: 100%;
+    height: 12px;
+    border-radius: 999px;
+    background: rgba(33, 33, 33, 0.08);
+    overflow: hidden;
+}
+
+.premium-progress-bar {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--premium-gold);
+}
+
+.premium-mini-chart {
+    display: grid;
+    gap: 10px;
+}
+
+.premium-mini-chart-row {
+    display: grid;
+    grid-template-columns: 110px 1fr 110px;
+    gap: 12px;
+    align-items: center;
+}
+
+@media (max-width: 720px) {
+    .premium-mini-chart-row {
+        grid-template-columns: 1fr;
+    }
+}
