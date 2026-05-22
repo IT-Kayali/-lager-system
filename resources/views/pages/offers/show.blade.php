@@ -9,6 +9,12 @@
         </div>
     @endif
 
+    @if ($offer->isFinal())
+        <div class="premium-alert" style="border-color: rgba(33,33,33,.15); background: rgba(33,33,33,.06); color:#212121;">
+            Dieses Angebot ist abgeschlossen. Bearbeitung und erneute FIFO-Abbuchung sind gesperrt.
+        </div>
+    @endif
+
     <section class="premium-card">
         <div class="premium-toolbar">
             <div>
@@ -38,6 +44,7 @@
             </div>
         </div>
 
+        @if (! $offer->isFinal())
         <form method="POST" action="{{ route('offers.status', $offer) }}" style="margin-bottom:18px;">
             @csrf
             @method('PUT')
@@ -68,6 +75,11 @@
                 </div>
             </div>
         </form>
+        @else
+            <div style="margin-bottom:18px;">
+                <span class="premium-badge ok">Status: {{ $offer->statusLabel() }}</span>
+            </div>
+        @endif
 
         <div class="premium-table-wrap">
             <table class="premium-table">

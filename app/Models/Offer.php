@@ -42,6 +42,9 @@ class Offer extends Model
             'subtotal' => 'decimal:2',
             'total' => 'decimal:2',
             'reserved_until' => 'datetime',
+            'completed_at' => 'datetime',
+            'cancelled_at' => 'datetime',
+            'reservation_released_at' => 'datetime',
         ];
     }
 
@@ -83,6 +86,20 @@ class Offer extends Model
     public function isReservationActive(): bool
     {
         return in_array($this->status, self::RESERVING_STATUSES, true);
+    }
+
+    public function isFinal(): bool
+    {
+        return in_array($this->status, [
+            self::STATUS_COMPLETED,
+            self::STATUS_CANCELLED,
+            self::STATUS_RESERVATION_EXPIRED,
+        ], true);
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->status === self::STATUS_COMPLETED;
     }
 
     public function statusLabel(): string
