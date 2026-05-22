@@ -22,3 +22,47 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Security / local secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies
+/vendor
+/node_modules
+
+# Build output
+/public/build
+/public/hot
+
+# Storage / uploads / generated files
+/storage/*.key
+/storage/app/public/*
+!/storage/app/public/.gitignore
+/storage/framework/cache/*
+!/storage/framework/cache/.gitignore
+/storage/framework/cache/data/*
+!/storage/framework/cache/data/.gitignore
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
+/storage/framework/views/*
+!/storage/framework/views/.gitignore
+/storage/logs/*
+!/storage/logs/.gitignore
+
+# Backups / database dumps
+*.sql
+*.sqlite
+*.db
+*.dump
+*.backup
+*.zip
+*.tar
+*.gz
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
