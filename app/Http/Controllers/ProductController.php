@@ -27,7 +27,6 @@ class ProductController extends Controller
                         ->orWhere('name', 'like', "%{$search}%")
                         ->orWhere('manufacturer', 'like', "%{$search}%")
                         ->orWhere('supplier', 'like', "%{$search}%")
-                        ->orWhere('storage_location', 'like', "%{$search}%")
                         ->orWhere('serial_number', 'like', "%{$search}%");
                 });
             })
@@ -56,10 +55,6 @@ class ProductController extends Controller
     {
         $data = $this->validatedData($request);
 
-        if ($request->hasFile('image')) {
-            $data['image_path'] = $request->file('image')->store('products', 'public');
-        }
-
         Product::create($data);
 
         return redirect()
@@ -79,10 +74,6 @@ class ProductController extends Controller
     public function update(Request $request, Product $product): RedirectResponse
     {
         $data = $this->validatedData($request);
-
-        if ($request->hasFile('image')) {
-            $data['image_path'] = $request->file('image')->store('products', 'public');
-        }
 
         $product->update($data);
 
@@ -109,10 +100,8 @@ class ProductController extends Controller
             'unit' => ['required', Rule::in(array_keys($this->units()))],
             'supplier' => ['nullable', 'string', 'max:255'],
             'supplier_id' => ['nullable', 'integer', 'exists:suppliers,id'],
-            'storage_location' => ['nullable', 'string', 'max:255'],
             'minimum_stock' => ['required', 'numeric', 'min:0', 'max:999999999'],
             'description' => ['nullable', 'string', 'max:5000'],
-            'image' => ['nullable', 'image', 'max:4096'],
         ]);
     }
 

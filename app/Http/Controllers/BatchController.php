@@ -23,7 +23,6 @@ class BatchController extends Controller
                 $query->where(function ($subQuery) use ($search) {
                     $subQuery
                         ->where('batch_number', 'like', "%{$search}%")
-                        ->orWhere('storage_location', 'like', "%{$search}%")
                         ->orWhereHas('product', function ($productQuery) use ($search) {
                             $productQuery
                                 ->where('product_code', 'like', "%{$search}%")
@@ -206,10 +205,7 @@ class BatchController extends Controller
                 Rule::unique('product_batches', 'batch_number')->ignore($batch?->id),
             ],
             'quantity' => ['required', 'numeric', 'min:0', 'max:999999999'],
-            'storage_location' => ['nullable', 'string', 'max:255'],
-            'purchase_price' => ['nullable', 'numeric', 'min:0', 'max:999999999'],
             'received_at' => ['required', 'date'],
-            'expires_at' => ['nullable', 'date', 'after_or_equal:received_at'],
         ]);
     }
 

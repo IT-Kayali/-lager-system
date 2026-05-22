@@ -1671,3 +1671,40 @@ body.itk-auth-v2::after {
 .premium-whatsapp-link:hover {
     text-decoration: underline;
 }
+
+/* Full width table fix */
+.premium-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.premium-table {
+    width: 100% !important;
+}
+
+.premium-wide-table {
+    width: 100% !important;
+    min-width: 1100px;
+    table-layout: auto;
+}
+
+.premium-wide-table th,
+.premium-wide-table td {
+    white-space: nowrap;
+}
+
+.premium-wide-table td:nth-child(2) {
+    white-space: normal;
+    min-width: 180px;
+}
+
+.premium-wide-table .premium-actions {
+    justify-content: flex-start;
+    white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+    .premium-wide-table {
+        min-width: 980px;
+    }
+}

@@ -65,7 +65,6 @@
                         <tr>
                             <th>Produkt</th>
                             <th>Hersteller</th>
-                            <th>Lagerort</th>
                             <th>Gesamt</th>
                             <th>Reserviert</th>
                             <th>Verfügbar</th>
@@ -87,12 +86,6 @@
                             @endphp
 
                             <tr>
-                                <td>
-                                    <strong>{{ $product->name }}</strong>
-                                    <div class="premium-muted">{{ $product->product_code }}</div>
-                                </td>
-                                <td>{{ $product->manufacturer ?: '—' }}</td>
-                                <td>{{ $product->storage_location ?: '—' }}</td>
                                 <td>{{ number_format($row['total_stock'], 3, ',', '.') }}</td>
                                 <td>{{ number_format($row['reserved_stock'], 3, ',', '.') }}</td>
                                 <td>{{ number_format($row['available_stock'], 3, ',', '.') }}</td>

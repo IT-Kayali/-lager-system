@@ -18,10 +18,8 @@ class Product extends Model
         'unit',
         'supplier',
         'supplier_id',
-        'storage_location',
         'minimum_stock',
         'description',
-        'image_path',
     ];
 
     protected function casts(): array

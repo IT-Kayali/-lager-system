@@ -11,19 +11,14 @@ class ProductBatch extends Model
         'product_id',
         'batch_number',
         'quantity',
-        'storage_location',
-        'purchase_price',
         'received_at',
-        'expires_at',
     ];
 
     protected function casts(): array
     {
         return [
             'quantity' => 'decimal:3',
-            'purchase_price' => 'decimal:2',
             'received_at' => 'date',
-            'expires_at' => 'date',
         ];
     }
 
