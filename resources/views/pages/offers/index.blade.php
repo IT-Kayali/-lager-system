@@ -116,6 +116,16 @@
                                             </button>
                                         </form>
                                     @endif
+
+                                    @if (auth()->user()?->isManager())
+                                        <form method="POST" action="{{ route('offers.destroy', $offer) }}" onsubmit="return confirm('Angebot wirklich löschen? Offene Reservierungen werden dadurch freigegeben. Erledigte Angebote mit FIFO-Abbuchung bleiben geschützt.');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="premium-icon-btn premium-danger" type="submit" title="Löschen">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

@@ -71,6 +71,10 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE)
         ->name('offers.cancel');
 
+    Route::delete('/offers/{offer}', [OfferController::class, 'destroy'])
+        ->middleware('role:' . User::ROLE_MANAGER)
+        ->name('offers.destroy');
+
     Route::resource('customers', CustomerController::class)
         ->except(['show'])
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE);

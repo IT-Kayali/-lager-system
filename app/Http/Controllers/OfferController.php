@@ -214,6 +214,38 @@ class OfferController extends Controller
             ->with('success', 'Angebot wurde storniert. Die Reservierung wurde freigegeben.');
     }
 
+    public function destroy(Offer $offer): RedirectResponse
+    {
+        if ($offer->status === Offer::STATUS_COMPLETED) {
+            $hasFifoMovements = \App\Models\StockMovement::query()
+                ->where('reference_type', Offer::class)
+                ->where('reference_id', $offer->id)
+                ->exists();
+
+            if ($hasFifoMovements) {
+                return redirect()
+                    ->route('offers.index')
+                    ->with('error', 'Erledigte Angebote mit FIFO-Abbuchung können nicht gelöscht werden. Bitte als Nachweis behalten.');
+            }
+        }
+
+        $offerNumber = $offer->offer_number;
+
+        DB::transaction(function () use ($offer, $offerNumber) {
+            ActivityLog::record('offer.deleted', $offer, [
+                'offer_number' => $offerNumber,
+                'status' => $offer->status,
+                'total' => (float) $offer->total,
+            ]);
+
+            $offer->delete();
+        });
+
+        return redirect()
+            ->route('offers.index')
+            ->with('success', 'Angebot ' . $offerNumber . ' wurde gelöscht.');
+    }
+
     private function validatedData(Request $request): array
     {
         return $request->validate([
