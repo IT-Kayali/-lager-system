@@ -1708,3 +1708,76 @@ body.itk-auth-v2::after {
         min-width: 980px;
     }
 }
+
+/* Searchable dropdowns / Tom Select premium design */
+.ts-wrapper {
+    width: 100%;
+}
+
+.ts-wrapper.single .ts-control,
+.ts-wrapper.multi .ts-control {
+    min-height: 52px;
+    border-radius: 18px;
+    border: 1px solid rgba(33, 33, 33, 0.13);
+    background: #fffaf1;
+    color: #212121;
+    padding: 10px 14px;
+    box-shadow: none;
+    font-size: 15px;
+}
+
+.ts-wrapper.focus .ts-control {
+    border-color: #e3ca6e;
+    box-shadow: 0 0 0 4px rgba(227, 202, 110, 0.18);
+}
+
+.ts-wrapper.single .ts-control input {
+    color: #212121;
+    font-size: 15px;
+}
+
+.ts-wrapper .item {
+    color: #212121;
+    font-weight: 700;
+}
+
+.ts-dropdown {
+    border-radius: 18px;
+    border: 1px solid rgba(227, 202, 110, 0.45);
+    background: #fffaf1;
+    box-shadow: 0 22px 60px rgba(33, 33, 33, 0.16);
+    overflow: hidden;
+    z-index: 9999;
+}
+
+.ts-dropdown .dropdown-input {
+    border: 0;
+    border-bottom: 1px solid rgba(33, 33, 33, 0.10);
+    padding: 14px;
+    font-size: 15px;
+    background: #fffaf1;
+    color: #212121;
+    outline: none;
+}
+
+.ts-dropdown .option {
+    padding: 12px 14px;
+    color: #212121;
+    font-weight: 700;
+}
+
+.ts-dropdown .option.active,
+.ts-dropdown .option:hover {
+    background: #e3ca6e;
+    color: #212121;
+}
+
+.ts-dropdown .no-results {
+    padding: 14px;
+    color: rgba(33, 33, 33, 0.55);
+    font-weight: 700;
+}
+
+.ts-wrapper.disabled .ts-control {
+    opacity: 0.6;
+}
