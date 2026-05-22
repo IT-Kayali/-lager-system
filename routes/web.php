@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PriceController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\BatchController;
 use App\Http\Controllers\ProductController;
@@ -38,9 +39,13 @@ Route::middleware(['auth'])->group(function () {
         ->except(['show'])
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE);
 
-    Route::view('/prices', 'pages.prices.index')
+    Route::get('/prices', [PriceController::class, 'index'])
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE)
         ->name('prices.index');
+
+    Route::put('/prices', [PriceController::class, 'update'])
+        ->middleware('role:' . User::ROLE_MANAGER)
+        ->name('prices.update');
 
     Route::view('/warnings', 'pages.warnings.index')
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE)

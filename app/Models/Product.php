@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Schema;
 
 class Product extends Model
 {
@@ -43,6 +44,12 @@ class Product extends Model
                 $product->product_code = 'PRD-' . ($lastNumber + 1);
             }
         });
+
+        static::created(function (Product $product): void {
+            if (Schema::hasTable('product_price_tiers') && Schema::hasTable('customer_groups')) {
+                ProductPriceTier::ensureForProduct($product);
+            }
+        });
     }
 
     public function batches(): HasMany
@@ -53,6 +60,11 @@ class Product extends Model
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class);
+    }
+
+    public function priceTiers(): HasMany
+    {
+        return $this->hasMany(ProductPriceTier::class);
     }
 
     public function getTotalStockAttribute(): float
