@@ -17,6 +17,7 @@ class Product extends Model
         'serial_number',
         'unit',
         'supplier',
+        'supplier_id',
         'storage_location',
         'minimum_stock',
         'description',

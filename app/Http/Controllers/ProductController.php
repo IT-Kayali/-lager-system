@@ -40,10 +40,16 @@ class ProductController extends Controller
 
     public function create(): View
     {
-        return view('pages.products.create', [
-            'product' => new Product(),
-            'units' => $this->units(),
+        $product = new Product([
+            'unit' => 'gram',
+            'minimum_stock' => 0,
         ]);
+
+        $suppliers = Supplier::query()
+            ->orderBy('company_name')
+            ->get();
+
+        return view('pages.products.create', compact('product', 'suppliers'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -63,10 +69,11 @@ class ProductController extends Controller
 
     public function edit(Product $product): View
     {
-        return view('pages.products.edit', [
-            'product' => $product,
-            'units' => $this->units(),
-        ]);
+        $suppliers = Supplier::query()
+            ->orderBy('company_name')
+            ->get();
+
+        return view('pages.products.edit', compact('product', 'suppliers'));
     }
 
     public function update(Request $request, Product $product): RedirectResponse

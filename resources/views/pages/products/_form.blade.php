@@ -51,12 +51,6 @@
         @error('supplier_id') <div class="premium-error">{{ $message }}</div> @enderror
     </div>
 
-    <div class="premium-form-field">
-        <label for="storage_location">Lagerort</label>
-        <input id="storage_location" name="storage_location" class="premium-input" value="{{ old('storage_location', $product->storage_location) }}">
-        @error('storage_location') <div class="premium-error">{{ $message }}</div> @enderror
-    </div>
-
     <div class="premium-form-field full">
         <label for="minimum_stock">Mindestbestand *</label>
         <input id="minimum_stock" name="minimum_stock" type="number" step="0.001" min="0" class="premium-input" value="{{ old('minimum_stock', $product->minimum_stock) }}" required>
