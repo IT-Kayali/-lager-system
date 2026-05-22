@@ -97,5 +97,11 @@
         @endpersist
 
         @fluxScripts
-    </body>
+    
+<div class="itkayali-auth-footer">
+    Erstellt von
+    <a href="https://it-kayali.de" target="_blank" rel="noopener noreferrer">IT-Kayali</a>
+</div>
+
+</body>
 </html>

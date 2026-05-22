@@ -10,6 +10,15 @@
                     {{ $template->name }}
                 </h2>
 
+                @if ($template->logo_path)
+                    <div style="margin-bottom:16px;">
+                        <div class="premium-muted" style="margin-bottom:8px;">Aktuelles Logo</div>
+                        <div style="background:#fffaf1; border:1px solid rgba(227,202,110,.45); border-radius:18px; padding:14px; display:inline-flex;">
+                            <img src="{{ asset('storage/' . $template->logo_path) }}" alt="Logo" style="max-width:180px; max-height:90px; object-fit:contain;">
+                        </div>
+                    </div>
+                @endif
+
                 <form method="POST" action="{{ route('document-templates.update', $template) }}" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
@@ -47,14 +56,11 @@
 
                         <div class="premium-form-field">
                             <label>Logo hochladen</label>
-                            <input name="logo" type="file" accept="image/*" class="premium-input">
+                            <input name="logo" type="file" accept="image/png,image/jpeg,image/webp" class="premium-input">
+                            <div class="premium-muted" style="margin-top:6px;">
+                                Empfohlen: PNG oder JPG, transparente Logos funktionieren gut.
+                            </div>
                             @error('logo') <div class="premium-error">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="premium-form-field">
-                            <label>Logo-URL optional</label>
-                            <input name="logo_url" class="premium-input" value="{{ old('logo_url', $template->logo_url) }}">
-                            @error('logo_url') <div class="premium-error">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="premium-form-field">

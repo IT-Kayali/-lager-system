@@ -20,19 +20,19 @@
                 autocomplete="email"
             />
 
-            <!-- Password -->
+            <!-- Passwort -->
             <flux:input
                 name="password"
-                :label="__('Password')"
+                :label="__('Passwort')"
                 type="password"
                 required
                 autocomplete="new-password"
-                :placeholder="__('Password')"
-                passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
+                :placeholder="__('Passwort')"
+                passwordrules="{{ \Illuminate\Validation\Rules\Passwort::defaults()->toPasswortRulesString() }}"
                 viewable
             />
 
-            <!-- Confirm Password -->
+            <!-- Confirm Passwort -->
             <flux:input
                 name="password_confirmation"
                 :label="__('Confirm password')"
@@ -40,7 +40,7 @@
                 required
                 autocomplete="new-password"
                 :placeholder="__('Confirm password')"
-                passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
+                passwordrules="{{ \Illuminate\Validation\Rules\Passwort::defaults()->toPasswortRulesString() }}"
                 viewable
             />
 

@@ -6,6 +6,7 @@ use App\Models\ActivityLog;
 use App\Models\DocumentTemplate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class DocumentTemplateController extends Controller
@@ -25,8 +26,7 @@ class DocumentTemplateController extends Controller
             'company_address' => ['nullable', 'string', 'max:3000'],
             'company_phone' => ['nullable', 'string', 'max:255'],
             'company_email' => ['nullable', 'email', 'max:255'],
-            'logo_url' => ['nullable', 'url', 'max:1000'],
-            'logo' => ['nullable', 'image', 'max:4096'],
+            'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'payment_info' => ['nullable', 'string', 'max:3000'],
             'footer_note' => ['nullable', 'string', 'max:3000'],
             'show_company_details' => ['nullable', 'boolean'],
@@ -37,7 +37,12 @@ class DocumentTemplateController extends Controller
         $data['show_logo'] = $request->boolean('show_logo');
 
         if ($request->hasFile('logo')) {
+            if ($documentTemplate->logo_path && Storage::disk('public')->exists($documentTemplate->logo_path)) {
+                Storage::disk('public')->delete($documentTemplate->logo_path);
+            }
+
             $data['logo_path'] = $request->file('logo')->store('document-templates', 'public');
+            $data['logo_url'] = null;
         }
 
         unset($data['logo']);
@@ -46,6 +51,8 @@ class DocumentTemplateController extends Controller
 
         ActivityLog::record('document_template.updated', $documentTemplate, [
             'template' => $documentTemplate->name,
+            'logo_path' => $documentTemplate->logo_path,
+            'show_logo' => $documentTemplate->show_logo,
         ]);
 
         return redirect()

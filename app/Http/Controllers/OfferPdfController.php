@@ -43,15 +43,19 @@ class OfferPdfController extends Controller
 
     private function logoDataUri(DocumentTemplate $template): ?string
     {
-        if (! $template->show_logo) {
+        if (! $template->show_logo || ! $template->logo_path) {
             return null;
         }
 
-        if ($template->logo_path) {
-            $path = public_path('storage/' . $template->logo_path);
+        $paths = [
+            storage_path('app/public/' . $template->logo_path),
+            public_path('storage/' . $template->logo_path),
+        ];
 
+        foreach ($paths as $path) {
             if (is_file($path)) {
                 $mime = mime_content_type($path) ?: 'image/png';
+
                 return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
             }
         }

@@ -581,3 +581,1075 @@ body {
         height: 260px;
     }
 }
+
+/* Premium Auth/Login */
+.premium-auth-body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 18% 18%, rgba(227, 202, 110, 0.18), transparent 32%),
+        radial-gradient(circle at 82% 20%, rgba(249, 115, 22, 0.08), transparent 30%),
+        linear-gradient(135deg, #fbf6ed 0%, #fffaf1 48%, #f5ead7 100%);
+    color: #212121;
+}
+
+.premium-auth-page {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 28px;
+}
+
+.premium-auth-shell {
+    width: min(100%, 460px);
+}
+
+.premium-auth-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.premium-auth-logo {
+    width: 54px;
+    height: 54px;
+    border-radius: 18px;
+    background: #e3ca6e;
+    color: #212121;
+    display: grid;
+    place-items: center;
+    font-size: 26px;
+    box-shadow: 0 18px 40px rgba(33, 33, 33, 0.14);
+}
+
+.premium-auth-brand-title {
+    font-size: 24px;
+    font-weight: 950;
+    letter-spacing: -0.04em;
+    color: #212121;
+    line-height: 1.05;
+}
+
+.premium-auth-brand-subtitle {
+    color: rgba(33, 33, 33, 0.62);
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.premium-auth-card {
+    background: rgba(33, 33, 33, 0.97);
+    border: 1px solid rgba(227, 202, 110, 0.42);
+    border-radius: 30px;
+    padding: 34px;
+    box-shadow: 0 32px 90px rgba(33, 33, 33, 0.22);
+    color: #fff;
+}
+
+.premium-auth-card h1,
+.premium-auth-card h2,
+.premium-auth-card h3 {
+    color: #fff !important;
+    font-weight: 950 !important;
+    letter-spacing: -0.04em;
+}
+
+.premium-auth-card p,
+.premium-auth-card label,
+.premium-auth-card span,
+.premium-auth-card div {
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.premium-auth-card input {
+    background: #fffaf1 !important;
+    color: #212121 !important;
+    border: 1px solid rgba(227, 202, 110, 0.42) !important;
+    border-radius: 16px !important;
+    min-height: 48px;
+}
+
+.premium-auth-card input::placeholder {
+    color: rgba(33, 33, 33, 0.42) !important;
+}
+
+.premium-auth-card input:focus {
+    border-color: #e3ca6e !important;
+    box-shadow: 0 0 0 4px rgba(227, 202, 110, 0.20) !important;
+    outline: none !important;
+}
+
+.premium-auth-card button[type="submit"] {
+    background: #e3ca6e !important;
+    color: #212121 !important;
+    border: 0 !important;
+    border-radius: 16px !important;
+    min-height: 48px;
+    font-weight: 900 !important;
+    box-shadow: 0 18px 36px rgba(227, 202, 110, 0.20);
+}
+
+.premium-auth-card button[type="submit"]:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+}
+
+.premium-auth-card a {
+    color: #f97316 !important;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.premium-auth-card a:hover {
+    text-decoration: underline;
+}
+
+.premium-auth-card svg {
+    color: #e3ca6e !important;
+}
+
+.premium-auth-footer {
+    text-align: center;
+    margin-top: 18px;
+    color: rgba(33, 33, 33, 0.58);
+    font-size: 14px;
+}
+
+.premium-auth-footer a {
+    color: #f97316;
+    font-weight: 900;
+    text-decoration: none;
+}
+
+.premium-auth-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive polishing */
+@media (max-width: 560px) {
+    .premium-auth-page {
+        padding: 18px;
+        place-items: start center;
+    }
+
+    .premium-auth-shell {
+        margin-top: 28px;
+    }
+
+    .premium-auth-card {
+        padding: 24px;
+        border-radius: 24px;
+    }
+
+    .premium-auth-brand-title {
+        font-size: 21px;
+    }
+
+    .premium-auth-logo {
+        width: 48px;
+        height: 48px;
+        border-radius: 16px;
+        font-size: 23px;
+    }
+}
+
+/* IT-Kayali Premium Login */
+body:has(.itk-login-wrap) {
+    margin: 0 !important;
+    min-height: 100vh !important;
+    background:
+        radial-gradient(circle at 18% 18%, rgba(227, 202, 110, 0.22), transparent 32%),
+        radial-gradient(circle at 82% 20%, rgba(249, 115, 22, 0.10), transparent 30%),
+        linear-gradient(135deg, #fbf6ed 0%, #fffaf1 48%, #f5ead7 100%) !important;
+    color: #212121 !important;
+}
+
+.itk-login-wrap {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 32px;
+}
+
+.itk-login-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.itk-login-logo {
+    width: 58px;
+    height: 58px;
+    border-radius: 20px;
+    background: #e3ca6e;
+    color: #212121;
+    display: grid;
+    place-items: center;
+    font-size: 28px;
+    box-shadow: 0 18px 40px rgba(33, 33, 33, 0.16);
+}
+
+.itk-login-title {
+    font-size: 25px;
+    font-weight: 950;
+    letter-spacing: -0.04em;
+    color: #212121;
+}
+
+.itk-login-subtitle {
+    color: rgba(33, 33, 33, 0.62);
+    font-size: 13px;
+    margin-top: 3px;
+}
+
+.itk-login-card {
+    width: min(100%, 460px);
+    background: #212121;
+    border: 1px solid rgba(227, 202, 110, 0.45);
+    border-radius: 30px;
+    padding: 34px;
+    box-shadow: 0 34px 90px rgba(33, 33, 33, 0.26);
+}
+
+.itk-login-head {
+    text-align: center;
+    margin-bottom: 26px;
+}
+
+.itk-login-head-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 18px;
+    background: rgba(227, 202, 110, 0.16);
+    color: #e3ca6e;
+    display: grid;
+    place-items: center;
+    font-size: 24px;
+    margin: 0 auto 14px;
+}
+
+.itk-login-head h1 {
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: 950;
+    letter-spacing: -0.04em;
+    margin: 0 0 8px;
+}
+
+.itk-login-head p {
+    color: rgba(255, 255, 255, 0.68);
+    margin: 0;
+    font-size: 14px;
+}
+
+.itk-login-form {
+    display: grid;
+    gap: 16px;
+}
+
+.itk-login-form label {
+    display: block;
+    color: rgba(255, 255, 255, 0.84);
+    font-weight: 800;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.itk-login-form input[type="email"],
+.itk-login-form input[type="password"] {
+    width: 100%;
+    min-height: 50px;
+    border-radius: 16px;
+    border: 1px solid rgba(227, 202, 110, 0.42);
+    background: #fffaf1;
+    color: #212121;
+    padding: 0 15px;
+    outline: none;
+    font-size: 15px;
+}
+
+.itk-login-form input::placeholder {
+    color: rgba(33, 33, 33, 0.45);
+}
+
+.itk-login-form input:focus {
+    border-color: #e3ca6e;
+    box-shadow: 0 0 0 4px rgba(227, 202, 110, 0.22);
+}
+
+.itk-login-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.itk-login-row a {
+    color: #f97316;
+    font-weight: 900;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.itk-login-row a:hover {
+    text-decoration: underline;
+}
+
+.itk-login-check {
+    display: flex !important;
+    align-items: center;
+    gap: 10px;
+    margin: 2px 0 4px;
+}
+
+.itk-login-check input {
+    width: 18px;
+    height: 18px;
+    accent-color: #e3ca6e;
+}
+
+.itk-login-check span {
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.itk-login-form button {
+    min-height: 52px;
+    border: 0;
+    border-radius: 17px;
+    background: #e3ca6e;
+    color: #212121;
+    font-weight: 950;
+    font-size: 15px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    box-shadow: 0 18px 36px rgba(227, 202, 110, 0.20);
+}
+
+.itk-login-form button:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+}
+
+.itk-login-error {
+    color: #fecaca;
+    font-size: 13px;
+    margin-top: 7px;
+}
+
+.itk-login-footer {
+    text-align: center;
+    margin-top: 18px;
+    color: rgba(33, 33, 33, 0.62);
+    font-size: 14px;
+}
+
+.itk-login-footer a {
+    color: #f97316;
+    font-weight: 950;
+    text-decoration: none;
+}
+
+.itk-login-footer a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 560px) {
+    .itk-login-wrap {
+        padding: 20px;
+        place-items: start center;
+    }
+
+    .itk-login-brand {
+        margin-top: 28px;
+    }
+
+    .itk-login-card {
+        padding: 24px;
+        border-radius: 24px;
+    }
+
+    .itk-login-title {
+        font-size: 22px;
+    }
+
+    .itk-login-logo {
+        width: 50px;
+        height: 50px;
+        border-radius: 17px;
+        font-size: 24px;
+    }
+}
+
+/* Safe Premium Login Fix - no Volt changes */
+body:has(form[action*="login"]),
+body:has(input[name="email"]):has(input[name="password"]) {
+    min-height: 100vh !important;
+    background:
+        radial-gradient(circle at 18% 18%, rgba(227, 202, 110, 0.22), transparent 32%),
+        radial-gradient(circle at 82% 20%, rgba(249, 115, 22, 0.10), transparent 30%),
+        linear-gradient(135deg, #fbf6ed 0%, #fffaf1 48%, #f5ead7 100%) !important;
+    color: #212121 !important;
+}
+
+/* Make default auth content visible */
+body:has(input[name="email"]):has(input[name="password"]) main,
+body:has(input[name="email"]):has(input[name="password"]) [class*="auth"],
+body:has(input[name="email"]):has(input[name="password"]) form {
+    color: #ffffff !important;
+}
+
+/* Center/login card */
+body:has(input[name="email"]):has(input[name="password"]) form {
+    background: #212121 !important;
+    border: 1px solid rgba(227, 202, 110, 0.45) !important;
+    border-radius: 30px !important;
+    padding: 34px !important;
+    box-shadow: 0 34px 90px rgba(33, 33, 33, 0.26) !important;
+}
+
+/* Login headings/text */
+body:has(input[name="email"]):has(input[name="password"]) h1,
+body:has(input[name="email"]):has(input[name="password"]) h2,
+body:has(input[name="email"]):has(input[name="password"]) h3 {
+    color: #ffffff !important;
+    font-weight: 950 !important;
+}
+
+body:has(input[name="email"]):has(input[name="password"]) p,
+body:has(input[name="email"]):has(input[name="password"]) label,
+body:has(input[name="email"]):has(input[name="password"]) span {
+    color: rgba(255, 255, 255, 0.82) !important;
+}
+
+/* Inputs */
+body:has(input[name="email"]):has(input[name="password"]) input[type="email"],
+body:has(input[name="email"]):has(input[name="password"]) input[type="password"] {
+    background: #fffaf1 !important;
+    color: #212121 !important;
+    border: 1px solid rgba(227, 202, 110, 0.42) !important;
+    border-radius: 16px !important;
+    min-height: 50px !important;
+}
+
+body:has(input[name="email"]):has(input[name="password"]) input::placeholder {
+    color: rgba(33, 33, 33, 0.45) !important;
+}
+
+/* Button */
+body:has(input[name="email"]):has(input[name="password"]) button[type="submit"] {
+    background: #e3ca6e !important;
+    color: #212121 !important;
+    border: 0 !important;
+    border-radius: 16px !important;
+    min-height: 50px !important;
+    font-weight: 950 !important;
+}
+
+/* Links orange */
+body:has(input[name="email"]):has(input[name="password"]) a {
+    color: #f97316 !important;
+    font-weight: 900 !important;
+}
+
+/* Add footer via CSS visually */
+body:has(input[name="email"]):has(input[name="password"])::after {
+    content: "Erstellt von IT-Kayali";
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 22px;
+    text-align: center;
+    color: #f97316;
+    font-weight: 950;
+    font-size: 14px;
+}
+
+/* Responsive login */
+@media (max-width: 560px) {
+    body:has(input[name="email"]):has(input[name="password"]) form {
+        padding: 24px !important;
+        border-radius: 24px !important;
+    }
+}
+
+.itkayali-auth-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 22px;
+    text-align: center;
+    color: rgba(33, 33, 33, 0.62);
+    font-size: 14px;
+    z-index: 50;
+}
+
+.itkayali-auth-footer a {
+    color: #f97316 !important;
+    font-weight: 950;
+    text-decoration: none;
+}
+
+.itkayali-auth-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Final Login Polish */
+body:has(input[name="email"]):has(input[name="password"]) {
+    background:
+        radial-gradient(circle at 50% 18%, rgba(227, 202, 110, 0.24), transparent 26%),
+        radial-gradient(circle at 88% 30%, rgba(249, 115, 22, 0.10), transparent 25%),
+        linear-gradient(135deg, #fbf6ed 0%, #fff8eb 55%, #f3e5cf 100%) !important;
+}
+
+/* Titelbereich sichtbar machen */
+body:has(input[name="email"]):has(input[name="password"]) h1,
+body:has(input[name="email"]):has(input[name="password"]) h2,
+body:has(input[name="email"]):has(input[name="password"]) h3 {
+    color: #212121 !important;
+    text-shadow: none !important;
+}
+
+body:has(input[name="email"]):has(input[name="password"]) p {
+    color: rgba(33, 33, 33, 0.68) !important;
+}
+
+/* Icon oben sichtbar */
+body:has(input[name="email"]):has(input[name="password"]) svg {
+    color: #e3ca6e !important;
+    stroke: #e3ca6e !important;
+}
+
+/* Form-Karte premium */
+body:has(input[name="email"]):has(input[name="password"]) form {
+    width: min(100%, 420px) !important;
+    background:
+        linear-gradient(180deg, rgba(33,33,33,0.98), rgba(24,24,24,0.98)) !important;
+    border: 1px solid rgba(227, 202, 110, 0.52) !important;
+    border-radius: 30px !important;
+    padding: 36px !important;
+    box-shadow:
+        0 34px 90px rgba(33, 33, 33, 0.26),
+        0 0 0 1px rgba(255,255,255,0.03) inset !important;
+}
+
+/* Text innerhalb der Karte weiß */
+body:has(input[name="email"]):has(input[name="password"]) form label,
+body:has(input[name="email"]):has(input[name="password"]) form span,
+body:has(input[name="email"]):has(input[name="password"]) form p,
+body:has(input[name="email"]):has(input[name="password"]) form div {
+    color: rgba(255, 255, 255, 0.86) !important;
+}
+
+/* Passwort vergessen komplett ausblenden */
+body:has(input[name="email"]):has(input[name="password"]) a[href*="forgot"],
+body:has(input[name="email"]):has(input[name="password"]) a[href*="password"],
+body:has(input[name="email"]):has(input[name="password"]) a:has(+ input[name="password"]) {
+    display: none !important;
+}
+
+/* Inputs schöner */
+body:has(input[name="email"]):has(input[name="password"]) input[type="email"],
+body:has(input[name="email"]):has(input[name="password"]) input[type="password"] {
+    background: #fffaf1 !important;
+    color: #212121 !important;
+    border: 1px solid rgba(227, 202, 110, 0.55) !important;
+    border-radius: 17px !important;
+    min-height: 52px !important;
+    font-weight: 700 !important;
+}
+
+body:has(input[name="email"]):has(input[name="password"]) input[type="email"]:focus,
+body:has(input[name="email"]):has(input[name="password"]) input[type="password"]:focus {
+    border-color: #e3ca6e !important;
+    box-shadow: 0 0 0 4px rgba(227, 202, 110, 0.22) !important;
+}
+
+/* Checkbox */
+body:has(input[name="email"]):has(input[name="password"]) input[type="checkbox"] {
+    accent-color: #e3ca6e !important;
+}
+
+/* Button */
+body:has(input[name="email"]):has(input[name="password"]) button[type="submit"] {
+    background: #e3ca6e !important;
+    color: #212121 !important;
+    border-radius: 17px !important;
+    min-height: 54px !important;
+    font-weight: 950 !important;
+    box-shadow: 0 18px 34px rgba(227, 202, 110, 0.22) !important;
+}
+
+body:has(input[name="email"]):has(input[name="password"]) button[type="submit"]:hover {
+    filter: brightness(1.04);
+    transform: translateY(-1px);
+}
+
+/* Footer sauber */
+.itkayali-auth-footer {
+    bottom: 28px !important;
+}
+
+.itkayali-auth-footer,
+body:has(input[name="email"]):has(input[name="password"])::after {
+    color: rgba(33, 33, 33, 0.62) !important;
+}
+
+.itkayali-auth-footer a {
+    color: #f97316 !important;
+}
+
+/* Handy */
+@media (max-width: 560px) {
+    body:has(input[name="email"]):has(input[name="password"]) form {
+        width: 100% !important;
+        padding: 26px !important;
+        border-radius: 24px !important;
+    }
+}
+
+/* Phase 9 Login Fine Polish */
+body:has(input[name="email"]):has(input[name="password"]) {
+    background:
+        radial-gradient(circle at 50% 14%, rgba(227, 202, 110, 0.26), transparent 24%),
+        radial-gradient(circle at 86% 28%, rgba(249, 115, 22, 0.08), transparent 24%),
+        linear-gradient(135deg, #fbf6ed 0%, #fff9ef 55%, #f4e7d2 100%) !important;
+}
+
+/* Oberer Bereich */
+body:has(input[name="email"]):has(input[name="password"]) h1,
+body:has(input[name="email"]):has(input[name="password"]) h2,
+body:has(input[name="email"]):has(input[name="password"]) h3 {
+    color: #e3ca6e !important;
+    font-size: 40px !important;
+    font-weight: 950 !important;
+    text-align: center !important;
+    letter-spacing: -0.04em !important;
+    margin-bottom: 10px !important;
+}
+
+body:has(input[name="email"]):has(input[name="password"]) p {
+    color: rgba(33, 33, 33, 0.72) !important;
+    text-align: center !important;
+    font-size: 16px !important;
+    max-width: 620px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Oberes Icon größer */
+body:has(input[name="email"]):has(input[name="password"]) svg {
+    width: 48px !important;
+    height: 48px !important;
+    color: #e3ca6e !important;
+    stroke: #e3ca6e !important;
+    display: block !important;
+    margin: 0 auto 14px auto !important;
+}
+
+/* Login-Karte */
+body:has(input[name="email"]):has(input[name="password"]) form {
+    width: min(100%, 440px) !important;
+    background: linear-gradient(180deg, rgba(33,33,33,.98), rgba(24,24,24,.98)) !important;
+    border: 1px solid rgba(227, 202, 110, 0.52) !important;
+    border-radius: 32px !important;
+    padding: 38px !important;
+    box-shadow:
+        0 34px 90px rgba(33, 33, 33, 0.26),
+        0 0 0 1px rgba(255,255,255,0.03) inset !important;
+}
+
+/* Inhalte in der Karte */
+body:has(input[name="email"]):has(input[name="password"]) form label,
+body:has(input[name="email"]):has(input[name="password"]) form span,
+body:has(input[name="email"]):has(input[name="password"]) form div {
+    color: rgba(255,255,255,.88) !important;
+    font-weight: 800 !important;
+}
+
+/* Inputs */
+body:has(input[name="email"]):has(input[name="password"]) input[type="email"],
+body:has(input[name="email"]):has(input[name="password"]) input[type="password"] {
+    background: #fffaf1 !important;
+    color: #212121 !important;
+    border: 1px solid rgba(227,202,110,.55) !important;
+    border-radius: 18px !important;
+    min-height: 54px !important;
+    padding: 0 16px !important;
+    font-weight: 700 !important;
+    font-size: 15px !important;
+}
+
+body:has(input[name="email"]):has(input[name="password"]) input::placeholder {
+    color: rgba(33,33,33,.52) !important;
+    font-weight: 600 !important;
+}
+
+body:has(input[name="email"]):has(input[name="password"]) input:focus {
+    border-color: #e3ca6e !important;
+    box-shadow: 0 0 0 4px rgba(227,202,110,.22) !important;
+}
+
+/* Passwort vergessen sicher verstecken */
+body:has(input[name="email"]):has(input[name="password"]) a[href*="password"],
+body:has(input[name="email"]):has(input[name="password"]) a[href*="forgot"] {
+    display: none !important;
+}
+
+/* Checkbox */
+body:has(input[name="email"]):has(input[name="password"]) input[type="checkbox"] {
+    accent-color: #e3ca6e !important;
+}
+
+/* Button */
+body:has(input[name="email"]):has(input[name="password"]) button[type="submit"] {
+    background: #e3ca6e !important;
+    color: #212121 !important;
+    border: 0 !important;
+    border-radius: 18px !important;
+    min-height: 56px !important;
+    font-weight: 950 !important;
+    font-size: 16px !important;
+    box-shadow: 0 18px 36px rgba(227, 202, 110, 0.22) !important;
+}
+
+body:has(input[name="email"]):has(input[name="password"]) button[type="submit"]:hover {
+    filter: brightness(1.04);
+    transform: translateY(-1px);
+}
+
+/* Footer-Link */
+body:has(input[name="email"]):has(input[name="password"])::after {
+    display: none !important;
+    content: none !important;
+}
+
+.itkayali-auth-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 26px;
+    text-align: center;
+    color: rgba(33,33,33,.62);
+    font-size: 14px;
+    z-index: 60;
+}
+
+.itkayali-auth-footer a {
+    color: #f97316 !important;
+    font-weight: 950 !important;
+    text-decoration: none;
+}
+
+.itkayali-auth-footer a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 560px) {
+    body:has(input[name="email"]):has(input[name="password"]) h1,
+    body:has(input[name="email"]):has(input[name="password"]) h2,
+    body:has(input[name="email"]):has(input[name="password"]) h3 {
+        font-size: 28px !important;
+    }
+
+    body:has(input[name="email"]):has(input[name="password"]) form {
+        width: 100% !important;
+        padding: 26px !important;
+        border-radius: 24px !important;
+    }
+
+    body:has(input[name="email"]):has(input[name="password"]) p {
+        font-size: 14px !important;
+        padding: 0 12px;
+    }
+}
+
+/* FINAL Login Override Fix */
+
+/* Titel oben sichtbar: Gold */
+body:has(input[name="email"]):has(input[name="password"]) h1,
+body:has(input[name="email"]):has(input[name="password"]) h2,
+body:has(input[name="email"]):has(input[name="password"]) h3 {
+    color: #e3ca6e !important;
+    text-shadow: none !important;
+}
+
+/* Untertitel oben dunkel statt weiß */
+body:has(input[name="email"]):has(input[name="password"]) > div p,
+body:has(input[name="email"]):has(input[name="password"]) main p {
+    color: rgba(33, 33, 33, 0.72) !important;
+}
+
+/* Wichtig: SVGs im Formular wieder normal klein machen */
+body:has(input[name="email"]):has(input[name="password"]) form svg {
+    width: 18px !important;
+    height: 18px !important;
+    margin: 0 !important;
+    color: currentColor !important;
+    stroke: currentColor !important;
+}
+
+/* Nur oberes Laravel/Icon größer lassen */
+body:has(input[name="email"]):has(input[name="password"]) main > div > svg,
+body:has(input[name="email"]):has(input[name="password"]) main svg:first-of-type {
+    width: 54px !important;
+    height: 54px !important;
+    color: #e3ca6e !important;
+    stroke: #e3ca6e !important;
+    margin: 0 auto 18px auto !important;
+}
+
+/* Passwort-Auge sauber positionieren, nicht riesig */
+body:has(input[name="email"]):has(input[name="password"]) form button[type="button"] {
+    width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    border-radius: 999px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #e3ca6e !important;
+    padding: 0 !important;
+}
+
+/* Checkbox normalisieren */
+body:has(input[name="email"]):has(input[name="password"]) input[type="checkbox"] {
+    width: 18px !important;
+    height: 18px !important;
+    min-height: 18px !important;
+    border-radius: 5px !important;
+    accent-color: #e3ca6e !important;
+}
+
+/* Kein riesiger Haken neben Checkbox */
+body:has(input[name="email"]):has(input[name="password"]) form label svg,
+body:has(input[name="email"]):has(input[name="password"]) form [role="checkbox"] svg {
+    width: 16px !important;
+    height: 16px !important;
+}
+
+/* Login-Karte etwas harmonischer */
+body:has(input[name="email"]):has(input[name="password"]) form {
+    margin-top: 26px !important;
+}
+
+/* IT-Kayali Footer sicher anzeigen */
+.itkayali-auth-footer,
+.login-itkayali-footer {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 26px !important;
+    text-align: center !important;
+    color: rgba(33, 33, 33, 0.68) !important;
+    font-size: 14px !important;
+    z-index: 9999 !important;
+}
+
+.itkayali-auth-footer a,
+.login-itkayali-footer a {
+    color: #f97316 !important;
+    font-weight: 950 !important;
+    text-decoration: none !important;
+}
+
+.itkayali-auth-footer a:hover,
+.login-itkayali-footer a:hover {
+    text-decoration: underline !important;
+}
+
+/* Clean final standalone login page */
+body.itk-auth-v2 {
+    margin: 0 !important;
+    min-height: 100vh !important;
+    background:
+        radial-gradient(circle at 50% 14%, rgba(227, 202, 110, 0.24), transparent 26%),
+        radial-gradient(circle at 85% 30%, rgba(249, 115, 22, 0.09), transparent 26%),
+        linear-gradient(135deg, #fbf6ed 0%, #fff8eb 52%, #f3e5cf 100%) !important;
+    color: #212121 !important;
+}
+
+body.itk-auth-v2::after {
+    display: none !important;
+    content: none !important;
+}
+
+.itk-auth-v2-page {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 32px 20px;
+}
+
+.itk-auth-v2-shell {
+    width: min(100%, 460px);
+    text-align: center;
+}
+
+.itk-auth-v2-hero {
+    margin-bottom: 24px;
+}
+
+.itk-auth-v2-logo {
+    width: 72px;
+    height: 72px;
+    border-radius: 24px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 16px;
+    background: rgba(227, 202, 110, 0.18);
+    color: #e3ca6e;
+    font-size: 38px;
+    box-shadow: 0 20px 50px rgba(33, 33, 33, 0.10);
+}
+
+.itk-auth-v2-hero h1 {
+    margin: 0 0 8px !important;
+    color: #e3ca6e !important;
+    font-size: 34px !important;
+    font-weight: 950 !important;
+    letter-spacing: -0.045em !important;
+    line-height: 1.08 !important;
+}
+
+.itk-auth-v2-hero p {
+    margin: 0 !important;
+    color: rgba(33, 33, 33, 0.70) !important;
+    font-size: 15px !important;
+    line-height: 1.5 !important;
+}
+
+.itk-auth-v2-card {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    background: linear-gradient(180deg, #242424 0%, #171717 100%) !important;
+    border: 1px solid rgba(227, 202, 110, 0.52) !important;
+    border-radius: 32px !important;
+    padding: 38px !important;
+    box-shadow:
+        0 36px 100px rgba(33, 33, 33, 0.24),
+        0 0 0 1px rgba(255,255,255,0.03) inset !important;
+    text-align: left !important;
+}
+
+.itk-auth-v2-field {
+    margin-bottom: 20px;
+}
+
+.itk-auth-v2-field label {
+    display: block !important;
+    color: #ffffff !important;
+    font-weight: 900 !important;
+    font-size: 14px !important;
+    margin-bottom: 9px !important;
+}
+
+.itk-auth-v2-field input {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    min-height: 56px !important;
+    border-radius: 18px !important;
+    border: 1px solid rgba(227, 202, 110, 0.58) !important;
+    background: #fffaf1 !important;
+    color: #212121 !important;
+    padding: 0 17px !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    outline: none !important;
+}
+
+.itk-auth-v2-field input::placeholder {
+    color: rgba(33, 33, 33, 0.52) !important;
+}
+
+.itk-auth-v2-field input:focus {
+    border-color: #e3ca6e !important;
+    box-shadow: 0 0 0 4px rgba(227, 202, 110, 0.22) !important;
+}
+
+.itk-auth-v2-remember {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    color: rgba(255, 255, 255, 0.88) !important;
+    font-weight: 850 !important;
+    margin: 4px 0 22px !important;
+}
+
+.itk-auth-v2-remember input {
+    width: 18px !important;
+    height: 18px !important;
+    accent-color: #e3ca6e !important;
+}
+
+.itk-auth-v2-submit {
+    width: 100% !important;
+    min-height: 58px !important;
+    border: 0 !important;
+    border-radius: 19px !important;
+    background: #e3ca6e !important;
+    color: #212121 !important;
+    font-weight: 950 !important;
+    font-size: 16px !important;
+    cursor: pointer !important;
+    box-shadow: 0 18px 36px rgba(227, 202, 110, 0.22) !important;
+}
+
+.itk-auth-v2-submit:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+}
+
+.itk-auth-v2-error {
+    color: #fecaca;
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+.itk-auth-v2-footer {
+    margin-top: 26px;
+    color: rgba(33, 33, 33, 0.64);
+    font-size: 14px;
+    text-align: center;
+}
+
+.itk-auth-v2-footer a {
+    color: #f97316 !important;
+    font-weight: 950 !important;
+    text-decoration: none !important;
+}
+
+.itk-auth-v2-footer a:hover {
+    text-decoration: underline !important;
+}
+
+@media (max-width: 560px) {
+    .itk-auth-v2-page {
+        padding: 24px 16px;
+        place-items: start center;
+    }
+
+    .itk-auth-v2-shell {
+        margin-top: 24px;
+    }
+
+    .itk-auth-v2-logo {
+        width: 62px;
+        height: 62px;
+        border-radius: 21px;
+        font-size: 32px;
+    }
+
+    .itk-auth-v2-hero h1 {
+        font-size: 27px !important;
+    }
+
+    .itk-auth-v2-card {
+        padding: 26px !important;
+        border-radius: 25px !important;
+    }
+}

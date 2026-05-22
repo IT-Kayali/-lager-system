@@ -1,12 +1,12 @@
 <?php
 
-use App\Concerns\PasswordValidationRules;
+use App\Concerns\PasswortValidationRules;
 use App\Livewire\Actions\Logout;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 new class extends Component {
-    use PasswordValidationRules;
+    use PasswortValidationRules;
 
     public string $password = '';
 
@@ -16,7 +16,7 @@ new class extends Component {
     public function deleteUser(Logout $logout): void
     {
         $this->validate([
-            'password' => $this->currentPasswordRules(),
+            'password' => $this->currentPasswortRules(),
         ]);
 
         tap(Auth::user(), $logout(...))->delete();
@@ -35,7 +35,7 @@ new class extends Component {
             </flux:subheading>
         </div>
 
-        <flux:input wire:model="password" :label="__('Password')" type="password" viewable />
+        <flux:input wire:model="password" :label="__('Passwort')" type="password" viewable />
 
         <div class="flex justify-end space-x-2 rtl:space-x-reverse">
             <flux:modal.close>
