@@ -33,6 +33,9 @@ class Offer extends Model
         'subtotal',
         'total',
         'reserved_until',
+        'completed_at',
+        'cancelled_at',
+        'reservation_released_at',
         'notes',
     ];
 

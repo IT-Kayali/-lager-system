@@ -19,7 +19,7 @@ class OfferFulfillmentService
         }
 
         if ($offer->isFinal()) {
-            throw new RuntimeException('Dieses Angebot ist bereits abgeschlossen und kann nicht erledigt werden.');
+            throw new RuntimeException('Dieses Angebot ist bereits abgeschlossen.');
         }
 
         DB::transaction(function () use ($offer) {
@@ -65,9 +65,13 @@ class OfferFulfillmentService
             'reservation_released_at' => now(),
         ]);
 
-        ActivityLog::record($status === Offer::STATUS_CANCELLED ? 'offer.cancelled' : 'offer.reservation_expired', $offer, [
-            'offer_number' => $offer->offer_number,
-        ]);
+        ActivityLog::record(
+            $status === Offer::STATUS_CANCELLED ? 'offer.cancelled' : 'offer.reservation_expired',
+            $offer,
+            [
+                'offer_number' => $offer->offer_number,
+            ]
+        );
     }
 
     private function deductProductByFifo(Product $product, float $quantity, Offer $offer): void
@@ -99,7 +103,6 @@ class OfferFulfillmentService
 
             $availableInBatch = (float) $batch->quantity;
             $deduct = min($availableInBatch, $remaining);
-
             $newQuantity = round($availableInBatch - $deduct, 3);
 
             if ($newQuantity < 0) {
