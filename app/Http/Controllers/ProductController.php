@@ -25,7 +25,6 @@ class ProductController extends Controller
                     $subQuery
                         ->where('product_code', 'like', "%{$search}%")
                         ->orWhere('name', 'like', "%{$search}%")
-                        ->orWhere('manufacturer', 'like', "%{$search}%")
                         ->orWhere('supplier', 'like', "%{$search}%")
                         ->orWhere('serial_number', 'like', "%{$search}%");
                 });
@@ -95,7 +94,6 @@ class ProductController extends Controller
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'manufacturer' => ['nullable', 'string', 'max:255'],
             'serial_number' => ['nullable', 'string', 'max:255'],
             'unit' => ['required', Rule::in(array_keys($this->units()))],
             'supplier' => ['nullable', 'string', 'max:255'],

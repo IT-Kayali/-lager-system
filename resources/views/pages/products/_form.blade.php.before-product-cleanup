@@ -9,13 +9,19 @@
 
 <div class="premium-form-grid">
     <div class="premium-form-field">
-        <label for="name">Bezeichnung *</label>
+        <label for="name">Produktname *</label>
         <input id="name" name="name" class="premium-input" value="{{ old('name', $product->name) }}" required>
         @error('name') <div class="premium-error">{{ $message }}</div> @enderror
     </div>
 
     <div class="premium-form-field">
-        <label for="serial_number">Code-Nummer</label>
+        <label for="manufacturer">Hersteller</label>
+        <input id="manufacturer" name="manufacturer" class="premium-input" value="{{ old('manufacturer', $product->manufacturer) }}">
+        @error('manufacturer') <div class="premium-error">{{ $message }}</div> @enderror
+    </div>
+
+    <div class="premium-form-field">
+        <label for="serial_number">Seriennummer</label>
         <input id="serial_number" name="serial_number" class="premium-input" value="{{ old('serial_number', $product->serial_number) }}">
         @error('serial_number') <div class="premium-error">{{ $message }}</div> @enderror
     </div>

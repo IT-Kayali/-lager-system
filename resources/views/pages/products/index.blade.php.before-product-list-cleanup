@@ -1,4 +1,4 @@
-<x-layouts.premium title="Produkte" subtitle="Produktverwaltung ohne Produktcode, Hersteller und Charge. Preise werden ausschließlich im Tab Preise gepflegt.">
+<x-layouts.premium title="Produkte" subtitle="Produktverwaltung ohne Preisfelder. Preise werden ausschließlich im Tab Preise gepflegt.">
     @if (session('success'))
         <div class="premium-alert">{{ session('success') }}</div>
     @endif
@@ -17,7 +17,7 @@
                     value="{{ $search ?? '' }}"
                     class="premium-input"
                     style="min-width:320px;"
-                    placeholder="Suchen nach Bezeichnung, Code-Nummer, Lieferant..."
+                    placeholder="Suchen nach Code, Name, Hersteller, Lieferant..."
                 >
 
                 <button class="premium-btn" type="submit">
@@ -43,10 +43,12 @@
             <table class="premium-table premium-wide-table">
                 <thead>
                     <tr>
-                        <th>Bezeichnung</th>
-                        <th>Code-Nummer</th>
+                        <th>Produktcode</th>
+                        <th>Produktname</th>
+                        <th>Hersteller</th>
                         <th>Einheit</th>
                         <th>Lieferant</th>
+                        <th>Charge</th>
                         <th>Gesamt</th>
                         <th>Reserviert</th>
                         <th>Verfügbar</th>
@@ -64,14 +66,23 @@
                                 'low' => 'Niedrig',
                                 'critical' => 'Kritisch',
                             ];
+
+                            $latestBatch = $product->batches?->sortByDesc('received_at')->first();
                         @endphp
 
                         <tr>
                             <td>
-                                <strong>{{ $product->name }}</strong>
+                                <span class="premium-code">{{ $product->product_code }}</span>
                             </td>
 
-                            <td>{{ $product->serial_number ?: '—' }}</td>
+                            <td>
+                                <strong>{{ $product->name }}</strong>
+                                @if ($product->serial_number)
+                                    <div class="premium-muted">SN: {{ $product->serial_number }}</div>
+                                @endif
+                            </td>
+
+                            <td>{{ $product->manufacturer ?: '—' }}</td>
 
                             <td>
                                 @switch($product->unit)
@@ -90,6 +101,8 @@
                             </td>
 
                             <td>{{ $product->supplierRecord?->company_name ?: $product->supplier ?: '—' }}</td>
+
+                            <td>{{ $latestBatch?->batch_number ?: '—' }}</td>
 
                             <td>{{ number_format((float) $product->total_stock, 3, ',', '.') }}</td>
 
@@ -127,7 +140,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="10">
+                            <td colspan="12">
                                 <div class="premium-muted">Noch keine Produkte vorhanden.</div>
                             </td>
                         </tr>
