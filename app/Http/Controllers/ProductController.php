@@ -94,6 +94,7 @@ class ProductController extends Controller
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'manufacturer_designation' => ['nullable', 'string', 'max:255'],
             'serial_number' => ['nullable', 'string', 'max:255'],
             'unit' => ['required', Rule::in(array_keys($this->units()))],
             'supplier' => ['nullable', 'string', 'max:255'],

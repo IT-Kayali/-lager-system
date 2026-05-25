@@ -15,6 +15,12 @@
     </div>
 
     <div class="premium-form-field">
+        <label for="manufacturer_designation">Bezeichnung durch Hersteller</label>
+        <input id="manufacturer_designation" name="manufacturer_designation" class="premium-input" value="{{ old('manufacturer_designation', $product->manufacturer_designation) }}">
+        @error('manufacturer_designation') <div class="premium-error">{{ $message }}</div> @enderror
+    </div>
+
+    <div class="premium-form-field">
         <label for="serial_number">Code-Nummer</label>
         <input id="serial_number" name="serial_number" class="premium-input" value="{{ old('serial_number', $product->serial_number) }}">
         @error('serial_number') <div class="premium-error">{{ $message }}</div> @enderror

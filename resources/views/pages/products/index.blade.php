@@ -44,6 +44,7 @@
                 <thead>
                     <tr>
                         <th>Bezeichnung</th>
+                        <th>Bezeichnung durch Hersteller</th>
                         <th>Code-Nummer</th>
                         <th>Einheit</th>
                         <th>Lieferant</th>
@@ -70,6 +71,8 @@
                             <td>
                                 <strong>{{ $product->name }}</strong>
                             </td>
+
+                            <td>{{ $product->manufacturer_designation ?: '—' }}</td>
 
                             <td>{{ $product->serial_number ?: '—' }}</td>
 
@@ -127,7 +130,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="10">
+                            <td colspan="11">
                                 <div class="premium-muted">Noch keine Produkte vorhanden.</div>
                             </td>
                         </tr>

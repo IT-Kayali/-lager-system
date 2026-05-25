@@ -9,7 +9,7 @@
                 <select name="product_id" class="premium-select" style="min-width: 280px;" onchange="this.form.submit()">
                     @forelse ($products as $product)
                         <option value="{{ $product->id }}" @selected($selectedProduct?->id === $product->id)>
-                            {{ $product->product_code }} — {{ $product->name }}
+                            {{ $product->name }}
                         </option>
                     @empty
                         <option value="">Noch keine Produkte vorhanden</option>

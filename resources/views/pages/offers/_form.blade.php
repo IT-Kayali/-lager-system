@@ -58,7 +58,7 @@
                         <option value="">Produkt auswählen</option>
                         @foreach ($products as $product)
                             <option value="{{ $product->id }}" @selected((string) ($item['product_id'] ?? '') === (string) $product->id)>
-                                {{ $product->product_code }} — {{ $product->name }}
+                                {{ $product->name }}
                                 | Verfügbar: {{ number_format($product->available_stock, 3, ',', '.') }}
                                 | Max: {{ number_format($product->max_reservable, 3, ',', '.') }}
                             </option>
@@ -120,7 +120,7 @@
                     <option value="">Produkt auswählen</option>
                     @foreach ($products as $product)
                         <option value="{{ $product->id }}">
-                            {{ $product->product_code }} — {{ $product->name }}
+                            {{ $product->name }}
                             | Verfügbar: {{ number_format($product->available_stock, 3, ',', '.') }}
                             | Max: {{ number_format($product->max_reservable, 3, ',', '.') }}
                         </option>
