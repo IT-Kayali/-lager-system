@@ -1843,3 +1843,388 @@ body.itk-auth-v2::after {
     color: rgba(33, 33, 33, 0.55);
     font-weight: 700;
 }
+
+/* =========================================================
+   MODERNE DROPDOWNS / SELECTS
+   ========================================================= */
+.premium-select,
+.premium-card select,
+.premium-toolbar select,
+.premium-search select,
+.premium-filter-select,
+form select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    width: 100%;
+    min-height: 58px;
+    border-radius: 22px;
+    border: 1px solid rgba(33, 33, 33, 0.14);
+    background-color: #fffdf8;
+    color: #212121;
+
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+
+    padding: 0 54px 0 18px;
+    cursor: pointer;
+
+    box-shadow:
+        0 10px 30px rgba(33, 33, 33, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7);
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease,
+        transform 0.15s ease;
+
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23212121' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"),
+        linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(251,246,237,0.98) 100%);
+    background-repeat: no-repeat, no-repeat;
+    background-position: right 18px center, center;
+    background-size: 16px 16px, 100% 100%;
+}
+
+.premium-select:hover,
+.premium-card select:hover,
+.premium-toolbar select:hover,
+.premium-search select:hover,
+.premium-filter-select:hover,
+form select:hover {
+    border-color: rgba(227, 202, 110, 0.8);
+    box-shadow:
+        0 12px 28px rgba(33, 33, 33, 0.06),
+        0 0 0 4px rgba(227, 202, 110, 0.08);
+}
+
+.premium-select:focus,
+.premium-card select:focus,
+.premium-toolbar select:focus,
+.premium-search select:focus,
+.premium-filter-select:focus,
+form select:focus {
+    outline: none;
+    border-color: #e3ca6e;
+    box-shadow:
+        0 0 0 4px rgba(227, 202, 110, 0.18),
+        0 14px 34px rgba(33, 33, 33, 0.06);
+    background-color: #fffefb;
+}
+
+.premium-select:disabled,
+.premium-card select:disabled,
+.premium-toolbar select:disabled,
+.premium-search select:disabled,
+.premium-filter-select:disabled,
+form select:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23999999' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"),
+        linear-gradient(180deg, rgba(245,245,245,0.96) 0%, rgba(240,240,240,0.98) 100%);
+}
+
+.premium-select option,
+.premium-card select option,
+.premium-toolbar select option,
+.premium-search select option,
+.premium-filter-select option,
+form select option {
+    color: #212121;
+    background: #ffffff;
+    font-weight: 600;
+}
+
+/* alten Browser-Pfeil ausblenden */
+select::-ms-expand {
+    display: none;
+}
+
+/* kleine Filter-Dropdowns oben in Listen */
+.premium-toolbar .premium-select,
+.premium-toolbar select,
+.premium-search .premium-select,
+.premium-search select {
+    min-height: 52px;
+    border-radius: 20px;
+}
+
+/* mobil etwas kompakter */
+@media (max-width: 768px) {
+    .premium-select,
+    .premium-card select,
+    .premium-toolbar select,
+    .premium-search select,
+    .premium-filter-select,
+    form select {
+        min-height: 52px;
+        border-radius: 18px;
+        font-size: 0.95rem;
+        padding: 0 48px 0 16px;
+        background-position: right 16px center, center;
+    }
+}
+
+/* Clean Premium Tom Select Dropdowns */
+.ts-wrapper {
+    width: 100%;
+    font-size: 15px;
+}
+
+.ts-wrapper.single .ts-control {
+    min-height: 54px;
+    border-radius: 18px;
+    border: 1px solid rgba(33, 33, 33, 0.14);
+    background: #fffaf1;
+    color: #212121;
+    padding: 10px 46px 10px 16px;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.ts-wrapper.single .ts-control:hover {
+    border-color: rgba(227, 202, 110, 0.85);
+}
+
+.ts-wrapper.focus .ts-control {
+    border-color: #e3ca6e !important;
+    box-shadow: 0 0 0 4px rgba(227, 202, 110, 0.18) !important;
+}
+
+.ts-wrapper.single .ts-control::after {
+    content: "";
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    width: 9px;
+    height: 9px;
+    border-right: 2px solid #212121;
+    border-bottom: 2px solid #212121;
+    transform: translateY(-65%) rotate(45deg);
+    pointer-events: none;
+}
+
+.ts-wrapper.single.dropdown-active .ts-control::after {
+    transform: translateY(-35%) rotate(-135deg);
+}
+
+.ts-wrapper.single .ts-control input {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    color: #212121 !important;
+    font-size: 15px !important;
+    padding: 0 !important;
+}
+
+.ts-wrapper .item {
+    color: #212121;
+    font-weight: 800;
+}
+
+.ts-dropdown {
+    margin-top: 8px;
+    border-radius: 18px;
+    border: 1px solid rgba(227, 202, 110, 0.45);
+    background: #fffdf8;
+    box-shadow: 0 18px 42px rgba(33, 33, 33, 0.14);
+    padding: 8px;
+    overflow: hidden;
+    z-index: 99999;
+}
+
+.ts-dropdown .option {
+    padding: 12px 14px;
+    border-radius: 12px;
+    color: #212121;
+    font-weight: 800;
+}
+
+.ts-dropdown .option:hover,
+.ts-dropdown .option.active {
+    background: #e3ca6e !important;
+    color: #212121 !important;
+}
+
+.ts-dropdown .selected {
+    background: rgba(227, 202, 110, 0.24);
+}
+
+.ts-no-results {
+    padding: 12px 14px;
+    color: rgba(33, 33, 33, 0.62);
+    font-weight: 800;
+}
+
+/* Alte native Select-Pfeile innerhalb TomSelect vermeiden */
+.ts-hidden-accessible {
+    display: none !important;
+}
+
+/* =========================================================
+   FINAL FIX: Keine doppelten Rahmen/Pfeile bei Tom Select
+   ========================================================= */
+
+/* Falls Tom Select doch alte Klassen übernimmt: komplett neutralisieren */
+.ts-wrapper.premium-select,
+.ts-wrapper.premium-input,
+.ts-wrapper.premium-filter-select {
+    appearance: none !important;
+    min-height: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    background-image: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    cursor: default !important;
+}
+
+.ts-wrapper.premium-select::after,
+.ts-wrapper.premium-input::after,
+.ts-wrapper.premium-filter-select::after {
+    content: none !important;
+    display: none !important;
+}
+
+/* Original Select wirklich unsichtbar machen */
+select.ts-hidden-accessible,
+.ts-hidden-accessible {
+    position: absolute !important;
+    left: -10000px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 1px !important;
+    height: 1px !important;
+    min-height: 1px !important;
+    border: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    background-image: none !important;
+}
+
+/* Nur EIN moderner Rahmen */
+.ts-wrapper {
+    width: 100% !important;
+}
+
+.ts-wrapper.single .ts-control {
+    min-height: 54px !important;
+    border-radius: 18px !important;
+    border: 1px solid rgba(33, 33, 33, 0.14) !important;
+    background: #fffaf1 !important;
+    background-image: none !important;
+    color: #212121 !important;
+    padding: 10px 48px 10px 16px !important;
+    box-shadow: none !important;
+    display: flex !important;
+    align-items: center !important;
+    cursor: pointer !important;
+    position: relative !important;
+}
+
+.ts-wrapper.single .ts-control:hover {
+    border-color: rgba(227, 202, 110, 0.85) !important;
+}
+
+.ts-wrapper.focus .ts-control {
+    border-color: #e3ca6e !important;
+    box-shadow: 0 0 0 4px rgba(227, 202, 110, 0.18) !important;
+}
+
+/* Nur EIN Pfeil */
+.ts-wrapper.single .ts-control::after {
+    content: "" !important;
+    position: absolute !important;
+    right: 18px !important;
+    top: 50% !important;
+    width: 9px !important;
+    height: 9px !important;
+    border-right: 2px solid #212121 !important;
+    border-bottom: 2px solid #212121 !important;
+    transform: translateY(-65%) rotate(45deg) !important;
+    pointer-events: none !important;
+    transition: transform 0.18s ease !important;
+}
+
+.ts-wrapper.single.dropdown-active .ts-control::after {
+    transform: translateY(-35%) rotate(-135deg) !important;
+}
+
+/* Eingabe/Suche ohne extra Rahmen */
+.ts-wrapper.single .ts-control input {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    color: #212121 !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    padding: 0 !important;
+}
+
+.ts-wrapper .item {
+    color: #212121 !important;
+    font-weight: 850 !important;
+}
+
+/* Modernes Dropdown-Menü */
+.ts-dropdown {
+    margin-top: 8px !important;
+    border-radius: 18px !important;
+    border: 1px solid rgba(227, 202, 110, 0.45) !important;
+    background: #fffdf8 !important;
+    box-shadow: 0 18px 42px rgba(33, 33, 33, 0.14) !important;
+    padding: 8px !important;
+    overflow: hidden !important;
+    z-index: 99999 !important;
+}
+
+.ts-dropdown .ts-dropdown-content {
+    max-height: 280px !important;
+}
+
+.ts-dropdown .option {
+    padding: 12px 14px !important;
+    border-radius: 12px !important;
+    color: #212121 !important;
+    font-weight: 850 !important;
+    transition: background 0.16s ease, color 0.16s ease !important;
+}
+
+.ts-dropdown .option:hover,
+.ts-dropdown .option.active {
+    background: #e3ca6e !important;
+    color: #212121 !important;
+}
+
+.ts-dropdown .option.selected {
+    background: rgba(227, 202, 110, 0.26) !important;
+    color: #212121 !important;
+}
+
+/* Suchfeld im Dropdown */
+.ts-dropdown input {
+    border: 1px solid rgba(33, 33, 33, 0.12) !important;
+    border-radius: 14px !important;
+    background: #ffffff !important;
+    padding: 11px 12px !important;
+    margin: 6px 6px 8px !important;
+    width: calc(100% - 12px) !important;
+    color: #212121 !important;
+    font-weight: 800 !important;
+}
+
+.ts-no-results {
+    padding: 12px 14px !important;
+    color: rgba(33, 33, 33, 0.62) !important;
+    font-weight: 800 !important;
+}

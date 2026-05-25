@@ -1,56 +1,91 @@
 import TomSelect from 'tom-select';
-import 'tom-select/dist/css/tom-select.css';
 
-function shouldEnhance(select) {
-    if (!select || select.tomselect) {
-        return false;
+function shouldUseSearch(select) {
+    const name = select.getAttribute('name') || '';
+
+    if (select.dataset.search === 'true') {
+        return true;
     }
 
-    if (select.dataset.noSearch === 'true') {
+    if (select.dataset.search === 'false') {
         return false;
     }
 
     return (
-        select.classList.contains('premium-select') ||
-        select.name === 'customer_id' ||
-        select.name === 'supplier_id' ||
-        select.name === 'product_id' ||
-        select.name === 'selected_product_id' ||
-        select.name.includes('product_id') ||
-        select.name.includes('customer_id') ||
-        select.name.includes('supplier_id')
+        name.includes('customer_id') ||
+        name.includes('product_id') ||
+        name.includes('supplier_id') ||
+        name.includes('selected_product_id')
     );
 }
 
-window.initSearchableSelects = function () {
+function initSearchableSelects() {
     document.querySelectorAll('select').forEach((select) => {
-        if (!shouldEnhance(select)) {
+        if (select.tomselect) {
             return;
         }
 
-        const emptyOption = select.querySelector('option[value=""]');
-        const placeholder = emptyOption ? emptyOption.textContent.trim() : 'Suchen...';
+        if (select.multiple) {
+            return;
+        }
 
-        new TomSelect(select, {
+        if (select.classList.contains('no-tomselect')) {
+            return;
+        }
+
+        const enableSearch = shouldUseSearch(select);
+
+        const firstOption = select.querySelector('option[value=""]');
+        const placeholder =
+            select.dataset.placeholder ||
+            select.getAttribute('placeholder') ||
+            firstOption?.textContent?.trim() ||
+            'Auswählen';
+
+        const instance = new TomSelect(select, {
             create: false,
             allowEmptyOption: true,
             maxOptions: 1000,
             placeholder: placeholder,
-            searchField: ['text'],
+            searchField: enableSearch ? ['text'] : [],
+            controlInput: enableSearch ? '<input />' : null,
+            dropdownParent: 'body',
+            sortField: enableSearch
+                ? {
+                    field: 'text',
+                    direction: 'asc',
+                }
+                : null,
             render: {
                 no_results: function () {
-                    return '<div class="no-results">Keine Ergebnisse gefunden</div>';
+                    return '<div class="ts-no-results">Keine Ergebnisse gefunden</div>';
                 },
             },
         });
-    });
-};
 
-document.addEventListener('DOMContentLoaded', window.initSearchableSelects);
-document.addEventListener('livewire:navigated', window.initSearchableSelects);
+        /*
+         * Wichtig:
+         * Tom Select kopiert Klassen wie premium-select auf den Wrapper.
+         * Genau das verursacht doppelte Rahmen und doppelte Pfeile.
+         */
+        instance.wrapper.classList.remove(
+            'premium-select',
+            'premium-input',
+            'premium-filter-select'
+        );
+
+        instance.control.classList.add('premium-ts-control');
+        instance.dropdown.classList.add('premium-ts-dropdown');
+    });
+}
+
+window.initSearchableSelects = initSearchableSelects;
+
+document.addEventListener('DOMContentLoaded', initSearchableSelects);
+document.addEventListener('livewire:navigated', initSearchableSelects);
 
 new MutationObserver(() => {
-    window.initSearchableSelects();
+    initSearchableSelects();
 }).observe(document.documentElement, {
     childList: true,
     subtree: true,
