@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\SystemUserController;
@@ -21,6 +22,14 @@ Route::redirect('/', '/dashboard');
 Route::redirect('/home', '/dashboard')->name('home');
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('settings', [SettingsController::class, 'index'])
+        ->name('settings.index')
+        ->middleware('role:manager');
+
+    Route::put('settings/reservation', [SettingsController::class, 'updateReservation'])
+        ->name('settings.reservation.update')
+        ->middleware('role:manager');
+
     Route::get('/dashboard', DashboardController::class)
         ->name('dashboard');
 

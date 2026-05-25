@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
+use App\Models\ApplicationSetting;
 use App\Models\Customer;
 use App\Models\Offer;
 use App\Models\Product;
@@ -88,7 +89,7 @@ class OfferController extends Controller
                 'document_type' => 'offer',
                 'subtotal' => $total,
                 'total' => $total,
-                'reserved_until' => now()->addHours(24),
+                'reserved_until' => now()->addHours(ApplicationSetting::reservationHours()),
                 'notes' => $data['notes'] ?? null,
             ]);
 

@@ -64,6 +64,13 @@
             'roles' => ['manager'],
         ],
         [
+            'label' => 'Einstellungen',
+            'route' => 'settings.index',
+            'active' => 'settings.*',
+            'icon' => 'bi-gear',
+            'roles' => ['manager'],
+        ],
+        [
             'label' => 'Rechte & Sicherheit',
             'route' => 'security.index',
             'active' => 'security.*',
