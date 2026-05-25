@@ -63,7 +63,7 @@
                                 @endif
 
                                 @if ($supplier->whatsapp ?: $supplier->phone)
-                                    <x-whatsapp-link :number="$supplier->whatsapp ?: $supplier->phone" :label="$supplier->whatsapp ?: $supplier->phone" />
+                                    <x-whatsapp-link :number="$supplier->whatsapp ?: $supplier->phone" :label="$supplier->whatsapp ?: $supplier->phone" :country-code="$supplier->whatsapp ? $supplier->whatsapp_country_code : $supplier->phone_country_code" />
                                 @endif
                             </td>
 

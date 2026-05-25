@@ -35,7 +35,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('dashboard');
 
     Route::resource('products', ProductController::class)
-        ->except(['show'])
+        
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE . ',' . User::ROLE_WAREHOUSE);
 
     Route::get('/batches/fifo-out', [BatchController::class, 'fifoOutForm'])
@@ -47,7 +47,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('batches.fifo-out.store');
 
     Route::resource('batches', BatchController::class)
-        ->except(['show'])
+        
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE);
 
     Route::get('/offers', [OfferController::class, 'index'])
@@ -91,18 +91,15 @@ Route::middleware(['auth'])->group(function () {
         ->name('offers.destroy');
 
     Route::resource('suppliers', SupplierController::class)
-        ->except(['show'])
+        
         ->middleware('role:' . User::ROLE_MANAGER);
 
     Route::post('customers/{customer}/wallet-transactions', [CustomerWalletTransactionController::class, 'store'])
         ->name('customers.wallet-transactions.store')
         ->middleware('role:manager,wholesale');
 
-    Route::get('customers/{customer}', [CustomerController::class, 'show'])
-        ->name('customers.show');
-
     Route::resource('customers', CustomerController::class)
-        ->except(['show'])
+        
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE);
 
     Route::get('/prices', [PriceController::class, 'index'])

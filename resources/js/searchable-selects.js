@@ -15,8 +15,13 @@ function shouldUseSearch(select) {
         name.includes('customer_id') ||
         name.includes('product_id') ||
         name.includes('supplier_id') ||
-        name.includes('selected_product_id')
+        name.includes('selected_product_id') ||
+        name.includes('country_code')
     );
+}
+
+function isCountrySelect(select) {
+    return select.classList.contains('phone-country-select');
 }
 
 function initSearchableSelects() {
@@ -34,6 +39,7 @@ function initSearchableSelects() {
         }
 
         const enableSearch = shouldUseSearch(select);
+        const countrySelect = isCountrySelect(select);
 
         const firstOption = select.querySelector('option[value=""]');
         const placeholder =
@@ -47,35 +53,58 @@ function initSearchableSelects() {
             allowEmptyOption: true,
             maxOptions: 1000,
             placeholder: placeholder,
-            searchField: enableSearch ? ['text'] : [],
+            searchField: enableSearch ? ['text', 'name', 'dial'] : [],
             controlInput: enableSearch ? '<input />' : null,
             dropdownParent: 'body',
-            sortField: enableSearch
-                ? {
-                    field: 'text',
-                    direction: 'asc',
-                }
-                : null,
+            sortField: null,
             render: {
+                option: function (data, escape) {
+                    if (!countrySelect) {
+                        return '<div>' + escape(data.text) + '</div>';
+                    }
+
+                    const iso = (data.iso || '').toLowerCase();
+                    const name = data.name || data.text || '';
+                    const dial = data.dial || '';
+
+                    return `
+                        <div class="ts-country-option">
+                            <span class="fi fi-${escape(iso)}"></span>
+                            <span class="ts-country-name">${escape(name)}</span>
+                            <strong class="ts-country-dial">${escape(dial)}</strong>
+                        </div>
+                    `;
+                },
+
+                item: function (data, escape) {
+                    if (!countrySelect) {
+                        return '<div>' + escape(data.text) + '</div>';
+                    }
+
+                    const iso = (data.iso || '').toLowerCase();
+                    const name = data.name || data.text || '';
+                    const dial = data.dial || '';
+
+                    return `
+                        <div class="ts-country-item">
+                            <span class="fi fi-${escape(iso)}"></span>
+                            <span>${escape(name)}</span>
+                            <strong>${escape(dial)}</strong>
+                        </div>
+                    `;
+                },
+
                 no_results: function () {
                     return '<div class="ts-no-results">Keine Ergebnisse gefunden</div>';
                 },
             },
         });
 
-        /*
-         * Wichtig:
-         * Tom Select kopiert Klassen wie premium-select auf den Wrapper.
-         * Genau das verursacht doppelte Rahmen und doppelte Pfeile.
-         */
         instance.wrapper.classList.remove(
             'premium-select',
             'premium-input',
             'premium-filter-select'
         );
-
-        instance.control.classList.add('premium-ts-control');
-        instance.dropdown.classList.add('premium-ts-dropdown');
     });
 }
 

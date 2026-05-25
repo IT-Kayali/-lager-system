@@ -1,19 +1,30 @@
 @props([
     'number' => null,
     'label' => null,
+    'countryCode' => '+49|DE',
 ])
 
 @php
     $raw = trim((string) $number);
+    $selectedCountryCode = trim((string) $countryCode);
+
     $digits = preg_replace('/\D+/', '', $raw);
 
-    if (str_starts_with($digits, '00')) {
-        $digits = substr($digits, 2);
-    } elseif (str_starts_with($digits, '0')) {
-        $digits = '49' . substr($digits, 1);
+    $dialPart = explode('|', $selectedCountryCode)[0] ?? '+49';
+    $countryDigits = preg_replace('/\D+/', '', $dialPart ?: '+49');
+
+    if (str_starts_with($raw, '+')) {
+        $whatsappDigits = $digits;
+    } elseif (str_starts_with($digits, '00')) {
+        $whatsappDigits = substr($digits, 2);
+    } elseif ($digits) {
+        $localDigits = ltrim($digits, '0');
+        $whatsappDigits = ($countryDigits ?: '49') . $localDigits;
+    } else {
+        $whatsappDigits = null;
     }
 
-    $url = $digits ? 'https://wa.me/' . $digits : null;
+    $url = $whatsappDigits ? 'https://wa.me/' . $whatsappDigits : null;
 @endphp
 
 @if ($url)

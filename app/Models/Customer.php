@@ -12,6 +12,7 @@ class Customer extends Model
         'customer_group_id',
         'company_name',
         'email',
+        'phone_country_code',
         'phone',
         'city',
         'delivery_address',

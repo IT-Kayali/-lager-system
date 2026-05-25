@@ -85,7 +85,7 @@
                 <div>
                     <strong>Telefon / WhatsApp:</strong><br>
                     @if ($customer->phone)
-                        <x-whatsapp-link :number="$customer->phone" :label="$customer->phone" />
+                        <x-whatsapp-link :number="$customer->phone" :label="$customer->phone" :country-code="$customer->phone_country_code" />
                     @else
                         —
                     @endif

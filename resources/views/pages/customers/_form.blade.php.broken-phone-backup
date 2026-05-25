@@ -9,7 +9,7 @@
 
     <div class="premium-form-field">
         <label for="customer_group_id">Kundengruppe *</label>
-        <select id="customer_group_id" name="customer_group_id" class="premium-select" data-search="true" required>
+        <select id="customer_group_id" name="customer_group_id" class="premium-select" required>
             <option value="">Kundengruppe auswählen</option>
             @foreach ($groups as $group)
                 <option value="{{ $group->id }}" @selected((string) old('customer_group_id', $customer->customer_group_id) === (string) $group->id)>
@@ -25,7 +25,6 @@
         <input id="email" name="email" type="email" class="premium-input" value="{{ old('email', $customer->email) }}">
         @error('email') <div class="premium-error">{{ $message }}</div> @enderror
     </div>
-
     <div class="premium-form-field full">
         <label>Telefon / WhatsApp</label>
 
@@ -50,6 +49,7 @@
                 @error('phone') <div class="premium-error">{{ $message }}</div> @enderror
             </div>
         </div>
+    </div> @enderror
     </div>
 
     <div class="premium-form-field">
@@ -152,6 +152,10 @@
     </button>
 
     <a href="{{ route('customers.index') }}" class="premium-btn">
+        <i class="bi bi-arrow-left"></i>
+        Zurück
+    </a>
+<a href="{{ route('suppliers.index') }}" class="premium-btn">
         <i class="bi bi-arrow-left"></i>
         Zurück
     </a>

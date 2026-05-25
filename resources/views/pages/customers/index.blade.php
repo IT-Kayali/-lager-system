@@ -66,7 +66,7 @@
                                 <div>{{ $customer->email ?: '—' }}</div>
 
                                 @if ($customer->phone)
-                                    <x-whatsapp-link :number="$customer->phone" :label="$customer->phone" />
+                                    <x-whatsapp-link :number="$customer->phone" :label="$customer->phone" :country-code="$customer->phone_country_code" />
                                 @endif
                             </td>
 

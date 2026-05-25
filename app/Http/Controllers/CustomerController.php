@@ -131,6 +131,7 @@ class CustomerController extends Controller
             'customer_group_id' => ['required', 'integer', 'exists:customer_groups,id'],
             'company_name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
+            'phone_country_code' => ['required', 'string', 'max:10'],
             'phone' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:255'],
 
