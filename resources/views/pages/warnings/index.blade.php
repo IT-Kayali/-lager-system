@@ -66,7 +66,7 @@
                             <th>Produkt</th>
                             <th>Hersteller</th>
                             <th>Gesamt</th>
-                            <th>Reserviert</th>
+                            <th></th>
                             <th>Verfügbar</th>
                             <th>Mindestbestand</th>
                             <th>Max. reservierbar</th>

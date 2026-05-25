@@ -67,7 +67,6 @@
                         @foreach ([
                             'offer' => 'Angebot',
                             'in_progress' => 'In Bearbeitung',
-                            'reserved' => 'Reserviert',
                             'ready_for_pickup' => 'Abholbereit',
                             'completed' => 'Erledigt',
                             'cancelled' => 'Storniert',

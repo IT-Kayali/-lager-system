@@ -12,7 +12,7 @@ class ReservationReleaseService
     {
         return DB::transaction(function (): int {
             $offers = Offer::query()
-                ->whereIn('status', Offer::RESERVING_STATUSES)
+                ->whereIn('status', Offer::EXPIRING_RESERVATION_STATUSES)
                 ->whereNotNull('reserved_until')
                 ->where('reserved_until', '<', now())
                 ->lockForUpdate()

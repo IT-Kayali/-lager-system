@@ -58,7 +58,7 @@
                         <th>Status</th>
                         <th>Positionen</th>
                         <th>Gesamt</th>
-                        <th>Reserviert bis</th>
+                        <th> bis</th>
                         <th>PDF</th>
                         <th>Aktionen</th>
                     </tr>

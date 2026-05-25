@@ -67,8 +67,7 @@ class OfferStatusController extends Controller
         return [
             Offer::STATUS_OFFER => 'Angebot',
             Offer::STATUS_IN_PROGRESS => 'In Bearbeitung',
-            Offer::STATUS_RESERVED => 'Reserviert',
-            Offer::STATUS_READY => 'Abholbereit',
+Offer::STATUS_READY => 'Abholbereit',
             Offer::STATUS_COMPLETED => 'Erledigt',
             Offer::STATUS_CANCELLED => 'Storniert',
             Offer::STATUS_RESERVATION_EXPIRED => 'Reservierung abgelaufen',

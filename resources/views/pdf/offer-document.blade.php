@@ -188,7 +188,7 @@
             <div><strong>Datum:</strong> {{ now()->format('d.m.Y') }}</div>
             <div><strong>Vorlage:</strong> {{ $template->name }}</div>
             @if ($documentType === 'offer' && $offer->reserved_until)
-                <div><strong>Reserviert bis:</strong> {{ $offer->reserved_until->format('d.m.Y H:i') }}</div>
+                <div><strong> bis:</strong> {{ $offer->reserved_until->format('d.m.Y H:i') }}</div>
             @endif
         </div>
     </div>

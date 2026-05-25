@@ -9,31 +9,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Offer extends Model
 {
     public const STATUS_OFFER = 'offer';
-
-    /*
-     * Legacy: reserved bleibt nur als technische Alt-Konstante,
-     * wird aber nicht mehr aktiv im System ausgewählt.
-     */
-    public const STATUS_RESERVED = 'reserved';
-
     public const STATUS_IN_PROGRESS = 'in_progress';
-    public const STATUS_PROCESSING = 'in_progress';
-
-    public const STATUS_READY = 'ready';
-    public const STATUS_READY_FOR_PICKUP = 'ready';
-
+    public const STATUS_RESERVED = 'reserved';
+    public const STATUS_READY = 'ready_for_pickup';
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_CANCELLED = 'cancelled';
     public const STATUS_RESERVATION_EXPIRED = 'reservation_expired';
-
-    public const STATUSES = [
-        self::STATUS_OFFER,
-        self::STATUS_IN_PROGRESS,
-        self::STATUS_READY,
-        self::STATUS_COMPLETED,
-        self::STATUS_CANCELLED,
-        self::STATUS_RESERVATION_EXPIRED,
-    ];
 
     public const EXPIRING_RESERVATION_STATUSES = [
         self::STATUS_OFFER,
@@ -41,20 +22,9 @@ class Offer extends Model
 
     public const RESERVING_STATUSES = [
         self::STATUS_OFFER,
-        self::STATUS_IN_PROGRESS,
-        self::STATUS_READY,
+        self::STATUS_PROCESSING,
+        self::STATUS_READY_FOR_PICKUP,
     ];
-
-    public const STATUS_LABELS = [
-        self::STATUS_OFFER => 'Angebot',
-        self::STATUS_IN_PROGRESS => 'In Bearbeitung',
-        self::STATUS_READY => 'Abholbereit',
-        self::STATUS_COMPLETED => 'Erledigt',
-        self::STATUS_CANCELLED => 'Storniert',
-        self::STATUS_RESERVATION_EXPIRED => 'Reservierung abgelaufen',
-    ];
-
-
 
     protected $fillable = [
         'offer_number',
