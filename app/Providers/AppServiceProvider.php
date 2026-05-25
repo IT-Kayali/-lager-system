@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Offer;
+use App\Observers\OfferWalletObserver;
+
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Offer::observe(OfferWalletObserver::class);
         $this->configureDefaults();
     }
 

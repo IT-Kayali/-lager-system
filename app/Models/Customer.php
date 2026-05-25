@@ -42,4 +42,15 @@ class Customer extends Model
     {
         return $this->belongsTo(CustomerGroup::class, 'customer_group_id');
     }
+
+    public function walletTransactions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(CustomerWalletTransaction::class);
+    }
+
+    public function getWalletBalanceAttribute(): float
+    {
+        return (float) $this->walletTransactions()->sum('amount');
+    }
+
 }

@@ -13,6 +13,7 @@ use App\Http\Controllers\OfferController;
 use App\Http\Controllers\OfferStatusController;
 use App\Http\Controllers\PriceController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\CustomerWalletTransactionController;
 use App\Http\Controllers\BatchController;
 use App\Http\Controllers\ProductController;
 use App\Models\User;
@@ -92,6 +93,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('suppliers', SupplierController::class)
         ->except(['show'])
         ->middleware('role:' . User::ROLE_MANAGER);
+
+    Route::post('customers/{customer}/wallet-transactions', [CustomerWalletTransactionController::class, 'store'])
+        ->name('customers.wallet-transactions.store')
+        ->middleware('role:manager,wholesale');
 
     Route::get('customers/{customer}', [CustomerController::class, 'show'])
         ->name('customers.show');

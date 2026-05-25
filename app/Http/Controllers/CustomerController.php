@@ -56,9 +56,16 @@ class CustomerController extends Controller
             ->latest()
             ->paginate(15);
 
+        $walletTransactions = $customer->walletTransactions()
+            ->with(['user', 'offer'])
+            ->latest()
+            ->paginate(15, ['*'], 'wallet_page');
+
         return view('pages.customers.show', [
             'customer' => $customer,
             'offers' => $offers,
+            'walletTransactions' => $walletTransactions,
+            'walletBalance' => $customer->wallet_balance,
             'statusLabels' => Offer::STATUS_LABELS,
         ]);
     }
