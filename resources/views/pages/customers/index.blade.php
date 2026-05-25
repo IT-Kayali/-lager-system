@@ -76,6 +76,10 @@
 
                             <td>
                                 <div class="premium-actions">
+                                    <a class="premium-icon-btn" href="{{ route('customers.show', $customer) }}" title="Kundenprofil anzeigen">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+
                                     <a class="premium-icon-btn" href="{{ route('customers.edit', $customer) }}" title="Bearbeiten">
                                         <i class="bi bi-pencil"></i>
                                     </a>

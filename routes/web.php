@@ -93,6 +93,9 @@ Route::middleware(['auth'])->group(function () {
         ->except(['show'])
         ->middleware('role:' . User::ROLE_MANAGER);
 
+    Route::get('customers/{customer}', [CustomerController::class, 'show'])
+        ->name('customers.show');
+
     Route::resource('customers', CustomerController::class)
         ->except(['show'])
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE);

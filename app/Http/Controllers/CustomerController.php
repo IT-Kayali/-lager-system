@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\Offer;
 use App\Models\CustomerGroup;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -41,6 +42,24 @@ class CustomerController extends Controller
             'groups' => $this->groups(),
             'search' => $search,
             'selectedGroup' => $group,
+        ]);
+    }
+
+
+    public function show(Customer $customer): View
+    {
+        $customer->load('group');
+
+        $offers = Offer::query()
+            ->withCount('items')
+            ->where('customer_id', $customer->id)
+            ->latest()
+            ->paginate(15);
+
+        return view('pages.customers.show', [
+            'customer' => $customer,
+            'offers' => $offers,
+            'statusLabels' => Offer::STATUS_LABELS,
         ]);
     }
 
