@@ -1,28 +1,5 @@
 import TomSelect from 'tom-select';
 
-function normalizeOfferProductOptionLabels(select) {
-    select.querySelectorAll('option').forEach((option) => {
-        const text = option.textContent.replace(/\s+/g, ' ').trim();
-
-        // Beispiel vorher:
-        // 150 | Verfügbar: 9.569,000 | Max: 9.519,000
-        //
-        // Beispiel nachher:
-        // 150 | 9.519,000 verfügbar
-        const match = text.match(/^(.+?)\s*\|\s*Verfügbar:\s*([^|]+)\s*\|\s*Max:\s*(.+)$/);
-
-        if (!match) {
-            return;
-        }
-
-        const productName = match[1].trim();
-        const maxUsableQuantity = match[3].trim();
-
-        option.textContent = `${productName} | ${maxUsableQuantity} verfügbar`;
-    });
-}
-
-
 function shouldUseSearch(select) {
     const name = select.getAttribute('name') || '';
 
@@ -60,8 +37,6 @@ function initSearchableSelects() {
         if (select.classList.contains('no-tomselect')) {
             return;
         }
-
-        normalizeOfferProductOptionLabels(select);
 
         const enableSearch = shouldUseSearch(select);
         const countrySelect = isCountrySelect(select);
