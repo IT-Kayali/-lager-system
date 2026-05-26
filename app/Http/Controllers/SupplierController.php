@@ -102,7 +102,7 @@ class SupplierController extends Controller
             'email' => ['nullable', 'email', 'max:255'],
             'phone_country_code' => ['required', 'string', 'max:10'],
             'phone' => ['nullable', 'string', 'max:255'],
-            'whatsapp_country_code' => ['required', 'string', 'max:10'],
+            'whatsapp_country_code' => ['nullable', 'string', 'max:10'],
             'whatsapp' => ['nullable', 'string', 'max:255'],
 
             'street' => ['nullable', 'string', 'max:255'],

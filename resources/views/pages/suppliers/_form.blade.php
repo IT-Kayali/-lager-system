@@ -13,13 +13,14 @@
         @error('contact_person') <div class="premium-error">{{ $message }}</div> @enderror
     </div>
 
-    <div class="premium-form-field">
+    <div class="premium-form-field full">
         <label>E-Mail</label>
         <input name="email" type="email" class="premium-input" value="{{ old('email', $supplier->email) }}">
         @error('email') <div class="premium-error">{{ $message }}</div> @enderror
     </div>
+
     <div class="premium-form-field full">
-        <label>Telefon</label>
+        <label>Telefon / WhatsApp</label>
 
         <div class="phone-combo">
             <div>
@@ -40,31 +41,6 @@
                 @error('phone') <div class="premium-error">{{ $message }}</div> @enderror
             </div>
         </div>
-    </div>
-
-    <div class="premium-form-field full">
-        <label>WhatsApp</label>
-
-        <div class="phone-combo">
-            <div>
-                <x-country-code-select
-                    name="whatsapp_country_code"
-                    :selected="$supplier->whatsapp_country_code ?: $supplier->phone_country_code ?: '+49|DE'"
-                />
-                @error('whatsapp_country_code') <div class="premium-error">{{ $message }}</div> @enderror
-            </div>
-
-            <div>
-                <input
-                    name="whatsapp"
-                    class="premium-input"
-                    value="{{ old('whatsapp', $supplier->whatsapp) }}"
-                    placeholder="WhatsApp-Nummer ohne Vorwahl"
-                >
-                @error('whatsapp') <div class="premium-error">{{ $message }}</div> @enderror
-            </div>
-        </div>
-    </div> @enderror
     </div>
 </div>
 

@@ -1,19 +1,15 @@
 import TomSelect from 'tom-select';
 
-const collator = new Intl.Collator('de-DE', {
-    numeric: true,
-    sensitivity: 'base',
-});
-
-function normalizeText(text) {
-    return (text || '').replace(/\s+/g, ' ').trim();
-}
-
 function shouldUseSearch(select) {
     const name = select.getAttribute('name') || '';
 
-    if (select.dataset.search === 'true') return true;
-    if (select.dataset.search === 'false') return false;
+    if (select.dataset.search === 'true') {
+        return true;
+    }
+
+    if (select.dataset.search === 'false') {
+        return false;
+    }
 
     return (
         name.includes('customer_id') ||
@@ -28,12 +24,15 @@ function isCountrySelect(select) {
     return select.classList.contains('phone-country-select');
 }
 
-function isStatusOrFixedOrderSelect(select) {
+function shouldSkipSorting(select) {
     const name = select.getAttribute('name') || '';
     const id = select.getAttribute('id') || '';
 
+    if (select.dataset.sort === 'false') {
+        return true;
+    }
+
     return (
-        select.dataset.sort === 'false' ||
         name === 'status' ||
         id.includes('status') ||
         name.includes('status') ||
@@ -44,36 +43,71 @@ function isStatusOrFixedOrderSelect(select) {
     );
 }
 
-function isPlaceholderOption(option) {
-    const text = normalizeText(option.textContent).toLowerCase();
-
-    return (
-        option.value === '' ||
-        option.disabled ||
-        text.includes('auswählen') ||
-        text.includes('bitte wählen')
-    );
+function normalizeText(text) {
+    return (text || '')
+        .replace(/\s+/g, ' ')
+        .trim();
 }
 
-function sortKey(option) {
-    let text = normalizeText(option.dataset.name || option.textContent);
-
-    // Bei Produktoptionen nur nach Bezeichnung/Nummer vor dem Trennzeichen sortieren:
-    // "150 | 9.519,000 verfügbar" => "150"
-    if (text.includes('|')) {
-        text = text.split('|')[0].trim();
+function sortSelectOptions(select) {
+    if (shouldSkipSorting(select)) {
+        return;
     }
 
-    return text;
+    const options = Array.from(select.options);
+
+    if (options.length <= 2) {
+        return;
+    }
+
+    const placeholders = options.filter((option) => {
+        return option.value === '' || option.disabled || normalizeText(option.textContent).toLowerCase().includes('auswählen');
+    });
+
+    const realOptions = options.filter((option) => !placeholders.includes(option));
+
+    const collator = new Intl.Collator('de-DE', {
+        numeric: true,
+        sensitivity: 'base',
+    });
+
+    realOptions.sort((a, b) => {
+        const aCountry = a.dataset.iso || '';
+        const bCountry = b.dataset.iso || '';
+
+        // Bei Länder-Vorwahl Deutschland oben lassen
+        if (isCountrySelect(select)) {
+            if (aCountry.toUpperCase() === 'DE') return -1;
+            if (bCountry.toUpperCase() === 'DE') return 1;
+        }
+
+        const aText = normalizeText(a.dataset.name || a.textContent);
+        const bText = normalizeText(b.dataset.name || b.textContent);
+
+        return collator.compare(aText, bText);
+    });
+
+    select.innerHTML = '';
+
+    [...placeholders, ...realOptions].forEach((option) => {
+        select.appendChild(option);
+    });
 }
 
 function normalizeOfferProductOptionLabels(select) {
     select.querySelectorAll('option').forEach((option) => {
         const text = normalizeText(option.textContent);
 
+        // Vorher:
+        // 150 | Verfügbar: 9.569,000 | Max: 9.519,000
+        //
+        // Nachher:
+        // 150 | 9.519,000 verfügbar
         const match = text.match(/^(.+?)\s*\|\s*Verfügbar:\s*([^|]+)\s*\|\s*Max:\s*(.+)$/);
 
-        if (!match) return;
+        if (!match) {
+            return;
+        }
 
         const productName = match[1].trim();
         const maxUsableQuantity = match[3].trim();
@@ -82,69 +116,19 @@ function normalizeOfferProductOptionLabels(select) {
     });
 }
 
-function sortSelectOptions(select) {
-    if (isStatusOrFixedOrderSelect(select)) return;
-
-    const oldValue = select.value;
-    const hadExplicitSelected = Array.from(select.options).some((option) => {
-        return option.hasAttribute('selected') && option.value !== '';
-    });
-
-    const options = Array.from(select.options);
-    if (options.length <= 1) return;
-
-    const placeholders = options.filter(isPlaceholderOption);
-    const realOptions = options.filter((option) => !isPlaceholderOption(option));
-
-    realOptions.sort((a, b) => {
-        if (isCountrySelect(select)) {
-            const aIso = (a.dataset.iso || '').toUpperCase();
-            const bIso = (b.dataset.iso || '').toUpperCase();
-
-            if (aIso === 'DE') return -1;
-            if (bIso === 'DE') return 1;
-        }
-
-        return collator.compare(sortKey(a), sortKey(b));
-    });
-
-    select.replaceChildren(...placeholders, ...realOptions);
-
-    /*
-     * Wichtig:
-     * Bei Create-Formularen soll nicht automatisch der erste/letzte echte Wert
-     * ausgewählt werden. Wenn kein Wert bewusst gewählt wurde, bleibt der
-     * Platzhalter aktiv.
-     */
-    if (!oldValue && !hadExplicitSelected && placeholders.length > 0 && !isCountrySelect(select)) {
-        select.value = '';
-        placeholders[0].selected = true;
-        return;
-    }
-
-    /*
-     * Bei Länder-Vorwahl soll Deutschland standardmäßig ausgewählt sein.
-     */
-    if ((!oldValue || oldValue === '+49') && isCountrySelect(select)) {
-        const germany = Array.from(select.options).find((option) => option.value === '+49|DE');
-
-        if (germany) {
-            select.value = '+49|DE';
-            germany.selected = true;
-            return;
-        }
-    }
-
-    if (oldValue) {
-        select.value = oldValue;
-    }
-}
-
 function initSearchableSelects() {
     document.querySelectorAll('select').forEach((select) => {
-        if (select.tomselect) return;
-        if (select.multiple) return;
-        if (select.classList.contains('no-tomselect')) return;
+        if (select.tomselect) {
+            return;
+        }
+
+        if (select.multiple) {
+            return;
+        }
+
+        if (select.classList.contains('no-tomselect')) {
+            return;
+        }
 
         normalizeOfferProductOptionLabels(select);
         sortSelectOptions(select);
@@ -167,10 +151,7 @@ function initSearchableSelects() {
             searchField: enableSearch ? ['text', 'name', 'dial'] : [],
             controlInput: enableSearch ? '<input />' : null,
             dropdownParent: 'body',
-
-            // Wichtig: Tom Select soll unsere DOM-Reihenfolge behalten.
-            sortField: [{ field: '$order', direction: 'asc' }],
-
+            sortField: null,
             render: {
                 option: function (data, escape) {
                     if (!countrySelect) {

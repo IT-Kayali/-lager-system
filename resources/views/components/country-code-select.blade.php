@@ -7,6 +7,7 @@
 @php
     $id = $id ?: str_replace(['[', ']'], ['_', ''], $name);
     $current = old($name, $selected ?: '+49|DE');
+    if (! $current || $current === '+49') { $current = '+49|DE'; }
 
     $countries = \App\Support\PhoneCountries::all();
 

@@ -85,11 +85,6 @@ function normalizeOfferProductOptionLabels(select) {
 function sortSelectOptions(select) {
     if (isStatusOrFixedOrderSelect(select)) return;
 
-    const oldValue = select.value;
-    const hadExplicitSelected = Array.from(select.options).some((option) => {
-        return option.hasAttribute('selected') && option.value !== '';
-    });
-
     const options = Array.from(select.options);
     if (options.length <= 1) return;
 
@@ -109,35 +104,6 @@ function sortSelectOptions(select) {
     });
 
     select.replaceChildren(...placeholders, ...realOptions);
-
-    /*
-     * Wichtig:
-     * Bei Create-Formularen soll nicht automatisch der erste/letzte echte Wert
-     * ausgewählt werden. Wenn kein Wert bewusst gewählt wurde, bleibt der
-     * Platzhalter aktiv.
-     */
-    if (!oldValue && !hadExplicitSelected && placeholders.length > 0 && !isCountrySelect(select)) {
-        select.value = '';
-        placeholders[0].selected = true;
-        return;
-    }
-
-    /*
-     * Bei Länder-Vorwahl soll Deutschland standardmäßig ausgewählt sein.
-     */
-    if ((!oldValue || oldValue === '+49') && isCountrySelect(select)) {
-        const germany = Array.from(select.options).find((option) => option.value === '+49|DE');
-
-        if (germany) {
-            select.value = '+49|DE';
-            germany.selected = true;
-            return;
-        }
-    }
-
-    if (oldValue) {
-        select.value = oldValue;
-    }
 }
 
 function initSearchableSelects() {
