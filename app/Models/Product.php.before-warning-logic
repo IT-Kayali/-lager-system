@@ -108,18 +108,17 @@ class Product extends Model
 
     public function getStockStatusAttribute(): string
     {
-        $available = (float) $this->available_stock;
-        $minimum = (float) $this->minimum_stock;
+        $minimumStock = (float) $this->minimum_stock;
 
-        if ($minimum <= 0) {
+        if ($minimumStock <= 0) {
             return 'ok';
         }
 
-        if ($available <= $minimum) {
+        if ($this->available_stock <= ($minimumStock * 0.4)) {
             return 'critical';
         }
 
-        if ($available <= ($minimum * 1.10)) {
+        if ($this->available_stock < $minimumStock) {
             return 'low';
         }
 

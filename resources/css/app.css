@@ -2355,3 +2355,31 @@ select.ts-hidden-accessible,
         grid-template-columns: 1fr;
     }
 }
+
+/* Warning / stock status colors */
+.premium-badge.critical,
+.stock-status.critical,
+.warning-status.critical,
+.badge-critical {
+    background: rgba(239, 68, 68, 0.14) !important;
+    color: #b91c1c !important;
+    border: 1px solid rgba(239, 68, 68, 0.28) !important;
+}
+
+.premium-badge.low,
+.stock-status.low,
+.warning-status.low,
+.badge-low {
+    background: rgba(245, 158, 11, 0.16) !important;
+    color: #b45309 !important;
+    border: 1px solid rgba(245, 158, 11, 0.32) !important;
+}
+
+.premium-badge.ok,
+.stock-status.ok,
+.warning-status.ok,
+.badge-ok {
+    background: rgba(34, 197, 94, 0.14) !important;
+    color: #15803d !important;
+    border: 1px solid rgba(34, 197, 94, 0.25) !important;
+}

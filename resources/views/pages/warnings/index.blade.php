@@ -30,7 +30,7 @@
             <div>
                 <h2 style="font-size:20px; font-weight:900; margin:0;">Bestandswarnungen</h2>
                 <p class="premium-muted" style="margin:4px 0 0;">
-                    OK-Produkte werden hier nicht angezeigt. Statuslogik: Niedrig unter Mindestbestand, Kritisch bei maximal 40% vom Mindestbestand.
+                    OK-Produkte werden hier nicht angezeigt. Statuslogik: Niedrig bis 10% über Mindestbestand, Kritisch bei Mindestbestand oder darunter.
                 </p>
             </div>
 
