@@ -94,13 +94,13 @@
 
                             <td>{{ $product->supplierRecord?->company_name ?: $product->supplier ?: '—' }}</td>
 
-                            <td>{{ number_format((float) $product->total_stock, 3, ',', '.') }}</td>
+                            <td>{{ number_format((float) $product->total_stock, 2, ',', '.') }}</td>
 
-                            <td>{{ number_format((float) $product->reserved_stock, 3, ',', '.') }}</td>
+                            <td>{{ number_format((float) $product->reserved_stock, 2, ',', '.') }}</td>
 
-                            <td>{{ number_format((float) $product->available_stock, 3, ',', '.') }}</td>
+                            <td>{{ number_format((float) $product->available_stock, 2, ',', '.') }}</td>
 
-                            <td>{{ number_format((float) $product->minimum_stock, 3, ',', '.') }}</td>
+                            <td>{{ number_format((float) $product->minimum_stock, 2, ',', '.') }}</td>
 
                             <td>
                                 <span class="premium-badge {{ $product->stock_status }}">

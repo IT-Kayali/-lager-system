@@ -53,7 +53,7 @@
 
     <div class="premium-form-field full">
         <label for="minimum_stock">Mindestbestand *</label>
-        <input id="minimum_stock" name="minimum_stock" type="number" step="0.001" min="0" class="premium-input" value="{{ old('minimum_stock', $product->minimum_stock) }}" required>
+        <input id="minimum_stock" name="minimum_stock" type="number" step="0.01" min="0" class="premium-input" value="{{ old('minimum_stock', $product->minimum_stock) }}" required>
         @error('minimum_stock') <div class="premium-error">{{ $message }}</div> @enderror
     </div>
 

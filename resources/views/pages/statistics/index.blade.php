@@ -103,7 +103,7 @@
 
         <div class="premium-stat-card">
             <div class="premium-stat-icon"><i class="bi bi-box-seam"></i></div>
-            <div class="premium-stat-value">{{ number_format($stockSummary['available_stock'], 3, ',', '.') }}</div>
+            <div class="premium-stat-value">{{ number_format($stockSummary['available_stock'], 2, ',', '.') }}</div>
             <div class="premium-stat-label">Verfügbarer Bestand</div>
         </div>
     </section>
@@ -183,7 +183,7 @@
                                     <strong>{{ $product['product_name'] }}</strong>
                                     <div class="premium-muted">{{ $product['product_code'] }}</div>
                                 </td>
-                                <td>{{ number_format((float) $product['sold_quantity'], 3, ',', '.') }}</td>
+                                <td>{{ number_format((float) $product['sold_quantity'], 2, ',', '.') }}</td>
                                 <td>{{ number_format((float) $product['revenue'], 2, ',', '.') }} €</td>
                             </tr>
                         @empty

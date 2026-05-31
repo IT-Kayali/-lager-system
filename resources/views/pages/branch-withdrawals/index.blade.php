@@ -46,9 +46,9 @@
                             <tr>
                                 <td><strong>{{ $withdrawal->withdrawal_number }}</strong></td>
                                 <td>{{ $withdrawal->product?->name ?? '—' }}</td>
-                                <td>{{ number_format((float) $withdrawal->quantity, 3, ',', '.') }}</td>
-                                <td>{{ number_format((float) $withdrawal->stock_before, 3, ',', '.') }}</td>
-                                <td>{{ number_format((float) $withdrawal->stock_after, 3, ',', '.') }}</td>
+                                <td>{{ number_format((float) $withdrawal->quantity, 2, ',', '.') }}</td>
+                                <td>{{ number_format((float) $withdrawal->stock_before, 2, ',', '.') }}</td>
+                                <td>{{ number_format((float) $withdrawal->stock_after, 2, ',', '.') }}</td>
                                 <td>{{ $withdrawal->branch_name }}</td>
                                 <td>{{ $withdrawal->user?->name ?? 'System' }}</td>
                                 <td>{{ $withdrawal->created_at?->format('d.m.Y H:i') }}</td>

@@ -232,7 +232,7 @@
                         <strong>{{ $item->product_name }}</strong><br>
                         <span class="muted">{{ $item->product_code }}</span>
                     </td>
-                    <td>{{ number_format((float) $item->quantity, 3, ',', '.') }} {{ $item->unit }}</td>
+                    <td>{{ number_format((float) $item->quantity, 2, ',', '.') }} {{ $item->unit }}</td>
                     <td>
                         <span class="badge">{{ $item->tier_label }}</span>
                     </td>

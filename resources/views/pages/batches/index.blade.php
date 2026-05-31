@@ -67,7 +67,7 @@
                             </td>
 
                             <td>
-                                {{ number_format((float) $batch->quantity, 3, ',', '.') }}
+                                {{ number_format((float) $batch->quantity, 2, ',', '.') }}
                                 {{ $batch->product?->unit ?? '' }}
                             </td>
 

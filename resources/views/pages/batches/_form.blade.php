@@ -22,7 +22,7 @@
 
     <div class="premium-form-field">
         <label for="quantity">Menge *</label>
-        <input id="quantity" name="quantity" type="number" step="0.001" min="0" class="premium-input" value="{{ old('quantity', $batch->quantity) }}" required>
+        <input id="quantity" name="quantity" type="number" step="0.01" min="0" class="premium-input" value="{{ old('quantity', $batch->quantity) }}" required>
         @error('quantity') <div class="premium-error">{{ $message }}</div> @enderror
     </div>
 

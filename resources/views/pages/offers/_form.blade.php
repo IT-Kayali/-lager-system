@@ -59,8 +59,8 @@
                         @foreach ($products as $product)
                             <option value="{{ $product->id }}" @selected((string) ($item['product_id'] ?? '') === (string) $product->id)>
                                 {{ $product->name }}
-                                | Verfügbar: {{ number_format($product->available_stock, 3, ',', '.') }}
-                                | Max: {{ number_format($product->max_reservable, 3, ',', '.') }}
+                                | Verfügbar: {{ number_format($product->available_stock, 2, ',', '.') }}
+                                | Max: {{ number_format($product->max_reservable, 2, ',', '.') }}
                             </option>
                         @endforeach
                     </select>
@@ -71,8 +71,8 @@
                     <input
                         name="items[{{ $index }}][quantity]"
                         type="number"
-                        step="0.001"
-                        min="0.001"
+                        step="0.01"
+                        min="0.01"
                         max="5000"
                         class="premium-input"
                         value="{{ $item['quantity'] ?? '' }}"
@@ -121,8 +121,8 @@
                     @foreach ($products as $product)
                         <option value="{{ $product->id }}">
                             {{ $product->name }}
-                            | Verfügbar: {{ number_format($product->available_stock, 3, ',', '.') }}
-                            | Max: {{ number_format($product->max_reservable, 3, ',', '.') }}
+                            | Verfügbar: {{ number_format($product->available_stock, 2, ',', '.') }}
+                            | Max: {{ number_format($product->max_reservable, 2, ',', '.') }}
                         </option>
                     @endforeach
                 </select>
@@ -130,7 +130,7 @@
 
             <div class="premium-form-field">
                 <label>Menge/Gewicht</label>
-                <input data-name="quantity" type="number" step="0.001" min="0.001" max="5000" class="premium-input" placeholder="z. B. 50">
+                <input data-name="quantity" type="number" step="0.01" min="0.01" max="5000" class="premium-input" placeholder="z. B. 50">
             </div>
 
             <div class="premium-form-field" style="display:flex; align-items:end;">

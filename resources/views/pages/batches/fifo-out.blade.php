@@ -29,8 +29,8 @@
                         id="quantity"
                         name="quantity"
                         type="number"
-                        step="0.001"
-                        min="0.001"
+                        step="0.01"
+                        min="0.01"
                         class="premium-input"
                         value="{{ old('quantity') }}"
                         required
