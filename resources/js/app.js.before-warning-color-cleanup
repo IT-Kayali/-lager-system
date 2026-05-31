@@ -1,0 +1,101 @@
+import Chart from 'chart.js/auto';
+import 'tom-select/dist/css/tom-select.css';
+import 'flag-icons/css/flag-icons.min.css';
+import './searchable-selects';
+
+window.Chart = Chart;
+
+/**
+ * Warnings page visual status coloring.
+ * Adds classes based on visible German labels without changing Blade structure.
+ */
+function initWarningsPageColors() {
+    const path = window.location.pathname;
+
+    if (!path.includes('/warnings')) {
+        return;
+    }
+
+    const cards = Array.from(document.querySelectorAll('.premium-card, [class*="card"]'));
+
+    cards.forEach((card) => {
+        const text = card.textContent.replace(/\s+/g, ' ').trim();
+
+        if (text.includes('Warnungen gesamt')) {
+            card.classList.add('warning-card-total');
+        }
+
+        if (text.includes('Niedrig') && !text.includes('Bestandswarnungen')) {
+            card.classList.add('warning-card-low');
+        }
+
+        if (text.includes('Kritisch')) {
+            card.classList.add('warning-card-critical');
+        }
+    });
+
+    const clickableElements = Array.from(document.querySelectorAll('a, button'));
+
+    clickableElements.forEach((element) => {
+        const text = element.textContent.replace(/\s+/g, ' ').trim();
+
+        if (text === 'Warnungen') {
+            element.classList.add('warning-filter-total');
+        }
+
+        if (text === 'Niedrig') {
+            element.classList.add('warning-filter-low');
+        }
+
+        if (text === 'Kritisch') {
+            element.classList.add('warning-filter-critical');
+        }
+    });
+
+    const rows = Array.from(document.querySelectorAll('table tbody tr'));
+
+    rows.forEach((row) => {
+        const text = row.textContent.replace(/\s+/g, ' ').trim();
+
+        if (text.includes('Kritisch')) {
+            row.classList.add('warning-row-critical');
+        } else if (text.includes('Niedrig')) {
+            row.classList.add('warning-row-low');
+        }
+
+        Array.from(row.querySelectorAll('td')).forEach((cell) => {
+            const cellText = cell.textContent.replace(/\s+/g, ' ').trim();
+
+            if (cellText === 'Kritisch') {
+                cell.classList.add('warning-status-cell');
+                const badge = cell.querySelector('.premium-badge, span, div');
+                if (badge) {
+                    badge.classList.add('warning-status-badge-critical');
+                }
+            }
+
+            if (cellText === 'Niedrig') {
+                cell.classList.add('warning-status-cell');
+                const badge = cell.querySelector('.premium-badge, span, div');
+                if (badge) {
+                    badge.classList.add('warning-status-badge-low');
+                }
+            }
+        });
+
+        const lastCell = row.querySelector('td:last-child');
+        if (lastCell) {
+            lastCell.classList.add('warning-action-cell');
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initWarningsPageColors);
+document.addEventListener('livewire:navigated', initWarningsPageColors);
+
+new MutationObserver(() => {
+    initWarningsPageColors();
+}).observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+});

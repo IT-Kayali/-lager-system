@@ -2383,3 +2383,278 @@ select.ts-hidden-accessible,
     color: #15803d !important;
     border: 1px solid rgba(34, 197, 94, 0.25) !important;
 }
+
+/* Dashboard Lagerstatus Farben */
+.dashboard-stock-status-critical,
+.dashboard-stock-status-critical *,
+.premium-dashboard-critical,
+.premium-dashboard-critical * {
+    background: rgba(239, 68, 68, 0.14) !important;
+    color: #b91c1c !important;
+    border-color: rgba(239, 68, 68, 0.30) !important;
+}
+
+.dashboard-stock-status-low,
+.dashboard-stock-status-low *,
+.premium-dashboard-low,
+.premium-dashboard-low * {
+    background: rgba(245, 158, 11, 0.16) !important;
+    color: #b45309 !important;
+    border-color: rgba(245, 158, 11, 0.34) !important;
+}
+
+.dashboard-stock-status-ok,
+.dashboard-stock-status-ok *,
+.premium-dashboard-ok,
+.premium-dashboard-ok * {
+    background: rgba(34, 197, 94, 0.14) !important;
+    color: #15803d !important;
+    border-color: rgba(34, 197, 94, 0.28) !important;
+}
+
+.dashboard-stock-status-neutral,
+.dashboard-stock-status-neutral *,
+.premium-dashboard-neutral,
+.premium-dashboard-neutral * {
+    background: rgba(227, 202, 110, 0.20) !important;
+    color: #6b5a16 !important;
+    border-color: rgba(227, 202, 110, 0.42) !important;
+}
+
+/* Falls Dashboard alte dunkle Status-Zeilen nutzt */
+.dashboard-stock-list .critical,
+.dashboard-stock-list .critical *,
+.dashboard-status-list .critical,
+.dashboard-status-list .critical * {
+    background: rgba(239, 68, 68, 0.14) !important;
+    color: #b91c1c !important;
+}
+
+.dashboard-stock-list .low,
+.dashboard-stock-list .low *,
+.dashboard-status-list .low,
+.dashboard-status-list .low * {
+    background: rgba(245, 158, 11, 0.16) !important;
+    color: #b45309 !important;
+}
+
+.dashboard-stock-list .ok,
+.dashboard-stock-list .ok *,
+.dashboard-status-list .ok,
+.dashboard-status-list .ok * {
+    background: rgba(34, 197, 94, 0.14) !important;
+    color: #15803d !important;
+}
+
+/* Warnungs-KPI oben */
+.dashboard-kpi-critical {
+    border-color: rgba(239, 68, 68, 0.30) !important;
+}
+
+.dashboard-kpi-critical .premium-icon,
+.dashboard-kpi-critical .premium-stat-icon,
+.dashboard-kpi-critical i {
+    color: #b91c1c !important;
+    background: rgba(239, 68, 68, 0.14) !important;
+}
+
+/* =========================================================
+   WARNUNGEN PAGE COLORS
+   ========================================================= */
+
+.warning-card-total,
+.warning-filter-total {
+    background: linear-gradient(180deg, rgba(245,158,11,.13), rgba(255,250,240,.95)) !important;
+    border-color: rgba(245,158,11,.32) !important;
+}
+
+.warning-card-low,
+.warning-filter-low {
+    background: linear-gradient(180deg, rgba(245,158,11,.18), rgba(255,250,240,.96)) !important;
+    border-color: rgba(245,158,11,.42) !important;
+    color: #92400e !important;
+}
+
+.warning-card-critical,
+.warning-filter-critical {
+    background: linear-gradient(180deg, rgba(239,68,68,.16), rgba(255,245,245,.96)) !important;
+    border-color: rgba(239,68,68,.42) !important;
+    color: #991b1b !important;
+}
+
+.warning-card-low i,
+.warning-card-low .premium-stat-icon,
+.warning-card-low .premium-icon,
+.warning-filter-low i {
+    color: #b45309 !important;
+    background: rgba(245,158,11,.16) !important;
+}
+
+.warning-card-critical i,
+.warning-card-critical .premium-stat-icon,
+.warning-card-critical .premium-icon,
+.warning-filter-critical i {
+    color: #b91c1c !important;
+    background: rgba(239,68,68,.16) !important;
+}
+
+.warning-filter-low {
+    background: #f59e0b !important;
+    color: #fff7ed !important;
+    border-color: rgba(245,158,11,.45) !important;
+}
+
+.warning-filter-critical {
+    background: #dc2626 !important;
+    color: #fff5f5 !important;
+    border-color: rgba(220,38,38,.45) !important;
+}
+
+.warning-row-low {
+    background: rgba(245,158,11,.07) !important;
+}
+
+.warning-row-critical {
+    background: rgba(239,68,68,.075) !important;
+}
+
+.warning-row-low td {
+    border-top-color: rgba(245,158,11,.20) !important;
+    border-bottom-color: rgba(245,158,11,.20) !important;
+}
+
+.warning-row-critical td {
+    border-top-color: rgba(239,68,68,.22) !important;
+    border-bottom-color: rgba(239,68,68,.22) !important;
+}
+
+.warning-status-badge-low,
+.premium-badge.low {
+    background: rgba(245,158,11,.16) !important;
+    color: #b45309 !important;
+    border: 1px solid rgba(245,158,11,.36) !important;
+}
+
+.warning-status-badge-critical,
+.premium-badge.critical {
+    background: rgba(239,68,68,.16) !important;
+    color: #b91c1c !important;
+    border: 1px solid rgba(239,68,68,.36) !important;
+}
+
+.warning-status-badge-ok,
+.premium-badge.ok {
+    background: rgba(34,197,94,.14) !important;
+    color: #15803d !important;
+    border: 1px solid rgba(34,197,94,.30) !important;
+}
+
+.warning-action-cell,
+.warning-status-cell {
+    background: transparent !important;
+}
+
+/* =========================================================
+   CLEAN WARNINGS PAGE COLORS - FINAL
+   ========================================================= */
+
+/* Alte zu starke Farben neutralisieren */
+.premium-card.warning-card-total,
+.premium-card.warning-card-low,
+.premium-card.warning-card-critical {
+    color: #212121 !important;
+}
+
+.premium-card.warning-card-total *,
+.premium-card.warning-card-low *,
+.premium-card.warning-card-critical * {
+    color: inherit;
+}
+
+/* KPI: Warnungen gesamt */
+.premium-card.warning-card-total {
+    background: linear-gradient(180deg, rgba(245, 158, 11, 0.11), rgba(255, 253, 248, 0.98)) !important;
+    border-color: rgba(245, 158, 11, 0.30) !important;
+}
+
+/* KPI: Niedrig */
+.premium-card.warning-card-low {
+    background: linear-gradient(180deg, rgba(245, 158, 11, 0.15), rgba(255, 253, 248, 0.98)) !important;
+    border-color: rgba(245, 158, 11, 0.42) !important;
+}
+
+.premium-card.warning-card-low i,
+.premium-card.warning-card-low .premium-stat-icon,
+.premium-card.warning-card-low .premium-icon {
+    color: #b45309 !important;
+    background: rgba(245, 158, 11, 0.16) !important;
+}
+
+/* KPI: Kritisch */
+.premium-card.warning-card-critical {
+    background: linear-gradient(180deg, rgba(239, 68, 68, 0.14), rgba(255, 253, 248, 0.98)) !important;
+    border-color: rgba(239, 68, 68, 0.42) !important;
+}
+
+.premium-card.warning-card-critical i,
+.premium-card.warning-card-critical .premium-stat-icon,
+.premium-card.warning-card-critical .premium-icon {
+    color: #b91c1c !important;
+    background: rgba(239, 68, 68, 0.16) !important;
+}
+
+/* Der große Tabellenbereich bleibt normal */
+.premium-card:has(.premium-table),
+.premium-card:has(table) {
+    background: #fffdf8 !important;
+    border-color: rgba(33, 33, 33, 0.10) !important;
+}
+
+/* Filterbuttons */
+.warning-filter-total {
+    background: #e3ca6e !important;
+    color: #212121 !important;
+    border-color: rgba(227, 202, 110, 0.50) !important;
+}
+
+.warning-filter-low {
+    background: #f59e0b !important;
+    color: #fff7ed !important;
+    border-color: rgba(245, 158, 11, 0.45) !important;
+}
+
+.warning-filter-critical {
+    background: #dc2626 !important;
+    color: #fff5f5 !important;
+    border-color: rgba(220, 38, 38, 0.45) !important;
+}
+
+/* Tabellenzeilen */
+tr.warning-row-low {
+    background: rgba(245, 158, 11, 0.07) !important;
+}
+
+tr.warning-row-critical {
+    background: rgba(239, 68, 68, 0.075) !important;
+}
+
+/* Status-Badges */
+.premium-badge.low,
+.warning-status-badge-low {
+    background: rgba(245, 158, 11, 0.16) !important;
+    color: #b45309 !important;
+    border: 1px solid rgba(245, 158, 11, 0.35) !important;
+}
+
+.premium-badge.critical,
+.warning-status-badge-critical {
+    background: rgba(239, 68, 68, 0.16) !important;
+    color: #b91c1c !important;
+    border: 1px solid rgba(239, 68, 68, 0.35) !important;
+}
+
+.premium-badge.ok {
+    background: rgba(34, 197, 94, 0.14) !important;
+    color: #15803d !important;
+    border: 1px solid rgba(34, 197, 94, 0.30) !important;
+}

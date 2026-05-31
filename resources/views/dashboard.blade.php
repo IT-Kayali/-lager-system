@@ -24,7 +24,7 @@
         <div class="premium-stat-card">
             <div class="premium-stat-icon"><i class="bi bi-exclamation-lg"></i></div>
             <div class="premium-stat-value">{{ $stats['critical'] }}</div>
-            <div class="premium-stat-label">Kritische Artikel</div>
+            <div class="premium-stat-label"><span class="dashboard-kpi-critical-label dashboard-stock-status-critical">Kritische Artikel</span></div>
         </div>
     </section>
 
