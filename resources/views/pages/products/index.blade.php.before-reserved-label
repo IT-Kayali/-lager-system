@@ -49,7 +49,7 @@
                         <th>Einheit</th>
                         <th>Lieferant</th>
                         <th>Gesamt</th>
-                        <th>Reserviert</th>
+                        <th></th>
                         <th>Verfügbar</th>
                         <th>Mindestbestand</th>
                         <th>Status</th>
