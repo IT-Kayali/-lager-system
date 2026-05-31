@@ -2658,3 +2658,280 @@ tr.warning-row-critical {
     color: #15803d !important;
     border: 1px solid rgba(34, 197, 94, 0.30) !important;
 }
+
+/* =========================================================
+   WARNUNGEN TABLE LAYOUT FIX
+   ========================================================= */
+
+body:has([href*="/warnings"].active) .premium-table-wrap,
+body:has(.warning-filter-total) .premium-table-wrap {
+    width: 100% !important;
+    overflow-x: auto !important;
+}
+
+body:has(.warning-filter-total) table,
+body:has(.warning-filter-low) table,
+body:has(.warning-filter-critical) table {
+    width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: separate !important;
+    border-spacing: 0 10px !important;
+}
+
+/* Spalten sauber verteilen */
+body:has(.warning-filter-total) table th:nth-child(1),
+body:has(.warning-filter-total) table td:nth-child(1) {
+    width: 14% !important;
+}
+
+body:has(.warning-filter-total) table th:nth-child(2),
+body:has(.warning-filter-total) table td:nth-child(2) {
+    width: 12% !important;
+}
+
+body:has(.warning-filter-total) table th:nth-child(3),
+body:has(.warning-filter-total) table td:nth-child(3),
+body:has(.warning-filter-total) table th:nth-child(4),
+body:has(.warning-filter-total) table td:nth-child(4),
+body:has(.warning-filter-total) table th:nth-child(5),
+body:has(.warning-filter-total) table td:nth-child(5),
+body:has(.warning-filter-total) table th:nth-child(6),
+body:has(.warning-filter-total) table td:nth-child(6) {
+    width: 13% !important;
+}
+
+body:has(.warning-filter-total) table th:nth-child(7),
+body:has(.warning-filter-total) table td:nth-child(7) {
+    width: 11% !important;
+    text-align: center !important;
+}
+
+body:has(.warning-filter-total) table th:nth-child(8),
+body:has(.warning-filter-total) table td:nth-child(8) {
+    width: 11% !important;
+    text-align: right !important;
+}
+
+/* Zellen nicht mehr komisch ziehen */
+body:has(.warning-filter-total) table th,
+body:has(.warning-filter-total) table td {
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+}
+
+/* Status-Badge mittig */
+body:has(.warning-filter-total) table td:nth-child(7) .premium-badge {
+    display: inline-flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+/* Aktionen rechts sauber nebeneinander */
+body:has(.warning-filter-total) table td:nth-child(8) {
+    min-width: 120px !important;
+}
+
+body:has(.warning-filter-total) table td:nth-child(8) .premium-actions,
+body:has(.warning-filter-total) table td:nth-child(8) div {
+    justify-content: flex-end !important;
+    display: flex !important;
+    gap: 8px !important;
+}
+
+/* Row-Background nur auf Zeile, nicht komisch auf Einzelzellen */
+body:has(.warning-filter-total) tr.warning-row-low td {
+    background: rgba(245, 158, 11, 0.055) !important;
+}
+
+body:has(.warning-filter-total) tr.warning-row-critical td {
+    background: rgba(239, 68, 68, 0.065) !important;
+}
+
+/* Erste und letzte Zelle schön abrunden */
+body:has(.warning-filter-total) table tbody tr td:first-child {
+    border-top-left-radius: 18px !important;
+    border-bottom-left-radius: 18px !important;
+}
+
+body:has(.warning-filter-total) table tbody tr td:last-child {
+    border-top-right-radius: 18px !important;
+    border-bottom-right-radius: 18px !important;
+}
+
+/* Mobile bleibt scrollbar */
+@media (max-width: 1100px) {
+    body:has(.warning-filter-total) table {
+        min-width: 1100px !important;
+    }
+}
+
+/* =========================================================
+   WARNINGS TABLE FINAL COLUMN ALIGNMENT
+   ========================================================= */
+
+body:has(.warning-filter-total) .premium-table-wrap {
+    width: 100% !important;
+    overflow-x: auto !important;
+}
+
+body:has(.warning-filter-total) table {
+    width: 100% !important;
+    min-width: 1180px !important;
+    table-layout: fixed !important;
+}
+
+/* Produkt */
+body:has(.warning-filter-total) table th:nth-child(1),
+body:has(.warning-filter-total) table td:nth-child(1) {
+    width: 15% !important;
+}
+
+/* Hersteller */
+body:has(.warning-filter-total) table th:nth-child(2),
+body:has(.warning-filter-total) table td:nth-child(2) {
+    width: 12% !important;
+}
+
+/* Gesamt */
+body:has(.warning-filter-total) table th:nth-child(3),
+body:has(.warning-filter-total) table td:nth-child(3) {
+    width: 11% !important;
+}
+
+/* Reserviert */
+body:has(.warning-filter-total) table th:nth-child(4),
+body:has(.warning-filter-total) table td:nth-child(4) {
+    width: 11% !important;
+}
+
+/* Verfügbar */
+body:has(.warning-filter-total) table th:nth-child(5),
+body:has(.warning-filter-total) table td:nth-child(5) {
+    width: 11% !important;
+}
+
+/* Mindestbestand */
+body:has(.warning-filter-total) table th:nth-child(6),
+body:has(.warning-filter-total) table td:nth-child(6) {
+    width: 12% !important;
+}
+
+/* Max. reservierbar */
+body:has(.warning-filter-total) table th:nth-child(7),
+body:has(.warning-filter-total) table td:nth-child(7) {
+    width: 13% !important;
+}
+
+/* Status */
+body:has(.warning-filter-total) table th:nth-child(8),
+body:has(.warning-filter-total) table td:nth-child(8) {
+    width: 8% !important;
+    text-align: center !important;
+}
+
+/* Aktion */
+body:has(.warning-filter-total) table th:nth-child(9),
+body:has(.warning-filter-total) table td:nth-child(9) {
+    width: 7% !important;
+    text-align: right !important;
+}
+
+body:has(.warning-filter-total) table th,
+body:has(.warning-filter-total) table td {
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+}
+
+body:has(.warning-filter-total) table td:nth-child(9) div,
+body:has(.warning-filter-total) table td:nth-child(9) .premium-actions {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+}
+
+/* =========================================================
+   WARNINGS TABLE CLEAN FINAL
+   ========================================================= */
+
+.warnings-card {
+    background: #fffdf8 !important;
+    border-color: rgba(33, 33, 33, 0.10) !important;
+}
+
+.warnings-table-wrap {
+    width: 100% !important;
+    overflow-x: auto !important;
+}
+
+.warnings-table {
+    width: 100% !important;
+    min-width: 1150px !important;
+    table-layout: fixed !important;
+    border-collapse: separate !important;
+    border-spacing: 0 10px !important;
+}
+
+.warnings-table th,
+.warnings-table td {
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+    text-align: left !important;
+}
+
+.warnings-table th:nth-child(8),
+.warnings-table td:nth-child(8) {
+    text-align: center !important;
+}
+
+.warnings-table th:nth-child(9),
+.warnings-table td:nth-child(9) {
+    text-align: right !important;
+}
+
+.warnings-table tbody tr.warning-row-low td {
+    background: rgba(245, 158, 11, 0.075) !important;
+    border-top: 1px solid rgba(245, 158, 11, 0.22) !important;
+    border-bottom: 1px solid rgba(245, 158, 11, 0.22) !important;
+}
+
+.warnings-table tbody tr.warning-row-critical td {
+    background: rgba(239, 68, 68, 0.075) !important;
+    border-top: 1px solid rgba(239, 68, 68, 0.22) !important;
+    border-bottom: 1px solid rgba(239, 68, 68, 0.22) !important;
+}
+
+.warnings-table tbody tr td:first-child {
+    border-left: 1px solid rgba(33, 33, 33, 0.08) !important;
+    border-top-left-radius: 18px !important;
+    border-bottom-left-radius: 18px !important;
+}
+
+.warnings-table tbody tr td:last-child {
+    border-right: 1px solid rgba(33, 33, 33, 0.08) !important;
+    border-top-right-radius: 18px !important;
+    border-bottom-right-radius: 18px !important;
+}
+
+.warning-actions {
+    justify-content: flex-end !important;
+    display: flex !important;
+    gap: 8px !important;
+}
+
+.warnings-table .premium-badge.low {
+    background: rgba(245, 158, 11, 0.16) !important;
+    color: #b45309 !important;
+    border: 1px solid rgba(245, 158, 11, 0.35) !important;
+}
+
+.warnings-table .premium-badge.critical {
+    background: rgba(239, 68, 68, 0.16) !important;
+    color: #b91c1c !important;
+    border: 1px solid rgba(239, 68, 68, 0.35) !important;
+}
+
+.warnings-table .premium-badge.ok {
+    background: rgba(34, 197, 94, 0.14) !important;
+    color: #15803d !important;
+    border: 1px solid rgba(34, 197, 94, 0.30) !important;
+}
