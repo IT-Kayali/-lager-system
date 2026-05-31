@@ -139,6 +139,10 @@
                                             <i class="bi bi-pencil"></i>
                                         </a>
 
+                                        <a class="premium-icon-btn" href="{{ route('branch-withdrawals.create', ['product_id' => $product->id]) }}" title="Filialausgang buchen">
+                                            <i class="bi bi-shop"></i>
+                                        </a>
+
                                         <a class="premium-icon-btn" href="{{ route('batches.create', ['product_id' => $product->id]) }}" title="Bestand buchen">
                                             <i class="bi bi-plus-lg"></i>
                                         </a>

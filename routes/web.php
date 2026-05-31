@@ -154,3 +154,10 @@ Route::middleware(['auth'])->group(function () {
 if (file_exists(__DIR__ . '/auth.php')) {
     require __DIR__ . '/auth.php';
 }
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('branch-withdrawals', \App\Http\Controllers\BranchWithdrawalController::class)
+        ->only(['index', 'create', 'store']);
+});
+

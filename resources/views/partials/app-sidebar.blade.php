@@ -22,6 +22,13 @@
             'roles' => ['manager', 'warehouse'],
         ],
         [
+            'label' => 'Filialausgang',
+            'route' => 'branch-withdrawals.index',
+            'active' => 'branch-withdrawals.*',
+            'icon' => 'bi-shop',
+            'roles' => ['manager', 'warehouse'],
+        ],
+        [
             'label' => 'Angebote & Rechnungen',
             'route' => 'offers.index',
             'active' => 'offers.*',
