@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <style>
+        @page {
+            margin: 0;
+            size: A4 portrait;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: DejaVu Sans, sans-serif;
+            color: #212121;
+            font-size: 10.5px;
+            line-height: 1.45;
+        }
+
+        .page {
+            position: relative;
+            width: 210mm;
+            height: 285mm;
+        }
+
+        .logo {
+            display: block;
+            max-width: 42mm;
+            max-height: 18mm;
+            object-fit: contain;
+            margin-bottom: 4mm;
+        }
+
+        .company-block {
+            position: absolute;
+            top: 43mm;
+            left: 18mm;
+            width: 76mm;
+            font-size: 10px;
+            color: #333333;
+            line-height: 1.55;
+        }
+
+        .company-name {
+            font-size: 14px;
+            font-weight: 800;
+            color: #bca24a;
+            margin-bottom: 2mm;
+        }
+
+        .right-header {
+            position: absolute;
+            top: 43mm;
+            right: 18mm;
+            width: 82mm;
+            text-align: right;
+            color: #222222;
+        }
+
+        .document-title {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: .2px;
+            margin-bottom: 8mm;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .document-meta {
+            font-size: 9.8px;
+            line-height: 1.75;
+            margin-bottom: 7mm;
+        }
+
+        .document-meta strong {
+            font-weight: 900;
+        }
+
+        .customer-block {
+            font-size: 9.8px;
+            line-height: 1.55;
+        }
+
+        .customer-title {
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 2mm;
+            color: #6d6d6d;
+        }
+
+        .content-area {
+            position: absolute;
+            top: 101mm;
+            left: 18mm;
+            width: 174mm;
+        }
+
+        .items-table {
+            width: 174mm;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .items-table th {
+            text-transform: uppercase;
+            font-size: 9px;
+            letter-spacing: .7px;
+            color: #6d6d6d;
+            font-weight: 900;
+            padding: 0 0 3.8mm 0;
+            border-bottom: 1px solid #ded8ca;
+            text-align: left;
+        }
+
+        .items-table td {
+            padding: 4mm 0;
+            border-bottom: 1px solid #eee7d8;
+            vertical-align: top;
+            font-size: 10.5px;
+        }
+
+        .items-table th:nth-child(1),
+        .items-table td:nth-child(1) {
+            width: 92mm;
+            text-align: left;
+        }
+
+        .items-table th:nth-child(2),
+        .items-table td:nth-child(2) {
+            width: 24mm;
+            text-align: center;
+        }
+
+        .items-table th:nth-child(3),
+        .items-table td:nth-child(3) {
+            width: 28mm;
+            text-align: right;
+        }
+
+        .items-table th:nth-child(4),
+        .items-table td:nth-child(4) {
+            width: 30mm;
+            text-align: right;
+        }
+
+        .product-name {
+            font-weight: 800;
+        }
+
+        .summary-table {
+            width: 76mm;
+            margin-left: auto;
+            margin-top: 11mm;
+            border-collapse: collapse;
+            font-size: 10.6px;
+        }
+
+        .summary-table td {
+            padding: 2.8mm 0;
+            border-bottom: 1px solid #e8dfca;
+        }
+
+        .summary-table td:first-child {
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .summary-table td:last-child {
+            text-align: right;
+            font-weight: 900;
+        }
+
+        .summary-total td {
+            border-top: 2px solid #d9bd55;
+            border-bottom: none;
+            font-size: 14px;
+            font-weight: 900;
+            padding-top: 4mm;
+        }
+
+        .thank-you {
+            position: absolute;
+            left: 18mm;
+            bottom: 58mm;
+            font-size: 12px;
+            font-weight: 800;
+            color: #6b4f33;
+        }
+
+        .notes {
+            margin-top: 10mm;
+            font-size: 9.5px;
+            color: #555555;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body @if (! empty($backgroundDataUri)) style="background-image:url('{{ $backgroundDataUri }}'); background-repeat:no-repeat; background-position:top left; background-size:210mm 297mm;" @endif>
+@php
+    $documentTitle = $documentType === 'invoice' ? 'RECHNUNG' : 'PREISANGEBOT';
+    $numberLabel = $documentType === 'invoice' ? 'Rechnung Nr.' : 'Preisangebot Nr.';
+
+    $companyAddressLines = [];
+
+    if ($template->company_street || $template->company_house_number) {
+        $companyAddressLines[] = trim(($template->company_street ?? '') . ' ' . ($template->company_house_number ?? ''));
+    }
+
+    if ($template->company_postal_code || $template->company_city) {
+        $companyAddressLines[] = trim(($template->company_postal_code ?? '') . ' ' . ($template->company_city ?? ''));
+    }
+
+    if ($template->company_country) {
+        $companyAddressLines[] = $template->company_country;
+    }
+
+    if (empty($companyAddressLines) && $template->company_address) {
+        $companyAddressLines = explode("\n", $template->company_address);
+    }
+
+    $customerAddressLines = [];
+
+    if ($offer->customer?->billing_street || $offer->customer?->billing_house_number) {
+        $customerAddressLines[] = trim(($offer->customer->billing_street ?? '') . ' ' . ($offer->customer->billing_house_number ?? ''));
+    }
+
+    if ($offer->customer?->billing_postal_code || $offer->customer?->billing_city) {
+        $customerAddressLines[] = trim(($offer->customer->billing_postal_code ?? '') . ' ' . ($offer->customer->billing_city ?? ''));
+    }
+
+    if ($offer->customer?->billing_country) {
+        $customerAddressLines[] = $offer->customer->billing_country;
+    }
+
+    if (empty($customerAddressLines)) {
+        if ($offer->customer?->delivery_street || $offer->customer?->delivery_house_number) {
+            $customerAddressLines[] = trim(($offer->customer->delivery_street ?? '') . ' ' . ($offer->customer->delivery_house_number ?? ''));
+        }
+
+        if ($offer->customer?->delivery_postal_code || $offer->customer?->delivery_city) {
+            $customerAddressLines[] = trim(($offer->customer->delivery_postal_code ?? '') . ' ' . ($offer->customer->delivery_city ?? ''));
+        }
+
+        if ($offer->customer?->delivery_country) {
+            $customerAddressLines[] = $offer->customer->delivery_country;
+        }
+    }
+
+    if (empty($customerAddressLines) && $offer->customer?->billing_address) {
+        $customerAddressLines = explode("\n", $offer->customer->billing_address);
+    } elseif (empty($customerAddressLines) && $offer->customer?->delivery_address) {
+        $customerAddressLines = explode("\n", $offer->customer->delivery_address);
+    }
+
+    $taxRate = (float) ($template->tax_rate ?? 19);
+    $taxRateLabel = rtrim(rtrim(number_format($taxRate, 2, ',', '.'), '0'), ',');
+    $subtotal = (float) $offer->items->sum('line_total');
+    $taxAmount = round($subtotal * ($taxRate / 100), 2);
+    $grandTotal = round($subtotal + $taxAmount, 2);
+@endphp
+
+<div class="page">
+    <div class="company-block">
+        @if ($template->show_logo && $logoDataUri)
+            <img src="{{ $logoDataUri }}" class="logo">
+        @elseif ($template->company_name)
+            <div class="company-name">{{ $template->company_name }}</div>
+        @endif
+
+        @if ($template->show_company_details)
+            @foreach ($companyAddressLines as $line)
+                {{ $line }}<br>
+            @endforeach
+
+            @if ($template->company_phone)
+                {{ $template->company_phone }}<br>
+            @endif
+
+            @if ($template->company_email)
+                {{ $template->company_email }}<br>
+            @endif
+
+            @if (! empty($template->company_website))
+                {{ $template->company_website }}
+            @endif
+        @endif
+    </div>
+
+    <div class="right-header">
+        <div class="document-title">{{ $documentTitle }}</div>
+
+        <div class="document-meta">
+            <div><strong>{{ $numberLabel }}</strong> {{ $offer->offer_number }}</div>
+            <div><strong>Datum</strong> {{ now()->format('d.m.Y') }}</div>
+        </div>
+
+        <div class="customer-block">
+            <div class="customer-title">Kunde</div>
+            <strong>{{ $offer->customer?->company_name }}</strong><br>
+
+            @if ($offer->customer?->customer_number)
+                Kundennr.: {{ $offer->customer->customer_number }}<br>
+            @endif
+
+            @foreach ($customerAddressLines as $line)
+                {{ $line }}<br>
+            @endforeach
+
+            @if ($offer->customer?->vat_number)
+                USt-Nummer: {{ $offer->customer->vat_number }}
+            @endif
+        </div>
+    </div>
+
+    <div class="content-area">
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>{{ $template->product_column_label ?: 'Bezeichnung' }}</th>
+                    <th>Menge</th>
+                    <th>Preis</th>
+                    <th>Summe</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach ($offer->items as $item)
+                    <tr>
+                        <td>
+                            <span class="product-name">{{ $item->product_name }}</span>
+                        </td>
+                        <td>{{ number_format((float) $item->quantity, 2, ',', '.') }}</td>
+                        <td>{{ number_format((float) $item->unit_price, 2, ',', '.') }} €</td>
+                        <td>{{ number_format((float) $item->line_total, 2, ',', '.') }} €</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+        <table class="summary-table">
+            <tr>
+                <td>Zwischensumme</td>
+                <td>{{ number_format($subtotal, 2, ',', '.') }} €</td>
+            </tr>
+            <tr>
+                <td>MwSt. ({{ $taxRateLabel }}%)</td>
+                <td>{{ number_format($taxAmount, 2, ',', '.') }} €</td>
+            </tr>
+            <tr class="summary-total">
+                <td>Total</td>
+                <td>{{ number_format($grandTotal, 2, ',', '.') }} €</td>
+            </tr>
+        </table>
+
+        @if ($offer->notes)
+            <div class="notes">
+                {!! nl2br(e($offer->notes)) !!}
+            </div>
+        @endif
+    </div>
+
+    <div class="thank-you">
+        {{ $template->footer_note ?: 'Vielen Dank für Ihr Vertrauen' }}
+    </div>
+</div>
+</body>
+</html>

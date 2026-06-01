@@ -3,35 +3,6 @@
 <head>
     <meta charset="utf-8">
     <style>
-
-        @font-face {
-            font-family: 'Exo';
-            font-style: normal;
-            font-weight: 400;
-            src: url("file://{{ public_path('fonts/exo/exo-latin-400-normal.woff2') }}") format("woff2");
-        }
-
-        @font-face {
-            font-family: 'Exo';
-            font-style: normal;
-            font-weight: 600;
-            src: url("file://{{ public_path('fonts/exo/exo-latin-600-normal.woff2') }}") format("woff2");
-        }
-
-        @font-face {
-            font-family: 'Exo';
-            font-style: normal;
-            font-weight: 700;
-            src: url("file://{{ public_path('fonts/exo/exo-latin-700-normal.woff2') }}") format("woff2");
-        }
-
-        @font-face {
-            font-family: 'Exo';
-            font-style: normal;
-            font-weight: 900;
-            src: url("file://{{ public_path('fonts/exo/exo-latin-900-normal.woff2') }}") format("woff2");
-        }
-
         @page {
             margin: 0;
             size: A4 portrait;
@@ -44,7 +15,7 @@
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Exo', DejaVu Sans, sans-serif;
+            font-family: DejaVu Serif, serif;
             color: #111111;
             font-size: 11px;
             line-height: 1.35;

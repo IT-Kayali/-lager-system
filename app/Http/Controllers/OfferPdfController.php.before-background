@@ -34,35 +34,11 @@ class OfferPdfController extends Controller
             'title' => $title,
             'documentType' => $type,
             'logoDataUri' => $this->logoDataUri($template),
-            'backgroundDataUri' => $this->backgroundDataUri($template),
         ])->setPaper('a4');
 
         $filename = ($type === 'invoice' ? 'rechnung-' : 'angebot-') . $offer->offer_number . '.pdf';
 
         return $pdf->stream($filename);
-    }
-
-
-    private function backgroundDataUri(DocumentTemplate $template): ?string
-    {
-        if (! $template->background_image_path) {
-            return null;
-        }
-
-        $paths = [
-            storage_path('app/public/' . $template->background_image_path),
-            public_path('storage/' . $template->background_image_path),
-        ];
-
-        foreach ($paths as $path) {
-            if (is_file($path)) {
-                $mime = mime_content_type($path) ?: 'image/jpeg';
-
-                return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
-            }
-        }
-
-        return null;
     }
 
     private function logoDataUri(DocumentTemplate $template): ?string

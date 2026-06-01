@@ -85,18 +85,6 @@
                         </div>
 
                         <div class="premium-form-field">
-                            <label>USt-ID</label>
-                            <input name="company_vat_id" class="premium-input" value="{{ old('company_vat_id', $template->company_vat_id) }}" placeholder="z. B. DE319000676">
-                            @error('company_vat_id') <div class="premium-error">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="premium-form-field">
-                            <label>Website</label>
-                            <input name="company_website" class="premium-input" value="{{ old('company_website', $template->company_website) }}" placeholder="z. B. www.alowidat.de">
-                            @error('company_website') <div class="premium-error">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="premium-form-field">
                             <label>Logo hochladen</label>
                             <input name="logo" type="file" accept="image/png,image/jpeg,image/webp" class="premium-input">
                             <div class="premium-muted" style="margin-top:6px;">

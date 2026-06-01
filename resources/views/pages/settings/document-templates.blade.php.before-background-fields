@@ -85,56 +85,12 @@
                         </div>
 
                         <div class="premium-form-field">
-                            <label>USt-ID</label>
-                            <input name="company_vat_id" class="premium-input" value="{{ old('company_vat_id', $template->company_vat_id) }}" placeholder="z. B. DE319000676">
-                            @error('company_vat_id') <div class="premium-error">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="premium-form-field">
-                            <label>Website</label>
-                            <input name="company_website" class="premium-input" value="{{ old('company_website', $template->company_website) }}" placeholder="z. B. www.alowidat.de">
-                            @error('company_website') <div class="premium-error">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="premium-form-field">
                             <label>Logo hochladen</label>
                             <input name="logo" type="file" accept="image/png,image/jpeg,image/webp" class="premium-input">
                             <div class="premium-muted" style="margin-top:6px;">
                                 Empfohlen: PNG oder JPG, transparente Logos funktionieren gut.
                             </div>
                             @error('logo') <div class="premium-error">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="premium-form-field">
-                            <label>PDF-Hintergrund hochladen</label>
-                            <input name="background_image" type="file" accept="image/png,image/jpeg,image/webp" class="premium-input">
-
-                            @if ($template->background_image_path)
-                                <div style="margin-top:12px;">
-                                    <div class="premium-muted" style="margin-bottom:8px;">Aktueller Hintergrund</div>
-                                    <div style="background:#fffaf1; border:1px solid rgba(227,202,110,.45); border-radius:18px; padding:14px; display:inline-flex;">
-                                        <img src="{{ asset('storage/' . $template->background_image_path) }}" alt="PDF Hintergrund" style="max-width:180px; max-height:120px; object-fit:contain;">
-                                    </div>
-                                </div>
-                            @endif
-
-                            <div class="premium-muted" style="margin-top:6px;">
-                                Empfohlen: A4 Hochformat als JPG oder PNG. Dieses Bild wird im PDF als fixer Hintergrund verwendet.
-                            </div>
-
-                            @error('background_image') <div class="premium-error">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="premium-form-field">
-                            <label>MwSt. (%)</label>
-                            <input name="tax_rate" type="number" step="0.01" min="0" max="100" class="premium-input" value="{{ old('tax_rate', $template->tax_rate ?? 19) }}">
-                            @error('tax_rate') <div class="premium-error">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="premium-form-field">
-                            <label>Spaltenname für Produkt</label>
-                            <input name="product_column_label" class="premium-input" value="{{ old('product_column_label', $template->product_column_label ?: 'Bezeichnung') }}">
-                            @error('product_column_label') <div class="premium-error">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="premium-form-field">

@@ -31,7 +31,12 @@ class DocumentTemplateController extends Controller
             'company_country' => ['nullable', 'string', 'max:255'],
             'company_phone' => ['nullable', 'string', 'max:255'],
             'company_email' => ['nullable', 'email', 'max:255'],
+            'company_vat_id' => ['nullable', 'string', 'max:255'],
+            'company_website' => ['nullable', 'string', 'max:255'],
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'background_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
+            'tax_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'product_column_label' => ['nullable', 'string', 'max:255'],
             'payment_info' => ['nullable', 'string', 'max:3000'],
             'footer_note' => ['nullable', 'string', 'max:3000'],
             'show_company_details' => ['nullable', 'boolean'],
@@ -40,6 +45,8 @@ class DocumentTemplateController extends Controller
 
         $data['show_company_details'] = $request->boolean('show_company_details');
         $data['show_logo'] = $request->boolean('show_logo');
+        $data['tax_rate'] = $data['tax_rate'] ?? 19.00;
+        $data['product_column_label'] = $data['product_column_label'] ?: 'Bezeichnung';
 
         if ($request->hasFile('logo')) {
             if ($documentTemplate->logo_path && Storage::disk('public')->exists($documentTemplate->logo_path)) {
@@ -50,7 +57,16 @@ class DocumentTemplateController extends Controller
             $data['logo_url'] = null;
         }
 
+        if ($request->hasFile('background_image')) {
+            if ($documentTemplate->background_image_path && Storage::disk('public')->exists($documentTemplate->background_image_path)) {
+                Storage::disk('public')->delete($documentTemplate->background_image_path);
+            }
+
+            $data['background_image_path'] = $request->file('background_image')->store('document-template-backgrounds', 'public');
+        }
+
         unset($data['logo']);
+        unset($data['background_image']);
 
         $documentTemplate->update($data);
 
