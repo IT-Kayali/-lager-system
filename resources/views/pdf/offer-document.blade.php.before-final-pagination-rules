@@ -441,70 +441,81 @@
     $items = $offer->items->values();
 
     /*
-     * Finale PDF-Seitenlogik:
+     * PDF-Seitenlogik mit festen Zeilenplätzen:
      *
-     * 1–8 Produkte:
-     * - Seite 1 enthält Produkte + Summe/Dank.
+     * 1 Produkt = 1 Zeile
+     * Summe + Dank = ca. 10 Zeilen
      *
-     * Ab 9 Produkten:
-     * - Seite 1 enthält max. 15 Produkte, ohne Summe/Dank.
-     * - Folgeseiten ohne Summe enthalten max. 24 Produkte.
-     * - Letzte Seite mit Summe/Dank enthält max. 14 Produkte + Summe/Dank.
+     * Erste Seite:
+     * - max. 15 Produkte ohne Summe
      *
-     * Beispiele:
-     * - 8 Produkte: Seite 1 = 8 + Summe/Dank
-     * - 9 Produkte: Seite 1 = 9, Seite 2 = Summe/Dank
-     * - 15 Produkte: Seite 1 = 15, Seite 2 = Summe/Dank
-     * - 24 Produkte: Seite 1 = 15, Seite 2 = 9 + Summe/Dank
-     * - 30 Produkte: Seite 1 = 15, Seite 2 = 15, Seite 3 = Summe/Dank
-     * - 39 Produkte: Seite 1 = 15, Seite 2 = 24, Seite 3 = Summe/Dank
-     * - 41 Produkte: Seite 1 = 15, Seite 2 = 24, Seite 3 = 2 + Summe/Dank
+     * Folgeseiten:
+     * - max. 24 Produkte ohne Summe
+     *
+     * Letzte Seite mit Summe:
+     * - max. 14 Produkte + Summe/Dank
+     *
+     * Footer bleibt dadurch immer frei.
      */
-    $firstPageWithSummaryLimit = 8;
-    $firstPageProductOnlyLimit = 15;
+    $summaryLineCost = 10;
 
+    $firstPageProductOnlyLimit = 15;
     $normalPageProductOnlyLimit = 24;
-    $normalPageWithSummaryLimit = 14;
+
+    $firstPageWithSummaryLimit = max(0, $firstPageProductOnlyLimit - $summaryLineCost); // 5
+    $normalPageWithSummaryLimit = max(0, $normalPageProductOnlyLimit - $summaryLineCost); // 14
 
     $chunks = collect();
     $totalItems = $items->count();
 
     if ($totalItems <= $firstPageWithSummaryLimit) {
-        // Bis 8 Produkte: alles auf Seite 1 inkl. Summe/Dank.
+        // Sehr kleines Angebot: Produkte + Leerzeile + Summe/Dank passen auf Seite 1.
         $chunks->push($items);
     } else {
-        // Ab 9 Produkten: erste Seite nur Produkte, max. 15.
+        // Seite 1 bekommt maximal 15 Produkte, ohne Summe/Dank.
         $chunks->push($items->slice(0, $firstPageProductOnlyLimit)->values());
 
         $remaining = $items->slice($firstPageProductOnlyLimit)->values();
 
-        if ($remaining->count() === 0) {
-            // 9–15 Produkte: Summe/Dank bekommt eine eigene zweite Seite.
-            $chunks->push(collect());
-        } else {
-            while ($remaining->count() > 0) {
-                $remainingCount = $remaining->count();
+        while ($remaining->count() > 0) {
+            $remainingCount = $remaining->count();
 
-                if ($remainingCount <= $normalPageWithSummaryLimit) {
-                    // Rest passt zusammen mit Summe/Dank auf die letzte Seite.
-                    $chunks->push($remaining->values());
-                    $remaining = collect();
-                    break;
-                }
-
-                if ($remainingCount <= $normalPageProductOnlyLimit) {
-                    // Rest passt als Produktseite, aber nicht mehr mit Summe/Dank.
-                    // Deshalb danach eigene Summen-/Dank-Seite.
-                    $chunks->push($remaining->values());
-                    $chunks->push(collect());
-                    $remaining = collect();
-                    break;
-                }
-
-                // Volle Folgeseite mit max. 24 Produkten.
-                $chunks->push($remaining->slice(0, $normalPageProductOnlyLimit)->values());
-                $remaining = $remaining->slice($normalPageProductOnlyLimit)->values();
+            if ($remainingCount <= $normalPageWithSummaryLimit) {
+                // Rest passt zusammen mit Summe/Dank auf die letzte Seite.
+                $chunks->push($remaining->values());
+                $remaining = collect();
+                break;
             }
+
+            if ($remainingCount <= $normalPageProductOnlyLimit) {
+                // Restprodukte passen auf eine Produktseite, Summe/Dank bekommt eigene Seite.
+                $chunks->push($remaining->values());
+                $chunks->push(collect());
+                $remaining = collect();
+                break;
+            }
+
+            if ($remainingCount <= ($normalPageProductOnlyLimit + $normalPageWithSummaryLimit)) {
+                /*
+                 * Rest auf zwei Seiten verteilen:
+                 * - Produktseite
+                 * - letzte Seite mit bis zu 14 Produkten + Summe/Dank
+                 *
+                 * Beispiel: 25 Restprodukte => 11 Produkte + 14 Produkte/Summe.
+                 */
+                $lastPageTake = $normalPageWithSummaryLimit;
+                $productPageTake = $remainingCount - $lastPageTake;
+
+                $chunks->push($remaining->slice(0, $productPageTake)->values());
+                $chunks->push($remaining->slice($productPageTake)->values());
+
+                $remaining = collect();
+                break;
+            }
+
+            // Viele Produkte: volle Produktseite mit 24 Produkten.
+            $chunks->push($remaining->slice(0, $normalPageProductOnlyLimit)->values());
+            $remaining = $remaining->slice($normalPageProductOnlyLimit)->values();
         }
     }
 @endphp

@@ -1,0 +1,7 @@
+{
+    "exopdf": {
+        "normal": "\/var\/www\/lager-system\/storage\/fonts\/exopdf_normal_afc2bedecefb38411473063986f2a94c",
+        "bold": "\/var\/www\/lager-system\/storage\/fonts\/exopdf_bold_c43e4dab1e46a4e1b0c0a9b67ee122dc",
+        "900": "exopdf_900_c15a5b68bea8c73b8eb916a0708a63ae"
+    }
+}

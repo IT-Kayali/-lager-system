@@ -441,26 +441,14 @@
     $items = $offer->items->values();
 
     /*
-     * Finale PDF-Seitenlogik:
+     * Seitenlogik:
      *
-     * 1–8 Produkte:
-     * - Seite 1 enthält Produkte + Summe/Dank.
-     *
-     * Ab 9 Produkten:
-     * - Seite 1 enthält max. 15 Produkte, ohne Summe/Dank.
-     * - Folgeseiten ohne Summe enthalten max. 24 Produkte.
-     * - Letzte Seite mit Summe/Dank enthält max. 14 Produkte + Summe/Dank.
-     *
-     * Beispiele:
-     * - 8 Produkte: Seite 1 = 8 + Summe/Dank
-     * - 9 Produkte: Seite 1 = 9, Seite 2 = Summe/Dank
-     * - 15 Produkte: Seite 1 = 15, Seite 2 = Summe/Dank
-     * - 24 Produkte: Seite 1 = 15, Seite 2 = 9 + Summe/Dank
-     * - 30 Produkte: Seite 1 = 15, Seite 2 = 15, Seite 3 = Summe/Dank
-     * - 39 Produkte: Seite 1 = 15, Seite 2 = 24, Seite 3 = Summe/Dank
-     * - 41 Produkte: Seite 1 = 15, Seite 2 = 24, Seite 3 = 2 + Summe/Dank
+     * - Bis 12 Produkte: Seite 1 enthält Produkte + Summe/Dank
+     * - Ab 13 Produkten: Seite 1 ist eine reine Produktseite mit max. 15 Produkten
+     * - Weitere reine Produktseiten: max. 24 Produkte
+     * - Letzte Seite mit Summe/Dank: max. 14 Produkte
      */
-    $firstPageWithSummaryLimit = 8;
+    $firstPageWithSummaryLimit = 12;
     $firstPageProductOnlyLimit = 15;
 
     $normalPageProductOnlyLimit = 24;
@@ -470,41 +458,35 @@
     $totalItems = $items->count();
 
     if ($totalItems <= $firstPageWithSummaryLimit) {
-        // Bis 8 Produkte: alles auf Seite 1 inkl. Summe/Dank.
+        // Bis 12 Produkte: alles auf Seite 1 inkl. Summe/Dank
         $chunks->push($items);
     } else {
-        // Ab 9 Produkten: erste Seite nur Produkte, max. 15.
+        // Ab 13 Produkten: erste Seite nur Produkte, max. 15
         $chunks->push($items->slice(0, $firstPageProductOnlyLimit)->values());
 
         $remaining = $items->slice($firstPageProductOnlyLimit)->values();
 
-        if ($remaining->count() === 0) {
-            // 9–15 Produkte: Summe/Dank bekommt eine eigene zweite Seite.
-            $chunks->push(collect());
-        } else {
-            while ($remaining->count() > 0) {
-                $remainingCount = $remaining->count();
+        while ($remaining->count() > 0) {
+            $remainingCount = $remaining->count();
 
-                if ($remainingCount <= $normalPageWithSummaryLimit) {
-                    // Rest passt zusammen mit Summe/Dank auf die letzte Seite.
-                    $chunks->push($remaining->values());
-                    $remaining = collect();
-                    break;
-                }
-
-                if ($remainingCount <= $normalPageProductOnlyLimit) {
-                    // Rest passt als Produktseite, aber nicht mehr mit Summe/Dank.
-                    // Deshalb danach eigene Summen-/Dank-Seite.
-                    $chunks->push($remaining->values());
-                    $chunks->push(collect());
-                    $remaining = collect();
-                    break;
-                }
-
-                // Volle Folgeseite mit max. 24 Produkten.
-                $chunks->push($remaining->slice(0, $normalPageProductOnlyLimit)->values());
-                $remaining = $remaining->slice($normalPageProductOnlyLimit)->values();
+            if ($remainingCount <= $normalPageWithSummaryLimit) {
+                // Rest passt zusammen mit Summe/Dank auf die letzte Seite
+                $chunks->push($remaining->values());
+                $remaining = collect();
+                break;
             }
+
+            if ($remainingCount <= $normalPageProductOnlyLimit) {
+                // Rest füllt noch eine Produktseite, Summe/Dank bekommt eigene Seite
+                $chunks->push($remaining->values());
+                $chunks->push(collect());
+                $remaining = collect();
+                break;
+            }
+
+            // Volle Produktseite mit max. 24 Produkten
+            $chunks->push($remaining->slice(0, $normalPageProductOnlyLimit)->values());
+            $remaining = $remaining->slice($normalPageProductOnlyLimit)->values();
         }
     }
 @endphp

@@ -441,71 +441,56 @@
     $items = $offer->items->values();
 
     /*
-     * Finale PDF-Seitenlogik:
+     * Seitenlogik:
      *
-     * 1–8 Produkte:
-     * - Seite 1 enthält Produkte + Summe/Dank.
-     *
-     * Ab 9 Produkten:
-     * - Seite 1 enthält max. 15 Produkte, ohne Summe/Dank.
-     * - Folgeseiten ohne Summe enthalten max. 24 Produkte.
-     * - Letzte Seite mit Summe/Dank enthält max. 14 Produkte + Summe/Dank.
-     *
-     * Beispiele:
-     * - 8 Produkte: Seite 1 = 8 + Summe/Dank
-     * - 9 Produkte: Seite 1 = 9, Seite 2 = Summe/Dank
-     * - 15 Produkte: Seite 1 = 15, Seite 2 = Summe/Dank
-     * - 24 Produkte: Seite 1 = 15, Seite 2 = 9 + Summe/Dank
-     * - 30 Produkte: Seite 1 = 15, Seite 2 = 15, Seite 3 = Summe/Dank
-     * - 39 Produkte: Seite 1 = 15, Seite 2 = 24, Seite 3 = Summe/Dank
-     * - 41 Produkte: Seite 1 = 15, Seite 2 = 24, Seite 3 = 2 + Summe/Dank
+     * - Footerbereich bleibt immer frei.
+     * - Seite 1: max. 15 Produkte.
+     * - Produkt-Folgeseiten: max. 24 Produkte.
+     * - Keine Seite mit nur 1-2 Produkten, wenn man es besser verteilen kann.
+     * - Summe/Dank kommt auf eine eigene letzte Seite.
      */
     $firstPageWithSummaryLimit = 8;
     $firstPageProductOnlyLimit = 15;
-
-    $normalPageProductOnlyLimit = 24;
-    $normalPageWithSummaryLimit = 14;
+    $nextPageProductOnlyLimit = 24;
 
     $chunks = collect();
     $totalItems = $items->count();
 
     if ($totalItems <= $firstPageWithSummaryLimit) {
-        // Bis 8 Produkte: alles auf Seite 1 inkl. Summe/Dank.
+        // Kleine Angebote: Produkte + Leerzeile + Summe passen auf Seite 1.
         $chunks->push($items);
     } else {
-        // Ab 9 Produkten: erste Seite nur Produkte, max. 15.
+        // Seite 1: maximal 15 Produkte, keine Summe.
         $chunks->push($items->slice(0, $firstPageProductOnlyLimit)->values());
 
         $remaining = $items->slice($firstPageProductOnlyLimit)->values();
+        $remainingCount = $remaining->count();
 
-        if ($remaining->count() === 0) {
-            // 9–15 Produkte: Summe/Dank bekommt eine eigene zweite Seite.
-            $chunks->push(collect());
-        } else {
-            while ($remaining->count() > 0) {
-                $remainingCount = $remaining->count();
+        if ($remainingCount > 0) {
+            /*
+             * Produktseiten nach Seite 1 gleichmäßig verteilen.
+             * Beispiel:
+             * 25 Restprodukte werden nicht 24 + 1,
+             * sondern 13 + 12.
+             */
+            $productPageCount = (int) ceil($remainingCount / $nextPageProductOnlyLimit);
+            $perPage = (int) ceil($remainingCount / $productPageCount);
 
-                if ($remainingCount <= $normalPageWithSummaryLimit) {
-                    // Rest passt zusammen mit Summe/Dank auf die letzte Seite.
-                    $chunks->push($remaining->values());
-                    $remaining = collect();
-                    break;
-                }
+            $offset = 0;
 
-                if ($remainingCount <= $normalPageProductOnlyLimit) {
-                    // Rest passt als Produktseite, aber nicht mehr mit Summe/Dank.
-                    // Deshalb danach eigene Summen-/Dank-Seite.
-                    $chunks->push($remaining->values());
-                    $chunks->push(collect());
-                    $remaining = collect();
-                    break;
-                }
+            for ($i = 0; $i < $productPageCount; $i++) {
+                $remainingForPages = $remainingCount - $offset;
+                $pagesLeft = $productPageCount - $i;
+                $take = (int) ceil($remainingForPages / $pagesLeft);
+                $take = min($take, $nextPageProductOnlyLimit);
 
-                // Volle Folgeseite mit max. 24 Produkten.
-                $chunks->push($remaining->slice(0, $normalPageProductOnlyLimit)->values());
-                $remaining = $remaining->slice($normalPageProductOnlyLimit)->values();
+                $chunks->push($remaining->slice($offset, $take)->values());
+                $offset += $take;
             }
         }
+
+        // Eigene letzte Seite nur für Summe/Dank.
+        $chunks->push(collect());
     }
 @endphp
 

@@ -177,7 +177,7 @@
             top: 36mm;
         }
         .content-area.summary-only {
-            top: 38mm;
+            top: 58mm;
         }
 
         .items-table {
@@ -234,11 +234,8 @@
         }
 
         .content-area.summary-only .after-table-block,
-        .no-logo-table-area.summary-only
-        .after-table-block {
-            margin-top: 6mm;
-            width: 160mm;
-            page-break-inside: avoid;
+        .no-logo-table-area.summary-only .after-table-block {
+            margin-top: 0;
         }
 
         .after-table-block {
@@ -247,11 +244,11 @@
             page-break-inside: avoid;
         }
         .after-table-line {
-            width: 70mm;
+            width: 160mm;
             border-top: 1.3px solid #777777;
-            margin-left: auto;
-            margin-bottom: 1.8mm;
+            margin-bottom: 5mm;
         }
+
         .after-table-content {
             display: table;
             width: 160mm;
@@ -261,52 +258,60 @@
             display: table-cell;
             width: 75mm;
             vertical-align: top;
-            padding-top: 36mm;
+            padding-top: 8mm;
         }
+
         .after-table-right {
             display: table-cell;
             width: 85mm;
             vertical-align: top;
             text-align: right;
         }
+
         .thank-you {
             font-size: 12pt;
             font-weight: 900;
             color: #111111;
-            margin-bottom: 7mm;
+            margin-bottom: 5mm;
         }
+
         .bottom-company {
             font-size: 12pt;
             font-weight: 400;
             color: #111111;
         }
+
         .summary-table {
             width: 70mm;
             margin-left: auto;
             border-collapse: collapse;
             font-size: 12pt;
-            line-height: 1.15;
+            line-height: 1.2;
         }
+
         .summary-table td {
-            padding: 0.65mm 0;
+            padding: 0.7mm 0;
             font-size: 12pt;
         }
+
         .summary-table td:first-child {
             width: 43mm;
-            text-align: left;
+            text-align: right;
             font-weight: 700;
             padding-right: 6mm;
         }
+
         .summary-table td:last-child {
             width: 27mm;
             text-align: right;
             font-weight: 700;
-            white-space: nowrap;
         }
+
         .summary-table .tax-row td {
             font-size: 12pt;
             font-weight: 400 !important;
         }
+
         .summary-total td {
             font-size: 12pt;
             font-weight: 900;
@@ -354,7 +359,7 @@
             top: 36mm;
         }
         .no-logo-table-area.summary-only {
-            top: 38mm;
+            top: 58mm;
         }
 
         .no-logo-payment {
@@ -441,71 +446,37 @@
     $items = $offer->items->values();
 
     /*
-     * Finale PDF-Seitenlogik:
+     * Seitenlogik:
      *
-     * 1–8 Produkte:
-     * - Seite 1 enthält Produkte + Summe/Dank.
-     *
-     * Ab 9 Produkten:
-     * - Seite 1 enthält max. 15 Produkte, ohne Summe/Dank.
-     * - Folgeseiten ohne Summe enthalten max. 24 Produkte.
-     * - Letzte Seite mit Summe/Dank enthält max. 14 Produkte + Summe/Dank.
-     *
-     * Beispiele:
-     * - 8 Produkte: Seite 1 = 8 + Summe/Dank
-     * - 9 Produkte: Seite 1 = 9, Seite 2 = Summe/Dank
-     * - 15 Produkte: Seite 1 = 15, Seite 2 = Summe/Dank
-     * - 24 Produkte: Seite 1 = 15, Seite 2 = 9 + Summe/Dank
-     * - 30 Produkte: Seite 1 = 15, Seite 2 = 15, Seite 3 = Summe/Dank
-     * - 39 Produkte: Seite 1 = 15, Seite 2 = 24, Seite 3 = Summe/Dank
-     * - 41 Produkte: Seite 1 = 15, Seite 2 = 24, Seite 3 = 2 + Summe/Dank
+     * - Footerbereich bleibt immer frei.
+     * - Seite 1 darf max. 15 Produkte anzeigen.
+     * - Reine Produkt-Folgeseiten dürfen max. 24 Produkte anzeigen.
+     * - Summe/Dank kommt auf eine eigene letzte Seite, sobald die Artikelliste länger ist.
      */
     $firstPageWithSummaryLimit = 8;
     $firstPageProductOnlyLimit = 15;
-
-    $normalPageProductOnlyLimit = 24;
-    $normalPageWithSummaryLimit = 14;
+    $nextPageProductOnlyLimit = 24;
 
     $chunks = collect();
     $totalItems = $items->count();
 
     if ($totalItems <= $firstPageWithSummaryLimit) {
-        // Bis 8 Produkte: alles auf Seite 1 inkl. Summe/Dank.
+        // Kleine Angebote: Produkte + Leerzeile + Summe passen auf Seite 1.
         $chunks->push($items);
     } else {
-        // Ab 9 Produkten: erste Seite nur Produkte, max. 15.
+        // Seite 1: maximal 15 Produkte, keine Summe.
         $chunks->push($items->slice(0, $firstPageProductOnlyLimit)->values());
 
         $remaining = $items->slice($firstPageProductOnlyLimit)->values();
 
-        if ($remaining->count() === 0) {
-            // 9–15 Produkte: Summe/Dank bekommt eine eigene zweite Seite.
-            $chunks->push(collect());
-        } else {
-            while ($remaining->count() > 0) {
-                $remainingCount = $remaining->count();
-
-                if ($remainingCount <= $normalPageWithSummaryLimit) {
-                    // Rest passt zusammen mit Summe/Dank auf die letzte Seite.
-                    $chunks->push($remaining->values());
-                    $remaining = collect();
-                    break;
-                }
-
-                if ($remainingCount <= $normalPageProductOnlyLimit) {
-                    // Rest passt als Produktseite, aber nicht mehr mit Summe/Dank.
-                    // Deshalb danach eigene Summen-/Dank-Seite.
-                    $chunks->push($remaining->values());
-                    $chunks->push(collect());
-                    $remaining = collect();
-                    break;
-                }
-
-                // Volle Folgeseite mit max. 24 Produkten.
-                $chunks->push($remaining->slice(0, $normalPageProductOnlyLimit)->values());
-                $remaining = $remaining->slice($normalPageProductOnlyLimit)->values();
-            }
+        // Folgeseiten: reine Produktseiten mit maximal 24 Produkten.
+        while ($remaining->count() > 0) {
+            $chunks->push($remaining->slice(0, $nextPageProductOnlyLimit)->values());
+            $remaining = $remaining->slice($nextPageProductOnlyLimit)->values();
         }
+
+        // Letzte Seite nur für Summe/Dank.
+        $chunks->push(collect());
     }
 @endphp
 
