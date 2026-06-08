@@ -3,10 +3,6 @@
 <head>
     <meta charset="utf-8">
     <style>
-        @page {
-            margin: 0;
-            size: A4 portrait;
-        }
 
         @font-face {
             font-family: 'ExoPDF';
@@ -29,18 +25,19 @@
             src: url("file://{{ public_path('fonts/exo/Exo-Black.ttf') }}") format("truetype");
         }
 
-        @font-face {
-            font-family: 'GlacialIndifference';
-            font-style: normal;
-            font-weight: 400;
-            src: url("file://{{ public_path('fonts/glacial/GlacialIndifference-Regular.ttf') }}") format("truetype");
+        @page {
+            margin: 0;
+            size: A4 portrait;
         }
-
-        @font-face {
-            font-family: 'GlacialIndifference';
-            font-style: normal;
-            font-weight: 700;
-            src: url("file://{{ public_path('fonts/glacial/GlacialIndifference-Bold.ttf') }}") format("truetype");
+}") format("truetype");
+        }
+}") format("truetype");
+        }
+}") format("truetype");
+        }
+}") format("truetype");
+        }
+}") format("truetype");
         }
 
         * {

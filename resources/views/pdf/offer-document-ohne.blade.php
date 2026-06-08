@@ -3,23 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        @page {
-            margin: 0;
-            size: A4 portrait;
-        }
 
         @font-face {
             font-family: 'GlacialPDF';
             font-style: normal;
             font-weight: 400;
-            src: url("file://{{ public_path('fonts/glacial/GlacialIndifference-Regular.otf') }}") format("opentype");
+            src: url("file://{{ public_path('fonts/glacial/GlacialIndifference-Regular.ttf') }}") format("truetype");
         }
 
         @font-face {
             font-family: 'GlacialPDF';
             font-style: normal;
-            font-weight: 600;
-            src: url("file://{{ public_path('fonts/glacial/GlacialIndifference-Bold.otf') }}") format("opentype");
+            font-weight: 700;
+            src: url("file://{{ public_path('fonts/glacial/GlacialIndifference-Bold.ttf') }}") format("truetype");
+        }
+
+        @page {
+            margin: 0;
+            size: A4 portrait;
+        }
+}") format("opentype");
+        }
+}") format("opentype");
         }
 
         * {
@@ -212,10 +217,19 @@
             font-weight: 700;
             white-space: nowrap;
         }
+    
+        body,
+        body * {
+            font-family: 'GlacialPDF', DejaVu Sans, sans-serif !important;
+        }
+
+        body.glacial-force {
+            font-family: 'GlacialPDF', DejaVu Sans, sans-serif !important;
+        }
     </style>
 </head>
 
-<body>
+<body class="glacial-force">
 @php
     $documentType = $documentType ?? 'offer';
 
