@@ -15,21 +15,8 @@ class Customer extends Model
         'phone_country_code',
         'phone',
         'city',
-
-        'delivery_street',
-        'delivery_house_number',
-        'delivery_postal_code',
-        'delivery_city',
-        'delivery_country',
         'delivery_address',
-
-        'billing_street',
-        'billing_house_number',
-        'billing_postal_code',
-        'billing_city',
-        'billing_country',
         'billing_address',
-
         'vat_number',
         'notes',
     ];

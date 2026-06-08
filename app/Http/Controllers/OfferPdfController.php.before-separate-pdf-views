@@ -28,11 +28,7 @@ class OfferPdfController extends Controller
             'template' => $template->name,
         ]);
 
-        $templateName = strtolower((string) ($template->name ?? ''));
-        $isNoLogoPdfTemplate = str_contains($templateName, 'ohne') || ! (bool) ($template->show_logo ?? false);
-        $pdfView = $isNoLogoPdfTemplate ? 'pdf.offer-document-ohne' : 'pdf.offer-document';
-
-        $pdf = Pdf::loadView($pdfView, [
+        $pdf = Pdf::loadView('pdf.offer-document', [
             'offer' => $offer,
             'template' => $template,
             'title' => $title,

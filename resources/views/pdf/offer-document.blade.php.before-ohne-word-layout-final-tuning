@@ -3,6 +3,21 @@
 <head>
     <meta charset="utf-8">
     <style>
+
+        @font-face {
+            font-family: 'GlacialIndifference';
+            font-style: normal;
+            font-weight: 400;
+            src: url("file://{{ public_path('fonts/glacial/GlacialIndifference-Regular.ttf') }}") format("truetype");
+        }
+
+        @font-face {
+            font-family: 'GlacialIndifference';
+            font-style: normal;
+            font-weight: 700;
+            src: url("file://{{ public_path('fonts/glacial/GlacialIndifference-Bold.ttf') }}") format("truetype");
+        }
+
         @page {
             margin: 0;
             size: A4 portrait;
@@ -28,19 +43,9 @@
             font-weight: 900;
             src: url("file://{{ public_path('fonts/exo/Exo-Black.ttf') }}") format("truetype");
         }
-
-        @font-face {
-            font-family: 'GlacialIndifference';
-            font-style: normal;
-            font-weight: 400;
-            src: url("file://{{ public_path('fonts/glacial/GlacialIndifference-Regular.ttf') }}") format("truetype");
+}") format("truetype");
         }
-
-        @font-face {
-            font-family: 'GlacialIndifference';
-            font-style: normal;
-            font-weight: 700;
-            src: url("file://{{ public_path('fonts/glacial/GlacialIndifference-Bold.ttf') }}") format("truetype");
+}") format("truetype");
         }
 
         * {
@@ -311,55 +316,294 @@
             font-size: 12pt;
             font-weight: 900;
         }
-
         .no-logo-title {
             position: absolute;
             top: 34mm;
             left: 0;
             width: 210mm;
             text-align: center;
-            font-size: 28px;
+            font-size: 28pt;
             font-weight: 700;
-            letter-spacing: .5px;
+            letter-spacing: .4px;
             text-transform: uppercase;
         }
-
         .no-logo-meta {
             position: absolute;
-            top: 53mm;
+            top: 54mm;
             left: 0;
             width: 210mm;
             text-align: center;
-            font-size: 12px;
-            line-height: 1.55;
+            font-size: 12pt;
+            line-height: 1.45;
+            font-weight: 400;
         }
-
         .no-logo-company {
             position: absolute;
-            top: 80mm;
-            left: 36mm;
-            width: 80mm;
-            font-size: 12px;
-            line-height: 1.45;
+            top: 76mm;
+            left: 0;
+            width: 210mm;
+            text-align: center;
+            font-size: 12pt;
+            line-height: 1.35;
+            font-weight: 400;
         }
-
         .no-logo-table-area {
             position: absolute;
             top: 116mm;
             left: 25mm;
             width: 160mm;
         }
-
         .no-logo-table-area.continuation {
             top: 36mm;
         }
         .no-logo-table-area.summary-only {
-            top: 38mm;
+            top: 42mm;
+        }
+        .no-logo-payment {
+            font-size: 12pt;
+            line-height: 1.25;
+            font-weight: 400;
+        }
+    
+        /* NO_LOGO_WORD_EXACT_START */
+
+        body.font-no-logo,
+        body.font-no-logo * {
+            font-family: 'GlacialIndifference', DejaVu Sans, sans-serif !important;
         }
 
-        .no-logo-payment {
-            font-size: 11px;
+        body.font-no-logo {
+            background: #f3efec;
+            color: #111111;
         }
+
+        body.font-no-logo .page {
+            background: #f3efec;
+        }
+
+        body.font-no-logo .no-logo-title {
+            position: absolute;
+            top: 30mm;
+            left: 22mm;
+            width: 170mm;
+            text-align: left;
+            font-size: 33pt;
+            font-weight: 400;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            line-height: 1;
+        }
+
+        body.font-no-logo .no-logo-meta {
+            position: absolute;
+            top: 58mm;
+            left: 22mm;
+            width: 88mm;
+            text-align: left;
+            font-size: 13pt;
+            line-height: 1.25;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+
+        body.font-no-logo .no-logo-meta .meta-label {
+            font-weight: 400;
+        }
+
+        body.font-no-logo .no-logo-meta .meta-number {
+            font-weight: 700;
+        }
+
+        body.font-no-logo .no-logo-meta .valid-line {
+            font-weight: 700;
+            letter-spacing: .8px;
+        }
+
+        body.font-no-logo .no-logo-meta-line {
+            width: 88mm;
+            border-top: 1.4px solid #6f5f5d;
+            margin-top: 8mm;
+        }
+
+        body.font-no-logo .no-logo-company {
+            position: absolute;
+            top: 91mm;
+            left: 22mm;
+            width: 88mm;
+            text-align: left;
+            font-size: 12.5pt;
+            line-height: 1.35;
+            font-weight: 400;
+            letter-spacing: 1.1px;
+        }
+
+        body.font-no-logo .no-logo-company strong {
+            font-weight: 400;
+        }
+
+        body.font-no-logo .no-logo-table-area {
+            position: absolute;
+            top: 132mm;
+            left: 18mm;
+            width: 174mm;
+        }
+
+        body.font-no-logo .no-logo-table-area.continuation {
+            top: 33mm;
+        }
+
+        body.font-no-logo .no-logo-table-area.summary-only {
+            top: 62mm;
+        }
+
+        body.font-no-logo .items-table {
+            width: 174mm;
+            border-collapse: separate;
+            border-spacing: 0;
+            table-layout: fixed;
+        }
+
+        body.font-no-logo .items-table thead tr {
+            background: #d0c8c3;
+        }
+
+        body.font-no-logo .items-table th {
+            background: #d0c8c3;
+            border-bottom: 0;
+            text-transform: uppercase;
+            font-size: 12.5pt;
+            font-weight: 700;
+            letter-spacing: .8px;
+            padding: 3mm 0;
+            color: #303030;
+        }
+
+        body.font-no-logo .items-table th:first-child {
+            border-radius: 5mm 0 0 5mm;
+            padding-left: 4mm;
+        }
+
+        body.font-no-logo .items-table th:last-child {
+            border-radius: 0 5mm 5mm 0;
+            padding-right: 4mm;
+        }
+
+        body.font-no-logo .items-table td {
+            border: 0;
+            font-size: 12pt;
+            font-weight: 400;
+            padding: 4.1mm 0 0 0;
+            color: #111111;
+            vertical-align: top;
+        }
+
+        body.font-no-logo .items-table th:nth-child(1),
+        body.font-no-logo .items-table td:nth-child(1) {
+            width: 43mm;
+            text-align: left;
+            padding-left: 4mm;
+        }
+
+        body.font-no-logo .items-table th:nth-child(2),
+        body.font-no-logo .items-table td:nth-child(2) {
+            width: 41mm;
+            text-align: left;
+        }
+
+        body.font-no-logo .items-table th:nth-child(3),
+        body.font-no-logo .items-table td:nth-child(3) {
+            width: 41mm;
+            text-align: left;
+        }
+
+        body.font-no-logo .items-table th:nth-child(4),
+        body.font-no-logo .items-table td:nth-child(4) {
+            width: 49mm;
+            text-align: right;
+            padding-right: 4mm;
+        }
+
+        body.font-no-logo .empty-product-row td {
+            height: 8mm;
+            padding-top: 4mm;
+            font-size: 12pt;
+        }
+
+        body.font-no-logo .after-table-block {
+            width: 174mm;
+            margin-top: 14mm;
+            page-break-inside: avoid;
+        }
+
+        body.font-no-logo .after-table-line {
+            width: 70mm;
+            border-top: 1.4px solid #6f5f5d;
+            margin-left: auto;
+            margin-bottom: 3mm;
+        }
+
+        body.font-no-logo .after-table-content {
+            display: table;
+            width: 174mm;
+            page-break-inside: avoid;
+        }
+
+        body.font-no-logo .after-table-left {
+            display: table-cell;
+            width: 92mm;
+            vertical-align: top;
+            padding-top: 36mm;
+        }
+
+        body.font-no-logo .after-table-right {
+            display: table-cell;
+            width: 82mm;
+            vertical-align: top;
+            text-align: right;
+        }
+
+        body.font-no-logo .summary-table {
+            width: 70mm;
+            margin-left: auto;
+            border-collapse: collapse;
+            font-size: 12.5pt;
+            line-height: 1.18;
+        }
+
+        body.font-no-logo .summary-table td {
+            padding: 1.2mm 0;
+            font-size: 12.5pt;
+        }
+
+        body.font-no-logo .summary-table td:first-child {
+            width: 34mm;
+            text-align: left;
+            font-weight: 700;
+            padding-right: 5mm;
+        }
+
+        body.font-no-logo .summary-table td:last-child {
+            width: 36mm;
+            text-align: right;
+            font-weight: 400;
+            white-space: nowrap;
+        }
+
+        body.font-no-logo .summary-total td:first-child,
+        body.font-no-logo .summary-total td:last-child {
+            font-weight: 700;
+        }
+
+        body.font-no-logo .no-logo-payment {
+            font-size: 12.5pt;
+            line-height: 1.25;
+            font-weight: 400;
+            letter-spacing: .1px;
+            width: 90mm;
+        }
+
+        /* NO_LOGO_WORD_EXACT_END */
+
     </style>
 </head>
 
@@ -420,19 +664,19 @@
         $validUntilText = null;
     }
 
-    $taxRate = (float) ($template->tax_rate ?? 19);
+    $taxRate = $isLogoTemplate ? (float) ($template->tax_rate ?? 19) : 0.0;
     $taxRateLabel = rtrim(rtrim(number_format($taxRate, 2, ',', '.'), '0'), ',');
     $subtotal = (float) $offer->items->sum('line_total');
-    $taxAmount = round($subtotal * ($taxRate / 100), 2);
-    $grandTotal = round($subtotal + $taxAmount, 2);
+    $taxAmount = $isLogoTemplate ? round($subtotal * ($taxRate / 100), 2) : 0.0;
+    $grandTotal = $isLogoTemplate ? round($subtotal + $taxAmount, 2) : round($subtotal, 2);
 
     $productLabel = $isLogoTemplate
         ? ($template->product_column_label ?: 'Beschreibung')
-        : 'Product';
+        : 'PRODUCT';
 
-    $quantityLabel = $isLogoTemplate ? 'Menge' : 'Quantity';
-    $priceLabel = $isLogoTemplate ? 'Preis' : 'Price';
-    $sumLabel = $isLogoTemplate ? 'Summe' : 'Sum';
+    $quantityLabel = $isLogoTemplate ? 'Menge' : 'QUANTITY';
+    $priceLabel = $isLogoTemplate ? 'Preis' : 'PRICE';
+    $sumLabel = $isLogoTemplate ? 'Summe' : 'SUM';
 
     $subtotalLabel = $isLogoTemplate ? 'Zwischensumme' : 'NET:';
     $taxLabel = $isLogoTemplate ? 'MwSt. (' . $taxRateLabel . '%)' : 'VAT (' . $taxRateLabel . ' %):';
@@ -507,47 +751,6 @@
             }
         }
     }
-
-
-    // BILLING_ADDRESS_PDF_START
-    $billingAddressLines = [];
-
-    if ($offer->customer) {
-        $customer = $offer->customer;
-
-        $billingStreet = trim((string) ($customer->billing_street ?? ''));
-        $billingHouseNumber = trim((string) ($customer->billing_house_number ?? ''));
-        $billingPostalCode = trim((string) ($customer->billing_postal_code ?? ''));
-        $billingCity = trim((string) ($customer->billing_city ?? ''));
-        $billingCountry = trim((string) ($customer->billing_country ?? ''));
-
-        $streetLine = trim($billingStreet . ' ' . $billingHouseNumber);
-        if ($streetLine !== '') {
-            $billingAddressLines[] = $streetLine;
-        }
-
-        $cityLine = trim($billingPostalCode . ' ' . $billingCity);
-        if ($cityLine !== '') {
-            $billingAddressLines[] = $cityLine;
-        }
-
-        if ($billingCountry !== '') {
-            $billingAddressLines[] = $billingCountry;
-        }
-
-        if (empty($billingAddressLines) && ! empty($customer->billing_address)) {
-            $billingAddressLines = array_values(array_filter(
-                preg_split('/\r\n|\r|\n/', trim((string) $customer->billing_address)),
-                fn ($line) => trim((string) $line) !== ''
-            ));
-        }
-
-        if (! empty($billingAddressLines)) {
-            $customerAddressLines = $billingAddressLines;
-        }
-    }
-    // BILLING_ADDRESS_PDF_END
-
 @endphp
 
 <body class="{{ $isLogoTemplate ? 'font-logo' : 'font-no-logo' }}">
@@ -667,10 +870,12 @@
                                         <td>{{ $subtotalLabel }}</td>
                                         <td>{{ number_format($subtotal, 2, ',', '.') }}€</td>
                                     </tr>
-                                    <tr class="tax-row">
-                                        <td>{{ $taxLabel }}</td>
-                                        <td>{{ number_format($taxAmount, 2, ',', '.') }}€</td>
-                                    </tr>
+                                    @if ($isLogoTemplate)
+                                        <tr class="tax-row">
+                                            <td>{{ $taxLabel }}</td>
+                                            <td>{{ number_format($taxAmount, 2, ',', '.') }}€</td>
+                                        </tr>
+                                    @endif
                                     <tr class="summary-total">
                                         <td>{{ $totalLabel }}</td>
                                         <td>{{ number_format($grandTotal, 2, ',', '.') }}€</td>
@@ -686,20 +891,28 @@
                 <div class="no-logo-title">{{ $documentTitle }}</div>
 
                 <div class="no-logo-meta">
-                    <strong>{{ $numberLabel }}</strong> {{ $offer->offer_number }}<br>
-                    @if ($validUntilText)
-                        Valid until: {{ $validUntilText }}
-                    @else
-                        {{ now()->format('d /m /Y - H:i') }}
-                    @endif
+                    <div>
+                        <span class="meta-label">{{ $numberLabel }}</span>
+                        <span class="meta-number">{{ $offer->offer_number }}</span>
+                    </div>
+
+                    <div class="valid-line">
+                        @if ($validUntilText)
+                            Valid until: {{ $validUntilText }}
+                        @else
+                            {{ now()->format('d /m /Y - H:i') }}
+                        @endif
+                    </div>
+
+                    <div class="no-logo-meta-line"></div>
                 </div>
 
                 <div class="no-logo-company">
-                    @if ($template->company_name)
-                        <strong>{{ $template->company_name }}</strong><br>
+                    @if ($offer->customer?->company_name)
+                        {{ $offer->customer->company_name }}<br>
                     @endif
 
-                    @foreach ($companyAddressLines as $line)
+                    @foreach ($customerAddressLines as $line)
                         {{ $line }}<br>
                     @endforeach
                 </div>
@@ -756,10 +969,12 @@
                                         <td>{{ $subtotalLabel }}</td>
                                         <td>{{ number_format($subtotal, 2, ',', '.') }}€</td>
                                     </tr>
-                                    <tr class="tax-row">
-                                        <td>{{ $taxLabel }}</td>
-                                        <td>{{ number_format($taxAmount, 2, ',', '.') }}€</td>
-                                    </tr>
+                                    @if ($isLogoTemplate)
+                                        <tr class="tax-row">
+                                            <td>{{ $taxLabel }}</td>
+                                            <td>{{ number_format($taxAmount, 2, ',', '.') }}€</td>
+                                        </tr>
+                                    @endif
                                     <tr class="summary-total">
                                         <td>{{ $totalLabel }}</td>
                                         <td>{{ number_format($grandTotal, 2, ',', '.') }}€</td>

@@ -507,47 +507,6 @@
             }
         }
     }
-
-
-    // BILLING_ADDRESS_PDF_START
-    $billingAddressLines = [];
-
-    if ($offer->customer) {
-        $customer = $offer->customer;
-
-        $billingStreet = trim((string) ($customer->billing_street ?? ''));
-        $billingHouseNumber = trim((string) ($customer->billing_house_number ?? ''));
-        $billingPostalCode = trim((string) ($customer->billing_postal_code ?? ''));
-        $billingCity = trim((string) ($customer->billing_city ?? ''));
-        $billingCountry = trim((string) ($customer->billing_country ?? ''));
-
-        $streetLine = trim($billingStreet . ' ' . $billingHouseNumber);
-        if ($streetLine !== '') {
-            $billingAddressLines[] = $streetLine;
-        }
-
-        $cityLine = trim($billingPostalCode . ' ' . $billingCity);
-        if ($cityLine !== '') {
-            $billingAddressLines[] = $cityLine;
-        }
-
-        if ($billingCountry !== '') {
-            $billingAddressLines[] = $billingCountry;
-        }
-
-        if (empty($billingAddressLines) && ! empty($customer->billing_address)) {
-            $billingAddressLines = array_values(array_filter(
-                preg_split('/\r\n|\r|\n/', trim((string) $customer->billing_address)),
-                fn ($line) => trim((string) $line) !== ''
-            ));
-        }
-
-        if (! empty($billingAddressLines)) {
-            $customerAddressLines = $billingAddressLines;
-        }
-    }
-    // BILLING_ADDRESS_PDF_END
-
 @endphp
 
 <body class="{{ $isLogoTemplate ? 'font-logo' : 'font-no-logo' }}">
