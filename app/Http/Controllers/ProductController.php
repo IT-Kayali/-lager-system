@@ -37,6 +37,22 @@ class ProductController extends Controller
         return view('pages.products.index', compact('products', 'search'));
     }
 
+
+    public function show(Product $product): View
+    {
+        $product->load([
+            'supplierRecord',
+            'categories',
+            'batches' => fn ($query) => $query
+                ->orderBy('received_at')
+                ->orderBy('id'),
+        ]);
+
+        return view('pages.products.show', [
+            'product' => $product,
+        ]);
+    }
+
     public function create(): View
     {
         $product = new Product([

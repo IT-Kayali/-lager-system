@@ -55,6 +55,13 @@ class Product extends Model
     }
 
 
+
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return $this->where('name', $value)->first()
+            ?? $this->whereKey($value)->firstOrFail();
+    }
+
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(ProductCategory::class, 'category_product', 'product_id', 'product_category_id')
