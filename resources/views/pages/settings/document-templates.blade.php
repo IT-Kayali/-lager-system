@@ -1,4 +1,4 @@
-<x-layouts.premium title="PDF-Vorlagen" subtitle="Firmendaten, Logo, Zahlungsinformationen und Footer für Angebote und Rechnungen bearbeiten.">
+<x-layouts.premium title="PDF-Vorlagen" subtitle="Firmendaten, Logo und Footer für Angebote und Rechnungen bearbeiten.">
     @if (session('success'))
         <div class="premium-alert">{{ session('success') }}</div>
     @endif
@@ -125,23 +125,17 @@
                             @error('background_image') <div class="premium-error">{{ $message }}</div> @enderror
                         </div>
 
-                        <div class="premium-form-field">
-                            <label>MwSt. (%)</label>
-                            <input name="tax_rate" type="number" step="0.01" min="0" max="100" class="premium-input" value="{{ old('tax_rate', $template->tax_rate ?? 19) }}">
-                            @error('tax_rate') <div class="premium-error">{{ $message }}</div> @enderror
-                        </div>
+                        @if ($template->show_logo)
+                            <div class="premium-form-field">
+                                <label>MwSt. (%)</label>
+                                <input name="tax_rate" type="number" step="0.01" min="0" max="100" class="premium-input" value="{{ old('tax_rate', $template->tax_rate ?? 19) }}">
+                                @error('tax_rate') <div class="premium-error">{{ $message }}</div> @enderror
+                            </div>
+                        @endif
 
-                        <div class="premium-form-field">
-                            <label>Spaltenname für Produkt</label>
-                            <input name="product_column_label" class="premium-input" value="{{ old('product_column_label', $template->product_column_label ?: 'Bezeichnung') }}">
-                            @error('product_column_label') <div class="premium-error">{{ $message }}</div> @enderror
-                        </div>
 
-                        <div class="premium-form-field">
-                            <label>Zahlungsinformationen</label>
-                            <textarea name="payment_info" rows="3" class="premium-textarea">{{ old('payment_info', $template->payment_info) }}</textarea>
-                            @error('payment_info') <div class="premium-error">{{ $message }}</div> @enderror
-                        </div>
+
+
 
                         <div class="premium-form-field">
                             <label>Footer-Hinweise</label>
