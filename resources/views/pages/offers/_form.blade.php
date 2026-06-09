@@ -36,7 +36,7 @@
 <div style="margin-top:24px;">
     <h2 style="font-size:20px; font-weight:900; margin:0 0 12px;">Produktpositionen</h2>
     <p class="premium-muted" style="margin-top:0;">
-        Starte mit einer Position. Weitere Produkte kannst du über das Plus hinzufügen.
+        Sobald du ein Produkt und eine Menge einträgst, erscheint automatisch die nächste Position.
     </p>
 </div>
 
@@ -46,6 +46,12 @@
     if ($itemsForForm->isEmpty()) {
         $itemsForForm = collect([['product_id' => '', 'quantity' => '']]);
     }
+
+    $unitLabels = [
+        'gram' => 'g',
+        'liter' => 'L',
+        'piece' => 'Stk.',
+    ];
 @endphp
 
 <div id="offer-items" style="display:grid; gap:12px;">
@@ -59,8 +65,7 @@
                         @foreach ($products as $product)
                             <option value="{{ $product->id }}" @selected((string) ($item['product_id'] ?? '') === (string) $product->id)>
                                 {{ $product->name }}
-                                | Verfügbar: {{ number_format($product->available_stock, 2, ',', '.') }}
-                                | Max: {{ number_format($product->max_reservable, 2, ',', '.') }}
+                                | {{ number_format($product->available_stock, 2, ',', '.') }} {{ $unitLabels[$product->unit] ?? $product->unit }} verfügbar
                             </option>
                         @endforeach
                     </select>
@@ -86,18 +91,9 @@
                     </button>
                 </div>
             </div>
-
-            <div class="premium-muted" style="margin-top:8px;">
-                50–90g = 50g, 91–239g = 100g, 240–460g = 250g, 461–750g = 500g, 751–5000g = 1000g
-            </div>
         </div>
     @endforeach
 </div>
-
-<button type="button" id="add-offer-item" class="premium-btn" style="margin-top:14px;">
-    <i class="bi bi-plus-lg"></i>
-    Produkt hinzufügen
-</button>
 
 <div style="display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;">
     <button class="premium-btn gold" type="submit">
@@ -121,8 +117,7 @@
                     @foreach ($products as $product)
                         <option value="{{ $product->id }}">
                             {{ $product->name }}
-                            | Verfügbar: {{ number_format($product->available_stock, 2, ',', '.') }}
-                            | Max: {{ number_format($product->max_reservable, 2, ',', '.') }}
+                            | {{ number_format($product->available_stock, 2, ',', '.') }} {{ $unitLabels[$product->unit] ?? $product->unit }} verfügbar
                         </option>
                     @endforeach
                 </select>
@@ -139,21 +134,34 @@
                 </button>
             </div>
         </div>
-
-        <div class="premium-muted" style="margin-top:8px;">
-            50–90g = 50g, 91–239g = 100g, 240–460g = 250g, 461–750g = 500g, 751–5000g = 1000g
-        </div>
     </div>
 </template>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const wrapper = document.getElementById('offer-items');
-        const addButton = document.getElementById('add-offer-item');
         const template = document.getElementById('offer-item-template');
 
+        function getRows() {
+            return Array.from(wrapper.querySelectorAll('.offer-item-row'));
+        }
+
+        function rowHasData(row) {
+            const product = row.querySelector('select[name*="[product_id]"], select[data-name="product_id"]');
+            const quantity = row.querySelector('input[name*="[quantity]"], input[data-name="quantity"]');
+
+            return Boolean(product && product.value) || Boolean(quantity && quantity.value);
+        }
+
+        function rowIsComplete(row) {
+            const product = row.querySelector('select[name*="[product_id]"], select[data-name="product_id"]');
+            const quantity = row.querySelector('input[name*="[quantity]"], input[data-name="quantity"]');
+
+            return Boolean(product && product.value) && Boolean(quantity && quantity.value);
+        }
+
         function reindexRows() {
-            wrapper.querySelectorAll('.offer-item-row').forEach((row, index) => {
+            getRows().forEach((row, index) => {
                 row.querySelectorAll('[data-name], select[name], input[name]').forEach((field) => {
                     const key = field.dataset.name || field.name.match(/\[(product_id|quantity)\]/)?.[1];
 
@@ -164,25 +172,80 @@
             });
         }
 
-        function bindRemoveButtons() {
-            wrapper.querySelectorAll('.remove-offer-item').forEach((button) => {
-                button.onclick = function () {
-                    if (wrapper.querySelectorAll('.offer-item-row').length > 1) {
-                        button.closest('.offer-item-row').remove();
-                        reindexRows();
-                    }
-                };
-            });
-        }
-
-        addButton.addEventListener('click', function () {
+        function addEmptyRow() {
             const clone = template.content.cloneNode(true);
             wrapper.appendChild(clone);
             reindexRows();
-            bindRemoveButtons();
-        });
+            bindRowEvents();
+        }
 
-        bindRemoveButtons();
+        function ensureTrailingEmptyRow() {
+            const rows = getRows();
+            const lastRow = rows[rows.length - 1];
+
+            if (!lastRow || rowIsComplete(lastRow)) {
+                addEmptyRow();
+            }
+        }
+
+        function removeExtraEmptyRows() {
+            const rows = getRows();
+
+            rows.forEach((row, index) => {
+                const isLast = index === rows.length - 1;
+
+                if (!isLast && !rowHasData(row) && rows.length > 1) {
+                    row.remove();
+                }
+            });
+
+            reindexRows();
+        }
+
+        function bindRowEvents() {
+            getRows().forEach((row) => {
+                const product = row.querySelector('select[name*="[product_id]"], select[data-name="product_id"]');
+                const quantity = row.querySelector('input[name*="[quantity]"], input[data-name="quantity"]');
+                const removeButton = row.querySelector('.remove-offer-item');
+
+                [product, quantity].forEach((field) => {
+                    if (!field || field.dataset.autoBound === '1') {
+                        return;
+                    }
+
+                    field.dataset.autoBound = '1';
+
+                    field.addEventListener('change', function () {
+                        ensureTrailingEmptyRow();
+                        removeExtraEmptyRows();
+                    });
+
+                    field.addEventListener('input', function () {
+                        ensureTrailingEmptyRow();
+                        removeExtraEmptyRows();
+                    });
+                });
+
+                if (removeButton && removeButton.dataset.autoBound !== '1') {
+                    removeButton.dataset.autoBound = '1';
+
+                    removeButton.addEventListener('click', function () {
+                        const rows = getRows();
+
+                        if (rows.length > 1) {
+                            row.remove();
+                            reindexRows();
+                            ensureTrailingEmptyRow();
+                            removeExtraEmptyRows();
+                        }
+                    });
+                }
+            });
+        }
+
+        bindRowEvents();
         reindexRows();
+        ensureTrailingEmptyRow();
+        removeExtraEmptyRows();
     });
 </script>
