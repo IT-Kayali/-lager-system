@@ -1,12 +1,28 @@
 @csrf
 
+@php
+    $receivedValue = old(
+        'received_at',
+        ! empty($batch->received_at)
+            ? \Illuminate\Support\Carbon::parse($batch->received_at)->format('Y-m-d')
+            : now()->format('Y-m-d')
+    );
+
+    $expiresValue = old(
+        'expires_at',
+        ! empty($batch->expires_at)
+            ? \Illuminate\Support\Carbon::parse($batch->expires_at)->format('Y-m-d')
+            : ''
+    );
+@endphp
+
 <div class="premium-form-grid">
     <div class="premium-form-field">
         <label for="product_id">Produkt *</label>
         <select id="product_id" name="product_id" class="premium-select" required>
             <option value="">Produkt auswählen</option>
             @foreach (($products ?? collect()) as $product)
-                <option value="{{ $product->id }}" @selected((string) old('product_id', $batch->product_id) === (string) $product->id)>
+                <option value="{{ $product->id }}" @selected((string) old('product_id', $batch->product_id ?? '') === (string) $product->id)>
                     {{ $product->name }}
                 </option>
             @endforeach
@@ -16,20 +32,53 @@
 
     <div class="premium-form-field">
         <label for="batch_number">Batchnummer</label>
-        <input id="batch_number" name="batch_number" class="premium-input" value="{{ old('batch_number', $batch->batch_number) }}">
+        <input
+            id="batch_number"
+            name="batch_number"
+            class="premium-input"
+            value="{{ old('batch_number', $batch->batch_number ?? '') }}"
+        >
         @error('batch_number') <div class="premium-error">{{ $message }}</div> @enderror
     </div>
 
     <div class="premium-form-field">
         <label for="quantity">Menge *</label>
-        <input id="quantity" name="quantity" type="number" step="0.01" min="0" class="premium-input" value="{{ old('quantity', $batch->quantity) }}" required>
+        <input
+            id="quantity"
+            name="quantity"
+            type="number"
+            step="0.01"
+            min="0"
+            class="premium-input"
+            value="{{ old('quantity', $batch->quantity ?? '') }}"
+            required
+        >
         @error('quantity') <div class="premium-error">{{ $message }}</div> @enderror
     </div>
 
     <div class="premium-form-field">
         <label for="received_at">Wareneingangsdatum *</label>
-        <input id="received_at" name="received_at" type="date" class="premium-input" value="{{ old('received_at', optional($batch->received_at)->format('Y-m-d')) }}" required>
+        <input
+            id="received_at"
+            name="received_at"
+            type="date"
+            class="premium-input"
+            value="{{ $receivedValue }}"
+            required
+        >
         @error('received_at') <div class="premium-error">{{ $message }}</div> @enderror
+    </div>
+
+    <div class="premium-form-field">
+        <label for="expires_at">Ablaufdatum optional</label>
+        <input
+            id="expires_at"
+            name="expires_at"
+            type="date"
+            class="premium-input"
+            value="{{ $expiresValue }}"
+        >
+        @error('expires_at') <div class="premium-error">{{ $message }}</div> @enderror
     </div>
 </div>
 

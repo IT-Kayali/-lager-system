@@ -16,6 +16,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerWalletTransactionController;
 use App\Http\Controllers\BatchController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductCategoryController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -37,6 +38,17 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('products', ProductController::class)
         
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE . ',' . User::ROLE_WAREHOUSE);
+
+    Route::resource('product-categories', ProductCategoryController::class)
+        ->except(['show'])
+        ->middleware('role:' . User::ROLE_MANAGER);
+
+    Route::get('/kategorien', function () {
+        return redirect()->route('product-categories.index');
+    })
+        ->middleware('role:' . User::ROLE_MANAGER)
+        ->name('product-categories.redirect');
+
 
     Route::get('/batches/fifo-out', [BatchController::class, 'fifoOutForm'])
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE)

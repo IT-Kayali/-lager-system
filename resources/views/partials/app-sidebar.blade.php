@@ -15,6 +15,13 @@
             'roles' => ['manager', 'wholesale', 'warehouse'],
         ],
         [
+            'label' => 'Kategorien',
+            'route' => 'product-categories.index',
+            'active' => 'product-categories.*',
+            'icon' => 'bi-tags',
+            'roles' => ['manager', 'wholesale', 'warehouse'],
+        ],
+        [
             'label' => 'Chargen & FIFO',
             'route' => 'batches.index',
             'active' => 'batches.*',

@@ -11,6 +11,7 @@ class ProductBatch extends Model
         'product_id',
         'batch_number',
         'quantity',
+        'expires_at',
         'received_at',
     ];
 
@@ -18,6 +19,7 @@ class ProductBatch extends Model
     {
         return [
             'quantity' => 'decimal:3',
+            'expires_at' => 'date',
             'received_at' => 'date',
         ];
     }

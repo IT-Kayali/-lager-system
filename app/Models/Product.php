@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
@@ -51,6 +52,13 @@ class Product extends Model
                 ProductPriceTier::ensureForProduct($product);
             }
         });
+    }
+
+
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(ProductCategory::class, 'category_product', 'product_id', 'product_category_id')
+            ->withTimestamps();
     }
 
     public function supplierRecord(): BelongsTo

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Models\Supplier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,7 +19,7 @@ class ProductController extends Controller
 
         $search = trim((string) $request->query('search'));
 
-        $products = Product::query()
+        $products = Product::query()->with('categories')
             ->with(['batches' => fn ($query) => $query->orderBy('received_at')->orderBy('id')])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($subQuery) use ($search) {
@@ -54,7 +55,11 @@ class ProductController extends Controller
     {
         $data = $this->validatedData($request);
 
-        Product::create($data);
+        
+        $categoryIds = $data['category_ids'] ?? [];
+        unset($data['category_ids']);
+$product = Product::create($data);
+        $product->categories()->sync($categoryIds);
 
         return redirect()
             ->route('products.index')
@@ -74,7 +79,11 @@ class ProductController extends Controller
     {
         $data = $this->validatedData($request);
 
-        $product->update($data);
+        
+        $categoryIds = $data['category_ids'] ?? [];
+        unset($data['category_ids']);
+$product->update($data);
+        $product->categories()->sync($categoryIds);
 
         return redirect()
             ->route('products.index')
@@ -101,6 +110,8 @@ class ProductController extends Controller
             'supplier_id' => ['nullable', 'integer', 'exists:suppliers,id'],
             'minimum_stock' => ['required', 'numeric', 'min:0', 'max:999999999'],
             'description' => ['nullable', 'string', 'max:5000'],
+            'category_ids' => ['nullable', 'array'],
+            'category_ids.*' => ['integer', 'exists:product_categories,id'],
         ]);
     }
 

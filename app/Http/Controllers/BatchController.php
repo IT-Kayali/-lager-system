@@ -137,6 +137,7 @@ class BatchController extends Controller
         $data = $request->validate([
             'product_id' => ['required', 'integer', 'exists:products,id'],
             'quantity' => ['required', 'numeric', 'min:0.001', 'max:999999999'],
+            'expires_at' => ['nullable', 'date'],
             'note' => ['nullable', 'string', 'max:1000'],
         ]);
 
@@ -206,6 +207,7 @@ class BatchController extends Controller
             ],
             'quantity' => ['required', 'numeric', 'min:0', 'max:999999999'],
             'received_at' => ['required', 'date'],
+            'expires_at' => ['nullable', 'date'],
         ]);
     }
 

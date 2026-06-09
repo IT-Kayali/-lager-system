@@ -48,6 +48,7 @@
                         <th>Batchnummer</th>
                         <th>Produkt</th>
                         <th>Menge</th>
+                        <th>Ablaufdatum</th>
                         <th>Wareneingang</th>
                         <th>FIFO-Reihenfolge</th>
                         <th>Aktionen</th>
@@ -69,6 +70,9 @@
                             <td>
                                 {{ number_format((float) $batch->quantity, 2, ',', '.') }}
                                 {{ $batch->product?->unit ?? '' }}
+                            </td>
+                            <td>
+                                {{ $batch->expires_at ? $batch->expires_at->format('d.m.Y') : '—' }}
                             </td>
 
                             <td>{{ $batch->received_at?->format('d.m.Y') ?: '—' }}</td>

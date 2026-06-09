@@ -57,13 +57,142 @@
         @error('minimum_stock') <div class="premium-error">{{ $message }}</div> @enderror
     </div>
 
-    <div class="premium-form-field full">
+{{-- CATEGORY_VISIBLE_BLOCK_START --}}
+@php
+    $categoryOptionsForProductForm = \App\Models\ProductCategory::query()
+        ->where('is_active', true)
+        ->orderBy('name')
+        ->get();
+
+    $selectedCategoryIds = collect(old(
+        'category_ids',
+        isset($product) && $product->exists
+            ? $product->categories()->pluck('product_categories.id')->all()
+            : []
+    ))->map(fn ($id) => (string) $id)->all();
+@endphp
+
+<div class="premium-form-field full">
+    <label>Kategorien</label>
+
+    <div class="category-checkbox-grid">
+        @forelse ($categoryOptionsForProductForm as $category)
+            <label class="category-checkbox-card">
+                <input
+                    type="checkbox"
+                    name="category_ids[]"
+                    value="{{ $category->id }}"
+                    @checked(in_array((string) $category->id, $selectedCategoryIds, true))
+                >
+
+                <span class="category-checkbox-dot" style="background: {{ $category->color ?: '#d4af37' }};"></span>
+
+                <span class="category-checkbox-text">
+                    {{ $category->name }}
+                </span>
+
+                <span class="category-checkbox-check">
+                    <i class="bi bi-check2"></i>
+                </span>
+            </label>
+        @empty
+            <div class="premium-muted">
+                Noch keine Kategorien vorhanden.
+                <a href="{{ route('product-categories.create') }}">Kategorie erstellen</a>
+            </div>
+        @endforelse
+    </div>
+
+    <div class="premium-muted" style="margin-top:8px;">
+        Du kannst mehrere Kategorien einfach anklicken. Keine Strg-Taste nötig.
+    </div>
+
+    @error('category_ids') <div class="premium-error">{{ $message }}</div> @enderror
+    @error('category_ids.*') <div class="premium-error">{{ $message }}</div> @enderror
+</div>
+
+<style>
+    .category-checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 10px;
+        margin-top: 8px;
+    }
+
+    .category-checkbox-card {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 48px;
+        padding: 12px 44px 12px 14px;
+        border: 1px solid #ded6c8;
+        border-radius: 16px;
+        background: #ffffff;
+        cursor: pointer;
+        font-weight: 800;
+        transition: border-color .18s ease, box-shadow .18s ease, transform .12s ease, background .18s ease;
+    }
+
+    .category-checkbox-card:hover {
+        border-color: #d4af37;
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, .15);
+        transform: translateY(-1px);
+    }
+
+    .category-checkbox-card input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .category-checkbox-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        flex: 0 0 auto;
+        box-shadow: 0 0 0 3px rgba(0,0,0,.04);
+    }
+
+    .category-checkbox-text {
+        color: #111;
+        line-height: 1.25;
+    }
+
+    .category-checkbox-check {
+        position: absolute;
+        right: 12px;
+        width: 24px;
+        height: 24px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #f4efe5;
+        color: transparent;
+        border: 1px solid #ded6c8;
+    }
+
+    .category-checkbox-card:has(input:checked) {
+        background: #fff7dc;
+        border-color: #d4af37;
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, .18);
+    }
+
+    .category-checkbox-card:has(input:checked) .category-checkbox-check {
+        background: #d4af37;
+        border-color: #d4af37;
+        color: #111;
+    }
+</style>
+{{-- CATEGORY_VISIBLE_BLOCK_END --}}
+
+<div class="premium-form-field full">
         <label for="description">Beschreibung optional</label>
         <textarea id="description" name="description" rows="5" class="premium-textarea">{{ old('description', $product->description) }}</textarea>
         @error('description') <div class="premium-error">{{ $message }}</div> @enderror
     </div>
 </div>
-
 <div style="display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;">
     <button class="premium-btn gold" type="submit">
         <i class="bi bi-check2-circle"></i>
