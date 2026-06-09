@@ -13,7 +13,13 @@ class OfferPdfController extends Controller
 {
     public function stream(Offer $offer, string $type): Response
     {
-        if (! in_array($type, ['offer', 'invoice'], true)) {
+        $documentLabels = [
+            'offer' => 'Angebot',
+            'invoice' => 'Rechnung',
+            'delivery-note' => 'Lieferschein',
+        ];
+
+        if (! array_key_exists($type, $documentLabels)) {
             throw new InvalidArgumentException('Ungültiger Dokumenttyp.');
         }
 
@@ -21,16 +27,27 @@ class OfferPdfController extends Controller
 
         $template = DocumentTemplate::byKey($offer->template_type);
 
-        $title = $type === 'invoice' ? 'Rechnung' : 'Angebot';
+        $title = $documentLabels[$type];
 
-        ActivityLog::record($type === 'invoice' ? 'invoice.pdf.generated' : 'offer.pdf.generated', $offer, [
+        $activityEvents = [
+            'offer' => 'offer.pdf.generated',
+            'invoice' => 'invoice.pdf.generated',
+            'delivery-note' => 'delivery_note.pdf.generated',
+        ];
+
+        ActivityLog::record($activityEvents[$type], $offer, [
             'offer_number' => $offer->offer_number,
             'template' => $template->name,
         ]);
 
         $templateName = strtolower((string) ($template->name ?? ''));
         $isNoLogoPdfTemplate = str_contains($templateName, 'ohne') || ! (bool) ($template->show_logo ?? false);
-        $pdfView = $isNoLogoPdfTemplate ? 'pdf.offer-document-ohne' : 'pdf.offer-document';
+
+        if ($type === 'delivery-note') {
+            $pdfView = $isNoLogoPdfTemplate ? 'pdf.delivery-note-ohne' : 'pdf.delivery-note';
+        } else {
+            $pdfView = $isNoLogoPdfTemplate ? 'pdf.offer-document-ohne' : 'pdf.offer-document';
+        }
 
         $pdf = Pdf::loadView($pdfView, [
             'offer' => $offer,
@@ -41,7 +58,13 @@ class OfferPdfController extends Controller
             'backgroundDataUri' => $this->backgroundDataUri($template),
         ])->setPaper('a4');
 
-        $filename = ($type === 'invoice' ? 'rechnung-' : 'angebot-') . $offer->offer_number . '.pdf';
+        $filenamePrefixes = [
+            'offer' => 'angebot-',
+            'invoice' => 'rechnung-',
+            'delivery-note' => 'lieferschein-',
+        ];
+
+        $filename = $filenamePrefixes[$type] . $offer->offer_number . '.pdf';
 
         return $pdf->stream($filename);
     }

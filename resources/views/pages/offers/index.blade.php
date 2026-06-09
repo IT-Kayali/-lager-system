@@ -96,6 +96,9 @@
                                     <a class="premium-icon-btn" href="{{ route('offers.pdf', [$offer, 'invoice']) }}" target="_blank" title="Rechnung PDF">
                                         <i class="bi bi-receipt"></i>
                                     </a>
+                                    <a class="premium-icon-btn" href="{{ route('offers.pdf', [$offer, 'delivery-note']) }}" target="_blank" title="Lieferschein PDF">
+                                        <i class="bi bi-truck"></i>
+                                    </a>
                                 </div>
                             </td>
                             <td>

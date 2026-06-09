@@ -34,6 +34,10 @@
                     <i class="bi bi-receipt"></i>
                     Rechnung PDF
                 </a>
+                <a href="{{ route('offers.pdf', [$offer, 'delivery-note']) }}" target="_blank" class="premium-btn">
+                    <i class="bi bi-truck"></i>
+                    Lieferschein PDF
+                </a>
 
                 @if (! in_array($offer->status, ['completed', 'cancelled', 'reservation_expired'], true))
                     <a href="{{ route('offers.edit', $offer) }}" class="premium-btn">
