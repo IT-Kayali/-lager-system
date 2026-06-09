@@ -66,3 +66,13 @@ yarn-error.log
 Thumbs.db
 .vscode/
 .idea/
+
+# Lokale Backup-Dateien
+*.before-*
+*.broken-*
+*.current-*
+*.bad-*
+
+# DomPDF generierter Font-Cache
+storage/fonts/*
+!storage/fonts/.gitignore
