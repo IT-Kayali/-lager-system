@@ -110,6 +110,158 @@
 </style>
 <!-- PREMIUM_SELECT_STYLE_END -->
 
+
+<!-- GLOBAL_UNIFIED_TABLE_STYLE_START -->
+<style>
+    /*
+     * Einheitliches Tabellen-Design für alle Bereiche:
+     * Produkte, Kategorien, Chargen, Filialausgang, Angebote,
+     * Kunden, Lieferanten, Preise, Warnungen.
+     */
+
+    .premium-table-wrap,
+    .products-table-shell,
+    .category-table-shell,
+    .category-products-table-shell {
+        margin-top: 22px !important;
+        overflow-x: auto !important;
+        border: 1px solid #e7dece !important;
+        background: #ffffff !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+    }
+
+    .premium-table,
+    .products-clean-table,
+    .category-clean-table,
+    .category-products-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        border-spacing: 0 !important;
+        background: #ffffff !important;
+    }
+
+    .premium-table thead th,
+    .products-clean-table thead th,
+    .category-clean-table thead th,
+    .category-products-table thead th {
+        padding: 14px 12px !important;
+        color: #7a7064 !important;
+        font-size: 11px !important;
+        font-weight: 950 !important;
+        text-transform: uppercase !important;
+        letter-spacing: .06em !important;
+        white-space: nowrap !important;
+        text-align: left !important;
+        border-bottom: 1px solid #e7dece !important;
+        background: #fffdf8 !important;
+    }
+
+    .premium-table tbody td,
+    .products-clean-table tbody td,
+    .category-clean-table tbody td,
+    .category-products-table tbody td {
+        padding: 16px 12px !important;
+        vertical-align: middle !important;
+        border-bottom: 1px solid #e7dece !important;
+        background: #ffffff !important;
+        white-space: nowrap !important;
+        border-left: 0 !important;
+        border-right: 0 !important;
+        border-radius: 0 !important;
+    }
+
+    .premium-table tbody tr:last-child td,
+    .products-clean-table tbody tr:last-child td,
+    .category-clean-table tbody tr:last-child td,
+    .category-products-table tbody tr:last-child td {
+        border-bottom: 0 !important;
+    }
+
+    .premium-table tbody tr:hover td,
+    .products-clean-table tbody tr:hover td,
+    .category-clean-table tbody tr:hover td,
+    .category-products-table tbody tr:hover td {
+        background: #fffaf0 !important;
+    }
+
+    .premium-table tbody tr,
+    .products-clean-table tbody tr,
+    .category-clean-table tbody tr,
+    .category-products-table tbody tr {
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+    }
+
+    .premium-table td:first-child,
+    .premium-table th:first-child,
+    .products-clean-table td:first-child,
+    .products-clean-table th:first-child,
+    .category-clean-table td:first-child,
+    .category-clean-table th:first-child,
+    .category-products-table td:first-child,
+    .category-products-table th:first-child {
+        border-left: 0 !important;
+        border-radius: 0 !important;
+    }
+
+    .premium-table td:last-child,
+    .premium-table th:last-child,
+    .products-clean-table td:last-child,
+    .products-clean-table th:last-child,
+    .category-clean-table td:last-child,
+    .category-clean-table th:last-child,
+    .category-products-table td:last-child,
+    .category-products-table th:last-child {
+        border-right: 0 !important;
+        border-radius: 0 !important;
+        text-align: right !important;
+    }
+
+    .premium-actions {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 8px !important;
+        flex-wrap: nowrap !important;
+    }
+
+    .premium-actions form {
+        margin: 0 !important;
+    }
+
+    .premium-code {
+        color: #111111 !important;
+        font-weight: 950 !important;
+        text-decoration: none !important;
+    }
+
+    .premium-code:hover {
+        color: #a9871f !important;
+        text-decoration: underline !important;
+    }
+
+    .premium-table .premium-muted,
+    .products-clean-table .premium-muted,
+    .category-clean-table .premium-muted,
+    .category-products-table .premium-muted {
+        color: #7a7064 !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+    }
+
+    @media (max-width: 900px) {
+        .premium-table,
+        .products-clean-table,
+        .category-clean-table,
+        .category-products-table {
+            min-width: 850px !important;
+        }
+    }
+</style>
+<!-- GLOBAL_UNIFIED_TABLE_STYLE_END -->
+
 </head>
 <body>
     <div class="premium-shell">
