@@ -44,7 +44,9 @@
                             <td>
                                 <span style="display:inline-flex; align-items:center; gap:8px; font-weight:900;">
                                     <span style="display:inline-block; width:12px; height:12px; border-radius:999px; background:{{ $category->color ?: '#d4af37' }};"></span>
+                                    <a class="product-category-name-link" href="{{ route('product-categories.show', ['product_category' => $category->getRouteName()]) }}">
                                     {{ $category->name }}
+                                </a>
                                 </span>
                             </td>
                             <td>{{ $category->description ?: '—' }}</td>
@@ -58,7 +60,11 @@
                             </td>
                             <td style="text-align:right;">
                                 <div style="display:flex; gap:8px; justify-content:flex-end;">
-                                    <a class="premium-icon-btn" href="{{ route('product-categories.edit', $category) }}" title="Bearbeiten">
+                                    
+                            <a class="premium-icon-btn" href="{{ route('product-categories.show', ['product_category' => $category->getRouteName()]) }}" title="Kategorie anzeigen">
+                                <i class="bi bi-eye"></i>
+                            </a>
+<a class="premium-icon-btn" href="{{ route('product-categories.edit', $category) }}" title="Bearbeiten">
                                         <i class="bi bi-pencil"></i>
                                     </a>
 
@@ -87,4 +93,20 @@
             {{ $categories->links() }}
         </div>
     </div>
+
+<style>
+    /* CATEGORY_PREVIEW_LINK_STYLE_START */
+    .product-category-name-link {
+        color: #111111;
+        text-decoration: none;
+        font-weight: 950;
+    }
+
+    .product-category-name-link:hover {
+        color: #a9871f;
+        text-decoration: underline;
+    }
+    /* CATEGORY_PREVIEW_LINK_STYLE_END */
+</style>
+
 </x-layouts.premium>

@@ -32,6 +32,21 @@ class ProductCategory extends Model
         });
     }
 
+
+    public function getRouteName(): string
+    {
+        return preg_replace('/\s+/', '-', trim((string) $this->name));
+    }
+
+    public function resolveRouteBinding($value, $field = null)
+    {
+        $nameFromUrl = str_replace('-', ' ', (string) $value);
+
+        return $this->where('name', $value)->first()
+            ?? $this->where('name', $nameFromUrl)->first()
+            ?? $this->whereKey($value)->firstOrFail();
+    }
+
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'category_product', 'product_category_id', 'product_id')

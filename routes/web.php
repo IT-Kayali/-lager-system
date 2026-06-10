@@ -40,7 +40,6 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE . ',' . User::ROLE_WAREHOUSE);
 
     Route::resource('product-categories', ProductCategoryController::class)
-        ->except(['show'])
         ->middleware('role:' . User::ROLE_MANAGER);
 
     Route::get('/kategorien', function () {

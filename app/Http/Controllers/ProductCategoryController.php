@@ -51,6 +51,19 @@ class ProductCategoryController extends Controller
             ->with('success', 'Kategorie wurde erfolgreich angelegt.');
     }
 
+    public function show(ProductCategory $productCategory): View
+    {
+        $productCategory->load([
+            'products' => fn ($query) => $query
+                ->with('supplierRecord')
+                ->orderBy('name'),
+        ]);
+
+        return view('pages.product-categories.show', [
+            'category' => $productCategory,
+        ]);
+    }
+
     public function edit(ProductCategory $productCategory): View
     {
         return view('pages.product-categories.edit', [
