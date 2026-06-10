@@ -87,7 +87,7 @@
 
                             <td>
                                 <div class="premium-actions suppliers-actions">
-                                    <a class="premium-icon-btn" href="{{ route('suppliers.show', $supplier) }}" title="Lieferant anzeigen">
+                                    <a class="premium-icon-btn" href="{{ route('suppliers.show', ['supplier' => $supplier->getRouteName()]) }}" title="Lieferant anzeigen">
                                         <i class="bi bi-eye"></i>
                                     </a>
 

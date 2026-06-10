@@ -57,4 +57,22 @@ class Supplier extends Model
             $this->country,
         ])->filter()->implode("\n");
     }
+    public function getRouteName(): string
+    {
+        $name = $this->company_name ?: $this->supplier_number ?: (string) $this->id;
+
+        return preg_replace('/\s+/', '-', trim((string) $name));
+    }
+
+    public function resolveRouteBinding($value, $field = null)
+    {
+        $nameFromUrl = str_replace('-', ' ', (string) $value);
+
+        return $this->where('company_name', $value)->first()
+            ?? $this->where('company_name', $nameFromUrl)->first()
+            ?? $this->where('supplier_number', $value)->first()
+            ?? $this->whereKey($value)->firstOrFail();
+    }
+
+
 }
