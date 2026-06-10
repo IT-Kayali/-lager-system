@@ -50,7 +50,7 @@
         </div>
 
         <div class="premium-table-wrap">
-            <table class="premium-table">
+            <table class="premium-table offers-clean-table">
                 <thead>
                     <tr>
                         <th>Angebot</th>
@@ -58,7 +58,7 @@
                         <th>Status</th>
                         <th>Positionen</th>
                         <th>Gesamt</th>
-                        <th> bis</th>
+                        <th>Bis</th>
                         <th>PDF</th>
                         <th>Aktionen</th>
                     </tr>
@@ -147,4 +147,84 @@
             {{ $offers->links() }}
         </div>
     </section>
+
+<!-- OFFERS_TABLE_POLISH_START -->
+<style>
+    .offers-clean-table {
+        min-width: 1120px;
+    }
+
+    .offers-clean-table th:nth-child(1),
+    .offers-clean-table td:nth-child(1) {
+        width: 14%;
+    }
+
+    .offers-clean-table th:nth-child(2),
+    .offers-clean-table td:nth-child(2) {
+        width: 17%;
+    }
+
+    .offers-clean-table th:nth-child(3),
+    .offers-clean-table td:nth-child(3) {
+        width: 16%;
+    }
+
+    .offers-clean-table th:nth-child(4),
+    .offers-clean-table td:nth-child(4) {
+        width: 8%;
+        text-align: center !important;
+    }
+
+    .offers-clean-table th:nth-child(5),
+    .offers-clean-table td:nth-child(5) {
+        width: 12%;
+        text-align: right !important;
+    }
+
+    .offers-clean-table th:nth-child(6),
+    .offers-clean-table td:nth-child(6) {
+        width: 12%;
+        text-align: center !important;
+    }
+
+    .offers-clean-table th:nth-child(7),
+    .offers-clean-table td:nth-child(7) {
+        width: 9%;
+        text-align: center !important;
+    }
+
+    .offers-clean-table th:nth-child(8),
+    .offers-clean-table td:nth-child(8) {
+        width: 12%;
+        text-align: right !important;
+    }
+
+    .offers-clean-table td:nth-child(7) .premium-actions {
+        justify-content: center !important;
+        gap: 7px !important;
+    }
+
+    .offers-clean-table td:nth-child(8) .premium-actions {
+        justify-content: flex-end !important;
+        gap: 7px !important;
+    }
+
+    .offers-clean-table .premium-icon-btn {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+    }
+
+    .offers-clean-table .premium-badge {
+        white-space: nowrap;
+    }
+
+    @media (max-width: 900px) {
+        .offers-clean-table {
+            min-width: 1120px !important;
+        }
+    }
+</style>
+<!-- OFFERS_TABLE_POLISH_END -->
+
 </x-layouts.premium>
