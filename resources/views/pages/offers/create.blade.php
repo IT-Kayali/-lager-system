@@ -30,7 +30,9 @@
         min-width: 220px;
     }
 
-    .offer-category-select {
+    .offer-category-select,
+    .offer-category-product-row select,
+    .offer-category-product-row .ts-control {
         background: #ffffff !important;
     }
 
@@ -43,6 +45,17 @@
 
     .offer-category-product-row .premium-form-field {
         margin: 0 !important;
+    }
+
+    .offer-category-product-row select:disabled,
+    .offer-category-product-row .ts-wrapper.disabled .ts-control {
+        opacity: .75 !important;
+        cursor: not-allowed !important;
+        background: #f5f0e7 !important;
+    }
+
+    .offer-category-product-row .ts-wrapper.disabled .ts-control input {
+        cursor: not-allowed !important;
     }
 
     @media (max-width: 1100px) {
@@ -69,7 +82,7 @@
 
         function isProductSelect(select) {
             const name = select.getAttribute('name') || '';
-            return name.includes('product_id') || name.includes('product');
+            return name.includes('product_id') || name.includes('[product]');
         }
 
         function getFieldWrapper(element) {
@@ -144,6 +157,18 @@
             }
         }
 
+        function setProductDisabled(productSelect, disabled) {
+            productSelect.disabled = disabled;
+
+            if (productSelect.tomselect) {
+                if (disabled) {
+                    productSelect.tomselect.disable();
+                } else {
+                    productSelect.tomselect.enable();
+                }
+            }
+        }
+
         function clearTomSelect(productSelect) {
             if (!productSelect.tomselect) {
                 return false;
@@ -175,6 +200,18 @@
             productSelect.tomselect.refreshItems();
         }
 
+        function chooseCategoryForExistingProduct(productSelect, categorySelect) {
+            if (categorySelect.value || !productSelect.value) {
+                return;
+            }
+
+            const categories = productCategoryMap[String(productSelect.value)] || [];
+
+            if (categories.length > 0) {
+                categorySelect.value = String(categories[0]);
+            }
+        }
+
         function filterProducts(productSelect, categorySelect, resetProduct = true) {
             const categoryId = categorySelect.value;
             const currentValue = resetProduct ? '' : productSelect.value;
@@ -184,11 +221,30 @@
 
             productSelect.innerHTML = '';
 
+            if (!categoryId) {
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                placeholder.textContent = 'Erst Kategorie auswählen';
+                productSelect.appendChild(placeholder);
+
+                if (hasTomSelect) {
+                    addTomSelectOption(productSelect, {
+                        value: '',
+                        text: 'Erst Kategorie auswählen',
+                    });
+                }
+
+                productSelect.value = '';
+                refreshTomSelect(productSelect);
+                setProductDisabled(productSelect, true);
+
+                return;
+            }
+
             originalOptions.forEach((option) => {
                 const isEmpty = option.value === '';
                 const categories = productCategoryMap[String(option.value)] || [];
-
-                const allowed = isEmpty || !categoryId || categories.includes(String(categoryId));
+                const allowed = isEmpty || categories.includes(String(categoryId));
 
                 if (!allowed) {
                     return;
@@ -196,7 +252,7 @@
 
                 const newOption = document.createElement('option');
                 newOption.value = option.value;
-                newOption.textContent = option.text;
+                newOption.textContent = isEmpty ? 'Produkt auswählen' : option.text;
                 newOption.disabled = option.disabled;
 
                 if (!resetProduct && option.value === currentValue) {
@@ -206,9 +262,14 @@
                 productSelect.appendChild(newOption);
 
                 if (hasTomSelect) {
-                    addTomSelectOption(productSelect, option);
+                    addTomSelectOption(productSelect, {
+                        value: option.value,
+                        text: isEmpty ? 'Produkt auswählen' : option.text,
+                    });
                 }
             });
+
+            setProductDisabled(productSelect, false);
 
             if (resetProduct) {
                 productSelect.value = '';
@@ -218,10 +279,13 @@
                 }
             } else {
                 productSelect.value = currentValue;
+
+                if (productSelect.tomselect && currentValue) {
+                    productSelect.tomselect.setValue(currentValue, true);
+                }
             }
 
             refreshTomSelect(productSelect);
-
             productSelect.dispatchEvent(new Event('change', { bubbles: true }));
         }
 
@@ -233,11 +297,11 @@
             rememberOriginalOptions(productSelect);
 
             const productField = getFieldWrapper(productSelect);
-            if (!productField) {
+            if (!productField || !productField.parentElement) {
                 return;
             }
 
-            let categoryField = productField.parentElement?.querySelector('.offer-category-filter-field');
+            let categoryField = productField.parentElement.querySelector('.offer-category-filter-field');
 
             if (!categoryField) {
                 categoryField = buildCategoryField();
@@ -253,9 +317,7 @@
                 row.classList.add('offer-category-product-row');
             }
 
-            if (!productSelect.value && categorySelect.value) {
-                categorySelect.value = '';
-            }
+            chooseCategoryForExistingProduct(productSelect, categorySelect);
 
             categorySelect.addEventListener('change', function () {
                 filterProducts(productSelect, categorySelect, true);
