@@ -45,7 +45,7 @@
                         <th>Nummer</th>
                         <th>Lieferant</th>
                         <th>Kontakt</th>
-                        <th>Adresse</th>
+                        <th>Stadt</th>
                         <th>Produkte</th>
                         <th>Aktionen</th>
                     </tr>
@@ -53,41 +53,50 @@
 
                 <tbody>
                     @forelse ($suppliers as $supplier)
+                        @php
+                            $supplierUrl = method_exists($supplier, 'getRouteName')
+                                ? $supplier->getRouteName()
+                                : $supplier;
+
+                            $productCount = $supplier->products_count ?? (method_exists($supplier, 'products') ? $supplier->products()->count() : 0);
+                        @endphp
+
                         <tr>
                             <td>
-                                <span class="premium-code">{{ $supplier->supplier_number }}</span>
+                                <a class="premium-code supplier-number-link" href="{{ route('suppliers.show', ['supplier' => $supplierUrl]) }}">
+                                    {{ $supplier->supplier_number }}
+                                </a>
                             </td>
 
                             <td>
-                                <strong>{{ $supplier->company_name }}</strong>
-                                <div class="premium-muted">{{ $supplier->contact_person ?: '—' }}</div>
+                                <a class="supplier-name-link" href="{{ route('suppliers.show', ['supplier' => $supplierUrl]) }}">
+                                    {{ $supplier->company_name }}
+                                </a>
+
+                                <div class="premium-muted">
+                                    {{ $supplier->contact_person ?: '—' }}
+                                </div>
                             </td>
 
                             <td>
                                 <div>{{ $supplier->email ?: '—' }}</div>
 
                                 @if ($supplier->whatsapp ?: $supplier->phone)
-                                    <x-whatsapp-link :number="$supplier->whatsapp ?: $supplier->phone" label="WhatsApp" :country-code="$supplier->phone_country_code" />
-                                @else
-                                    <div class="premium-muted">—</div>
+                                    <x-whatsapp-link :number="$supplier->whatsapp ?: $supplier->phone" :label="$supplier->whatsapp ?: $supplier->phone" :country-code="$supplier->phone_country_code" />
                                 @endif
                             </td>
 
                             <td>
-                                @if ($supplier->fullAddress())
-                                    {!! nl2br(e($supplier->fullAddress())) !!}
-                                @else
-                                    —
-                                @endif
+                                {{ $supplier->city ?: '—' }}
                             </td>
 
                             <td>
-                                <strong>{{ $supplier->products_count }}</strong>
+                                <strong>{{ $productCount }}</strong>
                             </td>
 
                             <td>
                                 <div class="premium-actions suppliers-actions">
-                                    <a class="premium-icon-btn" href="{{ route('suppliers.show', ['supplier' => $supplier->getRouteName()]) }}" title="Lieferant anzeigen">
+                                    <a class="premium-icon-btn" href="{{ route('suppliers.show', ['supplier' => $supplierUrl]) }}" title="Lieferant anzeigen">
                                         <i class="bi bi-eye"></i>
                                     </a>
 
@@ -145,34 +154,47 @@
 
         .suppliers-clean-table th:nth-child(1),
         .suppliers-clean-table td:nth-child(1) {
-            width: 13%;
+            width: 14%;
         }
 
         .suppliers-clean-table th:nth-child(2),
         .suppliers-clean-table td:nth-child(2) {
-            width: 18%;
+            width: 22%;
         }
 
         .suppliers-clean-table th:nth-child(3),
         .suppliers-clean-table td:nth-child(3) {
-            width: 22%;
+            width: 24%;
         }
 
         .suppliers-clean-table th:nth-child(4),
         .suppliers-clean-table td:nth-child(4) {
-            width: 27%;
+            width: 16%;
         }
 
         .suppliers-clean-table th:nth-child(5),
         .suppliers-clean-table td:nth-child(5) {
-            width: 8%;
+            width: 10%;
             text-align: center !important;
         }
 
         .suppliers-clean-table th:nth-child(6),
         .suppliers-clean-table td:nth-child(6) {
-            width: 12%;
+            width: 14%;
             text-align: right !important;
+        }
+
+        .supplier-name-link,
+        .supplier-number-link {
+            color: #111111 !important;
+            text-decoration: none !important;
+            font-weight: 950 !important;
+        }
+
+        .supplier-name-link:hover,
+        .supplier-number-link:hover {
+            color: #a9871f !important;
+            text-decoration: underline !important;
         }
 
         .suppliers-actions {
@@ -195,5 +217,41 @@
                 width: 100%;
             }
         }
-    </style>
+    
+        /* SUPPLIER_SEARCH_INLINE_FIX_START */
+        .suppliers-toolbar {
+            align-items: flex-start !important;
+        }
+
+        .suppliers-search {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 10px !important;
+            flex-wrap: nowrap !important;
+        }
+
+        .suppliers-search .premium-input {
+            width: 360px !important;
+            max-width: 360px !important;
+        }
+
+        .suppliers-search .premium-btn {
+            height: 46px !important;
+            white-space: nowrap !important;
+        }
+
+        @media (max-width: 700px) {
+            .suppliers-search {
+                flex-wrap: wrap !important;
+            }
+
+            .suppliers-search .premium-input {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+        }
+        /* SUPPLIER_SEARCH_INLINE_FIX_END */
+
+</style>
 </x-layouts.premium>
