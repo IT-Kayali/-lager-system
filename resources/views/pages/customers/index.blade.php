@@ -11,7 +11,7 @@
 
     <section class="premium-card">
         <div class="premium-toolbar">
-            <form method="GET" action="{{ route('customers.index') }}" class="premium-search">
+            <form method="GET" action="{{ route('customers.index') }}" class="premium-search customers-search-inline">
                 <input name="search" value="{{ $search }}" class="premium-input" style="min-width:280px;" placeholder="Kunde suchen...">
 
                 <button class="premium-btn" type="submit">
@@ -109,4 +109,37 @@
             {{ $customers->links() }}
         </div>
     </section>
+<style>
+        /* CUSTOMERS_SEARCH_INLINE_FIX_START */
+        .customers-search-inline {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 10px !important;
+            flex-wrap: nowrap !important;
+        }
+
+        .customers-search-inline .premium-input {
+            width: 360px !important;
+            max-width: 360px !important;
+        }
+
+        .customers-search-inline .premium-btn {
+            height: 46px !important;
+            white-space: nowrap !important;
+        }
+
+        @media (max-width: 700px) {
+            .customers-search-inline {
+                flex-wrap: wrap !important;
+            }
+
+            .customers-search-inline .premium-input {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+        }
+        /* CUSTOMERS_SEARCH_INLINE_FIX_END */
+
+</style>
 </x-layouts.premium>
