@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductBatch;
 use App\Models\ProductCategory;
 use App\Models\Supplier;
+use App\Models\StockMovement;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use App\Services\ReservationReleaseService;
@@ -70,12 +73,38 @@ class ProductController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validatedData($request);
+        $initialBatchData = $this->validatedInitialBatchData($request);
 
-        
         $categoryIds = $data['category_ids'] ?? [];
         unset($data['category_ids']);
-$product = Product::create($data);
-        $product->categories()->sync($categoryIds);
+
+        DB::transaction(function () use ($data, $categoryIds, $initialBatchData): void {
+            $product = Product::create($data);
+            $product->categories()->sync($categoryIds);
+
+            $initialBatches = collect($initialBatchData['initial_batches'] ?? [])
+                ->filter(fn ($row) => (float) ($row['quantity'] ?? 0) > 0)
+                ->values();
+
+            foreach ($initialBatches as $row) {
+                $batch = ProductBatch::create([
+                    'product_id' => $product->id,
+                    'batch_number' => ($row['batch_number'] ?? null) ?: null,
+                    'quantity' => (float) ($row['quantity'] ?? 0),
+                    'received_at' => ($row['received_at'] ?? null) ?: now()->toDateString(),
+                    'expires_at' => ($row['expires_at'] ?? null) ?: null,
+                ]);
+
+                StockMovement::create([
+                    'product_id' => $product->id,
+                    'product_batch_id' => $batch->id,
+                    'user_id' => auth()->id(),
+                    'type' => 'in',
+                    'quantity' => $batch->quantity,
+                    'note' => 'Wareneingang / Charge beim Produkt angelegt',
+                ]);
+            }
+        });
 
         return redirect()
             ->route('products.index')
@@ -113,6 +142,23 @@ $product->update($data);
         return redirect()
             ->route('products.index')
             ->with('success', 'Produkt wurde gelöscht.');
+    }
+
+    private function validatedInitialBatchData(Request $request): array
+    {
+        return $request->validate([
+            'initial_batches' => ['nullable', 'array'],
+            'initial_batches.*.quantity' => ['nullable', 'numeric', 'min:0', 'max:999999999'],
+            'initial_batches.*.batch_number' => [
+                'nullable',
+                'string',
+                'max:255',
+                'distinct',
+                Rule::unique('product_batches', 'batch_number'),
+            ],
+            'initial_batches.*.received_at' => ['nullable', 'date'],
+            'initial_batches.*.expires_at' => ['nullable', 'date'],
+        ]);
     }
 
     private function validatedData(Request $request): array

@@ -57,6 +57,255 @@
         @error('minimum_stock') <div class="premium-error">{{ $message }}</div> @enderror
     </div>
 
+{{-- INITIAL_BATCH_ON_CREATE_START --}}
+@if (! $product->exists)
+    @php
+        $initialBatchRows = collect(old('initial_batches', [
+            [
+                'quantity' => '',
+                'batch_number' => '',
+                'received_at' => now()->format('Y-m-d'),
+                'expires_at' => '',
+            ],
+        ]))->values();
+    @endphp
+
+    <div class="premium-form-field full initial-batch-card">
+        <div class="initial-batch-head">
+            <div>
+                <h3>Erste Chargen optional</h3>
+                <p>Du kannst direkt mehrere Chargen eintragen. Sobald du eine Zeile nutzt, erscheint automatisch die nächste.</p>
+            </div>
+            <span class="initial-batch-badge">Optional</span>
+        </div>
+
+        <div id="initial-batches-wrapper" data-default-received="{{ now()->format('Y-m-d') }}">
+            @foreach ($initialBatchRows as $index => $row)
+                <div class="initial-batch-row">
+                    <div class="premium-form-field">
+                        <label>Menge</label>
+                        <input name="initial_batches[{{ $index }}][quantity]" data-name="quantity" type="number" step="0.01" min="0" class="premium-input initial-batch-trigger" value="{{ $row['quantity'] ?? '' }}" placeholder="z. B. 1000">
+                    </div>
+
+                    <div class="premium-form-field">
+                        <label>Batchnummer optional</label>
+                        <input name="initial_batches[{{ $index }}][batch_number]" data-name="batch_number" class="premium-input initial-batch-trigger" value="{{ $row['batch_number'] ?? '' }}" placeholder="wird sonst automatisch erzeugt">
+                    </div>
+
+                    <div class="premium-form-field">
+                        <label>Wareneingangsdatum</label>
+                        <input name="initial_batches[{{ $index }}][received_at]" data-name="received_at" type="date" class="premium-input" value="{{ $row['received_at'] ?? now()->format('Y-m-d') }}">
+                    </div>
+
+                    <div class="premium-form-field">
+                        <label>Ablaufdatum optional</label>
+                        <input name="initial_batches[{{ $index }}][expires_at]" data-name="expires_at" type="date" class="premium-input initial-batch-trigger" value="{{ $row['expires_at'] ?? '' }}">
+                    </div>
+
+                    <button type="button" class="premium-icon-btn premium-danger initial-batch-remove" title="Charge entfernen">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            @endforeach
+        </div>
+
+        @error('initial_batches') <div class="premium-error">{{ $message }}</div> @enderror
+        @error('initial_batches.*.quantity') <div class="premium-error">{{ $message }}</div> @enderror
+        @error('initial_batches.*.batch_number') <div class="premium-error">{{ $message }}</div> @enderror
+        @error('initial_batches.*.received_at') <div class="premium-error">{{ $message }}</div> @enderror
+        @error('initial_batches.*.expires_at') <div class="premium-error">{{ $message }}</div> @enderror
+
+        <template id="initial-batch-template">
+            <div class="initial-batch-row">
+                <div class="premium-form-field">
+                    <label>Menge</label>
+                    <input data-name="quantity" type="number" step="0.01" min="0" class="premium-input initial-batch-trigger" placeholder="z. B. 1000">
+                </div>
+
+                <div class="premium-form-field">
+                    <label>Batchnummer optional</label>
+                    <input data-name="batch_number" class="premium-input initial-batch-trigger" placeholder="wird sonst automatisch erzeugt">
+                </div>
+
+                <div class="premium-form-field">
+                    <label>Wareneingangsdatum</label>
+                    <input data-name="received_at" type="date" class="premium-input">
+                </div>
+
+                <div class="premium-form-field">
+                    <label>Ablaufdatum optional</label>
+                    <input data-name="expires_at" type="date" class="premium-input initial-batch-trigger">
+                </div>
+
+                <button type="button" class="premium-icon-btn premium-danger initial-batch-remove" title="Charge entfernen">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </template>
+    </div>
+
+    <style>
+        .initial-batch-card {
+            border: 1px solid #e4d7bf;
+            border-radius: 18px;
+            padding: 16px;
+            background: #fffdf8;
+        }
+
+        .initial-batch-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .initial-batch-head h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 950;
+            color: #111111;
+        }
+
+        .initial-batch-head p {
+            margin: 5px 0 0;
+            color: #7a7064;
+            font-weight: 700;
+        }
+
+        .initial-batch-badge {
+            border-radius: 999px;
+            padding: 6px 10px;
+            background: #fff7dc;
+            border: 1px solid #d4af37;
+            font-size: 12px;
+            font-weight: 900;
+            color: #111111;
+            white-space: nowrap;
+        }
+
+        .initial-batch-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr auto;
+            gap: 10px;
+            align-items: end;
+            padding: 12px;
+            border: 1px solid #eadfcd;
+            border-radius: 16px;
+            background: #ffffff;
+            margin-top: 10px;
+        }
+
+        .initial-batch-row:first-child {
+            margin-top: 0;
+        }
+
+        @media (max-width: 1100px) {
+            .initial-batch-row {
+                grid-template-columns: repeat(2, minmax(220px, 1fr));
+            }
+        }
+
+        @media (max-width: 700px) {
+            .initial-batch-head,
+            .initial-batch-row {
+                display: grid;
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const wrapper = document.getElementById('initial-batches-wrapper');
+            const template = document.getElementById('initial-batch-template');
+
+            if (!wrapper || !template) return;
+
+            const defaultReceived = wrapper.dataset.defaultReceived || '';
+
+            function rows() {
+                return Array.from(wrapper.querySelectorAll('.initial-batch-row'));
+            }
+
+            function hasUserData(row) {
+                const quantity = row.querySelector('[data-name="quantity"]')?.value || '';
+                const batchNumber = row.querySelector('[data-name="batch_number"]')?.value || '';
+                const expiresAt = row.querySelector('[data-name="expires_at"]')?.value || '';
+
+                return quantity.trim() !== '' || batchNumber.trim() !== '' || expiresAt.trim() !== '';
+            }
+
+            function reindex() {
+                rows().forEach((row, index) => {
+                    row.querySelectorAll('[data-name]').forEach((field) => {
+                        field.name = `initial_batches[${index}][${field.dataset.name}]`;
+
+                        if (field.dataset.name === 'received_at' && !field.value) {
+                            field.value = defaultReceived;
+                        }
+                    });
+                });
+            }
+
+            function bind(row) {
+                row.querySelectorAll('.initial-batch-trigger').forEach((field) => {
+                    if (field.dataset.bound === '1') return;
+                    field.dataset.bound = '1';
+                    field.addEventListener('input', ensureEmptyRow);
+                    field.addEventListener('change', ensureEmptyRow);
+                });
+
+                const remove = row.querySelector('.initial-batch-remove');
+
+                if (remove && remove.dataset.bound !== '1') {
+                    remove.dataset.bound = '1';
+
+                    remove.addEventListener('click', function () {
+                        if (rows().length <= 1) {
+                            row.querySelectorAll('[data-name]').forEach((field) => {
+                                field.value = field.dataset.name === 'received_at' ? defaultReceived : '';
+                            });
+                        } else {
+                            row.remove();
+                        }
+
+                        reindex();
+                        ensureEmptyRow();
+                    });
+                }
+            }
+
+            function bindAll() {
+                rows().forEach(bind);
+            }
+
+            function addRow() {
+                const clone = template.content.cloneNode(true);
+                const row = clone.querySelector('.initial-batch-row');
+                row.querySelector('[data-name="received_at"]').value = defaultReceived;
+                wrapper.appendChild(clone);
+                reindex();
+                bindAll();
+            }
+
+            function ensureEmptyRow() {
+                const currentRows = rows();
+                const last = currentRows[currentRows.length - 1];
+
+                if (last && hasUserData(last)) {
+                    addRow();
+                }
+            }
+
+            bindAll();
+            reindex();
+            ensureEmptyRow();
+        });
+    </script>
+@endif
+{{-- INITIAL_BATCH_ON_CREATE_END --}}
+
 {{-- CATEGORY_VISIBLE_BLOCK_START --}}
 @php
     $categoryOptionsForProductForm = \App\Models\ProductCategory::query()
