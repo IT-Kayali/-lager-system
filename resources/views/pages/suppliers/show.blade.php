@@ -31,6 +31,10 @@
                     <span><i class="bi bi-envelope"></i> {{ $supplier->email }}</span>
                 @endif
 
+                @if ($supplier->phone)
+                    <span><i class="bi bi-telephone"></i> {{ $supplier->phone }}</span>
+                @endif
+
                 @if ($supplier->whatsapp ?: $supplier->phone)
                     <span>
                         <x-whatsapp-link :number="$supplier->whatsapp ?: $supplier->phone" label="WhatsApp" :country-code="$supplier->phone_country_code" />
@@ -79,6 +83,11 @@
                 <div>
                     <span>E-Mail</span>
                     <strong>{{ $supplier->email ?: '—' }}</strong>
+                </div>
+
+                <div>
+                    <span>Telefon</span>
+                    <strong>{{ $supplier->phone ?: '—' }}</strong>
                 </div>
 
                 <div>
