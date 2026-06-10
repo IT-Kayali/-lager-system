@@ -10,16 +10,21 @@
     @endif
 
     <section class="premium-card">
-        <div class="premium-toolbar">
-            <form method="GET" action="{{ route('suppliers.index') }}" class="premium-search">
-                <input name="search" value="{{ $search }}" class="premium-input" style="min-width:280px;" placeholder="Lieferant suchen...">
+        <div class="premium-toolbar suppliers-toolbar">
+            <form method="GET" action="{{ route('suppliers.index') }}" class="suppliers-search">
+                <input
+                    name="search"
+                    value="{{ $search ?? '' }}"
+                    class="premium-input"
+                    placeholder="Lieferant suchen..."
+                >
 
                 <button class="premium-btn" type="submit">
                     <i class="bi bi-search"></i>
                     Suchen
                 </button>
 
-                @if ($search)
+                @if (! empty($search))
                     <a href="{{ route('suppliers.index') }}" class="premium-btn">
                         <i class="bi bi-x-lg"></i>
                         Zurücksetzen
@@ -34,7 +39,7 @@
         </div>
 
         <div class="premium-table-wrap">
-            <table class="premium-table">
+            <table class="premium-table suppliers-clean-table">
                 <thead>
                     <tr>
                         <th>Nummer</th>
@@ -45,10 +50,13 @@
                         <th>Aktionen</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     @forelse ($suppliers as $supplier)
                         <tr>
-                            <td><span class="premium-code">{{ $supplier->supplier_number }}</span></td>
+                            <td>
+                                <span class="premium-code">{{ $supplier->supplier_number }}</span>
+                            </td>
 
                             <td>
                                 <strong>{{ $supplier->company_name }}</strong>
@@ -58,12 +66,10 @@
                             <td>
                                 <div>{{ $supplier->email ?: '—' }}</div>
 
-                                @if ($supplier->phone)
-                                    <div class="premium-muted">{{ $supplier->phone }}</div>
-                                @endif
-
                                 @if ($supplier->whatsapp ?: $supplier->phone)
-                                    <x-whatsapp-link :number="$supplier->phone" :label="$supplier->phone" :country-code="$supplier->phone_country_code" />
+                                    <x-whatsapp-link :number="$supplier->whatsapp ?: $supplier->phone" label="WhatsApp" :country-code="$supplier->phone_country_code" />
+                                @else
+                                    <div class="premium-muted">—</div>
                                 @endif
                             </td>
 
@@ -75,10 +81,16 @@
                                 @endif
                             </td>
 
-                            <td>{{ $supplier->products_count }}</td>
+                            <td>
+                                <strong>{{ $supplier->products_count }}</strong>
+                            </td>
 
                             <td>
-                                <div class="premium-actions">
+                                <div class="premium-actions suppliers-actions">
+                                    <a class="premium-icon-btn" href="{{ route('suppliers.show', $supplier) }}" title="Lieferant anzeigen">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+
                                     <a class="premium-icon-btn" href="{{ route('suppliers.edit', $supplier) }}" title="Bearbeiten">
                                         <i class="bi bi-pencil"></i>
                                     </a>
@@ -108,4 +120,80 @@
             {{ $suppliers->links() }}
         </div>
     </section>
+
+    <style>
+        .suppliers-toolbar {
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .suppliers-search {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .suppliers-search .premium-input {
+            width: 390px;
+            max-width: 100%;
+        }
+
+        .suppliers-clean-table {
+            min-width: 980px;
+        }
+
+        .suppliers-clean-table th:nth-child(1),
+        .suppliers-clean-table td:nth-child(1) {
+            width: 13%;
+        }
+
+        .suppliers-clean-table th:nth-child(2),
+        .suppliers-clean-table td:nth-child(2) {
+            width: 18%;
+        }
+
+        .suppliers-clean-table th:nth-child(3),
+        .suppliers-clean-table td:nth-child(3) {
+            width: 22%;
+        }
+
+        .suppliers-clean-table th:nth-child(4),
+        .suppliers-clean-table td:nth-child(4) {
+            width: 27%;
+        }
+
+        .suppliers-clean-table th:nth-child(5),
+        .suppliers-clean-table td:nth-child(5) {
+            width: 8%;
+            text-align: center !important;
+        }
+
+        .suppliers-clean-table th:nth-child(6),
+        .suppliers-clean-table td:nth-child(6) {
+            width: 12%;
+            text-align: right !important;
+        }
+
+        .suppliers-actions {
+            justify-content: flex-end !important;
+            flex-wrap: nowrap !important;
+            gap: 8px !important;
+        }
+
+        .suppliers-actions form {
+            margin: 0 !important;
+        }
+
+        @media (max-width: 900px) {
+            .suppliers-toolbar {
+                display: grid;
+            }
+
+            .suppliers-search,
+            .suppliers-search .premium-input {
+                width: 100%;
+            }
+        }
+    </style>
 </x-layouts.premium>

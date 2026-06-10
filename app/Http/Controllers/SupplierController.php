@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
 use App\Models\Supplier;
+use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -53,6 +54,24 @@ class SupplierController extends Controller
         return redirect()
             ->route('suppliers.index')
             ->with('success', 'Lieferant wurde erstellt.');
+    }
+
+    public function show(Supplier $supplier): View
+    {
+        $products = Product::query()
+            ->with(['categories', 'batches', 'supplierRecord'])
+            ->where(function ($query) use ($supplier) {
+                $query->where('supplier_id', $supplier->id)
+                    ->orWhere('supplier', $supplier->company_name)
+                    ->orWhere('supplier', $supplier->supplier_number);
+            })
+            ->orderBy('name')
+            ->get();
+
+        return view('pages.suppliers.show', [
+            'supplier' => $supplier,
+            'products' => $products,
+        ]);
     }
 
     public function edit(Supplier $supplier): View
