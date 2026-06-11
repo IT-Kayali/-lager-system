@@ -357,6 +357,28 @@
         .no-logo-payment {
             font-size: 11px;
         }
+    
+        /* PDF_HARD_BACKGROUND_STYLE_START */
+        .pdf-hard-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 210mm;
+            height: 297mm;
+            object-fit: cover;
+            z-index: 0;
+        }
+
+        .page {
+            position: relative;
+        }
+
+        .page > *:not(.pdf-hard-background) {
+            position: relative;
+            z-index: 1;
+        }
+        /* PDF_HARD_BACKGROUND_STYLE_END */
+
     </style>
 </head>
 

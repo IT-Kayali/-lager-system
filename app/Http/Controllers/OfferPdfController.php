@@ -26,8 +26,28 @@ class OfferPdfController extends Controller
         $offer->load(['customer.group', 'items.product']);
 
         $template = DocumentTemplate::byKey($offer->template_type);
-
         $title = $documentLabels[$type];
+
+        $templateName = strtolower((string) ($template->name ?? ''));
+        $isNoLogoPdfTemplate = str_contains($templateName, 'ohne') || ! (bool) ($template->show_logo ?? false);
+
+        if ($type === 'delivery-note') {
+            $pdfView = $isNoLogoPdfTemplate ? 'pdf.delivery-note-ohne' : 'pdf.delivery-note';
+
+            // Wichtig: Lieferschein nutzt NUR eigene Lieferschein-Dateien.
+            // Kein Fallback mehr auf Angebot/Rechnung.
+            $logoDataUri = $isNoLogoPdfTemplate
+                ? null
+                : $this->publicStorageDataUri($template->delivery_logo_path);
+
+            $backgroundDataUri = $this->publicStorageDataUri($template->delivery_background_image_path);
+        } else {
+            $pdfView = $isNoLogoPdfTemplate ? 'pdf.offer-document-ohne' : 'pdf.offer-document';
+
+            // Angebot/Rechnung nutzt NUR eigene Angebot/Rechnung-Dateien.
+            $logoDataUri = $this->publicStorageDataUri($template->logo_path);
+            $backgroundDataUri = $this->publicStorageDataUri($template->background_image_path);
+        }
 
         $activityEvents = [
             'offer' => 'offer.pdf.generated',
@@ -40,22 +60,13 @@ class OfferPdfController extends Controller
             'template' => $template->name,
         ]);
 
-        $templateName = strtolower((string) ($template->name ?? ''));
-        $isNoLogoPdfTemplate = str_contains($templateName, 'ohne') || ! (bool) ($template->show_logo ?? false);
-
-        if ($type === 'delivery-note') {
-            $pdfView = $isNoLogoPdfTemplate ? 'pdf.delivery-note-ohne' : 'pdf.delivery-note';
-        } else {
-            $pdfView = $isNoLogoPdfTemplate ? 'pdf.offer-document-ohne' : 'pdf.offer-document';
-        }
-
         $pdf = Pdf::loadView($pdfView, [
             'offer' => $offer,
             'template' => $template,
             'title' => $title,
             'documentType' => $type,
-            'logoDataUri' => $this->logoDataUri($template),
-            'backgroundDataUri' => $this->backgroundDataUri($template),
+            'logoDataUri' => $logoDataUri,
+            'backgroundDataUri' => $backgroundDataUri,
         ])->setPaper('a4');
 
         $filenamePrefixes = [
@@ -64,51 +75,35 @@ class OfferPdfController extends Controller
             'delivery-note' => 'lieferschein-',
         ];
 
-        $filename = $filenamePrefixes[$type] . $offer->offer_number . '.pdf';
-
-        return $pdf->stream($filename);
+        return $pdf->stream($filenamePrefixes[$type] . $offer->offer_number . '.pdf');
     }
 
-
-    private function backgroundDataUri(DocumentTemplate $template): ?string
+    private function publicStorageDataUri(?string $relativePath): ?string
     {
-        if (! $template->background_image_path) {
+        if (! $relativePath) {
             return null;
         }
 
         $paths = [
-            storage_path('app/public/' . $template->background_image_path),
-            public_path('storage/' . $template->background_image_path),
+            storage_path('app/public/' . $relativePath),
+            public_path('storage/' . $relativePath),
         ];
 
         foreach ($paths as $path) {
-            if (is_file($path)) {
-                $mime = mime_content_type($path) ?: 'image/jpeg';
-
-                return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
+            if (! is_file($path)) {
+                continue;
             }
-        }
 
-        return null;
-    }
+            $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 
-    private function logoDataUri(DocumentTemplate $template): ?string
-    {
-        if (! $template->show_logo || ! $template->logo_path) {
-            return null;
-        }
+            $mime = match ($extension) {
+                'jpg', 'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'webp' => 'image/webp',
+                default => mime_content_type($path) ?: 'image/jpeg',
+            };
 
-        $paths = [
-            storage_path('app/public/' . $template->logo_path),
-            public_path('storage/' . $template->logo_path),
-        ];
-
-        foreach ($paths as $path) {
-            if (is_file($path)) {
-                $mime = mime_content_type($path) ?: 'image/png';
-
-                return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
-            }
+            return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
         }
 
         return null;

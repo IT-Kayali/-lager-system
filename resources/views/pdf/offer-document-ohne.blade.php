@@ -226,6 +226,46 @@
         body.glacial-force {
             font-family: 'GlacialPDF', DejaVu Sans, sans-serif !important;
         }
+    
+        /* PDF_BACKGROUND_SUPPORT_START */
+        .pdf-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 210mm;
+            height: 297mm;
+            object-fit: cover;
+            z-index: 0;
+        }
+
+        .page > :not(.pdf-background) {
+            position: relative;
+            z-index: 1;
+        }
+        /* PDF_BACKGROUND_SUPPORT_END */
+
+    
+        /* PDF_HARD_BACKGROUND_STYLE_START */
+        .pdf-hard-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 210mm;
+            height: 297mm;
+            object-fit: cover;
+            z-index: 0;
+        }
+
+        .page {
+            position: relative;
+        }
+
+        .page > *:not(.pdf-hard-background) {
+            position: relative;
+            z-index: 1;
+        }
+        /* PDF_HARD_BACKGROUND_STYLE_END */
+
     </style>
 </head>
 
@@ -338,6 +378,16 @@
 
 @foreach ($chunks as $chunk)
     <div class="page">
+        {{-- PDF_HARD_BACKGROUND_IMAGE_START --}}
+        @if (! empty($backgroundDataUri))
+            <img class="pdf-hard-background" src="{{ $backgroundDataUri }}" alt="">
+        @endif
+        {{-- PDF_HARD_BACKGROUND_IMAGE_END --}}
+        {{-- PDF_BACKGROUND_IMAGE_START --}}
+        @if (! empty($backgroundDataUri))
+            <img class="pdf-background" src="{{ $backgroundDataUri }}" alt="">
+        @endif
+        {{-- PDF_BACKGROUND_IMAGE_END --}}
         @if ($chunk['first'])
             <div class="title">{{ $title }}</div>
 

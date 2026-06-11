@@ -1,4 +1,4 @@
-<x-layouts.premium title="PDF-Vorlagen" subtitle="Firmendaten, Logo und Footer für Angebote und Rechnungen bearbeiten.">
+<x-layouts.premium title="PDF-Vorlagen" subtitle="Firmendaten, Logo, Footer und Lieferschein-Texte bearbeiten.">
     @if (session('success'))
         <div class="premium-alert">{{ session('success') }}</div>
     @endif
@@ -18,6 +18,13 @@
                         </div>
                     </div>
                 @endif
+                                        @if ($template->logo_path)
+                                            <label class="pdf-asset-remove-box">
+                                                <input type="checkbox" name="remove_logo" value="1">
+                                                Logo Angebot/Rechnung entfernen
+                                            </label>
+                                        @endif
+
 
                 <form method="POST" action="{{ route('document-templates.update', $template) }}" enctype="multipart/form-data">
                     @csrf
@@ -97,7 +104,7 @@
                         </div>
 
                         <div class="premium-form-field">
-                            <label>Logo hochladen</label>
+                            <label>Logo Angebot/Rechnung hochladen</label>
                             <input name="logo" type="file" accept="image/png,image/jpeg,image/webp" class="premium-input">
                             <div class="premium-muted" style="margin-top:6px;">
                                 Empfohlen: PNG oder JPG, transparente Logos funktionieren gut.
@@ -106,7 +113,7 @@
                         </div>
 
                         <div class="premium-form-field">
-                            <label>PDF-Hintergrund hochladen</label>
+                            <label>PDF-Hintergrund Angebot/Rechnung hochladen</label>
                             <input name="background_image" type="file" accept="image/png,image/jpeg,image/webp" class="premium-input">
 
                             @if ($template->background_image_path)
@@ -117,6 +124,13 @@
                                     </div>
                                 </div>
                             @endif
+                                        @if ($template->background_image_path)
+                                            <label class="pdf-asset-remove-box">
+                                                <input type="checkbox" name="remove_background_image" value="1">
+                                                Hintergrund Angebot/Rechnung entfernen
+                                            </label>
+                                        @endif
+
 
                             <div class="premium-muted" style="margin-top:6px;">
                                 Empfohlen: A4 Hochformat als JPG oder PNG. Dieses Bild wird im PDF als fixer Hintergrund verwendet.
@@ -136,6 +150,165 @@
 
 
 
+
+
+
+                        {{-- DELIVERY_NOTE_ASSETS_SETTINGS_START --}}
+                        <div class="premium-card" style="box-shadow:none;">
+                            <h3 style="font-size:18px; font-weight:900; margin:0 0 8px;">Lieferschein Logo & Hintergrund</h3>
+                            <div class="premium-muted" style="margin-bottom:14px;">
+                                Diese Dateien gelten nur für den Lieferschein. Angebot und Rechnung bleiben davon getrennt.
+                            </div>
+
+                            <div class="premium-form-grid">
+                                <div class="premium-form-field">
+                                    <label>Logo Lieferschein hochladen</label>
+                                    <input name="delivery_logo" type="file" accept="image/png,image/jpeg,image/webp" class="premium-input">
+
+                                    @if ($template->delivery_logo_path)
+                                        <div style="margin-top:12px;">
+                                            <div class="premium-muted" style="margin-bottom:8px;">Aktuelles Lieferschein-Logo</div>
+                                            <div style="background:#fffaf1; border:1px solid rgba(227,202,110,.45); border-radius:18px; padding:14px; display:inline-flex;">
+                                                <img src="{{ asset('storage/' . $template->delivery_logo_path) }}" alt="Lieferschein Logo" style="max-width:180px; max-height:90px; object-fit:contain;">
+                                            </div>
+                                        </div>
+                                    @endif
+                                        @if ($template->delivery_logo_path)
+                                            <label class="pdf-asset-remove-box">
+                                                <input type="checkbox" name="remove_delivery_logo" value="1">
+                                                Logo Lieferschein entfernen
+                                            </label>
+                                        @endif
+
+
+                                    @error('delivery_logo') <div class="premium-error">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div class="premium-form-field">
+                                    <label>PDF-Hintergrund Lieferschein hochladen</label>
+                                    <input name="delivery_background_image" type="file" accept="image/png,image/jpeg,image/webp" class="premium-input">
+
+                                    @if ($template->delivery_background_image_path)
+                                        <div style="margin-top:12px;">
+                                            <div class="premium-muted" style="margin-bottom:8px;">Aktueller Lieferschein-Hintergrund</div>
+                                            <div style="background:#fffaf1; border:1px solid rgba(227,202,110,.45); border-radius:18px; padding:14px; display:inline-flex;">
+                                                <img src="{{ asset('storage/' . $template->delivery_background_image_path) }}" alt="Lieferschein Hintergrund" style="max-width:180px; max-height:120px; object-fit:contain;">
+                                            </div>
+                                        </div>
+                                    @endif
+                                        @if ($template->delivery_background_image_path)
+                                            <label class="pdf-asset-remove-box">
+                                                <input type="checkbox" name="remove_delivery_background_image" value="1">
+                                                Hintergrund Lieferschein entfernen
+                                            </label>
+                                        @endif
+
+
+                                    <div class="premium-muted" style="margin-top:6px;">
+                                        Empfohlen: A4 Hochformat als JPG oder PNG. Dieser Hintergrund wird nur im Lieferschein verwendet.
+                                    </div>
+
+                                    @error('delivery_background_image') <div class="premium-error">{{ $message }}</div> @enderror
+                                </div>
+                            </div>
+                        </div>
+                        {{-- DELIVERY_NOTE_ASSETS_SETTINGS_END --}}
+
+                        {{-- DELIVERY_NOTE_TEMPLATE_SETTINGS_START --}}
+                        <div class="premium-card" style="box-shadow:none;">
+                            <h3 style="font-size:18px; font-weight:900; margin:0 0 8px;">Lieferschein</h3>
+                            <div class="premium-muted" style="margin-bottom:14px;">
+                                Texte und Spalten für den Lieferschein dieser Vorlage.
+                            </div>
+
+                            <div class="premium-form-grid">
+                                <div class="premium-form-field">
+                                    <label>Titel</label>
+                                    <input name="delivery_title" class="premium-input" value="{{ old('delivery_title', $template->delivery_title ?: ($template->show_logo ? 'Lieferschein' : 'Delivery Notice')) }}">
+                                    @error('delivery_title') <div class="premium-error">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div class="premium-form-field">
+                                    <label>Datum-Label</label>
+                                    <input name="delivery_date_label" class="premium-input" value="{{ old('delivery_date_label', $template->delivery_date_label ?: ($template->show_logo ? 'Datum:' : 'Date:')) }}">
+                                    @error('delivery_date_label') <div class="premium-error">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div class="premium-form-field">
+                                    <label>Kunden-Nr.-Label</label>
+                                    <input name="delivery_customer_number_label" class="premium-input" value="{{ old('delivery_customer_number_label', $template->delivery_customer_number_label ?: ($template->show_logo ? 'Kunden-Nr.:' : 'Customer Nr.:')) }}">
+                                    @error('delivery_customer_number_label') <div class="premium-error">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div class="premium-form-field">
+                                    <label>Bestell-Nr.-Label</label>
+                                    <input name="delivery_order_number_label" class="premium-input" value="{{ old('delivery_order_number_label', $template->delivery_order_number_label ?: ($template->show_logo ? 'Bestell-Nr.:' : 'Order Nr.:')) }}">
+                                    @error('delivery_order_number_label') <div class="premium-error">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div class="premium-form-field">
+                                    <label>Versandart-Label</label>
+                                    <input name="delivery_shipping_method_label" class="premium-input" value="{{ old('delivery_shipping_method_label', $template->delivery_shipping_method_label ?: ($template->show_logo ? 'Versandart:' : 'Shipping Method:')) }}">
+                                    @error('delivery_shipping_method_label') <div class="premium-error">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div class="premium-form-field">
+                                    <label>Versandart-Text</label>
+                                    <input name="delivery_shipping_method_text" class="premium-input" value="{{ old('delivery_shipping_method_text', $template->delivery_shipping_method_text ?: 'Lieferung oder Abholung') }}">
+                                    @error('delivery_shipping_method_text') <div class="premium-error">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div class="premium-form-field">
+                                    <label>Spalte Menge</label>
+                                    <input name="delivery_quantity_label" class="premium-input" value="{{ old('delivery_quantity_label', $template->delivery_quantity_label ?: ($template->show_logo ? 'Menge' : 'Quantity')) }}">
+                                    @error('delivery_quantity_label') <div class="premium-error">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div class="premium-form-field">
+                                    <label>Spalte Produkt / Bezeichnung</label>
+                                    <input name="delivery_product_label" class="premium-input" value="{{ old('delivery_product_label', $template->delivery_product_label ?: ($template->show_logo ? 'Bezeichnung' : 'Product')) }}">
+                                    @error('delivery_product_label') <div class="premium-error">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div class="premium-form-field full">
+                                    <label>Einleitungstext</label>
+                                    <textarea name="delivery_intro_text" rows="4" class="premium-textarea">{{ old('delivery_intro_text', $template->delivery_intro_text) }}</textarea>
+                                    <div class="premium-muted" style="margin-top:6px;">Mehrere Zeilen sind möglich.</div>
+                                    @error('delivery_intro_text') <div class="premium-error">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div class="premium-form-field full">
+                                    <label>Schlusssatz / Hinweis</label>
+                                    <textarea name="delivery_footer_text" rows="3" class="premium-textarea">{{ old('delivery_footer_text', $template->delivery_footer_text) }}</textarea>
+                                    @error('delivery_footer_text') <div class="premium-error">{{ $message }}</div> @enderror
+                                </div>
+
+                                {{-- DELIVERY_FOOTER_EDIT_SETTINGS_START --}}
+                                <div class="premium-form-field full">
+                                    <label>Lieferschein-Footer links</label>
+                                    <textarea name="delivery_footer_left_text" rows="5" class="premium-textarea" placeholder="z. B. Firmenname, Adresse, Land">{{ old('delivery_footer_left_text', $template->delivery_footer_left_text) }}</textarea>
+                                    <div class="premium-muted" style="margin-top:6px;">Leer lassen = automatische Firmendaten verwenden.</div>
+                                    @error('delivery_footer_left_text') <div class="premium-error">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div class="premium-form-field full">
+                                    <label>Lieferschein-Footer Mitte</label>
+                                    <textarea name="delivery_footer_middle_text" rows="5" class="premium-textarea" placeholder="z. B. Kontakt, Telefon, E-Mail, Website">{{ old('delivery_footer_middle_text', $template->delivery_footer_middle_text) }}</textarea>
+                                    <div class="premium-muted" style="margin-top:6px;">Leer lassen = automatische Kontaktdaten verwenden.</div>
+                                    @error('delivery_footer_middle_text') <div class="premium-error">{{ $message }}</div> @enderror
+                                </div>
+
+                                <div class="premium-form-field full">
+                                    <label>Lieferschein-Footer rechts</label>
+                                    <textarea name="delivery_footer_right_text" rows="5" class="premium-textarea" placeholder="z. B. USt-ID, Finanzamt, zusätzliche Hinweise">{{ old('delivery_footer_right_text', $template->delivery_footer_right_text) }}</textarea>
+                                    <div class="premium-muted" style="margin-top:6px;">Leer lassen = USt-ID und Footer-Hinweis verwenden.</div>
+                                    @error('delivery_footer_right_text') <div class="premium-error">{{ $message }}</div> @enderror
+                                </div>
+                                {{-- DELIVERY_FOOTER_EDIT_SETTINGS_END --}}
+
+                            </div>
+                        </div>
+                        {{-- DELIVERY_NOTE_TEMPLATE_SETTINGS_END --}}
 
                         <div class="premium-form-field">
                             <label>Footer-Hinweise</label>
@@ -162,4 +335,33 @@
             </section>
         @endforeach
     </div>
+
+<style>
+    /* PDF_ASSET_REMOVE_STYLE_START */
+    .pdf-asset-remove-box {
+        margin-top: 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        padding: 10px 12px;
+        border: 1px solid rgba(239,68,68,.25);
+        background: rgba(239,68,68,.07);
+        color: #991b1b;
+        border-radius: 14px;
+        font-weight: 900;
+        cursor: pointer;
+    }
+
+    .pdf-asset-remove-box input {
+        width: 16px;
+        height: 16px;
+        accent-color: #ef4444;
+    }
+
+    .pdf-asset-remove-box:hover {
+        background: rgba(239,68,68,.12);
+    }
+    /* PDF_ASSET_REMOVE_STYLE_END */
+</style>
+
 </x-layouts.premium>
