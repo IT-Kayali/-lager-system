@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <style>
+        @page { margin: 0; size: A4 portrait; }
 
         @font-face {
             font-family: 'GlacialPDF';
@@ -18,32 +19,20 @@
             src: url("file://{{ public_path('fonts/glacial/GlacialIndifference-Bold.ttf') }}") format("truetype");
         }
 
-        @page {
-            margin: 0;
-            size: A4 portrait;
-        }
-}") format("opentype");
-        }
-}") format("opentype");
-        }
-
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
             padding: 0;
+            font-family: 'GlacialPDF', DejaVu Sans, sans-serif;
             background: #f4f0ed;
             color: #111;
-            font-family: 'GlacialPDF', DejaVu Sans, sans-serif;
         }
 
         .page {
             position: relative;
             width: 210mm;
             height: 297mm;
-            padding: 0;
             background: #f4f0ed;
             page-break-after: always;
             overflow: hidden;
@@ -53,411 +42,269 @@
             page-break-after: auto;
         }
 
-        .title {
+        .pdf-background {
             position: absolute;
-            top: 26mm;
-            left: 21mm;
-            font-size: 31pt;
-            font-weight: 400;
-            letter-spacing: 0.4px;
-            line-height: 1;
+            inset: 0;
+            width: 210mm;
+            height: 297mm;
+            object-fit: cover;
+            z-index: 0;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            padding: 22mm 20mm 18mm;
+        }
+
+        .title {
+            font-size: 24pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin: 0 0 8mm;
         }
 
         .meta {
-            position: absolute;
-            top: 51mm;
-            left: 21mm;
             font-size: 10.5pt;
-            line-height: 1.15;
-        }
-
-        .meta strong {
-            font-weight: 400;
-        }
-
-        .line {
-            position: absolute;
-            top: 69mm;
-            left: 21mm;
-            width: 82mm;
-            border-top: 1.2px solid #766765;
+            line-height: 1.4;
+            margin-bottom: 8mm;
         }
 
         .customer {
-            position: absolute;
-            top: 80mm;
-            left: 21mm;
-            width: 95mm;
-            font-size: 9.8pt;
-            line-height: 1.25;
-        }
-
-        .table-wrap {
-            position: absolute;
-            top: 116mm;
-            left: 18mm;
-            width: 174mm;
-        }
-
-        .table-wrap.continuation {
-            top: 32mm;
+            font-size: 10.5pt;
+            line-height: 1.35;
+            margin-bottom: 10mm;
         }
 
         table.items {
-            width: 174mm;
-            border-collapse: separate;
-            border-spacing: 0;
+            width: 170mm;
+            border-collapse: collapse;
             table-layout: fixed;
         }
 
         table.items th {
             background: #d2cbc7;
-            font-size: 8.8pt;
-            font-weight: 600;
-            letter-spacing: 0.8px;
-            text-transform: uppercase;
-            padding: 2.45mm 0;
+            font-size: 9.4pt;
+            font-weight: 700;
+            padding: 2.35mm 2mm;
+            border-bottom: 1px solid #999;
+            text-align: left;
             line-height: 1;
-        }
-
-        table.items th:first-child {
-            border-radius: 4.5mm 0 0 4.5mm;
-            padding-left: 4mm;
-        }
-
-        table.items th:last-child {
-            border-radius: 0 4.5mm 4.5mm 0;
-            padding-right: 4mm;
         }
 
         table.items td {
-            font-size: 8.8pt;
-            font-weight: 400;
-            padding-top: 3.25mm;
-            line-height: 1;
+            font-size: 9.4pt;
+            padding: 1.85mm 2mm;
+            border-bottom: 1px solid #c8c0bc;
             vertical-align: top;
+            line-height: 1.12;
         }
 
         table.items th:nth-child(1),
         table.items td:nth-child(1) {
-            width: 43mm;
-            text-align: left;
-            padding-left: 4mm;
+            width: 70mm;
         }
 
         table.items th:nth-child(2),
         table.items td:nth-child(2) {
-            width: 39mm;
-            text-align: left;
+            width: 30mm;
+            text-align: right;
         }
 
         table.items th:nth-child(3),
         table.items td:nth-child(3) {
-            width: 42mm;
-            text-align: left;
+            width: 34mm;
+            text-align: right;
         }
 
         table.items th:nth-child(4),
         table.items td:nth-child(4) {
-            width: 50mm;
-            text-align: right;
-            padding-right: 4mm;
-        }
-
-        .bottom {
-            width: 174mm;
-            margin-top: 15mm;
-            display: table;
-            page-break-inside: avoid;
-        }
-
-        .bottom-left {
-            display: table-cell;
-            width: 92mm;
-            vertical-align: top;
-            padding-top: 36mm;
-            font-size: 10.5pt;
-            line-height: 1.15;
-        }
-
-        .bottom-right {
-            display: table-cell;
-            width: 82mm;
-            vertical-align: top;
+            width: 36mm;
             text-align: right;
         }
 
-        .summary-line {
-            width: 70mm;
-            border-top: 1.2px solid #766765;
-            margin-left: auto;
-            margin-bottom: 3mm;
+        .summary {
+            position: absolute;
+            right: 20mm;
+            bottom: 28mm;
+            width: 72mm;
+            font-size: 11pt;
+            background: rgba(244, 240, 237, .94);
+            padding-top: 3mm;
         }
 
-        table.summary {
-            width: 70mm;
-            margin-left: auto;
+        .summary table {
+            width: 100%;
             border-collapse: collapse;
-            font-size: 8.8pt;
         }
 
-        table.summary td {
-            padding: 1mm 0;
+        .summary td {
+            padding: 2mm 0;
+            border-top: 1px solid #999;
         }
 
-        table.summary td:first-child {
-            width: 32mm;
-            text-align: left;
-            font-weight: 700;
-        }
-
-        table.summary td:last-child {
-            width: 38mm;
+        .summary td:last-child {
             text-align: right;
             font-weight: 700;
-            white-space: nowrap;
-        }
-    
-        body,
-        body * {
-            font-family: 'GlacialPDF', DejaVu Sans, sans-serif !important;
         }
 
-        body.glacial-force {
-            font-family: 'GlacialPDF', DejaVu Sans, sans-serif !important;
-        }
-    
-        /* PDF_BACKGROUND_SUPPORT_START */
-        .pdf-background {
+        .note {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 210mm;
-            height: 297mm;
-            object-fit: cover;
-            z-index: 0;
+            left: 20mm;
+            bottom: 28mm;
+            width: 82mm;
+            font-size: 9.8pt;
+            line-height: 1.35;
+            background: rgba(244, 240, 237, .94);
+            padding-top: 3mm;
         }
 
-        .page > :not(.pdf-background) {
-            position: relative;
-            z-index: 1;
-        }
-        /* PDF_BACKGROUND_SUPPORT_END */
-
-    
-        /* PDF_HARD_BACKGROUND_STYLE_START */
-        .pdf-hard-background {
+        .page-number {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 210mm;
-            height: 297mm;
-            object-fit: cover;
-            z-index: 0;
+            right: 20mm;
+            bottom: 11mm;
+            font-size: 8pt;
+            color: #777;
         }
-
-        .page {
-            position: relative;
-        }
-
-        .page > *:not(.pdf-hard-background) {
-            position: relative;
-            z-index: 1;
-        }
-        /* PDF_HARD_BACKGROUND_STYLE_END */
-
     </style>
 </head>
-
-<body class="glacial-force">
+<body>
 @php
-    $documentType = $documentType ?? 'offer';
-
-    $title = 'PRICE OFFER';
-    $numberLabel = $documentType === 'invoice' ? 'INVOICE NR.:' : 'OFFER NR.:';
-
-    $validUntilText = null;
-    if (!empty($offer->valid_until)) {
-        $validUntilText = \Carbon\Carbon::parse($offer->valid_until)->format('d /m /Y - H:i');
-    }
+    $documentTitle = ($documentType ?? null) === 'invoice' ? 'INVOICE' : 'PRICE OFFER';
+    $numberLabel = ($documentType ?? null) === 'invoice' ? 'INVOICE NR.:' : 'OFFER NR.:';
 
     $customerAddressLines = [];
     if ($offer->customer) {
-        if ($offer->customer->street ?? false) {
-            $customerAddressLines[] = trim(($offer->customer->street ?? '') . ' ' . ($offer->customer->house_number ?? ''));
-        }
+        $customerAddressLines[] = $offer->customer->company_name ?? null;
+        $customerAddressLines[] = $offer->customer->contact_person ?? null;
 
-        $cityLine = trim(($offer->customer->postal_code ?? '') . ' ' . ($offer->customer->city ?? ''));
-        if ($cityLine !== '') {
-            $customerAddressLines[] = $cityLine;
-        }
+        $streetLine = trim((string) (($offer->customer->billing_street ?? '') . ' ' . ($offer->customer->billing_house_number ?? '')));
+        $cityLine = trim((string) (($offer->customer->billing_postal_code ?? '') . ' ' . ($offer->customer->billing_city ?? '')));
 
-        if ($offer->customer->country ?? false) {
-            $customerAddressLines[] = $offer->customer->country;
+        if ($streetLine !== '') $customerAddressLines[] = $streetLine;
+        if ($cityLine !== '') $customerAddressLines[] = $cityLine;
+        if (! empty($offer->customer->billing_country)) $customerAddressLines[] = $offer->customer->billing_country;
+
+        if (count(array_filter($customerAddressLines)) <= 1 && ! empty($offer->customer->billing_address)) {
+            $customerAddressLines = preg_split('/\R/u', trim((string) $offer->customer->billing_address));
         }
     }
 
-    $items = $offer->items->values();
+    $customerAddressLines = array_values(array_filter($customerAddressLines));
 
-    $subtotal = (float) $offer->items->sum('line_total');
-    $grandTotal = round($subtotal, 2);
+    $shippingGross = (($offer->shipping_method ?? null) === 'Lieferung')
+        ? (float) ($offer->shipping_price_gross ?? 0)
+        : 0.0;
 
-    /*
-      Pagination:
-      Erste Seite: Kopf + max 15 Produkte.
-      Folgeseiten: max 24 Produkte.
-      Letzte Seite mit Summe: max 15 Produkte + Bottom.
-    */
-    $chunks = [];
-    $remaining = $items;
-
-    $firstPageItems = $remaining->take(15);
-    $chunks[] = [
-        'items' => $firstPageItems,
-        'first' => true,
-        'summary' => false,
-    ];
-    $remaining = $remaining->slice(15)->values();
-
-    while ($remaining->count() > 15) {
-        $chunks[] = [
-            'items' => $remaining->take(24),
-            'first' => false,
-            'summary' => false,
+    $items = $offer->items->values()->map(function ($item) {
+        return (object) [
+            'description' => $item->product_name ?? $item->description ?? ($item->product?->name ?? ''),
+            'quantity' => (float) $item->quantity,
+            'unit_price' => (float) $item->unit_price,
+            'line_total' => (float) $item->line_total,
         ];
-        $remaining = $remaining->slice(24)->values();
+    });
+
+    if ($shippingGross > 0) {
+        $items->push((object) [
+            'description' => 'Versand',
+            'quantity' => 1,
+            'unit_price' => round($shippingGross, 2),
+            'line_total' => round($shippingGross, 2),
+        ]);
     }
 
-    $chunks[] = [
-        'items' => $remaining,
-        'first' => false,
-        'summary' => true,
-    ];
+    $grandTotal = round((float) $items->sum('line_total'), 2);
 
+    $firstPageLimit = 12;
+    $normalPageLimit = 17;
+    $lastPageLimit = 12;
 
-    // BILLING_ADDRESS_PDF_START
-    $billingAddressLines = [];
+    $chunks = collect();
+    $remaining = $items->values();
 
-    if ($offer->customer) {
-        $customer = $offer->customer;
+    $chunks->push($remaining->take($firstPageLimit)->values());
+    $remaining = $remaining->slice($firstPageLimit)->values();
 
-        $billingStreet = trim((string) ($customer->billing_street ?? ''));
-        $billingHouseNumber = trim((string) ($customer->billing_house_number ?? ''));
-        $billingPostalCode = trim((string) ($customer->billing_postal_code ?? ''));
-        $billingCity = trim((string) ($customer->billing_city ?? ''));
-        $billingCountry = trim((string) ($customer->billing_country ?? ''));
-
-        $streetLine = trim($billingStreet . ' ' . $billingHouseNumber);
-        if ($streetLine !== '') {
-            $billingAddressLines[] = $streetLine;
-        }
-
-        $cityLine = trim($billingPostalCode . ' ' . $billingCity);
-        if ($cityLine !== '') {
-            $billingAddressLines[] = $cityLine;
-        }
-
-        if ($billingCountry !== '') {
-            $billingAddressLines[] = $billingCountry;
-        }
-
-        if (empty($billingAddressLines) && ! empty($customer->billing_address)) {
-            $billingAddressLines = array_values(array_filter(
-                preg_split('/\r\n|\r|\n/', trim((string) $customer->billing_address)),
-                fn ($line) => trim((string) $line) !== ''
-            ));
-        }
-
-        if (! empty($billingAddressLines)) {
-            $customerAddressLines = $billingAddressLines;
-        }
+    while ($remaining->count() > $lastPageLimit) {
+        $chunks->push($remaining->take($normalPageLimit)->values());
+        $remaining = $remaining->slice($normalPageLimit)->values();
     }
-    // BILLING_ADDRESS_PDF_END
 
+    if ($remaining->count() > 0) {
+        $chunks->push($remaining->values());
+    }
+
+    $pageCount = $chunks->count();
 @endphp
 
-@foreach ($chunks as $chunk)
+@foreach ($chunks as $pageIndex => $pageItems)
     <div class="page">
-        {{-- PDF_HARD_BACKGROUND_IMAGE_START --}}
-        @if (! empty($backgroundDataUri))
-            <img class="pdf-hard-background" src="{{ $backgroundDataUri }}" alt="">
-        @endif
-        {{-- PDF_HARD_BACKGROUND_IMAGE_END --}}
-        {{-- PDF_BACKGROUND_IMAGE_START --}}
         @if (! empty($backgroundDataUri))
             <img class="pdf-background" src="{{ $backgroundDataUri }}" alt="">
         @endif
-        {{-- PDF_BACKGROUND_IMAGE_END --}}
-        @if ($chunk['first'])
-            <div class="title">{{ $title }}</div>
 
-            <div class="meta">
-                {{ $numberLabel }} <strong>{{ $offer->offer_number }}</strong><br>
-                <strong>
-                    @if ($validUntilText)
-                        Valid until: {{ $validUntilText }}
-                    @else
-                        Valid until: {{ now()->format('d /m /Y - H:i') }}
-                    @endif
-                </strong>
-            </div>
+        <div class="content">
+            @if ($pageIndex === 0)
+                <div class="title">{{ $documentTitle }}</div>
 
-            <div class="line"></div>
+                <div class="meta">
+                    <strong>{{ $numberLabel }}</strong> {{ $offer->offer_number }}<br>
+                    <strong>Valid until:</strong> {{ optional($offer->reserved_until)->format('d /m /Y - H:i') }}
+                </div>
 
-            <div class="customer">
-                @if ($offer->customer?->company_name)
-                    {{ $offer->customer->company_name }}<br>
-                @endif
-
-                @foreach ($customerAddressLines as $line)
-                    {{ $line }}<br>
-                @endforeach
-            </div>
-        @endif
-
-        <div class="table-wrap {{ $chunk['first'] ? '' : 'continuation' }}">
-            @if ($chunk['items']->count())
-                <table class="items">
-                    <thead>
-                        <tr>
-                            <th>PRODUCT</th>
-                            <th>QUANTITY</th>
-                            <th>PRICE</th>
-                            <th>SUM</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($chunk['items'] as $item)
-                            <tr>
-                                <td>{{ $item->product_name ?? $item->description ?? '' }}</td>
-                                <td>{{ number_format((float) $item->quantity, 2, ',', '.') }}</td>
-                                <td>{{ number_format((float) $item->unit_price, 2, ',', '.') }}€</td>
-                                <td>{{ number_format((float) $item->line_total, 2, ',', '.') }}€</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            @endif
-
-            @if ($chunk['summary'])
-                <div class="bottom">
-                    <div class="bottom-left">
-                        Please pay the full amount before<br>
-                        the offer expires.
-                    </div>
-
-                    <div class="bottom-right">
-                        <div class="summary-line"></div>
-
-                        <table class="summary">
-                            <tr>
-                                <td>TOTAL:</td>
-                                <td>{{ number_format($grandTotal, 2, ',', '.') }}€</td>
-                            </tr>
-                        </table>
-                    </div>
+                <div class="customer">
+                    @foreach ($customerAddressLines as $line)
+                        {{ $line }}<br>
+                    @endforeach
+                </div>
+            @else
+                <div class="title">{{ $documentTitle }}</div>
+                <div class="meta">
+                    <strong>{{ $numberLabel }}</strong> {{ $offer->offer_number }}
                 </div>
             @endif
+
+            <table class="items">
+                <thead>
+                    <tr>
+                        <th>PRODUCT</th>
+                        <th>QUANTITY</th>
+                        <th>PRICE</th>
+                        <th>SUM</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($pageItems as $item)
+                        <tr>
+                            <td>{{ $item->description }}</td>
+                            <td>{{ number_format((float) $item->quantity, 2, ',', '.') }}</td>
+                            <td>{{ number_format((float) $item->unit_price, 2, ',', '.') }}€</td>
+                            <td>{{ number_format((float) $item->line_total, 2, ',', '.') }}€</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            @if ($loop->last)
+                <div class="note">
+                    Please pay the full amount before<br>
+                    the offer expires.
+                </div>
+
+                <div class="summary">
+                    <table>
+                        <tr>
+                            <td>TOTAL:</td>
+                            <td>{{ number_format($grandTotal, 2, ',', '.') }}€</td>
+                        </tr>
+                    </table>
+                </div>
+            @endif
+
+            <div class="page-number">
+                Seite {{ $pageIndex + 1 }} / {{ $pageCount }}
+            </div>
         </div>
     </div>
 @endforeach

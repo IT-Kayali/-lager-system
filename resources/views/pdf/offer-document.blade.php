@@ -378,8 +378,7 @@
             z-index: 1;
         }
         /* PDF_HARD_BACKGROUND_STYLE_END */
-
-    </style>
+</style>
 </head>
 
 @php
@@ -441,7 +440,36 @@
 
     $taxRate = (float) ($template->tax_rate ?? 19);
     $taxRateLabel = rtrim(rtrim(number_format($taxRate, 2, ',', '.'), '0'), ',');
-    $subtotal = (float) $offer->items->sum('line_total');
+
+    $shippingGross = (($offer->shipping_method ?? null) === 'Lieferung')
+        ? (float) ($offer->shipping_price_gross ?? 0)
+        : 0.0;
+
+    $shippingNet = $shippingGross > 0
+        ? ($taxRate > 0 ? round($shippingGross / (1 + ($taxRate / 100)), 2) : round($shippingGross, 2))
+        : 0.0;
+
+    $items = $offer->items->values()->map(function ($item) {
+        return (object) [
+            'product_name' => $item->product_name ?? null,
+            'description' => $item->description ?? ($item->product?->name ?? ''),
+            'quantity' => (float) $item->quantity,
+            'unit_price' => (float) $item->unit_price,
+            'line_total' => (float) $item->line_total,
+        ];
+    });
+
+    if ($shippingNet > 0) {
+        $items->push((object) [
+            'product_name' => 'Versand',
+            'description' => 'Versand',
+            'quantity' => 1,
+            'unit_price' => $shippingNet,
+            'line_total' => $shippingNet,
+        ]);
+    }
+
+    $subtotal = (float) $items->sum('line_total');
     $taxAmount = round($subtotal * ($taxRate / 100), 2);
     $grandTotal = round($subtotal + $taxAmount, 2);
 
@@ -457,7 +485,6 @@
     $taxLabel = $isLogoTemplate ? 'MwSt. (' . $taxRateLabel . '%)' : 'VAT (' . $taxRateLabel . ' %):';
     $totalLabel = $isLogoTemplate ? 'Total' : 'TOTAL:';
 
-    $items = $offer->items->values();
 
     /*
      * Finale PDF-Seitenlogik:

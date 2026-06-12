@@ -86,6 +86,8 @@ class OfferController extends Controller
                 'user_id' => auth()->id(),
                 'status' => Offer::STATUS_OFFER,
                 'template_type' => $data['template_type'],
+            'shipping_method' => $data['shipping_method'] ?? null,
+            'shipping_price_gross' => $data['shipping_price_gross'] ?? null,
                 'document_type' => 'offer',
                 'subtotal' => $total,
                 'total' => $total,
@@ -154,6 +156,8 @@ class OfferController extends Controller
             $offer->update([
                 'customer_id' => $customer->id,
                 'template_type' => $data['template_type'],
+            'shipping_method' => $data['shipping_method'] ?? null,
+            'shipping_price_gross' => $data['shipping_price_gross'] ?? null,
                 'subtotal' => $total,
                 'total' => $total,
                 'notes' => $data['notes'] ?? null,
@@ -190,6 +194,8 @@ class OfferController extends Controller
         $oldStatus = $offer->status;
 
         $offer->update([
+            'shipping_method' => $data['shipping_method'] ?? null,
+            'shipping_price_gross' => $data['shipping_price_gross'] ?? null,
             'status' => $data['status'],
         ]);
 
@@ -213,6 +219,8 @@ class OfferController extends Controller
         }
 
         $offer->update([
+            'shipping_method' => $data['shipping_method'] ?? null,
+            'shipping_price_gross' => $data['shipping_price_gross'] ?? null,
             'status' => Offer::STATUS_CANCELLED,
         ]);
 

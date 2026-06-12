@@ -7,6 +7,12 @@
 
     <section class="premium-card">
         <form method="POST" action="{{ route('offers.store') }}" id="offer-main-form">
+
+{{-- OFFER_SHIPPING_HIDDEN_FIELDS_START --}}
+<input type="hidden" name="shipping_method" id="shipping_method_real" value="{{ old('shipping_method', $offer->shipping_method ?? '') }}">
+<input type="hidden" name="shipping_price_gross" id="shipping_price_gross_real" value="{{ old('shipping_price_gross', $offer->shipping_price_gross ?? '') }}">
+{{-- OFFER_SHIPPING_HIDDEN_FIELDS_END --}}
+
             @include('pages.offers._form', ['submitLabel' => 'Angebot erstellen & reservieren'])
         </form>
     </section>
@@ -23,7 +29,7 @@
 
     <div class="premium-form-grid">
         <div class="premium-form-field full">
-            <select name="shipping_method" id="shipping_method" class="premium-select" required form="offer-main-form">
+            <select id="shipping_method" class="premium-select" required>
                 <option value="">Versandart auswählen</option>
                 <option value="Lieferung" @selected($shippingMethodValue === 'Lieferung')>Lieferung</option>
                 <option value="Abholung" @selected($shippingMethodValue === 'Abholung')>Abholung</option>
@@ -34,7 +40,7 @@
         <div class="premium-form-field full" id="shipping_price_gross_field">
             <label>Versandpreis brutto</label>
             <input
-                name="shipping_price_gross"
+               
                 id="shipping_price_gross"
                 type="number"
                 step="0.01"
@@ -42,7 +48,7 @@
                 class="premium-input"
                 value="{{ $shippingPriceValue }}"
                 placeholder="z. B. 6.90"
-             form="offer-main-form">
+            >
             <div class="premium-muted" style="margin-top:6px;">
                 Nur bei Lieferung. Wird in Angebot und Rechnung angezeigt, nicht im Lieferschein.
             </div>
@@ -501,5 +507,49 @@
     }
 </style>
 {{-- OFFER_SHIPPING_FORCE_FULL_WIDTH_END --}}
+
+
+{{-- OFFER_SHIPPING_HIDDEN_SYNC_START --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const methodVisible = document.getElementById('shipping_method');
+        const priceVisible = document.getElementById('shipping_price_gross');
+        const methodReal = document.getElementById('shipping_method_real');
+        const priceReal = document.getElementById('shipping_price_gross_real');
+
+        function syncShippingHiddenFields() {
+            if (!methodVisible || !methodReal) {
+                return;
+            }
+
+            methodReal.value = methodVisible.value || '';
+
+            if (priceReal) {
+                if (methodVisible.value === 'Lieferung' && priceVisible) {
+                    priceReal.value = priceVisible.value || '';
+                } else {
+                    priceReal.value = '';
+                }
+            }
+        }
+
+        if (methodVisible) {
+            methodVisible.addEventListener('change', syncShippingHiddenFields);
+            methodVisible.addEventListener('input', syncShippingHiddenFields);
+        }
+
+        if (priceVisible) {
+            priceVisible.addEventListener('change', syncShippingHiddenFields);
+            priceVisible.addEventListener('input', syncShippingHiddenFields);
+        }
+
+        document.querySelectorAll('form').forEach(function (form) {
+            form.addEventListener('submit', syncShippingHiddenFields);
+        });
+
+        syncShippingHiddenFields();
+    });
+</script>
+{{-- OFFER_SHIPPING_HIDDEN_SYNC_END --}}
 
 </x-layouts.premium>
