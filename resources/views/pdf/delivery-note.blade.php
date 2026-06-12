@@ -230,12 +230,12 @@
 </head>
 <body>
 @php
+    $shippingMethodText = trim((string) ($offer->shipping_method ?: ($template->delivery_shipping_method_text ?: 'Lieferung oder Abholung')));
     $deliveryTitle = trim((string) ($template->delivery_title ?: 'Lieferschein'));
     $dateLabel = trim((string) ($template->delivery_date_label ?: 'Datum:'));
     $customerNumberLabel = trim((string) ($template->delivery_customer_number_label ?: 'Kunden-Nr.:'));
     $orderNumberLabel = trim((string) ($template->delivery_order_number_label ?: 'Bestell-Nr.:'));
     $shippingMethodLabel = trim((string) ($template->delivery_shipping_method_label ?: 'Versandart:'));
-    $shippingMethodText = trim((string) ($template->delivery_shipping_method_text ?: 'Lieferung oder Abholung'));
     $quantityLabel = trim((string) ($template->delivery_quantity_label ?: 'Menge'));
     $productLabel = trim((string) ($template->delivery_product_label ?: 'Bezeichnung'));
     $introText = trim((string) ($template->delivery_intro_text ?: "Sehr geehrte Damen und Herren,\n\nvielen Dank für Ihre Bestellung. Wir liefern Ihnen wie vereinbart folgende Waren:"));

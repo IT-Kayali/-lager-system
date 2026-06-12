@@ -183,12 +183,12 @@
 </head>
 <body>
 @php
+    $shippingMethodText = trim((string) ($offer->shipping_method ?: ($template->delivery_shipping_method_text ?: 'Lieferung oder Abholung')));
     $deliveryTitle = trim((string) ($template->delivery_title ?: 'Delivery Notice'));
     $dateLabel = trim((string) ($template->delivery_date_label ?: 'Date:'));
     $customerNumberLabel = trim((string) ($template->delivery_customer_number_label ?: 'Customer Nr.:'));
     $orderNumberLabel = trim((string) ($template->delivery_order_number_label ?: 'Order Nr.:'));
     $shippingMethodLabel = trim((string) ($template->delivery_shipping_method_label ?: 'Shipping Method:'));
-    $shippingMethodText = trim((string) ($template->delivery_shipping_method_text ?: 'Lieferung oder Abholung'));
     $quantityLabel = trim((string) ($template->delivery_quantity_label ?: 'Quantity'));
     $productLabel = trim((string) ($template->delivery_product_label ?: 'Product'));
     $introText = trim((string) ($template->delivery_intro_text ?? ''));
