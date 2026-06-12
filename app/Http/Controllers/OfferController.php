@@ -178,6 +178,14 @@ class OfferController extends Controller
         $data = $request->validate([
             'status' => ['required', 'string', 'in:' . implode(',', array_keys($this->statuses()))],
         ]);
+        // SHIPPING_METHOD_NORMALIZE_START
+        if (($data['shipping_method'] ?? null) !== 'Lieferung') {
+            $data['shipping_price_gross'] = null;
+        } else {
+            $data['shipping_price_gross'] = $data['shipping_price_gross'] ?? 0;
+        }
+        // SHIPPING_METHOD_NORMALIZE_END
+
 
         $oldStatus = $offer->status;
 
@@ -254,6 +262,8 @@ class OfferController extends Controller
         return $request->validate([
             'customer_id' => ['required', 'integer', 'exists:customers,id'],
             'template_type' => ['required', 'string', 'in:with_company,without_company'],
+            'shipping_method' => ['required', 'string', 'in:Lieferung,Abholung'],
+            'shipping_price_gross' => ['nullable', 'numeric', 'min:0', 'max:999999.99'],
             'notes' => ['nullable', 'string', 'max:5000'],
             'items' => ['required', 'array'],
             'items.*.product_id' => ['nullable', 'integer', 'exists:products,id'],

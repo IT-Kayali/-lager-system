@@ -57,7 +57,9 @@ class Offer extends Model
 
 
     protected $fillable = [
-        'offer_number',
+        
+        
+        'shipping_price_gross','shipping_method','offer_number',
         'customer_id',
         'user_id',
         'status',
@@ -75,7 +77,8 @@ class Offer extends Model
     protected function casts(): array
     {
         return [
-            'subtotal' => 'decimal:2',
+            
+            'shipping_price_gross' => 'decimal:2','subtotal' => 'decimal:2',
             'total' => 'decimal:2',
             'reserved_until' => 'datetime',
             'completed_at' => 'datetime',

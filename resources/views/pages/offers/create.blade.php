@@ -6,10 +6,80 @@
     @endif
 
     <section class="premium-card">
-        <form method="POST" action="{{ route('offers.store') }}">
+        <form method="POST" action="{{ route('offers.store') }}" id="offer-main-form">
             @include('pages.offers._form', ['submitLabel' => 'Angebot erstellen & reservieren'])
         </form>
     </section>
+
+
+{{-- OFFER_SHIPPING_METHOD_START --}}
+@php
+    $shippingMethodValue = old('shipping_method', $offer->shipping_method ?? '');
+    $shippingPriceValue = old('shipping_price_gross', $offer->shipping_price_gross ?? '');
+@endphp
+
+<div id="offer-shipping-card" class="premium-card" style="box-shadow:none; margin:28px 0 18px; width:100%; max-width:none; grid-column:1 / -1;">
+    <h3 style="font-size:18px; font-weight:900; margin:0 0 12px;">Versand</h3>
+
+    <div class="premium-form-grid">
+        <div class="premium-form-field full">
+            <select name="shipping_method" id="shipping_method" class="premium-select" required form="offer-main-form">
+                <option value="">Versandart auswählen</option>
+                <option value="Lieferung" @selected($shippingMethodValue === 'Lieferung')>Lieferung</option>
+                <option value="Abholung" @selected($shippingMethodValue === 'Abholung')>Abholung</option>
+            </select>
+            @error('shipping_method') <div class="premium-error">{{ $message }}</div> @enderror
+        </div>
+
+        <div class="premium-form-field full" id="shipping_price_gross_field">
+            <label>Versandpreis brutto</label>
+            <input
+                name="shipping_price_gross"
+                id="shipping_price_gross"
+                type="number"
+                step="0.01"
+                min="0"
+                class="premium-input"
+                value="{{ $shippingPriceValue }}"
+                placeholder="z. B. 6.90"
+             form="offer-main-form">
+            <div class="premium-muted" style="margin-top:6px;">
+                Nur bei Lieferung. Wird in Angebot und Rechnung angezeigt, nicht im Lieferschein.
+            </div>
+            @error('shipping_price_gross') <div class="premium-error">{{ $message }}</div> @enderror
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const method = document.getElementById('shipping_method');
+        const priceField = document.getElementById('shipping_price_gross_field');
+        const priceInput = document.getElementById('shipping_price_gross');
+
+        function syncShippingPrice() {
+            if (!method || !priceField || !priceInput) {
+                return;
+            }
+
+            const isDelivery = method.value === 'Lieferung';
+
+            priceField.style.display = isDelivery ? '' : 'none';
+            priceInput.disabled = !isDelivery;
+
+            if (!isDelivery) {
+                priceInput.value = '';
+            }
+        }
+
+        if (method) {
+            method.addEventListener('change', syncShippingPrice);
+            syncShippingPrice();
+        }
+    });
+</script>
+{{-- OFFER_SHIPPING_METHOD_END --}}
+
 
 {{-- OFFER_CATEGORY_PRODUCT_FILTER_START --}}
 @php
@@ -347,5 +417,89 @@
     });
 </script>
 {{-- OFFER_CATEGORY_PRODUCT_FILTER_END --}}
+
+{{-- OFFER_SHIPPING_MOVE_TOP_START --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const shippingCard = document.getElementById('offer-shipping-card');
+
+        if (!shippingCard) {
+            return;
+        }
+
+        const productHeadings = Array.from(document.querySelectorAll('h1,h2,h3,h4,strong,div,span'))
+            .filter((el) => (el.textContent || '').trim() === 'Produktpositionen');
+
+        const productHeading = productHeadings[0];
+
+        if (!productHeading) {
+            return;
+        }
+
+        const mainCard = productHeading.closest('.premium-card');
+        const notesTextarea = mainCard ? mainCard.querySelector('textarea') : null;
+
+        if (notesTextarea) {
+            const notesField = notesTextarea.closest('.premium-form-field') || notesTextarea.parentElement;
+
+            if (notesField && notesField.parentElement) {
+                notesField.parentElement.insertBefore(shippingCard, notesField.nextSibling);
+                return;
+            }
+        }
+
+        mainCard.insertBefore(shippingCard, productHeading);
+    });
+</script>
+{{-- OFFER_SHIPPING_MOVE_TOP_END --}}
+
+{{-- OFFER_SHIPPING_FORCE_FULL_WIDTH_START --}}
+<style>
+    #offer-shipping-card {
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 100% !important;
+        flex: 0 0 100% !important;
+        grid-column: 1 / -1 !important;
+        align-self: stretch !important;
+        box-sizing: border-box !important;
+        display: block !important;
+    }
+
+    #offer-shipping-card .premium-form-grid {
+        width: 100% !important;
+        max-width: none !important;
+        display: grid !important;
+        grid-template-columns: minmax(280px, 480px) minmax(220px, 320px) !important;
+        gap: 14px !important;
+    }
+
+    #offer-shipping-card .premium-form-field {
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    #offer-shipping-card select {
+        width: 100% !important;
+        max-width: 480px !important;
+    }
+
+    #offer-shipping-card input {
+        width: 100% !important;
+        max-width: 320px !important;
+    }
+
+    @media (max-width: 900px) {
+        #offer-shipping-card .premium-form-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        #offer-shipping-card select,
+        #offer-shipping-card input {
+            max-width: none !important;
+        }
+    }
+</style>
+{{-- OFFER_SHIPPING_FORCE_FULL_WIDTH_END --}}
 
 </x-layouts.premium>
