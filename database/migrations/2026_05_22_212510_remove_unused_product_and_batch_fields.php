@@ -8,6 +8,16 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasColumn('products', 'storage_location')) {
+            try {
+                Schema::table('products', function (Blueprint $table) {
+                    $table->dropIndex('products_storage_location_index');
+                });
+            } catch (\Throwable $e) {
+                // Index may already be missing on some database states.
+            }
+        }
+
         $productColumns = [
             'storage_location',
             'image_path',
