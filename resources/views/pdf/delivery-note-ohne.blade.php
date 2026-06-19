@@ -93,19 +93,31 @@
             table-layout: fixed;
         }
 
+        table.items thead { display: table-header-group; }
+
+        table.items tbody { display: table-row-group; }
+
+        table.items tr { page-break-inside: avoid; }
+
         table.items th {
             font-size: 11pt;
             font-weight: 700;
-            padding: 3mm 2mm;
+            line-height: 1.25;
+            padding: 2.2mm 2mm;
             border-bottom: 1px solid #aaa;
             text-align: left;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
         }
 
         table.items td {
             font-size: 10.6pt;
-            padding: 2.8mm 2mm;
+            line-height: 1.25;
+            padding: 2mm 2mm;
             border-bottom: 1px solid #ddd;
             vertical-align: top;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
         }
 
         table.items th:nth-child(1),
@@ -192,27 +204,42 @@
         ];
     });
 
-    $firstPageLimit = 16;
-    $normalPageLimit = 24;
+    $estimateRowHeight = function ($item): float {
+        $quantityLines = max(1, (int) ceil(mb_strlen((string) $item->quantity) / 18));
+        $descriptionLines = max(1, (int) ceil(mb_strlen((string) $item->description) / 50));
+        $lines = max($quantityLines, $descriptionLines);
 
-    $pages = collect();
-    $remaining = $items->values();
+        return 6.8 + (($lines - 1) * 4.6);
+    };
 
-    $pages->push([
-        'first' => true,
-        'items' => $remaining->take($firstPageLimit)->values(),
-    ]);
+    $buildPages = function ($items) use ($estimateRowHeight) {
+        $pages = collect();
+        $pageItems = collect();
+        $availableHeight = 141.0;
+        $usedHeight = 7.5;
 
-    $remaining = $remaining->slice($firstPageLimit)->values();
+        foreach ($items as $item) {
+            $rowHeight = $estimateRowHeight($item);
 
-    while ($remaining->count() > 0) {
-        $pages->push([
-            'first' => false,
-            'items' => $remaining->take($normalPageLimit)->values(),
-        ]);
+            if ($pageItems->isNotEmpty() && ($usedHeight + $rowHeight) > $availableHeight) {
+                $pages->push(['first' => $pages->isEmpty(), 'items' => $pageItems]);
+                $pageItems = collect();
+                $availableHeight = 242.0;
+                $usedHeight = 7.5;
+            }
 
-        $remaining = $remaining->slice($normalPageLimit)->values();
-    }
+            $pageItems->push($item);
+            $usedHeight += $rowHeight;
+        }
+
+        if ($pageItems->isNotEmpty() || $pages->isEmpty()) {
+            $pages->push(['first' => $pages->isEmpty(), 'items' => $pageItems]);
+        }
+
+        return $pages;
+    };
+
+    $pages = $buildPages($items);
 
     $pageCount = $pages->count();
 @endphp
