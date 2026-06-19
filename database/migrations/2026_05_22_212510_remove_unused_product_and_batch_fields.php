@@ -8,6 +8,16 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasColumn('products', 'storage_location')) {
+            try {
+                Schema::table('products', function (Blueprint $table) {
+                    $table->dropIndex('products_storage_location_index');
+                });
+            } catch (\Throwable $e) {
+                // Index may already be missing on some database states.
+            }
+        }
+
         $productColumns = [
             'storage_location',
             'image_path',
@@ -19,6 +29,16 @@ return new class extends Migration
                 Schema::table('products', function (Blueprint $table) use ($column) {
                     $table->dropColumn($column);
                 });
+            }
+        }
+
+        if (Schema::hasColumn('product_batches', 'expires_at')) {
+            try {
+                Schema::table('product_batches', function (Blueprint $table) {
+                    $table->dropIndex('product_batches_expires_at_index');
+                });
+            } catch (\Throwable $e) {
+                // Index may already be missing on some database states.
             }
         }
 

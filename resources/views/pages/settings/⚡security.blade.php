@@ -1,6 +1,6 @@
 <?php
 
-use App\Concerns\PasswortValidationRules;
+use App\Concerns\PasswordValidationRules;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -18,7 +18,7 @@ use Livewire\Attributes\On;
 /* @end-chisel-2fa */
 
 new #[Title('Security settings')] class extends Component {
-    use PasswortValidationRules;
+    use PasswordValidationRules;
 
     public string $current_password = '';
     public string $password = '';
@@ -78,11 +78,11 @@ new #[Title('Security settings')] class extends Component {
     /**
      * Update the password for the currently authenticated user.
      */
-    public function updatePasswort(): void
+    public function updatePassword(): void
     {
         try {
             $validated = $this->validate([
-                'current_password' => $this->currentPasswortRules(),
+                'current_password' => $this->currentPasswordRules(),
                 'password' => $this->passwordRules(),
             ]);
         } catch (ValidationException $e) {
@@ -97,7 +97,7 @@ new #[Title('Security settings')] class extends Component {
 
         $this->reset('current_password', 'password', 'password_confirmation');
 
-        Flux::toast(variant: 'success', text: __('Passwort updated.'));
+        Flux::toast(variant: 'success', text: __('Password updated.'));
     }
 
     /* @chisel-passkeys */
@@ -188,7 +188,7 @@ new #[Title('Security settings')] class extends Component {
     <flux:heading class="sr-only">{{ __('Security settings') }}</flux:heading>
 
     <x-pages::settings.layout :heading="__('Update password')" :subheading="__('Ensure your account is using a long, random password to stay secure')">
-        <form method="POST" wire:submit="updatePasswort" class="mt-6 space-y-6">
+        <form method="POST" wire:submit="updatePassword" class="mt-6 space-y-6">
             <flux:input
                 wire:model="current_password"
                 :label="__('Current password')"
@@ -203,7 +203,7 @@ new #[Title('Security settings')] class extends Component {
                 type="password"
                 required
                 autocomplete="new-password"
-                passwordrules="{{ \Illuminate\Validation\Rules\Passwort::defaults()->toPasswortRulesString() }}"
+                passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
                 viewable
             />
             <flux:input
@@ -212,7 +212,7 @@ new #[Title('Security settings')] class extends Component {
                 type="password"
                 required
                 autocomplete="new-password"
-                passwordrules="{{ \Illuminate\Validation\Rules\Passwort::defaults()->toPasswortRulesString() }}"
+                passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
                 viewable
             />
 

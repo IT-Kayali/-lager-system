@@ -166,6 +166,10 @@ if (file_exists(__DIR__ . '/auth.php')) {
     require __DIR__ . '/auth.php';
 }
 
+if (file_exists(__DIR__ . '/settings.php')) {
+    require __DIR__ . '/settings.php';
+}
+
 
 Route::middleware(['auth'])->group(function () {
     Route::resource('branch-withdrawals', \App\Http\Controllers\BranchWithdrawalController::class)
