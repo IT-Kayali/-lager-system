@@ -78,7 +78,7 @@ new #[Title('Security settings')] class extends Component {
     /**
      * Update the password for the currently authenticated user.
      */
-    public function updatePasswort(): void
+    public function updatePassword(): void
     {
         try {
             $validated = $this->validate([
@@ -97,7 +97,7 @@ new #[Title('Security settings')] class extends Component {
 
         $this->reset('current_password', 'password', 'password_confirmation');
 
-        Flux::toast(variant: 'success', text: __('Passwort updated.'));
+        Flux::toast(variant: 'success', text: __('Password updated.'));
     }
 
     /* @chisel-passkeys */
@@ -188,7 +188,7 @@ new #[Title('Security settings')] class extends Component {
     <flux:heading class="sr-only">{{ __('Security settings') }}</flux:heading>
 
     <x-pages::settings.layout :heading="__('Update password')" :subheading="__('Ensure your account is using a long, random password to stay secure')">
-        <form method="POST" wire:submit="updatePasswort" class="mt-6 space-y-6">
+        <form method="POST" wire:submit="updatePassword" class="mt-6 space-y-6">
             <flux:input
                 wire:model="current_password"
                 :label="__('Current password')"
