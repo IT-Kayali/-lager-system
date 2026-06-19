@@ -1,6 +1,6 @@
 <?php
 
-use App\Concerns\PasswortValidationRules;
+use App\Concerns\PasswordValidationRules;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -18,7 +18,7 @@ use Livewire\Attributes\On;
 /* @end-chisel-2fa */
 
 new #[Title('Security settings')] class extends Component {
-    use PasswortValidationRules;
+    use PasswordValidationRules;
 
     public string $current_password = '';
     public string $password = '';
@@ -82,7 +82,7 @@ new #[Title('Security settings')] class extends Component {
     {
         try {
             $validated = $this->validate([
-                'current_password' => $this->currentPasswortRules(),
+                'current_password' => $this->currentPasswordRules(),
                 'password' => $this->passwordRules(),
             ]);
         } catch (ValidationException $e) {
@@ -203,7 +203,7 @@ new #[Title('Security settings')] class extends Component {
                 type="password"
                 required
                 autocomplete="new-password"
-                passwordrules="{{ \Illuminate\Validation\Rules\Passwort::defaults()->toPasswortRulesString() }}"
+                passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
                 viewable
             />
             <flux:input
@@ -212,7 +212,7 @@ new #[Title('Security settings')] class extends Component {
                 type="password"
                 required
                 autocomplete="new-password"
-                passwordrules="{{ \Illuminate\Validation\Rules\Passwort::defaults()->toPasswortRulesString() }}"
+                passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
                 viewable
             />
 
