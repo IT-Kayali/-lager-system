@@ -21,25 +21,21 @@
 
         * { box-sizing: border-box; }
 
-        body,
-        body * {
-            font-family: 'GlacialPDF', DejaVu Sans, sans-serif !important;
-        }
-
         body {
             margin: 0;
             padding: 0;
-            background: #f4f0ed;
+            font-family: 'GlacialPDF', DejaVu Sans, sans-serif;
             color: #111;
+            background: #fff;
         }
 
         .page {
             position: relative;
             width: 210mm;
             height: 297mm;
-            background: #f4f0ed;
             page-break-after: always;
             overflow: hidden;
+            background: #fff;
         }
 
         .page:last-child { page-break-after: auto; }
@@ -47,288 +43,235 @@
         .meta {
             position: absolute;
             top: 22mm;
-            right: 20mm;
-            width: 78mm;
-            font-size: 10pt;
+            left: 22mm;
+            font-size: 10.5pt;
             line-height: 1.45;
         }
 
-        .meta strong {
-            display: inline-block;
-            min-width: 29mm;
+        .meta table {
+            border-collapse: collapse;
+        }
+
+        .meta td:first-child {
+            width: 34mm;
             font-weight: 700;
         }
 
-        .customer {
+        .recipient {
             position: absolute;
-            top: 38mm;
-            left: 21mm;
+            top: 62mm;
+            left: 22mm;
             width: 95mm;
-            font-size: 10pt;
-            line-height: 1.35;
+            font-size: 10.5pt;
+            line-height: 1.38;
         }
 
         .title {
             position: absolute;
-            top: 92mm;
-            left: 21mm;
-            right: 21mm;
+            top: 106mm;
+            left: 22mm;
+            right: 22mm;
             text-align: center;
-            font-size: 22pt;
+            font-size: 21pt;
             font-weight: 700;
         }
 
-        .intro {
+        .items-wrap {
             position: absolute;
-            top: 112mm;
-            left: 21mm;
-            width: 168mm;
-            font-size: 10pt;
-            line-height: 1.45;
+            top: 132mm;
+            left: 22mm;
+            width: 166mm;
         }
 
-        .table-wrap {
-            position: absolute;
-            top: 134mm;
-            left: 21mm;
-            width: 168mm;
-        }
-
-        .table-wrap.continuation {
+        .items-wrap.continuation {
             top: 30mm;
         }
 
         table.items {
-            width: 168mm;
+            width: 166mm;
             border-collapse: collapse;
             table-layout: fixed;
         }
 
         table.items th {
-            background: #d2cbc7;
-            font-size: 10pt;
+            font-size: 11pt;
             font-weight: 700;
             padding: 3mm 2mm;
             border-bottom: 1px solid #aaa;
+            text-align: left;
         }
 
         table.items td {
-            font-size: 10pt;
-            padding: 3mm 2mm;
-            border-bottom: 1px solid #c8c0bc;
+            font-size: 10.6pt;
+            padding: 2.8mm 2mm;
+            border-bottom: 1px solid #ddd;
             vertical-align: top;
         }
 
         table.items th:nth-child(1),
         table.items td:nth-child(1) {
-            width: 42mm;
+            width: 56mm;
             text-align: center;
         }
 
         table.items th:nth-child(2),
         table.items td:nth-child(2) {
-            width: 126mm;
+            width: 110mm;
             text-align: left;
         }
 
-        .delivery-final-note {
+        .page-number {
             position: absolute;
-            left: 21mm;
-            right: 21mm;
-            bottom: 22mm;
-            font-size: 10pt;
-            line-height: 1.4;
+            right: 22mm;
+            bottom: 14mm;
+            font-size: 8pt;
+            color: #777;
         }
-    
-        /* PDF_BACKGROUND_SUPPORT_START */
-        .pdf-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 210mm;
-            height: 297mm;
-            object-fit: cover;
-            z-index: 0;
-        }
-
-        .page > :not(.pdf-background) {
-            position: relative;
-            z-index: 1;
-        }
-        /* PDF_BACKGROUND_SUPPORT_END */
-
-    
-        /* PDF_HARD_BACKGROUND_STYLE_START */
-        .pdf-hard-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 210mm;
-            height: 297mm;
-            object-fit: cover;
-            z-index: 0;
-        }
-
-        .page {
-            position: relative;
-        }
-
-        .page > *:not(.pdf-hard-background) {
-            position: relative;
-            z-index: 1;
-        }
-        /* PDF_HARD_BACKGROUND_STYLE_END */
-
     </style>
 </head>
 <body>
 @php
-    $shippingMethodText = trim((string) ($offer->shipping_method ?: ($template->delivery_shipping_method_text ?: 'Lieferung oder Abholung')));
-    $deliveryTitle = trim((string) ($template->delivery_title ?: 'Delivery Notice'));
-    $dateLabel = trim((string) ($template->delivery_date_label ?: 'Date:'));
-    $customerNumberLabel = trim((string) ($template->delivery_customer_number_label ?: 'Customer Nr.:'));
-    $orderNumberLabel = trim((string) ($template->delivery_order_number_label ?: 'Order Nr.:'));
-    $shippingMethodLabel = trim((string) ($template->delivery_shipping_method_label ?: 'Shipping Method:'));
-    $quantityLabel = trim((string) ($template->delivery_quantity_label ?: 'Quantity'));
-    $productLabel = trim((string) ($template->delivery_product_label ?: 'Product'));
-    $introText = trim((string) ($template->delivery_intro_text ?? ''));
-    $footerText = trim((string) ($template->delivery_footer_text ?? ''));
+    $customer = $offer->customer;
 
-    $deliveryAddressLines = [];
-    if ($offer->customer) {
-        $customer = $offer->customer;
-
+    $recipientLines = [];
+    if ($customer) {
         if (! empty($customer->company_name)) {
-            $deliveryAddressLines[] = $customer->company_name;
+            $recipientLines[] = $customer->company_name;
         }
 
         if (! empty($customer->contact_person)) {
-            $deliveryAddressLines[] = $customer->contact_person;
+            $recipientLines[] = $customer->contact_person;
         }
 
-        $deliveryStreetLine = trim((string) (($customer->delivery_street ?? '') . ' ' . ($customer->delivery_house_number ?? '')));
-        $deliveryCityLine = trim((string) (($customer->delivery_postal_code ?? '') . ' ' . ($customer->delivery_city ?? '')));
+        $streetLine = trim((string) (($customer->delivery_street ?? '') . ' ' . ($customer->delivery_house_number ?? '')));
+        $cityLine = trim((string) (($customer->delivery_postal_code ?? '') . ' ' . ($customer->delivery_city ?? '')));
+        $countryLine = trim((string) ($customer->delivery_country ?? ''));
 
-        if ($deliveryStreetLine !== '') $deliveryAddressLines[] = $deliveryStreetLine;
-        if ($deliveryCityLine !== '') $deliveryAddressLines[] = $deliveryCityLine;
-        if (! empty($customer->delivery_country)) $deliveryAddressLines[] = $customer->delivery_country;
+        if ($streetLine === '') {
+            $streetLine = trim((string) (($customer->billing_street ?? '') . ' ' . ($customer->billing_house_number ?? '')));
+        }
 
-        if (count($deliveryAddressLines) <= 1 && ! empty($customer->delivery_address)) {
-            $deliveryAddressLines = array_values(array_filter(
-                preg_split('/\R/u', trim((string) $customer->delivery_address)),
+        if ($cityLine === '') {
+            $cityLine = trim((string) (($customer->billing_postal_code ?? '') . ' ' . ($customer->billing_city ?? '')));
+        }
+
+        if ($countryLine === '') {
+            $countryLine = trim((string) ($customer->billing_country ?? ''));
+        }
+
+        foreach ([$streetLine, $cityLine, $countryLine] as $line) {
+            if ($line !== '') {
+                $recipientLines[] = $line;
+            }
+        }
+
+        if (count($recipientLines) <= 1 && ! empty($customer->billing_address)) {
+            $recipientLines = array_values(array_filter(
+                preg_split('/\R/u', trim((string) $customer->billing_address)),
                 fn ($line) => trim((string) $line) !== ''
             ));
         }
-
-        if (empty($deliveryAddressLines)) {
-            if (! empty($customer->company_name)) $deliveryAddressLines[] = $customer->company_name;
-
-            $billingStreetLine = trim((string) (($customer->billing_street ?? '') . ' ' . ($customer->billing_house_number ?? '')));
-            $billingCityLine = trim((string) (($customer->billing_postal_code ?? '') . ' ' . ($customer->billing_city ?? '')));
-
-            if ($billingStreetLine !== '') $deliveryAddressLines[] = $billingStreetLine;
-            if ($billingCityLine !== '') $deliveryAddressLines[] = $billingCityLine;
-            if (! empty($customer->billing_country)) $deliveryAddressLines[] = $customer->billing_country;
-        }
-
-        if (empty($deliveryAddressLines) && ! empty($customer->city)) {
-            $deliveryAddressLines[] = $customer->city;
-        }
     }
 
-    $unitShortLabels = [
-        'gram' => 'g',
-        'Gramm' => 'g',
-        'liter' => 'L',
-        'Liter' => 'L',
-        'piece' => 'St.',
-        'Stück' => 'St.',
-    ];
+    $customerNumber = $customer->customer_number ?? $customer->number ?? ('KD-' . str_pad((string) ($customer->id ?? 0), 5, '0', STR_PAD_LEFT));
+    $shippingMethod = $offer->shipping_method ?: '—';
 
-    $formatQuantity = function ($item) use ($unitShortLabels) {
-        $quantity = rtrim(rtrim(number_format((float) $item->quantity, 2, ',', '.'), '0'), ',');
-        $unit = $unitShortLabels[$item->product?->unit ?? ''] ?? ($item->product?->unit ?? '');
-
-        return trim($quantity . ' ' . $unit);
+    $formatQty = function ($value): string {
+        $formatted = number_format((float) $value, 3, ',', '.');
+        return rtrim(rtrim($formatted, '0'), ',');
     };
 
-    $items = $offer->items->values();
+    $items = $offer->items->values()->map(function ($item) use ($formatQty) {
+        $unit = trim((string) ($item->product?->unit ?? ''));
+        $qty = $formatQty($item->quantity);
+        $description = $item->product_name ?? $item->description ?? ($item->product?->name ?? '');
 
-    $chunks = [];
-    $remaining = $items;
+        return (object) [
+            'quantity' => trim($qty . ' ' . $unit),
+            'description' => $description,
+        ];
+    });
 
-    $chunks[] = [
-        'items' => $remaining->take($introText ? 11 : 14),
+    $firstPageLimit = 16;
+    $normalPageLimit = 24;
+
+    $pages = collect();
+    $remaining = $items->values();
+
+    $pages->push([
         'first' => true,
-    ];
+        'items' => $remaining->take($firstPageLimit)->values(),
+    ]);
 
-    $remaining = $remaining->slice($introText ? 11 : 14)->values();
+    $remaining = $remaining->slice($firstPageLimit)->values();
 
     while ($remaining->count() > 0) {
-        $chunks[] = [
-            'items' => $remaining->take(24),
+        $pages->push([
             'first' => false,
-        ];
+            'items' => $remaining->take($normalPageLimit)->values(),
+        ]);
 
-        $remaining = $remaining->slice(24)->values();
+        $remaining = $remaining->slice($normalPageLimit)->values();
     }
+
+    $pageCount = $pages->count();
 @endphp
 
-@foreach ($chunks as $chunk)
+@foreach ($pages as $pageIndex => $page)
     <div class="page">
-        {{-- PDF_HARD_BACKGROUND_IMAGE_START --}}
-        @if (! empty($backgroundDataUri))
-            <img class="pdf-hard-background" src="{{ $backgroundDataUri }}" alt="">
-        @endif
-        {{-- PDF_HARD_BACKGROUND_IMAGE_END --}}
-        {{-- PDF_BACKGROUND_IMAGE_START --}}
-        @if (! empty($backgroundDataUri))
-            <img class="pdf-background" src="{{ $backgroundDataUri }}" alt="">
-        @endif
-        {{-- PDF_BACKGROUND_IMAGE_END --}}
-        @if ($chunk['first'])
+        @if ($page['first'])
             <div class="meta">
-                <strong>{{ $dateLabel }}</strong> {{ now()->format('d.m.Y') }}<br>
-                <strong>{{ $customerNumberLabel }}</strong> {{ $offer->customer?->customer_number ?? '—' }}<br>
-                <strong>{{ $orderNumberLabel }}</strong> {{ $offer->offer_number }}<br><br>
-                <strong>{{ $shippingMethodLabel }}</strong> {{ $shippingMethodText }}
+                <table>
+                    <tr>
+                        <td>Date:</td>
+                        <td>{{ now()->format('d.m.Y') }}</td>
+                    </tr>
+                    <tr>
+                        <td>Customer Nr.:</td>
+                        <td>{{ $customerNumber }}</td>
+                    </tr>
+                    <tr>
+                        <td>Order Nr.:</td>
+                        <td>{{ $offer->offer_number }}</td>
+                    </tr>
+                    <tr>
+                        <td>Shipping Method:</td>
+                        <td>{{ $shippingMethod }}</td>
+                    </tr>
+                </table>
             </div>
 
-            <div class="customer">
-                @foreach ($deliveryAddressLines as $line)
+            <div class="recipient">
+                @foreach ($recipientLines as $line)
                     {{ $line }}<br>
                 @endforeach
             </div>
 
-            <div class="title">{{ $deliveryTitle }}</div>
-
-            @if ($introText)
-                <div class="intro">{!! nl2br(e($introText)) !!}</div>
-            @endif
+            <div class="title">Delivery Notice</div>
         @endif
 
-        <div class="table-wrap {{ $chunk['first'] ? '' : 'continuation' }}">
+        <div class="items-wrap {{ $page['first'] ? '' : 'continuation' }}">
             <table class="items">
                 <thead>
                     <tr>
-                        <th>{{ $quantityLabel }}</th>
-                        <th>{{ $productLabel }}</th>
+                        <th>Quantity</th>
+                        <th>Product</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($chunk['items'] as $item)
+                    @foreach ($page['items'] as $item)
                         <tr>
-                            <td>{{ $formatQuantity($item) }}</td>
-                            <td>{{ $item->product_name ?? $item->description ?? $item->product?->name ?? '' }}</td>
+                            <td>{{ $item->quantity }}</td>
+                            <td>{{ $item->description }}</td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
 
-        @if ($loop->last && $footerText)
-            <div class="delivery-final-note">{!! nl2br(e($footerText)) !!}</div>
-        @endif
+        <div class="page-number">
+            Seite {{ $pageIndex + 1 }} / {{ $pageCount }}
+        </div>
     </div>
 @endforeach
 </body>
