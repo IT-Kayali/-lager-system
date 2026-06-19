@@ -32,6 +32,16 @@ return new class extends Migration
             }
         }
 
+        if (Schema::hasColumn('product_batches', 'expires_at')) {
+            try {
+                Schema::table('product_batches', function (Blueprint $table) {
+                    $table->dropIndex('product_batches_expires_at_index');
+                });
+            } catch (\Throwable $e) {
+                // Index may already be missing on some database states.
+            }
+        }
+
         $batchColumns = [
             'storage_location',
             'purchase_price',
