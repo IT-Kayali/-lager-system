@@ -293,40 +293,56 @@
         ];
     });
 
+<<<<<<< HEAD
     $firstPageLimit = 9;
     $normalPageLimit = 18;
     $lastPageLimit = 13;
+=======
+    $estimateRowHeight = function ($item): float {
+        $quantityLines = max(1, (int) ceil(mb_strlen((string) $item->quantity) / 18));
+        $descriptionLines = max(1, (int) ceil(mb_strlen((string) $item->description) / 58));
+        $lines = max($quantityLines, $descriptionLines);
+>>>>>>> origin/main
 
-    $pages = collect();
-    $remaining = $items->values();
+        return 6.5 + (($lines - 1) * 4.4);
+    };
 
-    $pages->push([
-        'first' => true,
-        'items' => $remaining->take($firstPageLimit)->values(),
-    ]);
+    $buildPages = function ($items) use ($estimateRowHeight) {
+        $pages = collect();
+        $pageItems = collect();
+        $availableHeight = 92.0;
+        $usedHeight = 7.0;
 
-    $remaining = $remaining->slice($firstPageLimit)->values();
+        foreach ($items as $item) {
+            $rowHeight = $estimateRowHeight($item);
 
+<<<<<<< HEAD
     while ($remaining->count() > $lastPageLimit) {
         $count = $remaining->count();
         $take = $count <= ($normalPageLimit + $lastPageLimit)
             ? max(1, $count - $lastPageLimit)
             : $normalPageLimit;
+=======
+            if ($pageItems->isNotEmpty() && ($usedHeight + $rowHeight) > $availableHeight) {
+                $pages->push(['first' => $pages->isEmpty(), 'items' => $pageItems]);
+                $pageItems = collect();
+                $availableHeight = 197.0;
+                $usedHeight = 7.0;
+            }
 
-        $pages->push([
-            'first' => false,
-            'items' => $remaining->take($take)->values(),
-        ]);
+            $pageItems->push($item);
+            $usedHeight += $rowHeight;
+        }
+>>>>>>> origin/main
 
-        $remaining = $remaining->slice($take)->values();
-    }
+        if ($pageItems->isNotEmpty() || $pages->isEmpty()) {
+            $pages->push(['first' => $pages->isEmpty(), 'items' => $pageItems]);
+        }
 
-    if ($remaining->count() > 0) {
-        $pages->push([
-            'first' => false,
-            'items' => $remaining->values(),
-        ]);
-    }
+        return $pages;
+    };
+
+    $pages = $buildPages($items);
 
     $pageCount = $pages->count();
 @endphp
