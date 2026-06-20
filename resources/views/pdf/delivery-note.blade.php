@@ -139,19 +139,31 @@
             table-layout: fixed;
         }
 
+        table.items thead { display: table-header-group; }
+
+        table.items tbody { display: table-row-group; }
+
+        table.items tr { page-break-inside: avoid; }
+
         table.items th {
             background: #f0f0f0;
             font-size: 10pt;
             font-weight: 700;
-            padding: 3mm 2mm;
+            line-height: 1.25;
+            padding: 2.2mm 2mm;
             border-bottom: 1px solid #777;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
         }
 
         table.items td {
             font-size: 10pt;
-            padding: 2.8mm 2mm;
+            line-height: 1.25;
+            padding: 2mm 2mm;
             border-bottom: 1px solid #cfcfcf;
             vertical-align: top;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
         }
 
         table.items th:nth-child(1),
@@ -170,7 +182,7 @@
             position: absolute;
             left: 12mm;
             right: 12mm;
-            bottom: 58mm;
+            bottom: 62mm;
             font-size: 10pt;
             line-height: 1.35;
         }
@@ -281,9 +293,9 @@
         ];
     });
 
-    $firstPageLimit = 8;
-    $normalPageLimit = 16;
-    $lastPageLimit = 12;
+    $firstPageLimit = 9;
+    $normalPageLimit = 18;
+    $lastPageLimit = 13;
 
     $pages = collect();
     $remaining = $items->values();
@@ -297,12 +309,9 @@
 
     while ($remaining->count() > $lastPageLimit) {
         $count = $remaining->count();
-
-        if ($count <= ($normalPageLimit + $lastPageLimit)) {
-            $take = max(8, $count - $lastPageLimit);
-        } else {
-            $take = $normalPageLimit;
-        }
+        $take = $count <= ($normalPageLimit + $lastPageLimit)
+            ? max(1, $count - $lastPageLimit)
+            : $normalPageLimit;
 
         $pages->push([
             'first' => false,
