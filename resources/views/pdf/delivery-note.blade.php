@@ -182,7 +182,7 @@
             position: absolute;
             left: 12mm;
             right: 12mm;
-            bottom: 58mm;
+            bottom: 62mm;
             font-size: 10pt;
             line-height: 1.35;
         }
@@ -293,10 +293,16 @@
         ];
     });
 
+<<<<<<< HEAD
+    $firstPageLimit = 9;
+    $normalPageLimit = 18;
+    $lastPageLimit = 13;
+=======
     $estimateRowHeight = function ($item): float {
         $quantityLines = max(1, (int) ceil(mb_strlen((string) $item->quantity) / 18));
         $descriptionLines = max(1, (int) ceil(mb_strlen((string) $item->description) / 58));
         $lines = max($quantityLines, $descriptionLines);
+>>>>>>> origin/main
 
         return 6.5 + (($lines - 1) * 4.4);
     };
@@ -310,6 +316,13 @@
         foreach ($items as $item) {
             $rowHeight = $estimateRowHeight($item);
 
+<<<<<<< HEAD
+    while ($remaining->count() > $lastPageLimit) {
+        $count = $remaining->count();
+        $take = $count <= ($normalPageLimit + $lastPageLimit)
+            ? max(1, $count - $lastPageLimit)
+            : $normalPageLimit;
+=======
             if ($pageItems->isNotEmpty() && ($usedHeight + $rowHeight) > $availableHeight) {
                 $pages->push(['first' => $pages->isEmpty(), 'items' => $pageItems]);
                 $pageItems = collect();
@@ -320,6 +333,7 @@
             $pageItems->push($item);
             $usedHeight += $rowHeight;
         }
+>>>>>>> origin/main
 
         if ($pageItems->isNotEmpty() || $pages->isEmpty()) {
             $pages->push(['first' => $pages->isEmpty(), 'items' => $pageItems]);
