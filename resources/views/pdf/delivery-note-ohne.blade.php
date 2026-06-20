@@ -96,16 +96,22 @@
         table.items th {
             font-size: 11pt;
             font-weight: 700;
-            padding: 3mm 2mm;
+            line-height: 1.25;
+            padding: 2.2mm 2mm;
             border-bottom: 1px solid #aaa;
             text-align: left;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
         }
 
         table.items td {
             font-size: 10.6pt;
-            padding: 2.8mm 2mm;
+            line-height: 1.25;
+            padding: 2mm 2mm;
             border-bottom: 1px solid #ddd;
             vertical-align: top;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
         }
 
         table.items th:nth-child(1),
