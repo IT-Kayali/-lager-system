@@ -139,6 +139,12 @@
             table-layout: fixed;
         }
 
+        table.items thead { display: table-header-group; }
+
+        table.items tbody { display: table-row-group; }
+
+        table.items tr { page-break-inside: avoid; }
+
         table.items th {
             background: #f0f0f0;
             font-size: 10pt;
@@ -294,12 +300,22 @@
     $pages = collect();
     $remaining = $items->values();
 
-    $pages->push([
-        'first' => true,
-        'items' => $remaining->take($firstPageLimit)->values(),
-    ]);
+    $firstPageLimit = 9;
+    $normalPageLimit = 18;
+    $lastPageLimit = 13;
 
-    $remaining = $remaining->slice($firstPageLimit)->values();
+        return 6.5 + (($lines - 1) * 4.4);
+    };
+ main
+
+    $buildPages = function ($items) use ($estimateRowHeight) {
+        $pages = collect();
+        $pageItems = collect();
+        $availableHeight = 92.0;
+        $usedHeight = 7.0;
+
+        foreach ($items as $item) {
+            $rowHeight = $estimateRowHeight($item);
 
     while ($remaining->count() > $lastPageLimit) {
         $count = $remaining->count();
@@ -307,20 +323,14 @@
             ? max(1, $count - $lastPageLimit)
             : $normalPageLimit;
 
-        $pages->push([
-            'first' => false,
-            'items' => $remaining->take($take)->values(),
-        ]);
+        if ($pageItems->isNotEmpty() || $pages->isEmpty()) {
+            $pages->push(['first' => $pages->isEmpty(), 'items' => $pageItems]);
+        }
 
-        $remaining = $remaining->slice($take)->values();
-    }
+        return $pages;
+    };
 
-    if ($remaining->count() > 0) {
-        $pages->push([
-            'first' => false,
-            'items' => $remaining->values(),
-        ]);
-    }
+    $pages = $buildPages($items);
 
     $pageCount = $pages->count();
 @endphp
