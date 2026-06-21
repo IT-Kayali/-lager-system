@@ -300,22 +300,12 @@
     $pages = collect();
     $remaining = $items->values();
 
-    $firstPageLimit = 9;
-    $normalPageLimit = 18;
-    $lastPageLimit = 13;
+    $pages->push([
+        'first' => true,
+        'items' => $remaining->take($firstPageLimit)->values(),
+    ]);
 
-        return 6.5 + (($lines - 1) * 4.4);
-    };
- main
-
-    $buildPages = function ($items) use ($estimateRowHeight) {
-        $pages = collect();
-        $pageItems = collect();
-        $availableHeight = 92.0;
-        $usedHeight = 7.0;
-
-        foreach ($items as $item) {
-            $rowHeight = $estimateRowHeight($item);
+    $remaining = $remaining->slice($firstPageLimit)->values();
 
     while ($remaining->count() > $lastPageLimit) {
         $count = $remaining->count();
@@ -323,14 +313,20 @@
             ? max(1, $count - $lastPageLimit)
             : $normalPageLimit;
 
-        if ($pageItems->isNotEmpty() || $pages->isEmpty()) {
-            $pages->push(['first' => $pages->isEmpty(), 'items' => $pageItems]);
-        }
+        $pages->push([
+            'first' => false,
+            'items' => $remaining->take($take)->values(),
+        ]);
 
-        return $pages;
-    };
+        $remaining = $remaining->slice($take)->values();
+    }
 
-    $pages = $buildPages($items);
+    if ($remaining->count() > 0) {
+        $pages->push([
+            'first' => false,
+            'items' => $remaining->values(),
+        ]);
+    }
 
     $pageCount = $pages->count();
 @endphp
