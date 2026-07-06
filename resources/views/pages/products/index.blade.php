@@ -32,10 +32,22 @@
                 @endif
             </form>
 
-            <a href="{{ route('products.create') }}" class="premium-btn gold">
-                <i class="bi bi-plus-lg"></i>
-                Produkt hinzufügen
-            </a>
+            <div class="products-toolbar-actions">
+                <a href="{{ route('products.excel.export') }}" class="premium-btn">
+                    <i class="bi bi-download"></i>
+                    Excel exportieren
+                </a>
+
+                <a href="{{ route('products.excel.import.form') }}" class="premium-btn">
+                    <i class="bi bi-upload"></i>
+                    Excel importieren
+                </a>
+
+                <a href="{{ route('products.create') }}" class="premium-btn gold">
+                    <i class="bi bi-plus-lg"></i>
+                    Produkt hinzufügen
+                </a>
+            </div>
         </div>
 
         <div class="products-table-shell">
@@ -155,6 +167,14 @@
         .products-search .premium-input {
             width: 390px;
             max-width: 100%;
+        }
+
+        .products-toolbar-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-end;
         }
 
         .products-table-shell {

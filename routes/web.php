@@ -16,6 +16,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerWalletTransactionController;
 use App\Http\Controllers\BatchController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductExcelController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -34,6 +35,18 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard', DashboardController::class)
         ->name('dashboard');
+
+    Route::get('/products/excel/export', [ProductExcelController::class, 'export'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE)
+        ->name('products.excel.export');
+
+    Route::get('/products/excel/import', [ProductExcelController::class, 'importForm'])
+        ->middleware('role:' . User::ROLE_MANAGER)
+        ->name('products.excel.import.form');
+
+    Route::post('/products/excel/import', [ProductExcelController::class, 'import'])
+        ->middleware('role:' . User::ROLE_MANAGER)
+        ->name('products.excel.import');
 
     Route::resource('products', ProductController::class)
         
