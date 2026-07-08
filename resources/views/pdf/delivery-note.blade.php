@@ -295,7 +295,7 @@
 
     $firstPageLimit = 9;
     $normalPageLimit = 18;
-    $lastPageLimit = 13;
+    $lastPageLimit = 18;
 
     $pages = collect();
     $remaining = $items->values();
@@ -308,17 +308,12 @@
     $remaining = $remaining->slice($firstPageLimit)->values();
 
     while ($remaining->count() > $lastPageLimit) {
-        $count = $remaining->count();
-        $take = $count <= ($normalPageLimit + $lastPageLimit)
-            ? max(1, $count - $lastPageLimit)
-            : $normalPageLimit;
-
         $pages->push([
             'first' => false,
-            'items' => $remaining->take($take)->values(),
+            'items' => $remaining->take($normalPageLimit)->values(),
         ]);
 
-        $remaining = $remaining->slice($take)->values();
+        $remaining = $remaining->slice($normalPageLimit)->values();
     }
 
     if ($remaining->count() > 0) {
