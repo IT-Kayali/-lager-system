@@ -135,9 +135,11 @@
         .page-number {
             position: absolute;
             right: 22mm;
-            bottom: 14mm;
+            bottom: 9mm;
             font-size: 8pt;
             color: #777;
+            background: #fff;
+            padding: 1mm 0 0 3mm;
         }
     </style>
 </head>
@@ -209,13 +211,13 @@
         $descriptionLines = max(1, (int) ceil(mb_strlen((string) $item->description) / 50));
         $lines = max($quantityLines, $descriptionLines);
 
-        return 6.8 + (($lines - 1) * 4.6);
+        return 8.4 + (($lines - 1) * 4.9);
     };
 
     $buildPages = function ($items) use ($estimateRowHeight) {
         $pages = collect();
         $pageItems = collect();
-        $availableHeight = 141.0;
+        $availableHeight = 115.0;
         $usedHeight = 7.5;
 
         foreach ($items as $item) {
@@ -224,7 +226,7 @@
             if ($pageItems->isNotEmpty() && ($usedHeight + $rowHeight) > $availableHeight) {
                 $pages->push(['first' => $pages->isEmpty(), 'items' => $pageItems]);
                 $pageItems = collect();
-                $availableHeight = 242.0;
+                $availableHeight = 190.0;
                 $usedHeight = 7.5;
             }
 
