@@ -9,6 +9,6 @@ Route::middleware(['auth'])->group(function () {
     Route::redirect('settings/appearance', '/settings')
         ->name('appearance.edit');
 
-    Route::redirect('settings/security', '/security')
-        ->name('security.edit');
+    Route::livewire('settings/security', 'pages::settings.security')
+    ->name('security.edit');
 });
