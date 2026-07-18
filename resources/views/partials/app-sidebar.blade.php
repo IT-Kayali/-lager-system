@@ -125,13 +125,6 @@
             </div>
         </div>
 
-        @if (auth()->user()?->canAccessMenu(['manager', 'wholesale', 'warehouse']))
-            <a href="{{ route('products.create') }}" class="premium-sidebar-cta">
-                <i class="bi bi-plus-lg"></i>
-                <span>Neuer Artikel</span>
-            </a>
-        @endif
-
         <nav class="premium-sidebar-nav" aria-label="Hauptnavigation">
             @foreach ($mainNavItems as $item)
                 @if (auth()->user()?->canAccessMenu($item['roles']))
