@@ -113,13 +113,15 @@
 <aside class="premium-sidebar">
     <div class="premium-sidebar-inner">
         <div class="premium-brand">
-            <div class="premium-brand-mark">
-                <i class="bi bi-archive"></i>
-            </div>
+            <div class="premium-logo-placeholder">
+                <div class="premium-logo-placeholder-mark">
+                    <i class="bi bi-archive"></i>
+                </div>
 
-            <div class="premium-brand-copy">
-                <div class="premium-brand-title">Lagerverwaltung</div>
-                <div class="premium-brand-subtitle">Premium ERP</div>
+                <div class="premium-logo-placeholder-copy">
+                    <div class="premium-logo-placeholder-title">Logo</div>
+                    <div class="premium-logo-placeholder-subtitle">Lagerverwaltung</div>
+                </div>
             </div>
         </div>
 

@@ -815,6 +815,77 @@
 </style>
 <!-- PREMIUM_BRAND_OVERFLOW_FIX_END -->
 
+
+<!-- PREMIUM_LOGO_PLACEHOLDER_START -->
+<style>
+    .premium-brand {
+        padding-bottom: 24px;
+        border-bottom: 1px solid rgba(255, 232, 169, .18);
+    }
+
+    .premium-logo-placeholder {
+        width: 100%;
+        min-height: 74px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 18px;
+        background:
+            linear-gradient(135deg, rgba(212, 170, 32, .18), rgba(255, 255, 255, .04)),
+            rgba(255, 255, 255, .04);
+        border: 1px dashed rgba(255, 232, 169, .42);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
+        overflow: hidden;
+    }
+
+    .premium-logo-placeholder-mark {
+        width: 46px;
+        height: 46px;
+        flex: 0 0 46px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: var(--premium-gold);
+        color: #171716;
+        font-size: 22px;
+        box-shadow: 0 10px 22px rgba(0, 0, 0, .18);
+    }
+
+    .premium-logo-placeholder-copy {
+        min-width: 0;
+    }
+
+    .premium-logo-placeholder-title {
+        color: #ffe690;
+        font-size: 19px;
+        font-weight: 950;
+        line-height: 1.05;
+        letter-spacing: -.035em;
+    }
+
+    .premium-logo-placeholder-subtitle {
+        margin-top: 5px;
+        color: rgba(255, 255, 255, .72);
+        font-size: 11px;
+        font-weight: 850;
+        text-transform: uppercase;
+        letter-spacing: .045em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .premium-brand-mark,
+    .premium-brand-copy,
+    .premium-brand-title,
+    .premium-brand-subtitle {
+        display: none !important;
+    }
+</style>
+<!-- PREMIUM_LOGO_PLACEHOLDER_END -->
+
 </head>
 <body>
     <div class="premium-shell">
