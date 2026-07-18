@@ -763,6 +763,58 @@
 </style>
 <!-- PREMIUM_SIDEBAR_POLISH_END -->
 
+
+<!-- PREMIUM_BRAND_OVERFLOW_FIX_START -->
+<style>
+    .premium-sidebar {
+        overflow: hidden;
+    }
+
+    .premium-brand {
+        align-items: center;
+        gap: 11px;
+    }
+
+    .premium-brand-mark {
+        width: 38px !important;
+        height: 38px !important;
+        flex-basis: 38px !important;
+        flex-shrink: 0 !important;
+        font-size: 18px !important;
+    }
+
+    .premium-brand-copy {
+        min-width: 0;
+        max-width: calc(100% - 50px);
+        overflow: hidden;
+    }
+
+    .premium-brand-title {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 20px !important;
+        line-height: 1.05;
+        letter-spacing: -.045em;
+    }
+
+    .premium-brand-subtitle {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 10px !important;
+    }
+
+    @media (max-width: 1200px) {
+        .premium-brand-title {
+            font-size: 18px !important;
+        }
+    }
+</style>
+<!-- PREMIUM_BRAND_OVERFLOW_FIX_END -->
+
 </head>
 <body>
     <div class="premium-shell">
