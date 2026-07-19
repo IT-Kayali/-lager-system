@@ -1,4 +1,4 @@
-<x-layouts.premium title="Lieferanten" subtitle="Lieferanten verwalten und Produkten zuordnen.">
+<x-layouts.premium title="Lieferanten" subtitle="Verwalte Lieferanten, Kontakte und Produktzuordnungen.">
     @if (session('success'))
         <div class="premium-alert">{{ session('success') }}</div>
     @endif
@@ -9,37 +9,51 @@
         </div>
     @endif
 
-    <section class="premium-card">
-        <div class="premium-toolbar suppliers-toolbar">
-            <form method="GET" action="{{ route('suppliers.index') }}" class="suppliers-search">
+    <section class="suppliers-toolbar-card">
+        <form method="GET" action="{{ route('suppliers.index') }}" class="suppliers-filter-form">
+            <div class="suppliers-search-field">
+                <i class="bi bi-search"></i>
                 <input
                     name="search"
                     value="{{ $search ?? '' }}"
                     class="premium-input"
-                    placeholder="Lieferant suchen..."
+                    placeholder="Lieferant, Ansprechpartner, E-Mail oder Stadt suchen..."
                 >
+            </div>
 
-                <button class="premium-btn" type="submit">
-                    <i class="bi bi-search"></i>
-                    Suchen
-                </button>
+            <button class="premium-btn dark" type="submit">
+                <i class="bi bi-funnel"></i>
+                Filtern
+            </button>
 
-                @if (! empty($search))
-                    <a href="{{ route('suppliers.index') }}" class="premium-btn">
-                        <i class="bi bi-x-lg"></i>
-                        Zurücksetzen
-                    </a>
-                @endif
-            </form>
+            @if (! empty($search))
+                <a href="{{ route('suppliers.index') }}" class="premium-btn">
+                    <i class="bi bi-x-lg"></i>
+                    Zurücksetzen
+                </a>
+            @endif
+        </form>
 
-            <a href="{{ route('suppliers.create') }}" class="premium-btn gold">
-                <i class="bi bi-plus-lg"></i>
-                Lieferant hinzufügen
-            </a>
+        <a href="{{ route('suppliers.create') }}" class="premium-btn gold suppliers-add-btn">
+            <i class="bi bi-truck"></i>
+            Lieferant hinzufügen
+        </a>
+    </section>
+
+    <section class="suppliers-table-card">
+        <div class="suppliers-table-header">
+            <div>
+                <h2>Lieferantenübersicht</h2>
+                <p>{{ $suppliers->total() }} Lieferanten im System</p>
+            </div>
+
+            <div class="suppliers-table-meta">
+                <i class="bi bi-buildings"></i>
+            </div>
         </div>
 
-        <div class="premium-table-wrap">
-            <table class="premium-table suppliers-clean-table">
+        <div class="premium-table-wrap suppliers-table-wrap">
+            <table class="premium-table suppliers-table">
                 <thead>
                     <tr>
                         <th>Nummer</th>
@@ -73,25 +87,35 @@
                                     {{ $supplier->company_name }}
                                 </a>
 
-                                <div class="premium-muted">
-                                    {{ $supplier->contact_person ?: '—' }}
+                                <div class="premium-muted supplier-contact-person">
+                                    {{ $supplier->contact_person ?: 'Kein Ansprechpartner' }}
                                 </div>
                             </td>
 
                             <td>
-                                <div>{{ $supplier->email ?: '—' }}</div>
+                                <div class="supplier-contact-stack">
+                                    @if ($supplier->email)
+                                        <a href="mailto:{{ $supplier->email }}">
+                                            <i class="bi bi-envelope"></i>
+                                            {{ $supplier->email }}
+                                        </a>
+                                    @else
+                                        <span class="premium-muted">Keine E-Mail</span>
+                                    @endif
 
-                                @if ($supplier->whatsapp ?: $supplier->phone)
-                                    <x-whatsapp-link :number="$supplier->whatsapp ?: $supplier->phone" :label="$supplier->whatsapp ?: $supplier->phone" :country-code="$supplier->phone_country_code" />
-                                @endif
+                                    @if ($supplier->whatsapp ?: $supplier->phone)
+                                        <x-whatsapp-link :number="$supplier->whatsapp ?: $supplier->phone" :label="$supplier->whatsapp ?: $supplier->phone" :country-code="$supplier->phone_country_code" />
+                                    @endif
+                                </div>
                             </td>
 
-                            <td>
-                                {{ $supplier->city ?: '—' }}
-                            </td>
+                            <td>{{ $supplier->city ?: '—' }}</td>
 
                             <td>
-                                <strong>{{ $productCount }}</strong>
+                                <span class="supplier-products-pill">
+                                    <i class="bi bi-box-seam"></i>
+                                    {{ $productCount }}
+                                </span>
                             </td>
 
                             <td>
@@ -117,7 +141,11 @@
                     @empty
                         <tr>
                             <td colspan="6">
-                                <div class="premium-muted">Noch keine Lieferanten vorhanden.</div>
+                                <div class="suppliers-empty-state">
+                                    <i class="bi bi-truck"></i>
+                                    <strong>Noch keine Lieferanten vorhanden.</strong>
+                                    <span>Lege Lieferanten an, damit Produkte sauber zugeordnet werden können.</span>
+                                </div>
                             </td>
                         </tr>
                     @endforelse
@@ -125,63 +153,110 @@
             </table>
         </div>
 
-        <div style="margin-top:18px;">
+        <div class="suppliers-pagination">
             {{ $suppliers->links() }}
         </div>
     </section>
 
     <style>
-        .suppliers-toolbar {
-            align-items: flex-start;
-            gap: 16px;
+        .suppliers-toolbar-card,
+        .suppliers-table-card {
+            background: rgba(255, 255, 255, .86);
+            border: 1px solid #d9c9ae;
+            border-radius: 18px;
+            box-shadow: 0 18px 48px rgba(33, 29, 23, .08);
         }
 
-        .suppliers-search {
+        .suppliers-toolbar-card {
             display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 16px;
             align-items: center;
+            padding: 18px 20px;
+            margin-bottom: 22px;
         }
 
-        .suppliers-search .premium-input {
-            width: 390px;
-            max-width: 100%;
+        .suppliers-filter-form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
         }
 
-        .suppliers-clean-table {
+        .suppliers-search-field {
+            position: relative;
+            flex: 1;
+            max-width: 560px;
+        }
+
+        .suppliers-search-field i {
+            position: absolute;
+            top: 50%;
+            left: 16px;
+            transform: translateY(-50%);
+            color: #75694f;
+            font-size: 16px;
+            pointer-events: none;
+        }
+
+        .suppliers-search-field .premium-input {
+            width: 100%;
+            padding-left: 44px !important;
+        }
+
+        .suppliers-add-btn {
+            white-space: nowrap;
+        }
+
+        .suppliers-table-card {
+            overflow: hidden;
+        }
+
+        .suppliers-table-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: center;
+            padding: 22px 24px 18px;
+            border-bottom: 1px solid #e7dece;
+        }
+
+        .suppliers-table-header h2 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 950;
+            letter-spacing: -.02em;
+            color: #121212;
+        }
+
+        .suppliers-table-header p {
+            margin: 4px 0 0;
+            color: #6f665b;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .suppliers-table-meta {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: #f3e8be;
+            color: #7b5c00;
+            font-size: 20px;
+        }
+
+        .suppliers-table-wrap {
+            margin-top: 0 !important;
+            border-left: 0 !important;
+            border-right: 0 !important;
+            border-radius: 0 !important;
+        }
+
+        .suppliers-table {
             min-width: 980px;
-        }
-
-        .suppliers-clean-table th:nth-child(1),
-        .suppliers-clean-table td:nth-child(1) {
-            width: 14%;
-        }
-
-        .suppliers-clean-table th:nth-child(2),
-        .suppliers-clean-table td:nth-child(2) {
-            width: 22%;
-        }
-
-        .suppliers-clean-table th:nth-child(3),
-        .suppliers-clean-table td:nth-child(3) {
-            width: 24%;
-        }
-
-        .suppliers-clean-table th:nth-child(4),
-        .suppliers-clean-table td:nth-child(4) {
-            width: 16%;
-        }
-
-        .suppliers-clean-table th:nth-child(5),
-        .suppliers-clean-table td:nth-child(5) {
-            width: 10%;
-            text-align: center !important;
-        }
-
-        .suppliers-clean-table th:nth-child(6),
-        .suppliers-clean-table td:nth-child(6) {
-            width: 14%;
-            text-align: right !important;
         }
 
         .supplier-name-link,
@@ -191,10 +266,59 @@
             font-weight: 950 !important;
         }
 
+        .supplier-name-link {
+            display: inline-block;
+            font-size: 16px;
+        }
+
         .supplier-name-link:hover,
         .supplier-number-link:hover {
             color: #a9871f !important;
             text-decoration: underline !important;
+        }
+
+        .supplier-contact-person {
+            margin-top: 4px;
+        }
+
+        .supplier-contact-stack {
+            display: grid;
+            gap: 5px;
+        }
+
+        .supplier-contact-stack a {
+            color: #211d17;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .supplier-contact-stack a:hover {
+            color: #9a7300;
+        }
+
+        .supplier-contact-stack i {
+            margin-right: 6px;
+            color: #7b5c00;
+        }
+
+        .supplier-products-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            min-width: 58px;
+            min-height: 32px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: #f4efe5;
+            border: 1px solid #d7c7ab;
+            color: #211d17;
+            font-weight: 950;
+        }
+
+        .suppliers-table th:nth-child(5),
+        .suppliers-table td:nth-child(5) {
+            text-align: center !important;
         }
 
         .suppliers-actions {
@@ -207,51 +331,46 @@
             margin: 0 !important;
         }
 
-        @media (max-width: 900px) {
-            .suppliers-toolbar {
-                display: grid;
+        .suppliers-empty-state {
+            display: grid;
+            place-items: center;
+            gap: 8px;
+            padding: 34px 18px;
+            color: #6f665b;
+            text-align: center;
+        }
+
+        .suppliers-empty-state i {
+            width: 50px;
+            height: 50px;
+            display: grid;
+            place-items: center;
+            border-radius: 16px;
+            background: #f3e8be;
+            color: #7b5c00;
+            font-size: 22px;
+        }
+
+        .suppliers-empty-state strong {
+            color: #111;
+            font-size: 18px;
+        }
+
+        .suppliers-pagination {
+            padding: 16px 20px 20px;
+            border-top: 1px solid #e7dece;
+        }
+
+        @media (max-width: 980px) {
+            .suppliers-toolbar-card,
+            .suppliers-filter-form {
+                align-items: stretch;
+                flex-direction: column;
             }
 
-            .suppliers-search,
-            .suppliers-search .premium-input {
-                width: 100%;
+            .suppliers-search-field {
+                max-width: none;
             }
         }
-    
-        /* SUPPLIER_SEARCH_INLINE_FIX_START */
-        .suppliers-toolbar {
-            align-items: flex-start !important;
-        }
-
-        .suppliers-search {
-            display: flex !important;
-            flex-direction: row !important;
-            align-items: center !important;
-            gap: 10px !important;
-            flex-wrap: nowrap !important;
-        }
-
-        .suppliers-search .premium-input {
-            width: 360px !important;
-            max-width: 360px !important;
-        }
-
-        .suppliers-search .premium-btn {
-            height: 46px !important;
-            white-space: nowrap !important;
-        }
-
-        @media (max-width: 700px) {
-            .suppliers-search {
-                flex-wrap: wrap !important;
-            }
-
-            .suppliers-search .premium-input {
-                width: 100% !important;
-                max-width: 100% !important;
-            }
-        }
-        /* SUPPLIER_SEARCH_INLINE_FIX_END */
-
-</style>
+    </style>
 </x-layouts.premium>

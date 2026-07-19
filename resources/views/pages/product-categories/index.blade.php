@@ -1,4 +1,4 @@
-<x-layouts.premium title="Produktkategorien" subtitle="Kategorien für Produkte verwalten und später mehreren Produkten zuordnen.">
+<x-layouts.premium title="Produktkategorien" subtitle="Verwalte Produktgruppen, Farben und Zuordnungen.">
     @if (session('success'))
         <div class="premium-alert">{{ session('success') }}</div>
     @endif
@@ -9,15 +9,18 @@
         </div>
     @endif
 
-    <section class="premium-card">
-        <div class="premium-toolbar category-toolbar">
-            <form method="GET" action="{{ route('product-categories.index') }}" class="category-search">
-                <input
-                    name="search"
-                    value="{{ $search ?? '' }}"
-                    class="premium-input"
-                    placeholder="Kategorie suchen..."
-                >
+    <section class="category-page-actions">
+        <div class="category-search-card">
+            <form method="GET" action="{{ route('product-categories.index') }}" class="category-search-modern">
+                <div class="category-search-field">
+                    <i class="bi bi-search"></i>
+                    <input
+                        name="search"
+                        value="{{ $search ?? '' }}"
+                        class="premium-input"
+                        placeholder="Kategorie suchen..."
+                    >
+                </div>
 
                 <button class="premium-btn" type="submit">
                     <i class="bi bi-search"></i>
@@ -31,15 +34,17 @@
                     </a>
                 @endif
             </form>
-
-            <a href="{{ route('product-categories.create') }}" class="premium-btn gold">
-                <i class="bi bi-plus-lg"></i>
-                Neue Kategorie
-            </a>
         </div>
 
-        <div class="category-table-shell">
-            <table class="category-clean-table">
+        <a href="{{ route('product-categories.create') }}" class="premium-btn gold category-create-btn">
+            <i class="bi bi-plus-circle"></i>
+            Neue Kategorie
+        </a>
+    </section>
+
+    <section class="category-modern-card">
+        <div class="category-table-shell modern-category-table-shell">
+            <table class="category-clean-table modern-category-table">
                 <thead>
                     <tr>
                         <th>Kategorie</th>
@@ -64,7 +69,11 @@
                             <td>
                                 <a class="category-name-link" href="{{ route('product-categories.show', ['product_category' => $categoryUrlName]) }}">
                                     <span class="category-color-dot" style="background: {{ $category->color ?: '#d4af37' }};"></span>
-                                    {{ $category->name }}
+
+                                    <span class="category-name-copy">
+                                        <strong>{{ $category->name }}</strong>
+                                        <small>{{ $category->color ?: '#d4af37' }}</small>
+                                    </span>
                                 </a>
                             </td>
 
@@ -75,14 +84,22 @@
                             </td>
 
                             <td>
-                                <strong>{{ $productCount }}</strong>
+                                <span class="category-product-count">
+                                    {{ $productCount }}
+                                </span>
                             </td>
 
                             <td>
                                 @if ($category->is_active)
-                                    <span class="premium-badge ok">Aktiv</span>
+                                    <span class="category-status-pill active">
+                                        <i class="bi bi-check2-circle"></i>
+                                        Aktiv
+                                    </span>
                                 @else
-                                    <span class="premium-badge critical">Inaktiv</span>
+                                    <span class="category-status-pill inactive">
+                                        <i class="bi bi-pause-circle"></i>
+                                        Inaktiv
+                                    </span>
                                 @endif
                             </td>
 
@@ -93,7 +110,7 @@
                                     </a>
 
                                     <a class="premium-icon-btn" href="{{ route('product-categories.edit', $category) }}" title="Bearbeiten">
-                                        <i class="bi bi-pencil"></i>
+                                        <i class="bi bi-pencil-square"></i>
                                     </a>
 
                                     <form method="POST" action="{{ route('product-categories.destroy', $category) }}" onsubmit="return confirm('Kategorie wirklich löschen?');">
@@ -109,7 +126,11 @@
                     @empty
                         <tr>
                             <td colspan="5">
-                                <div class="premium-muted">Noch keine Kategorien vorhanden.</div>
+                                <div class="category-empty-state">
+                                    <i class="bi bi-tags"></i>
+                                    <strong>Noch keine Kategorien vorhanden.</strong>
+                                    <span>Lege eine Kategorie an, um Produkte besser zu organisieren.</span>
+                                </div>
                             </td>
                         </tr>
                     @endforelse
@@ -117,125 +138,178 @@
             </table>
         </div>
 
-        <div style="margin-top:18px;">
+        <div class="category-pagination">
             {{ $categories->links() }}
         </div>
     </section>
 
     <style>
-        .category-toolbar {
-            align-items: flex-start;
+        .category-page-actions {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
             gap: 16px;
-        }
-
-        .category-search {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
             align-items: center;
+            margin-bottom: 22px;
         }
 
-        .category-search .premium-input {
-            width: 390px;
-            max-width: 100%;
+        .category-search-card {
+            min-width: 0;
+            padding: 14px;
+            border: 1px solid #d8cbb7;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, .82);
+            box-shadow: 0 12px 28px rgba(42, 36, 25, .06);
         }
 
-        .category-table-shell {
-            margin-top: 22px;
-            overflow-x: auto;
-            border: 1px solid #e7dece;
-            background: #ffffff;
+        .category-search-modern {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
-        .category-clean-table {
+        .category-search-field {
+            position: relative;
+            min-width: 280px;
+            flex: 1;
+        }
+
+        .category-search-field i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #665f54;
+            font-size: 17px;
+            pointer-events: none;
+        }
+
+        .category-search-field .premium-input {
             width: 100%;
-            min-width: 850px;
-            border-collapse: collapse;
+            min-height: 48px;
+            padding-left: 42px !important;
+            background: #fffdf8 !important;
         }
 
-        .category-clean-table thead th {
-            padding: 14px 12px;
-            color: #7a7064;
-            font-size: 11px;
-            font-weight: 950;
-            text-transform: uppercase;
-            letter-spacing: .06em;
+        .category-create-btn {
             white-space: nowrap;
-            text-align: left;
-            border-bottom: 1px solid #e7dece;
-            background: #fffdf8;
         }
 
-        .category-clean-table tbody td {
-            padding: 16px 12px;
-            vertical-align: middle;
-            border-bottom: 1px solid #e7dece;
-            white-space: nowrap;
-            background: #ffffff;
+        .category-modern-card {
+            border: 1px solid #d8cbb7;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, .86);
+            box-shadow: 0 18px 45px rgba(42, 36, 25, .08);
+            overflow: hidden;
         }
 
-        .category-clean-table tbody tr:last-child td {
-            border-bottom: 0;
+        .modern-category-table-shell {
+            margin-top: 0 !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            background: transparent !important;
         }
 
-        .category-clean-table tbody tr:hover td {
-            background: #fffaf0;
+        .modern-category-table {
+            min-width: 920px;
+        }
+
+        .modern-category-table thead th {
+            padding: 18px 20px !important;
+            background: #eee7dc !important;
+            color: #3a332a !important;
+            border-bottom: 2px solid #8d8069 !important;
+        }
+
+        .modern-category-table tbody td {
+            padding: 18px 20px !important;
+            color: #111111 !important;
         }
 
         .category-name-link {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 14px;
             color: #111111;
             text-decoration: none;
-            font-size: 15px;
-            font-weight: 950;
+            min-width: 0;
         }
 
         .category-name-link:hover {
-            color: #a9871f;
-            text-decoration: underline;
+            color: #8a6a00;
         }
 
         .category-color-dot {
-            width: 11px;
-            height: 11px;
+            width: 18px;
+            height: 18px;
+            flex: 0 0 18px;
             border-radius: 999px;
             display: inline-block;
-            box-shadow: 0 0 0 3px rgba(0,0,0,.04);
+            box-shadow: 0 0 0 5px rgba(0, 0, 0, .04);
+        }
+
+        .category-name-copy {
+            display: grid;
+            gap: 3px;
+            min-width: 0;
+        }
+
+        .category-name-copy strong {
+            font-size: 17px;
+            font-weight: 950;
+            line-height: 1.15;
+        }
+
+        .category-name-copy small {
+            color: #665f54;
+            font-size: 12px;
+            font-weight: 850;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
         }
 
         .category-description {
+            display: inline-block;
+            max-width: 520px;
+            color: #3a332a;
+            font-size: 15px;
+            font-weight: 750;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .category-product-count {
+            min-width: 44px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            background: #f3e8be;
             color: #111111;
-            font-weight: 700;
+            font-weight: 950;
         }
 
-        .category-clean-table th:nth-child(1),
-        .category-clean-table td:nth-child(1) {
-            width: 280px;
+        .category-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            min-height: 32px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 950;
         }
 
-        .category-clean-table th:nth-child(2),
-        .category-clean-table td:nth-child(2) {
-            min-width: 280px;
+        .category-status-pill.active {
+            background: #dcfce7;
+            color: #166534;
         }
 
-        .category-clean-table th:nth-child(3),
-        .category-clean-table td:nth-child(3) {
-            width: 120px;
-            text-align: center;
-        }
-
-        .category-clean-table th:nth-child(4),
-        .category-clean-table td:nth-child(4) {
-            width: 120px;
-            text-align: center;
-        }
-
-        .category-clean-table th:nth-child(5),
-        .category-clean-table td:nth-child(5) {
-            width: 150px;
-            text-align: right;
+        .category-status-pill.inactive {
+            background: #f3eee4;
+            color: #665f54;
         }
 
         .category-actions {
@@ -248,14 +322,101 @@
             margin: 0;
         }
 
-        @media (max-width: 900px) {
-            .category-toolbar {
+        .premium-icon-btn {
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #d8cbb7;
+            border-radius: 10px;
+            background: #fffdf8;
+            color: #111111;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform .16s ease, border-color .16s ease, background .16s ease;
+        }
+
+        .premium-icon-btn:hover {
+            transform: translateY(-1px);
+            border-color: #c9a227;
+            background: #fff7dc;
+            color: #111111;
+        }
+
+        .premium-icon-btn.premium-danger,
+        .premium-danger {
+            color: #991b1b;
+        }
+
+        .premium-icon-btn.premium-danger:hover,
+        .premium-danger:hover {
+            border-color: #ef4444;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .category-empty-state {
+            display: grid;
+            place-items: center;
+            gap: 8px;
+            padding: 52px 16px;
+            text-align: center;
+            color: #665f54;
+        }
+
+        .category-empty-state i {
+            font-size: 34px;
+            color: #8a6a00;
+        }
+
+        .category-empty-state strong {
+            color: #111111;
+            font-size: 17px;
+        }
+
+        .category-pagination {
+            padding: 16px 20px;
+            border-top: 1px solid #e7dece;
+            background: #f8f2e7;
+        }
+
+        .modern-category-table th:nth-child(1),
+        .modern-category-table td:nth-child(1) {
+            width: 290px;
+        }
+
+        .modern-category-table th:nth-child(3),
+        .modern-category-table td:nth-child(3),
+        .modern-category-table th:nth-child(4),
+        .modern-category-table td:nth-child(4) {
+            width: 130px;
+            text-align: center;
+        }
+
+        .modern-category-table th:nth-child(5),
+        .modern-category-table td:nth-child(5) {
+            width: 150px;
+            text-align: right;
+        }
+
+        @media (max-width: 1000px) {
+            .category-page-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .category-create-btn {
+                justify-self: start;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .category-search-modern {
                 display: grid;
             }
 
-            .category-search,
-            .category-search .premium-input {
-                width: 100%;
+            .category-search-field {
+                min-width: 0;
             }
         }
     </style>

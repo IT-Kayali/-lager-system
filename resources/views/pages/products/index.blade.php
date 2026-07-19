@@ -1,4 +1,4 @@
-<x-layouts.premium title="Produkte" subtitle="Produktübersicht mit den wichtigsten Daten. Details findest du in der Produktvorschau.">
+<x-layouts.premium title="Produkte" subtitle="Produktübersicht mit den wichtigsten Daten.">
     @if (session('success'))
         <div class="premium-alert">{{ session('success') }}</div>
     @endif
@@ -9,15 +9,18 @@
         </div>
     @endif
 
-    <section class="premium-card">
-        <div class="premium-toolbar products-toolbar">
-            <form method="GET" action="{{ route('products.index') }}" class="products-search">
-                <input
-                    name="search"
-                    value="{{ $search ?? '' }}"
-                    class="premium-input"
-                    placeholder="Suchen nach Bezeichnung, Code-Nummer, Lieferant..."
-                >
+    <section class="products-page-actions">
+        <div class="products-page-search-card">
+            <form method="GET" action="{{ route('products.index') }}" class="products-search-modern">
+                <div class="products-search-field">
+                    <i class="bi bi-search"></i>
+                    <input
+                        name="search"
+                        value="{{ $search ?? '' }}"
+                        class="premium-input"
+                        placeholder="Produkt suchen..."
+                    >
+                </div>
 
                 <button class="premium-btn" type="submit">
                     <i class="bi bi-search"></i>
@@ -25,37 +28,39 @@
                 </button>
 
                 @if (! empty($search))
-                    <a href="{{ route('products.index') }}" class="premium-btn">
+                    <a href="{{ route('products.index') }}" class="premium-btn products-reset-btn">
                         <i class="bi bi-x-lg"></i>
                         Zurücksetzen
                     </a>
                 @endif
             </form>
-
-            <div class="products-toolbar-actions">
-                <a href="{{ route('products.excel.export') }}" class="premium-btn">
-                    <i class="bi bi-download"></i>
-                    Excel exportieren
-                </a>
-
-                <a href="{{ route('products.excel.import.form') }}" class="premium-btn">
-                    <i class="bi bi-upload"></i>
-                    Excel importieren
-                </a>
-
-                <a href="{{ route('products.create') }}" class="premium-btn gold">
-                    <i class="bi bi-plus-lg"></i>
-                    Produkt hinzufügen
-                </a>
-            </div>
         </div>
 
-        <div class="products-table-shell">
-            <table class="products-clean-table">
+        <div class="products-page-action-buttons">
+            <a href="{{ route('products.excel.export') }}" class="premium-btn">
+                <i class="bi bi-download"></i>
+                Excel exportieren
+            </a>
+
+            <a href="{{ route('products.excel.import.form') }}" class="premium-btn">
+                <i class="bi bi-upload"></i>
+                Excel importieren
+            </a>
+
+            <a href="{{ route('products.create') }}" class="premium-btn gold">
+                <i class="bi bi-plus-lg"></i>
+                Produkt hinzufügen
+            </a>
+        </div>
+    </section>
+
+    <section class="products-modern-card">
+        <div class="products-table-shell modern-products-table-shell">
+            <table class="products-clean-table modern-products-table">
                 <thead>
                     <tr>
                         <th>Produktbezeichnung</th>
-                        <th>Bezeichnung durch Hersteller</th>
+                        <th>Hersteller</th>
                         <th>Code-Nummer</th>
                         <th>Lieferant</th>
                         <th>Verfügbare Menge</th>
@@ -81,6 +86,8 @@
 
                             $unitShort = $unitShortLabels[$product->unit] ?? $product->unit;
                             $supplierName = $product->supplierRecord?->company_name ?: $product->supplier ?: '—';
+                            $codeNumber = $product->serial_number ?: ($product->product_code ?: '—');
+                            $stockStatus = $product->stock_status;
                         @endphp
 
                         <tr>
@@ -92,18 +99,22 @@
 
                             <td>{{ $product->manufacturer_designation ?: '—' }}</td>
 
-                            <td>{{ $product->serial_number ?: '—' }}</td>
+                            <td>
+                                <span class="products-code">{{ $codeNumber }}</span>
+                            </td>
 
                             <td>{{ $supplierName }}</td>
 
                             <td>
-                                <strong>{{ number_format((float) $product->available_stock, 2, ',', '.') }}</strong>
+                                <span class="products-stock-value {{ $stockStatus }}">
+                                    {{ number_format((float) $product->available_stock, 2, ',', '.') }}
+                                </span>
                                 <span class="unit-small">{{ $unitShort }}</span>
                             </td>
 
                             <td>
-                                <span class="premium-badge {{ $product->stock_status }}">
-                                    {{ $statusLabels[$product->stock_status] ?? $product->stock_status }}
+                                <span class="products-status-pill {{ $stockStatus }}">
+                                    {{ $statusLabels[$stockStatus] ?? $stockStatus }}
                                 </span>
                             </td>
 
@@ -118,11 +129,11 @@
                                     </a>
 
                                     <a class="premium-icon-btn" href="{{ route('batches.create', ['product_id' => $product->id]) }}" title="Bestand buchen">
-                                        <i class="bi bi-grid"></i>
+                                        <i class="bi bi-layers"></i>
                                     </a>
 
                                     <a class="premium-icon-btn" href="{{ route('products.edit', $product) }}" title="Bearbeiten">
-                                        <i class="bi bi-pencil"></i>
+                                        <i class="bi bi-pencil-square"></i>
                                     </a>
 
                                     <form method="POST" action="{{ route('products.destroy', $product) }}" onsubmit="return confirm('Produkt wirklich löschen?');">
@@ -138,7 +149,11 @@
                     @empty
                         <tr>
                             <td colspan="7">
-                                <div class="premium-muted">Noch keine Produkte vorhanden.</div>
+                                <div class="products-empty-state">
+                                    <i class="bi bi-box-seam"></i>
+                                    <strong>Noch keine Produkte vorhanden.</strong>
+                                    <span>Lege dein erstes Produkt an oder importiere eine Excel-Datei.</span>
+                                </div>
                             </td>
                         </tr>
                     @endforelse
@@ -146,128 +161,160 @@
             </table>
         </div>
 
-        <div style="margin-top:18px;">
+        <div class="products-pagination">
             {{ $products->links() }}
         </div>
     </section>
 
     <style>
-        .products-toolbar {
-            align-items: flex-start;
+        .products-page-actions {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
             gap: 16px;
+            align-items: center;
+            margin-bottom: 22px;
         }
 
-        .products-search {
+        .products-page-search-card {
+            min-width: 0;
+            padding: 14px;
+            border: 1px solid #d8cbb7;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, .82);
+            box-shadow: 0 12px 28px rgba(42, 36, 25, .06);
+        }
+
+        .products-search-modern {
             display: flex;
             gap: 10px;
-            flex-wrap: wrap;
             align-items: center;
-        }
-
-        .products-search .premium-input {
-            width: 390px;
-            max-width: 100%;
-        }
-
-        .products-toolbar-actions {
-            display: flex;
-            gap: 10px;
             flex-wrap: wrap;
-            align-items: center;
-            justify-content: flex-end;
         }
 
-        .products-table-shell {
-            margin-top: 22px;
-            overflow-x: auto;
-            border: 1px solid #e7dece;
-            background: #ffffff;
+        .products-search-field {
+            position: relative;
+            min-width: 280px;
+            flex: 1;
         }
 
-        .products-clean-table {
+        .products-search-field i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #665f54;
+            font-size: 17px;
+            pointer-events: none;
+        }
+
+        .products-search-field .premium-input {
             width: 100%;
-            min-width: 980px;
-            border-collapse: collapse;
+            padding-left: 42px !important;
+            min-height: 48px;
+            background: #fffdf8 !important;
         }
 
-        .products-clean-table thead th {
-            padding: 14px 12px;
-            color: #7a7064;
-            font-size: 11px;
+        .products-page-action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .products-modern-card {
+            border: 1px solid #d8cbb7;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, .86);
+            box-shadow: 0 18px 45px rgba(42, 36, 25, .08);
+            overflow: hidden;
+        }
+
+        .modern-products-table-shell {
+            margin-top: 0 !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            background: transparent !important;
+        }
+
+        .modern-products-table {
+            min-width: 1080px;
+        }
+
+        .modern-products-table thead th {
+            padding: 18px 18px !important;
+            background: #eee7dc !important;
+            color: #3a332a !important;
+            border-bottom: 2px solid #8d8069 !important;
+        }
+
+        .modern-products-table tbody td {
+            padding: 18px 18px !important;
+            color: #111111 !important;
+        }
+
+        .product-name-link {
+            color: #111111 !important;
+            font-size: 16px;
             font-weight: 950;
-            text-transform: uppercase;
-            letter-spacing: .06em;
-            white-space: nowrap;
-            text-align: left;
-            border-bottom: 1px solid #e7dece;
-            background: #fffdf8;
+            text-decoration: none;
         }
 
-        .products-clean-table tbody td {
-            padding: 16px 12px;
-            vertical-align: middle;
-            border-bottom: 1px solid #e7dece;
-            white-space: nowrap;
-            background: #ffffff;
+        .product-name-link:hover {
+            color: #8a6a00 !important;
+            text-decoration: underline;
         }
 
-        .products-clean-table tbody tr:last-child td {
-            border-bottom: 0;
+        .products-code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+            font-size: 13px;
+            font-weight: 850;
+            color: #3a332a;
         }
 
-        .products-clean-table tbody tr:hover td {
-            background: #fffaf0;
-        }
-
-        .product-name {
+        .products-stock-value {
             font-size: 15px;
             font-weight: 950;
             color: #111111;
         }
 
+        .products-stock-value.low {
+            color: #d97706;
+        }
+
+        .products-stock-value.critical {
+            color: #c91f1f;
+        }
+
         .unit-small {
-            color: #7a7064;
+            color: #665f54;
             font-size: 12px;
-            font-weight: 800;
+            font-weight: 850;
             margin-left: 4px;
         }
 
-        .products-clean-table th:nth-child(1),
-        .products-clean-table td:nth-child(1) {
-            width: 190px;
+        .products-status-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 30px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 950;
+            line-height: 1;
+            background: #dcfce7;
+            color: #166534;
         }
 
-        .products-clean-table th:nth-child(2),
-        .products-clean-table td:nth-child(2) {
-            width: 230px;
+        .products-status-pill.low {
+            background: #fef3c7;
+            color: #b45309;
         }
 
-        .products-clean-table th:nth-child(3),
-        .products-clean-table td:nth-child(3) {
-            width: 140px;
-        }
-
-        .products-clean-table th:nth-child(4),
-        .products-clean-table td:nth-child(4) {
-            width: 160px;
-        }
-
-        .products-clean-table th:nth-child(5),
-        .products-clean-table td:nth-child(5) {
-            width: 150px;
-            text-align: right;
-        }
-
-        .products-clean-table th:nth-child(6),
-        .products-clean-table td:nth-child(6) {
-            width: 110px;
-            text-align: center;
-        }
-
-        .products-clean-table th:nth-child(7),
-        .products-clean-table td:nth-child(7) {
-            width: 190px;
-            text-align: right;
+        .products-status-pill.critical {
+            background: #fee2e2;
+            color: #991b1b;
         }
 
         .products-actions {
@@ -280,79 +327,87 @@
             margin: 0;
         }
 
-        @media (max-width: 900px) {
-            .products-toolbar {
+        .premium-icon-btn {
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #d8cbb7;
+            border-radius: 10px;
+            background: #fffdf8;
+            color: #111111;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform .16s ease, border-color .16s ease, background .16s ease;
+        }
+
+        .premium-icon-btn:hover {
+            transform: translateY(-1px);
+            border-color: #c9a227;
+            background: #fff7dc;
+            color: #111111;
+        }
+
+        .premium-icon-btn.premium-danger,
+        .premium-danger {
+            color: #991b1b;
+        }
+
+        .premium-icon-btn.premium-danger:hover,
+        .premium-danger:hover {
+            border-color: #ef4444;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .products-empty-state {
+            display: grid;
+            place-items: center;
+            gap: 8px;
+            padding: 52px 16px;
+            text-align: center;
+            color: #665f54;
+        }
+
+        .products-empty-state i {
+            font-size: 34px;
+            color: #8a6a00;
+        }
+
+        .products-empty-state strong {
+            color: #111111;
+            font-size: 17px;
+        }
+
+        .products-pagination {
+            padding: 16px 18px;
+            border-top: 1px solid #e7dece;
+            background: #f8f2e7;
+        }
+
+        @media (max-width: 1250px) {
+            .products-page-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .products-page-action-buttons {
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .products-search-modern {
                 display: grid;
             }
 
-            .products-search,
-            .products-search .premium-input {
-                width: 100%;
+            .products-search-field {
+                min-width: 0;
+            }
+
+            .products-page-action-buttons {
+                display: grid;
             }
         }
-    
-        .product-name-link {
-            color: #111111;
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: 950;
-        }
-
-        .product-name-link:hover {
-            color: #a9871f;
-            text-decoration: underline;
-        }
-
-
-        /* PRODUCT_COLUMN_ALIGN_FIX_START */
-        .products-clean-table th:nth-child(1),
-        .products-clean-table td:nth-child(1) {
-            width: 16% !important;
-        }
-
-        .products-clean-table th:nth-child(2),
-        .products-clean-table td:nth-child(2) {
-            width: 20% !important;
-        }
-
-        .products-clean-table th:nth-child(3),
-        .products-clean-table td:nth-child(3) {
-            width: 12% !important;
-        }
-
-        .products-clean-table th:nth-child(4),
-        .products-clean-table td:nth-child(4) {
-            width: 15% !important;
-        }
-
-        .products-clean-table th:nth-child(5),
-        .products-clean-table td:nth-child(5) {
-            width: 13% !important;
-            text-align: left !important;
-        }
-
-        .products-clean-table th:nth-child(6),
-        .products-clean-table td:nth-child(6) {
-            width: 9% !important;
-            text-align: left !important;
-        }
-
-        .products-clean-table th:nth-child(7),
-        .products-clean-table td:nth-child(7) {
-            width: 15% !important;
-            text-align: right !important;
-        }
-
-        .products-clean-table td:nth-child(5) strong {
-            display: inline-block;
-            min-width: 78px;
-            text-align: right;
-        }
-
-        .products-clean-table td:nth-child(6) .premium-badge {
-            margin-left: 0 !important;
-        }
-        /* PRODUCT_COLUMN_ALIGN_FIX_END */
-
-</style>
+    </style>
 </x-layouts.premium>

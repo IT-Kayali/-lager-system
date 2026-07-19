@@ -5,8 +5,8 @@
         </div>
     @endif
 
-    <section class="premium-card">
-        <form method="POST" action="{{ route('offers.store') }}" id="offer-main-form">
+    <section class="premium-card offer-editor-card">
+        <form class="offer-editor-form" method="POST" action="{{ route('offers.store') }}" id="offer-main-form">
 
 {{-- OFFER_SHIPPING_HIDDEN_FIELDS_START --}}
 <input type="hidden" name="shipping_method" id="shipping_method_real" value="{{ old('shipping_method', $offer->shipping_method ?? '') }}">
@@ -24,11 +24,12 @@
     $shippingPriceValue = old('shipping_price_gross', $offer->shipping_price_gross ?? '');
 @endphp
 
-<div id="offer-shipping-card" class="premium-card" style="box-shadow:none; margin:28px 0 18px; width:100%; max-width:none; grid-column:1 / -1;">
+<div id="offer-shipping-card" class="premium-card offer-shipping-modern-card" style="box-shadow:none; margin:28px 0 18px; width:100%; max-width:none; grid-column:1 / -1;">
     <h3 style="font-size:18px; font-weight:900; margin:0 0 12px;">Versand</h3>
 
     <div class="premium-form-grid">
-        <div class="premium-form-field full">
+        <div class="premium-form-field full offer-shipping-method-field">
+            <label for="shipping_method">Versandart *</label>
             <select id="shipping_method" class="premium-select" required>
                 <option value="">Versandart auswählen</option>
                 <option value="Lieferung" @selected($shippingMethodValue === 'Lieferung')>Lieferung</option>
@@ -37,8 +38,8 @@
             @error('shipping_method') <div class="premium-error">{{ $message }}</div> @enderror
         </div>
 
-        <div class="premium-form-field full" id="shipping_price_gross_field">
-            <label>Versandpreis brutto</label>
+        <div class="premium-form-field full offer-shipping-price-field" id="shipping_price_gross_field">
+            <label for="shipping_price_gross">Versandpreis brutto</label>
             <input
                
                 id="shipping_price_gross"

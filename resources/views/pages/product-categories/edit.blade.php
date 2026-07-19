@@ -1,8 +1,8 @@
 <x-layouts.premium title="Kategorie bearbeiten" subtitle="Produktkategorie aktualisieren.">
-    <div class="premium-card">
-        <form method="POST" action="{{ route('product-categories.update', $category) }}">
+    <section class="premium-card category-editor-card">
+        <form class="category-editor-form" method="POST" action="{{ route('product-categories.update', $category) }}">
             @method('PUT')
             @include('pages.product-categories._form', ['submitLabel' => 'Kategorie speichern'])
         </form>
-    </div>
+    </section>
 </x-layouts.premium>
