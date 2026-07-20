@@ -38,4 +38,11 @@ class ApplicationSetting extends Model
 
         return max(1, min(720, $hours));
     }
+
+    public static function loginBackgroundPath(): ?string
+    {
+        $path = trim((string) static::getValue('login_background_path', ''));
+
+        return $path !== '' ? $path : null;
+    }
 }
