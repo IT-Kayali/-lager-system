@@ -68,4 +68,64 @@
             @endif
         </section>
     </div>
+
+    <section class="premium-card" style="margin-top:22px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+            <span style="width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:#f3e8be;color:#7b5c00;font-size:20px;">
+                <i class="bi bi-image"></i>
+            </span>
+            <div>
+                <h2 style="margin:0;font-size:22px;font-weight:950;">Anmeldeseite</h2>
+                <p class="premium-muted" style="margin:4px 0 0;">Modernes Login-Design verwalten und optional ein eigenes Hintergrundbild hinterlegen.</p>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ route('settings.login-appearance.update') }}" enctype="multipart/form-data" style="display:grid;gap:16px;">
+            @csrf
+            @method('PUT')
+
+            <div style="min-height:180px;display:grid;place-items:center;border:1px dashed #d9c9ae;border-radius:22px;background:linear-gradient(135deg,#fbf6ed,#f3e5cf);background-size:cover;background-position:center;@if (! empty($loginBackgroundUrl)) background-image:linear-gradient(135deg,rgba(18,18,18,.52),rgba(212,173,22,.20)),url('{{ $loginBackgroundUrl }}'); @endif">
+                <div style="width:min(86%,280px);display:grid;gap:8px;justify-items:center;padding:24px;border:1px solid rgba(227,202,110,.42);border-radius:24px;background:rgba(18,18,18,.88);color:#fff;text-align:center;box-shadow:0 24px 70px rgba(18,18,18,.25);">
+                    <span style="width:48px;height:48px;display:grid;place-items:center;border-radius:16px;background:#d4ad16;color:#121212;font-size:22px;">
+                        <i class="bi bi-shield-lock"></i>
+                    </span>
+                    <strong style="font-size:19px;font-weight:950;">Login Vorschau</strong>
+                    <small style="max-width:100%;color:#f3e8be;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                        {{ ! empty($loginBackgroundPath) ? basename($loginBackgroundPath) : 'Standard-Verlauf ohne Bild' }}
+                    </small>
+                </div>
+            </div>
+
+            <div class="premium-form-field">
+                <label for="login_background">Hintergrundbild optional</label>
+                <input
+                    id="login_background"
+                    name="login_background"
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    class="premium-input"
+                    style="padding:12px !important;"
+                >
+                <div class="premium-muted" style="margin-top:8px;">Empfohlen: JPG, PNG oder WebP im Querformat. Maximal 4 MB.</div>
+                @error('login_background')
+                    <div class="premium-error">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <button class="premium-btn gold" type="submit">
+                    <i class="bi bi-upload"></i>
+                    Hintergrund speichern
+                </button>
+
+                @if (! empty($loginBackgroundUrl))
+                    <button class="premium-btn" type="submit" name="remove_login_background" value="1">
+                        <i class="bi bi-trash"></i>
+                        Hintergrund entfernen
+                    </button>
+                @endif
+            </div>
+        </form>
+    </section>
+
 </x-layouts.premium>

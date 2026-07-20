@@ -23,6 +23,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
 Route::redirect('/home', '/dashboard')->name('home');
+Route::get('/login-background', [SettingsController::class, 'loginBackground'])
+    ->name('login.background');
+
 
 Route::middleware(['auth'])->group(function () {
     Route::get('settings', [SettingsController::class, 'index'])
@@ -31,6 +34,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::put('settings/reservation', [SettingsController::class, 'updateReservation'])
         ->name('settings.reservation.update')
+        ->middleware('role:manager');
+
+    Route::put('settings/login-appearance', [SettingsController::class, 'updateLoginAppearance'])
+        ->name('settings.login-appearance.update')
         ->middleware('role:manager');
 
     Route::get('/dashboard', DashboardController::class)
