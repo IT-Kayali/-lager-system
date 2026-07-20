@@ -135,6 +135,19 @@
             line-height: 1.05;
         }
 
+        .login-brand-logo {
+            display: block;
+            max-width: min(380px, 100%);
+            max-height: 120px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 22px 38px rgba(0, 0, 0, .34));
+            margin-bottom: 34px;
+        }
+
+
+
         .login-info h1 {
             max-width: 680px;
             margin: 14px 0 18px;
@@ -359,21 +372,20 @@
     <main class="login-page">
         <div class="login-shell">
             <section class="login-info" aria-label="Lagerverwaltung Übersicht">
-                <div class="login-brand">
-                    <div class="login-brand-icon">
-                        @if ($loginLogoUrl)
-                            <img src="{{ $loginLogoUrl }}" alt="Logo" style="width:100%;height:100%;object-fit:contain;padding:7px;">
-                        @else
+                @if ($loginLogoUrl)
+                    <img class="login-brand-logo" src="{{ $loginLogoUrl }}" alt="Logo">
+                @else
+                    <div class="login-brand">
+                        <div class="login-brand-icon">
                             <i class="bi bi-box-seam"></i>
-                        @endif
+                        </div>
+                        <div>
+                            <small>Premium ERP</small>
+                            <strong>Lagerverwaltungssystem</strong>
+                        </div>
                     </div>
-                    <div>
-                        <small>Premium ERP</small>
-                        <strong>Lagerverwaltungssystem</strong>
-                    </div>
-                </div>
-
-                <span class="login-kicker">{{ $loginEyebrow }}</span>
+                @endif
+<span class="login-kicker">{{ $loginEyebrow }}</span>
                 <h1>{{ $loginTitle }}</h1>
                 <p>{{ $loginSubtitle }}</p>
             </section>
