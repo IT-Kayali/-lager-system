@@ -1,6 +1,16 @@
 @php
     $loginBackgroundPath = \App\Models\ApplicationSetting::loginBackgroundPath();
     $loginBackgroundUrl = $loginBackgroundPath ? route('login.background', [], false) : null;
+    $loginLogoPath = \App\Models\ApplicationSetting::loginLogoPath();
+    $loginLogoUrl = $loginLogoPath ? route('login.logo', [], false) : null;
+    $loginEyebrow = \App\Models\ApplicationSetting::loginEyebrow();
+    $loginTitle = \App\Models\ApplicationSetting::loginTitle();
+    $loginSubtitle = \App\Models\ApplicationSetting::loginSubtitle();
+    $loginLogoPath = \App\Models\ApplicationSetting::loginLogoPath();
+    $loginLogoUrl = $loginLogoPath ? route('login.logo', [], false) : null;
+    $loginEyebrow = \App\Models\ApplicationSetting::loginEyebrow();
+    $loginTitle = \App\Models\ApplicationSetting::loginTitle();
+    $loginSubtitle = \App\Models\ApplicationSetting::loginSubtitle();
 @endphp
 
 <!DOCTYPE html>
@@ -144,7 +154,7 @@
             line-height: 1.65;
         }
 
-        .login-pills {
+        .login-pills { display: none !important;
             display: flex;
             flex-wrap: wrap;
             gap: 12px;
@@ -314,7 +324,7 @@
             }
 
             .login-brand,
-            .login-pills {
+            .login-pills { display: none !important;
                 justify-content: center;
             }
 
@@ -334,7 +344,7 @@
             }
 
             .login-info p,
-            .login-pills {
+            .login-pills { display: none !important;
                 display: none;
             }
 
@@ -351,7 +361,11 @@
             <section class="login-info" aria-label="Lagerverwaltung Übersicht">
                 <div class="login-brand">
                     <div class="login-brand-icon">
-                        <i class="bi bi-box-seam"></i>
+                        @if ($loginLogoUrl)
+                            <img src="{{ $loginLogoUrl }}" alt="Logo" style="width:100%;height:100%;object-fit:contain;padding:7px;">
+                        @else
+                            <i class="bi bi-box-seam"></i>
+                        @endif
                     </div>
                     <div>
                         <small>Premium ERP</small>
@@ -359,15 +373,9 @@
                     </div>
                 </div>
 
-                <span class="login-kicker">Sicherer Zugriff</span>
-                <h1>Alles im Lager sofort im Blick.</h1>
-                <p>Modernes Dashboard für Bestände, Angebote, Rechnungen und Warnungen — schnell, klar und sicher.</p>
-
-                <div class="login-pills" aria-label="Systemvorteile">
-                    <span><i class="bi bi-box-seam"></i> Live Bestand</span>
-                    <span><i class="bi bi-file-earmark-pdf"></i> PDF Workflow</span>
-                    <span><i class="bi bi-shield-check"></i> Sicherer Login</span>
-                </div>
+                <span class="login-kicker">{{ $loginEyebrow }}</span>
+                <h1>{{ $loginTitle }}</h1>
+                <p>{{ $loginSubtitle }}</p>
             </section>
 
             <section class="login-card-wrap" aria-label="Anmeldung">
