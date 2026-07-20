@@ -226,19 +226,13 @@
         }
 
         .login-input i {
-            position: absolute;
-            top: 50%;
-            left: 17px;
-            transform: translateY(-50%);
-            color: #a77b10;
-            font-size: 18px;
-            pointer-events: none;
+            display: none;
         }
 
         .login-input input {
             width: 100%;
             min-height: 58px;
-            padding: 0 18px 0 50px;
+            padding: 0 18px;
             border: 1px solid rgba(190, 155, 58, .42);
             border-radius: 18px;
             background: #fffdf8;
