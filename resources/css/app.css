@@ -80,18 +80,21 @@ body {
 }
 
 .premium-shell {
+    width: 100%;
     min-height: 100vh;
     display: flex;
+    align-items: stretch;
     background: var(--premium-bg);
     color: var(--premium-dark);
 }
 
 .premium-sidebar {
-    width: 292px;
+    flex: 0 0 clamp(210px, 12vw, 240px);
+    width: clamp(210px, 12vw, 240px);
     min-height: 100vh;
     background: var(--premium-dark);
     color: #fff;
-    padding: 24px 18px;
+    padding: clamp(16px, 1vw, 20px) clamp(12px, .8vw, 15px);
     position: sticky;
     top: 0;
 }
@@ -102,7 +105,7 @@ body {
     gap: 12px;
     padding: 12px 10px 24px;
     border-bottom: 1px solid rgba(227, 202, 110, 0.25);
-    margin-bottom: 22px;
+    margin-bottom: 18px;
 }
 
 .premium-brand-mark {
@@ -131,16 +134,16 @@ body {
 
 .premium-sidebar-nav {
     display: grid;
-    gap: 10px;
+    gap: 8px;
 }
 
 .premium-sidebar-link {
     display: flex;
     align-items: center;
-    gap: 12px;
-    min-height: 46px;
-    padding: 11px 13px;
-    border-radius: 16px;
+    gap: 10px;
+    min-height: 40px;
+    padding: 9px 11px;
+    border-radius: 14px;
     color: #fff;
     text-decoration: none;
     border: 1px solid rgba(227, 202, 110, 0.55);
@@ -161,7 +164,15 @@ body {
     height: 24px;
     display: inline-grid;
     place-items: center;
-    font-size: 18px;
+    font-size: 16px;
+}
+
+.premium-sidebar-link span {
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: normal;
+    word-break: normal;
+    line-height: 1.15;
 }
 
 .premium-sidebar-footer {
@@ -205,22 +216,25 @@ body {
 }
 
 .premium-main {
-    flex: 1;
-    padding: 26px;
+    flex: 1 1 auto;
+    width: 100%;
     min-width: 0;
+    max-width: none;
+    padding: clamp(12px, 1vw, 18px);
+    overflow-x: clip;
 }
 
 .premium-topbar {
     background: rgba(255, 250, 241, 0.78);
     border: 1px solid var(--premium-border);
     border-radius: 24px;
-    padding: 18px 22px;
+    padding: 15px 20px;
     display: flex;
     justify-content: space-between;
-    gap: 18px;
+    gap: 14px;
     align-items: center;
     box-shadow: 0 18px 55px rgba(33, 33, 33, 0.06);
-    margin-bottom: 22px;
+    margin-bottom: 18px;
 }
 
 .premium-page-title {
@@ -238,41 +252,46 @@ body {
 .premium-card {
     background: var(--premium-card);
     border: 1px solid var(--premium-border);
-    border-radius: 26px;
-    padding: 22px;
+    border-radius: 22px;
+    padding: 18px;
     box-shadow: 0 18px 55px rgba(33, 33, 33, 0.06);
 }
 
 .premium-grid {
     display: grid;
-    gap: 18px;
+    gap: 14px;
 }
 
 .premium-grid-4 {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+}
+
+.premium-grid > .premium-card,
+.premium-grid > .premium-stat-card {
+    min-width: 0;
 }
 
 .premium-stat-card {
     background: #fffdf8;
     border: 1px solid var(--premium-border);
-    border-radius: 24px;
-    padding: 20px;
+    border-radius: 20px;
+    padding: 16px;
 }
 
 .premium-stat-icon {
-    width: 46px;
-    height: 46px;
+    width: 40px;
+    height: 40px;
     border-radius: 16px;
     background: rgba(227, 202, 110, 0.32);
     color: var(--premium-dark);
     display: grid;
     place-items: center;
-    font-size: 21px;
-    margin-bottom: 16px;
+    font-size: 19px;
+    margin-bottom: 12px;
 }
 
 .premium-stat-value {
-    font-size: 30px;
+    font-size: 28px;
     font-weight: 900;
     letter-spacing: -0.04em;
 }
@@ -298,6 +317,11 @@ body {
 .premium-btn.gold {
     background: var(--premium-gold);
     color: var(--premium-dark);
+}
+
+.premium-topbar .premium-btn {
+    padding: 10px 14px;
+    border-radius: 14px;
 }
 
 .premium-placeholder {
@@ -557,12 +581,12 @@ body {
 }
 
 .premium-filter-card {
-    margin-bottom: 22px;
+    margin-bottom: 18px;
 }
 
 .premium-filter-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
     gap: 14px;
 }
 
@@ -2934,4 +2958,386 @@ body:has(.warning-filter-total) table td:nth-child(9) .premium-actions {
     background: rgba(34, 197, 94, 0.14) !important;
     color: #15803d !important;
     border: 1px solid rgba(34, 197, 94, 0.30) !important;
+}
+
+/* Compact desktop density so the admin looks normal at 100% browser zoom. */
+@media (min-width: 981px) {
+    .premium-sidebar {
+        flex: 0 0 240px;
+        width: 240px;
+        padding: 18px 14px;
+    }
+
+    .premium-brand {
+        gap: 9px;
+        padding: 10px 8px 18px;
+        margin-bottom: 14px;
+    }
+
+    .premium-brand-mark {
+        width: 38px;
+        height: 38px;
+        border-radius: 13px;
+        font-size: 18px;
+        flex: 0 0 38px;
+    }
+
+    .premium-brand-title {
+        font-size: 15px;
+        white-space: nowrap;
+    }
+
+    .premium-brand-subtitle {
+        font-size: 10px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .premium-sidebar-nav {
+        gap: 7px;
+    }
+
+    .premium-sidebar-link {
+        min-height: 38px;
+        gap: 10px;
+        padding: 8px 11px;
+        border-radius: 12px;
+        font-size: 13px;
+        line-height: 1.15;
+    }
+
+    .premium-sidebar-link i {
+        width: 19px;
+        height: 19px;
+        font-size: 15px;
+        flex: 0 0 19px;
+    }
+
+    .premium-sidebar-footer {
+        margin-top: 18px;
+        padding-top: 14px;
+    }
+
+    .premium-user-box {
+        border-radius: 14px;
+        padding: 10px;
+    }
+
+    .premium-main {
+        padding: 12px;
+    }
+
+    .premium-topbar {
+        border-radius: 18px;
+        padding: 14px 18px;
+        margin-bottom: 14px;
+        gap: 12px;
+    }
+
+    .premium-page-title {
+        font-size: 24px;
+    }
+
+    .premium-page-subtitle {
+        font-size: 13px;
+        margin-top: 3px;
+    }
+
+    .premium-grid {
+        gap: 12px;
+    }
+
+    .premium-grid-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .premium-card {
+        border-radius: 18px;
+        padding: 16px;
+    }
+
+    .premium-stat-card {
+        border-radius: 18px;
+        padding: 14px;
+    }
+
+    .premium-stat-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        font-size: 17px;
+        margin-bottom: 10px;
+    }
+
+    .premium-stat-value {
+        font-size: 26px;
+    }
+
+    .premium-stat-label {
+        font-size: 13px;
+    }
+
+    .premium-btn {
+        border-radius: 12px;
+        padding: 9px 12px;
+        gap: 7px;
+        font-size: 13px;
+    }
+
+    .premium-topbar .premium-btn {
+        padding: 9px 12px;
+        border-radius: 12px;
+    }
+
+    .premium-table th {
+        padding: 10px 10px !important;
+        font-size: 10px !important;
+    }
+
+    .premium-table tbody td {
+        padding: 11px 10px !important;
+        font-size: 13px !important;
+    }
+}
+
+/* Keep the desktop sidebar complete and independently scrollable like classic admin menus. */
+@media (min-width: 981px) {
+    .premium-sidebar {
+        height: 100vh;
+        max-height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        overscroll-behavior: contain;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(227, 202, 110, .55) rgba(255, 255, 255, .08);
+    }
+
+    .premium-sidebar::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .premium-sidebar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, .08);
+    }
+
+    .premium-sidebar::-webkit-scrollbar-thumb {
+        background: rgba(227, 202, 110, .55);
+        border-radius: 999px;
+    }
+
+    .premium-sidebar-link span {
+        display: block;
+        white-space: normal;
+    }
+}
+
+@media (min-width: 981px) {
+    body {
+        overflow: hidden;
+    }
+
+    .premium-main {
+        height: 100vh;
+        overflow-y: auto;
+    }
+}
+
+/* Rebuilt desktop sidebar: full logo area, readable menu and internal scroll. */
+@media (min-width: 981px) {
+    .premium-sidebar {
+        position: sticky;
+        top: 0;
+        flex: 0 0 248px;
+        width: 248px;
+        height: 100vh;
+        max-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding: 18px 14px;
+        overflow: hidden;
+    }
+
+    .premium-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 0 0 auto;
+        width: 100%;
+        min-height: 70px;
+        margin: 0;
+        padding: 12px;
+        border: 1px solid rgba(227, 202, 110, .42);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, .07);
+        color: #fff;
+        text-decoration: none;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+    }
+
+    .premium-brand-mark {
+        width: 42px;
+        height: 42px;
+        flex: 0 0 42px;
+        border-radius: 14px;
+        font-size: 20px;
+    }
+
+    .premium-brand-copy {
+        display: grid;
+        min-width: 0;
+        gap: 3px;
+    }
+
+    .premium-brand-title {
+        display: block;
+        max-width: 150px;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 900;
+        line-height: 1.05;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .premium-brand-subtitle {
+        display: block;
+        max-width: 150px;
+        color: rgba(255, 255, 255, .72);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .premium-sidebar-scroll {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 6px 2px 6px 0;
+        overscroll-behavior: contain;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(227, 202, 110, .55) rgba(255, 255, 255, .08);
+    }
+
+    .premium-sidebar-scroll::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .premium-sidebar-scroll::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, .08);
+        border-radius: 999px;
+    }
+
+    .premium-sidebar-scroll::-webkit-scrollbar-thumb {
+        background: rgba(227, 202, 110, .55);
+        border-radius: 999px;
+    }
+
+    .premium-sidebar-nav {
+        display: grid;
+        gap: 7px;
+    }
+
+    .premium-sidebar-link {
+        display: grid;
+        grid-template-columns: 24px minmax(0, 1fr);
+        align-items: center;
+        gap: 10px;
+        min-height: 42px;
+        padding: 9px 12px;
+        border-radius: 13px;
+        font-size: 14px;
+        font-weight: 850;
+        line-height: 1.15;
+        border: 1px solid transparent;
+        background: transparent;
+        color: rgba(255, 255, 255, .88);
+    }
+
+    .premium-sidebar-link:hover,
+    .premium-sidebar-link.active {
+        background: #111;
+        border-color: rgba(227, 202, 110, .26);
+        color: #f6dd7b;
+        transform: none;
+    }
+
+    .premium-sidebar-link.active {
+        box-shadow: inset 4px 0 0 #d5a911;
+    }
+
+    .premium-sidebar-link i {
+        width: 24px;
+        height: 24px;
+        display: grid;
+        place-items: center;
+        font-size: 17px;
+    }
+
+    .premium-sidebar-link span {
+        display: block;
+        min-width: 0;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        word-break: normal;
+        overflow-wrap: normal;
+    }
+
+    .premium-sidebar-footer {
+        flex: 0 0 auto;
+        margin: 0;
+        padding: 12px 0 0;
+        border-top: 1px solid rgba(227, 202, 110, .22);
+    }
+
+    .premium-user-box {
+        display: grid;
+        grid-template-columns: 36px minmax(0, 1fr);
+        gap: 10px;
+        align-items: center;
+        padding: 10px;
+        border-radius: 16px;
+    }
+
+    .premium-user-avatar {
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: #fff;
+        color: var(--premium-dark);
+        font-weight: 950;
+    }
+
+    .premium-user-meta {
+        min-width: 0;
+    }
+
+    .premium-user-name,
+    .premium-user-role {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .premium-logout-btn {
+        grid-column: 1 / -1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 8px;
+        padding: 8px 10px;
+        border-radius: 12px;
+        font-size: 13px;
+    }
 }
