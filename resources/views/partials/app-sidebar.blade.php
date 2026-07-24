@@ -110,74 +110,48 @@
     $footerNavItems = collect($navItems)->where('section', 'footer');
 @endphp
 
-<aside class="premium-sidebar">
-    <div class="premium-sidebar-inner">
-        <div class="premium-brand">
-            <div class="premium-logo-placeholder">
-                <div class="premium-logo-placeholder-mark">
-                    <i class="bi bi-archive"></i>
-                </div>
+<aside class="premium-sidebar" aria-label="Hauptnavigation">
+    <a href="{{ route('dashboard') }}" class="premium-brand" aria-label="Zurück zum Dashboard">
+        <span class="premium-brand-mark">
+            <i class="bi bi-box-seam"></i>
+        </span>
+        <span class="premium-brand-copy">
+            <span class="premium-brand-title">Lagerverwaltung</span>
+            <span class="premium-brand-subtitle">Inventory • Sales • PDF</span>
+        </span>
+    </a>
 
-                <div class="premium-logo-placeholder-copy">
-                    <div class="premium-logo-placeholder-title">Logo</div>
-                    <div class="premium-logo-placeholder-subtitle">Lagerverwaltung</div>
-                </div>
-            </div>
-        </div>
-
-        <nav class="premium-sidebar-nav" aria-label="Hauptnavigation">
-            @foreach ($mainNavItems as $item)
+    <div class="premium-sidebar-scroll">
+        <nav class="premium-sidebar-nav" aria-label="Menü">
+            @foreach ($navItems as $item)
                 @if (auth()->user()?->canAccessMenu($item['roles']))
                     <a
                         href="{{ route($item['route']) }}"
                         class="premium-sidebar-link {{ request()->routeIs($item['active']) ? 'active' : '' }}"
                     >
-                        <span class="premium-sidebar-icon">
-                            <i class="bi {{ $item['icon'] }}"></i>
-                        </span>
+                        <i class="bi {{ $item['icon'] }}"></i>
                         <span>{{ $item['label'] }}</span>
                     </a>
                 @endif
             @endforeach
         </nav>
+    </div>
 
-        <div class="premium-sidebar-footer">
-            <nav class="premium-sidebar-nav premium-sidebar-nav-footer" aria-label="Systemnavigation">
-                @foreach ($footerNavItems as $item)
-                    @if (auth()->user()?->canAccessMenu($item['roles']))
-                        <a
-                            href="{{ route($item['route']) }}"
-                            class="premium-sidebar-link {{ request()->routeIs($item['active']) ? 'active' : '' }}"
-                        >
-                            <span class="premium-sidebar-icon">
-                                <i class="bi {{ $item['icon'] }}"></i>
-                            </span>
-                            <span>{{ $item['label'] }}</span>
-                        </a>
-                    @endif
-                @endforeach
-
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button class="premium-sidebar-link premium-sidebar-button" type="submit">
-                        <span class="premium-sidebar-icon">
-                            <i class="bi bi-box-arrow-right"></i>
-                        </span>
-                        <span>Abmelden</span>
-                    </button>
-                </form>
-            </nav>
-
-            <div class="premium-user-box">
-                <div class="premium-user-avatar">
-                    {{ strtoupper(mb_substr(auth()->user()->name ?? 'U', 0, 1)) }}
-                </div>
-
-                <div class="premium-user-meta">
-                    <div class="premium-user-name">{{ auth()->user()->name }}</div>
-                    <div class="premium-user-role">{{ strtoupper(auth()->user()->role) }}</div>
-                </div>
+    <div class="premium-sidebar-footer">
+        <div class="premium-user-box">
+            <div class="premium-user-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+            <div class="premium-user-meta">
+                <div class="premium-user-name">{{ auth()->user()->name }}</div>
+                <div class="premium-user-role">{{ auth()->user()->role }}</div>
             </div>
+
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button class="premium-logout-btn" type="submit">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Abmelden</span>
+                </button>
+            </form>
         </div>
     </div>
 </aside>
