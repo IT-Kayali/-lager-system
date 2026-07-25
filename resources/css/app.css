@@ -3341,3 +3341,93 @@ body:has(.warning-filter-total) table td:nth-child(9) .premium-actions {
         font-size: 13px;
     }
 }
+
+/* SERVER-SIDEBAR-LOGO-AND-FOOTER-FIX */
+@media (min-width: 981px) {
+    .premium-sidebar .premium-brand.has-custom-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-width: 0;
+        padding: 10px 12px;
+        overflow: hidden;
+    }
+
+    .premium-sidebar .premium-brand-logo {
+        display: block;
+        width: 100%;
+        max-width: 190px;
+        height: 54px;
+        object-fit: contain;
+    }
+
+    .premium-sidebar .premium-sidebar-footer {
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+        padding-top: 14px;
+    }
+
+    .premium-sidebar .premium-user-box {
+        display: grid;
+        grid-template-columns: 40px minmax(0, 1fr);
+        align-items: center;
+        gap: 10px 12px;
+        width: 100%;
+        min-width: 0;
+        padding: 10px;
+        overflow: hidden;
+    }
+
+    .premium-sidebar .premium-user-avatar {
+        width: 40px;
+        height: 40px;
+        flex: 0 0 40px;
+    }
+
+    .premium-sidebar .premium-user-meta {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        overflow: visible;
+    }
+
+    .premium-sidebar .premium-user-name,
+    .premium-sidebar .premium-user-role {
+        display: block;
+        width: 100%;
+        max-width: none;
+        white-space: normal !important;
+        overflow: visible !important;
+        overflow-wrap: anywhere;
+        word-break: normal;
+        text-overflow: clip !important;
+        line-height: 1.2;
+    }
+
+    .premium-sidebar .premium-user-box > form {
+        grid-column: 1 / -1;
+        display: block;
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .premium-sidebar .premium-user-box .premium-logout-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        min-height: 40px;
+        margin: 0;
+        padding: 9px 12px;
+        white-space: nowrap;
+        overflow: visible;
+        box-sizing: border-box;
+    }
+}
+
