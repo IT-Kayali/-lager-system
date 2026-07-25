@@ -45,4 +45,38 @@ class ApplicationSetting extends Model
 
         return $path !== '' ? $path : null;
     }
+
+public static function loginLogoPath(): ?string
+    {
+        $path = trim((string) static::getValue('login_logo_path', ''));
+
+        return $path !== '' ? $path : null;
+    }
+
+
+    public static function loginEyebrow(): string
+    {
+        return trim((string) static::getValue(
+            'login_eyebrow',
+            'Sicherer Zugriff'
+        )) ?: 'Sicherer Zugriff';
+    }
+
+
+    public static function loginTitle(): string
+    {
+        return trim((string) static::getValue(
+            'login_title',
+            'Alles im Lager sofort im Blick.'
+        )) ?: 'Alles im Lager sofort im Blick.';
+    }
+
+
+    public static function loginSubtitle(): string
+    {
+        return trim((string) static::getValue(
+            'login_subtitle',
+            'Modernes Dashboard für Bestände, Angebote, Rechnungen und Warnungen — schnell, klar und sicher.'
+        )) ?: 'Modernes Dashboard für Bestände, Angebote, Rechnungen und Warnungen — schnell, klar und sicher.';
+    }
 }

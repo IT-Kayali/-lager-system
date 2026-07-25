@@ -97,4 +97,16 @@ class SettingsController extends Controller
 
         return Storage::disk('public')->response($path);
     }
+
+public function loginLogo()
+    {
+        $path = ApplicationSetting::loginLogoPath();
+
+        abort_unless(
+            $path && Storage::disk('public')->exists($path),
+            404
+        );
+
+        return Storage::disk('public')->response($path);
+    }
 }
