@@ -25,6 +25,8 @@ Route::redirect('/', '/dashboard');
 Route::redirect('/home', '/dashboard')->name('home');
 Route::get('/login-background', [SettingsController::class, 'loginBackground'])
     ->name('login.background');
+Route::get('/login-logo', [SettingsController::class, 'loginLogo'])
+    ->name('login.logo');
 
 
 Route::middleware(['auth'])->group(function () {
