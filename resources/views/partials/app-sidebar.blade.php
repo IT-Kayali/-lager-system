@@ -1,4 +1,9 @@
 @php
+    $sidebarLogoPath = \App\Models\ApplicationSetting::loginLogoPath();
+    $sidebarLogoUrl = $sidebarLogoPath
+        ? route('login.logo', [], false)
+        : null;
+
     $navItems = [
         [
             'label' => 'Dashboard',
@@ -111,14 +116,18 @@
 @endphp
 
 <aside class="premium-sidebar" aria-label="Hauptnavigation">
-    <a href="{{ route('dashboard') }}" class="premium-brand" aria-label="Zurück zum Dashboard">
-        <span class="premium-brand-mark">
-            <i class="bi bi-box-seam"></i>
-        </span>
-        <span class="premium-brand-copy">
-            <span class="premium-brand-title">Lagerverwaltung</span>
-            <span class="premium-brand-subtitle">Inventory • Sales • PDF</span>
-        </span>
+    <a href="{{ route('dashboard') }}" class="premium-brand {{ $sidebarLogoUrl ? 'has-custom-logo' : '' }}" aria-label="Zurück zum Dashboard">
+        @if ($sidebarLogoUrl)
+            <img class="premium-brand-logo" src="{{ $sidebarLogoUrl }}" alt="Sidebar-Logo">
+        @else
+            <span class="premium-brand-mark">
+                <i class="bi bi-box-seam"></i>
+            </span>
+            <span class="premium-brand-copy">
+                <span class="premium-brand-title">Lagerverwaltung</span>
+                <span class="premium-brand-subtitle">Inventory • Sales • PDF</span>
+            </span>
+        @endif
     </a>
 
     <div class="premium-sidebar-scroll">
@@ -141,7 +150,7 @@
         <div class="premium-user-box">
             <div class="premium-user-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
             <div class="premium-user-meta">
-                <div class="premium-user-name">{{ auth()->user()->name }}</div>
+                <div class="premium-user-name" title="{{ auth()->user()->name }}">{{ auth()->user()->name }}</div>
                 <div class="premium-user-role">{{ auth()->user()->role }}</div>
             </div>
 
