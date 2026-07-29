@@ -73,6 +73,7 @@
         </section>
     </div>
 
+    @include('pages.settings._button-appearance')
     @include('pages.settings._customer-groups')
 
     <section class="premium-card" style="margin-top:22px;">
