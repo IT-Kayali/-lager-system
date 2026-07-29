@@ -170,8 +170,7 @@ class CustomerController extends Controller
     private function groups()
     {
         return CustomerGroup::query()
-            ->orderByRaw("FIELD(slug, 'gold', 'silver', 'diamond')")
-            ->orderBy('name')
+            ->ordered()
             ->get();
     }
 }
