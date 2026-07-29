@@ -17,6 +17,7 @@ class SettingsController extends Controller
 
         return view('pages.settings.index', [
             'reservationHours' => ApplicationSetting::reservationHours(),
+            'buttonTheme' => ApplicationSetting::buttonTheme(),
             'loginBackgroundPath' => $loginBackgroundPath,
             'loginBackgroundUrl' => $loginBackgroundPath ? route('login.background', [], false) : null,
             'customerGroups' => CustomerGroup::query()
@@ -42,6 +43,46 @@ class SettingsController extends Controller
         return redirect()
             ->route('settings.index')
             ->with('success', 'Reservierungsdauer wurde gespeichert.');
+    }
+
+    public function updateButtonAppearance(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'primary_button_background' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'primary_button_text' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'secondary_button_background' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'secondary_button_text' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'reset_button_appearance' => ['nullable', 'boolean'],
+        ]);
+
+        $theme = $request->boolean('reset_button_appearance')
+            ? ApplicationSetting::buttonThemeDefaults()
+            : [
+                'primary_button_background' => strtoupper($data['primary_button_background']),
+                'primary_button_text' => strtoupper($data['primary_button_text']),
+                'secondary_button_background' => strtoupper($data['secondary_button_background']),
+                'secondary_button_text' => strtoupper($data['secondary_button_text']),
+            ];
+
+        $descriptions = [
+            'primary_button_background' => 'Hintergrundfarbe für primäre Standardbuttons',
+            'primary_button_text' => 'Schriftfarbe für primäre Standardbuttons',
+            'secondary_button_background' => 'Hintergrundfarbe für sekundäre Standardbuttons',
+            'secondary_button_text' => 'Schriftfarbe für sekundäre Standardbuttons',
+        ];
+
+        foreach ($theme as $key => $value) {
+            ApplicationSetting::putValue($key, $value, 'color', $descriptions[$key]);
+        }
+
+        return redirect()
+            ->to(route('settings.index') . '#button-appearance')
+            ->with(
+                'success',
+                $request->boolean('reset_button_appearance')
+                    ? 'Die Standardfarben der Buttons wurden wiederhergestellt.'
+                    : 'Das Button-Design wurde gespeichert.'
+            );
     }
 
     public function updateLoginAppearance(Request $request): RedirectResponse
