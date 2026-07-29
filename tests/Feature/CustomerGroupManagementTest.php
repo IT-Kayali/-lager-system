@@ -12,12 +12,14 @@ function managerUser(): User
     ]);
 }
 
-it('allows a manager to create a customer group with a color', function () {
+it('allows a manager to create a customer group with manual colors', function () {
     $this->actingAs(managerUser())
         ->post(route('customer-groups.store'), [
             'name' => 'Platin',
             'description' => 'Platin-Kunden',
             'color' => '#7C3AED',
+            'text_color_auto' => '0',
+            'text_color' => '#F8FAFC',
         ])
         ->assertRedirect(route('settings.index') . '#customer-groups');
 
@@ -26,6 +28,24 @@ it('allows a manager to create a customer group with a color', function () {
         'slug' => 'platin',
         'description' => 'Platin-Kunden',
         'color' => '#7C3AED',
+        'text_color' => '#F8FAFC',
+    ]);
+});
+
+it('stores no text color when automatic contrast is enabled', function () {
+    $this->actingAs(managerUser())
+        ->post(route('customer-groups.store'), [
+            'name' => 'Bronze',
+            'color' => '#92400E',
+            'text_color_auto' => '1',
+            'text_color' => '#000000',
+        ])
+        ->assertRedirect(route('settings.index') . '#customer-groups');
+
+    $this->assertDatabaseHas('customer_groups', [
+        'name' => 'Bronze',
+        'color' => '#92400E',
+        'text_color' => null,
     ]);
 });
 
@@ -41,6 +61,8 @@ it('updates a group without changing its technical slug', function () {
             'name' => 'Premium Gold',
             'description' => 'Bevorzugte Kunden',
             'color' => '#F59E0B',
+            'text_color_auto' => '0',
+            'text_color' => '#111827',
         ])
         ->assertRedirect(route('settings.index') . '#customer-groups');
 
@@ -49,7 +71,28 @@ it('updates a group without changing its technical slug', function () {
         'name' => 'Premium Gold',
         'slug' => 'gold',
         'color' => '#F59E0B',
+        'text_color' => '#111827',
     ]);
+});
+
+it('clears a manual text color when automatic contrast is enabled', function () {
+    $group = CustomerGroup::create([
+        'name' => 'Diamond',
+        'slug' => 'diamond',
+        'color' => '#2563EB',
+        'text_color' => '#FFFF00',
+    ]);
+
+    $this->actingAs(managerUser())
+        ->put(route('customer-groups.update', $group), [
+            'name' => 'Diamond',
+            'color' => '#2563EB',
+            'text_color_auto' => '1',
+            'text_color' => '#FFFF00',
+        ])
+        ->assertRedirect(route('settings.index') . '#customer-groups');
+
+    expect($group->fresh()->text_color)->toBeNull();
 });
 
 it('does not delete a group that still has customers', function () {
