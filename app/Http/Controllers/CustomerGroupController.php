@@ -18,6 +18,12 @@ class CustomerGroupController extends Controller
             'name' => ['required', 'string', 'max:100', 'unique:customer_groups,name'],
             'description' => ['nullable', 'string', 'max:1000'],
             'color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'text_color_auto' => ['nullable', 'boolean'],
+            'text_color' => [
+                Rule::requiredIf(! $request->boolean('text_color_auto')),
+                'nullable',
+                'regex:/^#[0-9A-Fa-f]{6}$/',
+            ],
         ]);
 
         $group = CustomerGroup::create([
@@ -25,6 +31,7 @@ class CustomerGroupController extends Controller
             'slug' => $this->uniqueSlug($data['name']),
             'description' => $data['description'] ?? null,
             'color' => strtoupper($data['color']),
+            'text_color' => $this->textColor($request, $data),
         ]);
 
         Product::query()->select('id')->cursor()->each(
@@ -46,12 +53,19 @@ class CustomerGroupController extends Controller
             ],
             'description' => ['nullable', 'string', 'max:1000'],
             'color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'text_color_auto' => ['nullable', 'boolean'],
+            'text_color' => [
+                Rule::requiredIf(! $request->boolean('text_color_auto')),
+                'nullable',
+                'regex:/^#[0-9A-Fa-f]{6}$/',
+            ],
         ]);
 
         $customerGroup->update([
             'name' => trim($data['name']),
             'description' => $data['description'] ?? null,
             'color' => strtoupper($data['color']),
+            'text_color' => $this->textColor($request, $data),
         ]);
 
         return $this->redirectToGroups()
@@ -77,6 +91,15 @@ class CustomerGroupController extends Controller
 
         return $this->redirectToGroups()
             ->with('success', "Kundengruppe „{$name}“ wurde gelöscht.");
+    }
+
+    private function textColor(Request $request, array $data): ?string
+    {
+        if ($request->boolean('text_color_auto')) {
+            return null;
+        }
+
+        return strtoupper($data['text_color']);
     }
 
     private function uniqueSlug(string $name): string
