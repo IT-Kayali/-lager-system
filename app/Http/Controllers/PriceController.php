@@ -19,8 +19,7 @@ class PriceController extends Controller
             ->get(['id', 'product_code', 'name']);
 
         $groups = CustomerGroup::query()
-            ->orderByRaw("FIELD(slug, 'gold', 'silver', 'diamond')")
-            ->orderBy('name')
+            ->ordered()
             ->get();
 
         $selectedProduct = $products->firstWhere('id', (int) $request->query('product_id')) ?? $products->first();

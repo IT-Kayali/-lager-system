@@ -62,7 +62,7 @@
                                         <div class="premium-muted">{{ $selectedProduct->product_code }}</div>
                                     </td>
                                     <td>
-                                        <span class="premium-badge ok">{{ $selectedGroup->name }}</span>
+                                        <x-customer-group-badge :group="$selectedGroup" />
                                     </td>
                                     <td>{{ $tier->min_grams }}–{{ $tier->max_grams }} Gramm</td>
                                     <td><span class="premium-code">{{ $tier->tier_label }}</span></td>

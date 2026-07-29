@@ -3,6 +3,10 @@
         <div class="premium-alert">{{ session('success') }}</div>
     @endif
 
+    @if (session('error'))
+        <div class="premium-alert" style="border-color:rgba(239,68,68,.25);background:rgba(239,68,68,.10);color:#991b1b;">{{ session('error') }}</div>
+    @endif
+
     <div class="premium-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr)); align-items:start;">
         <section class="premium-card">
             <h2 style="font-size:22px; font-weight:950; margin:0 0 10px;">
@@ -69,6 +73,8 @@
         </section>
     </div>
 
+    @include('pages.settings._customer-groups')
+
     <section class="premium-card" style="margin-top:22px;">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
             <span style="width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:#f3e8be;color:#7b5c00;font-size:20px;">
@@ -112,70 +118,68 @@
                 @enderror
             </div>
 
-            
+            <div class="premium-form-field">
+                <label for="login_logo">Logo optional</label>
+                <input
+                    id="login_logo"
+                    name="login_logo"
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    class="premium-input"
+                    style="padding:12px !important;"
+                >
+                <div class="premium-muted" style="margin-top:8px;">Empfohlen: transparentes PNG/SVG. Maximal 2 MB.</div>
+                @error('login_logo')
+                    <div class="premium-error">{{ $message }}</div>
+                @enderror
+            </div>
 
+            <div class="premium-form-grid two" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;">
                 <div class="premium-form-field">
-                    <label for="login_logo">Logo optional</label>
+                    <label for="login_eyebrow">Kleine Überschrift</label>
                     <input
-                        id="login_logo"
-                        name="login_logo"
-                        type="file"
-                        accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                        id="login_eyebrow"
+                        name="login_eyebrow"
                         class="premium-input"
-                        style="padding:12px !important;"
+                        value="{{ old('login_eyebrow', $loginEyebrow ?? 'Sicherer Zugriff') }}"
+                        maxlength="80"
                     >
-                    <div class="premium-muted" style="margin-top:8px;">Empfohlen: transparentes PNG/SVG. Maximal 2 MB.</div>
-                    @error('login_logo')
+                    @error('login_eyebrow')
                         <div class="premium-error">{{ $message }}</div>
                     @enderror
-                </div>
-
-                <div class="premium-form-grid two" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;">
-                    <div class="premium-form-field">
-                        <label for="login_eyebrow">Kleine Überschrift</label>
-                        <input
-                            id="login_eyebrow"
-                            name="login_eyebrow"
-                            class="premium-input"
-                            value="{{ old('login_eyebrow', $loginEyebrow ?? 'Sicherer Zugriff') }}"
-                            maxlength="80"
-                        >
-                        @error('login_eyebrow')
-                            <div class="premium-error">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="premium-form-field">
-                        <label for="login_title">Hauptüberschrift</label>
-                        <input
-                            id="login_title"
-                            name="login_title"
-                            class="premium-input"
-                            value="{{ old('login_title', $loginTitle ?? 'Alles im Lager sofort im Blick.') }}"
-                            maxlength="120"
-                        >
-                        @error('login_title')
-                            <div class="premium-error">{{ $message }}</div>
-                        @enderror
-                    </div>
                 </div>
 
                 <div class="premium-form-field">
-                    <label for="login_subtitle">Beschreibungstext</label>
-                    <textarea
-                        id="login_subtitle"
-                        name="login_subtitle"
+                    <label for="login_title">Hauptüberschrift</label>
+                    <input
+                        id="login_title"
+                        name="login_title"
                         class="premium-input"
-                        rows="3"
-                        maxlength="240"
-                    >{{ old('login_subtitle', $loginSubtitle ?? 'Modernes Dashboard für Bestände, Angebote, Rechnungen und Warnungen — schnell, klar und sicher.') }}</textarea>
-                    <div class="premium-muted" style="margin-top:8px;">Dieser Text erscheint links auf der Login-Seite.</div>
-                    @error('login_subtitle')
+                        value="{{ old('login_title', $loginTitle ?? 'Alles im Lager sofort im Blick.') }}"
+                        maxlength="120"
+                    >
+                    @error('login_title')
                         <div class="premium-error">{{ $message }}</div>
                     @enderror
                 </div>
+            </div>
 
-<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div class="premium-form-field">
+                <label for="login_subtitle">Beschreibungstext</label>
+                <textarea
+                    id="login_subtitle"
+                    name="login_subtitle"
+                    class="premium-input"
+                    rows="3"
+                    maxlength="240"
+                >{{ old('login_subtitle', $loginSubtitle ?? 'Modernes Dashboard für Bestände, Angebote, Rechnungen und Warnungen — schnell, klar und sicher.') }}</textarea>
+                <div class="premium-muted" style="margin-top:8px;">Dieser Text erscheint links auf der Login-Seite.</div>
+                @error('login_subtitle')
+                    <div class="premium-error">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                 <button class="premium-btn gold" type="submit">
                     <i class="bi bi-upload"></i>
                     Hintergrund speichern
@@ -188,14 +192,13 @@
                     </button>
                 @endif
 
-                    @if (! empty($loginLogoUrl))
-                        <button class="premium-btn" type="submit" name="remove_login_logo" value="1">
-                            <i class="bi bi-x-circle"></i>
-                            Logo entfernen
-                        </button>
-                    @endif
+                @if (! empty($loginLogoUrl))
+                    <button class="premium-btn" type="submit" name="remove_login_logo" value="1">
+                        <i class="bi bi-x-circle"></i>
+                        Logo entfernen
+                    </button>
+                @endif
             </div>
         </form>
     </section>
-
 </x-layouts.premium>

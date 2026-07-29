@@ -17,6 +17,9 @@
                 $customer->billing_city,
                 $customer->billing_country,
             ])->filter(fn ($value) => filled($value))->values()->all();
+
+    $selectedGroupId = (int) old('customer_group_id', $customer->customer_group_id);
+    $selectedCustomerGroup = $groups->firstWhere('id', $selectedGroupId);
 @endphp
 
 <div class="premium-form-grid">
@@ -31,11 +34,27 @@
         <select id="customer_group_id" name="customer_group_id" class="premium-select" data-search="true" required>
             <option value="">Kundengruppe auswählen</option>
             @foreach ($groups as $group)
-                <option value="{{ $group->id }}" @selected((string) old('customer_group_id', $customer->customer_group_id) === (string) $group->id)>
+                <option
+                    value="{{ $group->id }}"
+                    data-color="{{ $group->displayColor() }}"
+                    data-text-color="{{ $group->textColor() }}"
+                    @selected((string) $selectedGroupId === (string) $group->id)
+                >
                     {{ $group->name }}
                 </option>
             @endforeach
         </select>
+
+        <div id="customer-group-preview-wrap" style="margin-top:9px;" @unless($selectedCustomerGroup) hidden @endunless>
+            <span
+                id="customer-group-preview"
+                class="premium-badge"
+                @if($selectedCustomerGroup) style="{{ $selectedCustomerGroup->badgeStyle() }}" @endif
+            >
+                {{ $selectedCustomerGroup?->name }}
+            </span>
+        </div>
+
         @error('customer_group_id') <div class="premium-error">{{ $message }}</div> @enderror
     </div>
 
@@ -197,6 +216,9 @@
         const checkbox = document.getElementById('delivery_address_different');
         const card = document.getElementById('delivery-address-card');
         const deliveryFields = card ? Array.from(card.querySelectorAll('input, textarea, select')) : [];
+        const groupSelect = document.getElementById('customer_group_id');
+        const groupPreviewWrap = document.getElementById('customer-group-preview-wrap');
+        const groupPreview = document.getElementById('customer-group-preview');
 
         function updateDeliveryAddressVisibility() {
             if (!checkbox || !card) {
@@ -211,7 +233,32 @@
             });
         }
 
+        function updateCustomerGroupPreview() {
+            if (!groupSelect || !groupPreviewWrap || !groupPreview) {
+                return;
+            }
+
+            const option = groupSelect.selectedOptions[0];
+
+            if (!option || !option.value) {
+                groupPreviewWrap.hidden = true;
+                groupPreview.textContent = '';
+                return;
+            }
+
+            const color = option.dataset.color || '#475569';
+            const textColor = option.dataset.textColor || '#FFFFFF';
+
+            groupPreview.textContent = option.textContent.trim();
+            groupPreview.style.backgroundColor = color;
+            groupPreview.style.borderColor = color;
+            groupPreview.style.color = textColor;
+            groupPreviewWrap.hidden = false;
+        }
+
         checkbox?.addEventListener('change', updateDeliveryAddressVisibility);
+        groupSelect?.addEventListener('change', updateCustomerGroupPreview);
         updateDeliveryAddressVisibility();
+        updateCustomerGroupPreview();
     });
 </script>

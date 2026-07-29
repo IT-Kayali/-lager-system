@@ -57,7 +57,7 @@
 
                 <div>
                     <strong>Kundengruppe:</strong><br>
-                    <span class="premium-badge ok">{{ $customer->group?->name ?? '—' }}</span>
+                    <x-customer-group-badge :group="$customer->group" />
                 </div>
 
                 @if ($customer->vat_number)
@@ -204,25 +204,19 @@
                     @forelse ($walletTransactions as $transaction)
                         <tr>
                             <td>{{ $transaction->created_at?->format('d.m.Y H:i') }}</td>
-
                             <td>{{ $transactionLabels[$transaction->type] ?? $transaction->type }}</td>
-
                             <td>
                                 <strong class="{{ $transaction->amount >= 0 ? 'wallet-text-positive' : 'wallet-text-negative' }}">
                                     {{ $transaction->amount >= 0 ? '+' : '' }}{{ number_format((float) $transaction->amount, 2, ',', '.') }} €
                                 </strong>
                             </td>
-
                             <td>
                                 <strong class="{{ $transaction->balance_after >= 0 ? 'wallet-text-positive' : 'wallet-text-negative' }}">
                                     {{ $transaction->balance_after >= 0 ? '+' : '' }}{{ number_format((float) $transaction->balance_after, 2, ',', '.') }} €
                                 </strong>
                             </td>
-
                             <td style="white-space:normal; min-width:220px;">{{ $transaction->note }}</td>
-
                             <td>{{ $transaction->user?->name ?: 'System' }}</td>
-
                             <td>
                                 @if ($transaction->offer)
                                     <a href="{{ route('offers.show', $transaction->offer) }}" class="premium-code">

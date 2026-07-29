@@ -19,9 +19,13 @@
         <div class="premium-toolbar">
             <div>
                 <h2 style="font-size:24px; font-weight:900; margin:0;">{{ $offer->offer_number }}</h2>
-                <p class="premium-muted" style="margin:4px 0 0;">
-                    {{ $offer->customer?->company_name }} · {{ $offer->customer?->group?->name }} · {{ $offer->templateLabel() }}
-                </p>
+                <div class="premium-muted" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;">
+                    <span>{{ $offer->customer?->company_name }}</span>
+                    <span>·</span>
+                    <x-customer-group-badge :group="$offer->customer?->group" />
+                    <span>·</span>
+                    <span>{{ $offer->templateLabel() }}</span>
+                </div>
             </div>
 
             <div style="display:flex; gap:10px; flex-wrap:wrap;">

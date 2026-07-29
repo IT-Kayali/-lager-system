@@ -14,16 +14,19 @@ class CustomerGroupSeeder extends Seeder
                 'name' => 'Gold',
                 'slug' => CustomerGroup::GOLD,
                 'description' => 'Gold-Kundengruppe',
+                'color' => CustomerGroup::DEFAULT_COLORS[CustomerGroup::GOLD],
             ],
             [
                 'name' => 'Silber',
                 'slug' => CustomerGroup::SILVER,
                 'description' => 'Silber-Kundengruppe',
+                'color' => CustomerGroup::DEFAULT_COLORS[CustomerGroup::SILVER],
             ],
             [
                 'name' => 'Diamond',
                 'slug' => CustomerGroup::DIAMOND,
                 'description' => 'Diamond-Kundengruppe',
+                'color' => CustomerGroup::DEFAULT_COLORS[CustomerGroup::DIAMOND],
             ],
         ];
 

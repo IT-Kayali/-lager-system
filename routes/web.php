@@ -1,23 +1,24 @@
 <?php
 
+use App\Http\Controllers\BatchController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\CustomerGroupController;
+use App\Http\Controllers\CustomerWalletTransactionController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\SupplierController;
-use App\Http\Controllers\StatisticsController;
-use App\Http\Controllers\SystemUserController;
-use App\Http\Controllers\SecurityController;
-use App\Http\Controllers\WarningController;
-use App\Http\Controllers\OfferPdfController;
 use App\Http\Controllers\DocumentTemplateController;
 use App\Http\Controllers\OfferController;
+use App\Http\Controllers\OfferPdfController;
 use App\Http\Controllers\OfferStatusController;
 use App\Http\Controllers\PriceController;
-use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\CustomerWalletTransactionController;
-use App\Http\Controllers\BatchController;
+use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductExcelController;
-use App\Http\Controllers\ProductCategoryController;
+use App\Http\Controllers\SecurityController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\StatisticsController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\SystemUserController;
+use App\Http\Controllers\WarningController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -27,7 +28,6 @@ Route::get('/login-background', [SettingsController::class, 'loginBackground'])
     ->name('login.background');
 Route::get('/login-logo', [SettingsController::class, 'loginLogo'])
     ->name('login.logo');
-
 
 Route::middleware(['auth'])->group(function () {
     Route::get('settings', [SettingsController::class, 'index'])
@@ -40,6 +40,18 @@ Route::middleware(['auth'])->group(function () {
 
     Route::put('settings/login-appearance', [SettingsController::class, 'updateLoginAppearance'])
         ->name('settings.login-appearance.update')
+        ->middleware('role:manager');
+
+    Route::post('settings/customer-groups', [CustomerGroupController::class, 'store'])
+        ->name('customer-groups.store')
+        ->middleware('role:manager');
+
+    Route::put('settings/customer-groups/{customerGroup}', [CustomerGroupController::class, 'update'])
+        ->name('customer-groups.update')
+        ->middleware('role:manager');
+
+    Route::delete('settings/customer-groups/{customerGroup}', [CustomerGroupController::class, 'destroy'])
+        ->name('customer-groups.destroy')
         ->middleware('role:manager');
 
     Route::get('/dashboard', DashboardController::class)
@@ -58,7 +70,6 @@ Route::middleware(['auth'])->group(function () {
         ->name('products.excel.import');
 
     Route::resource('products', ProductController::class)
-        
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE . ',' . User::ROLE_WAREHOUSE);
 
     Route::resource('product-categories', ProductCategoryController::class)
@@ -70,7 +81,6 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:' . User::ROLE_MANAGER)
         ->name('product-categories.redirect');
 
-
     Route::get('/batches/fifo-out', [BatchController::class, 'fifoOutForm'])
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE)
         ->name('batches.fifo-out.form');
@@ -80,7 +90,6 @@ Route::middleware(['auth'])->group(function () {
         ->name('batches.fifo-out.store');
 
     Route::resource('batches', BatchController::class)
-        
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE);
 
     Route::get('/offers', [OfferController::class, 'index'])
@@ -124,7 +133,6 @@ Route::middleware(['auth'])->group(function () {
         ->name('offers.destroy');
 
     Route::resource('suppliers', SupplierController::class)
-        
         ->middleware('role:' . User::ROLE_MANAGER);
 
     Route::post('customers/{customer}/wallet-transactions', [CustomerWalletTransactionController::class, 'store'])
@@ -132,7 +140,6 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:manager,wholesale');
 
     Route::resource('customers', CustomerController::class)
-        
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WHOLESALE);
 
     Route::get('/prices', [PriceController::class, 'index'])
@@ -174,6 +181,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/security/users/{user}', [SystemUserController::class, 'destroy'])
         ->middleware('role:' . User::ROLE_MANAGER)
         ->name('security.users.destroy');
+
     Route::get('/document-templates', [DocumentTemplateController::class, 'index'])
         ->middleware('role:' . User::ROLE_MANAGER)
         ->name('document-templates.index');
@@ -181,7 +189,6 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/document-templates/{documentTemplate}', [DocumentTemplateController::class, 'update'])
         ->middleware('role:' . User::ROLE_MANAGER)
         ->name('document-templates.update');
-
 });
 
 if (file_exists(__DIR__ . '/auth.php')) {
@@ -192,9 +199,7 @@ if (file_exists(__DIR__ . '/settings.php')) {
     require __DIR__ . '/settings.php';
 }
 
-
 Route::middleware(['auth'])->group(function () {
     Route::resource('branch-withdrawals', \App\Http\Controllers\BranchWithdrawalController::class)
         ->only(['index', 'create', 'store']);
 });
-

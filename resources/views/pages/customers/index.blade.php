@@ -1,4 +1,4 @@
-<x-layouts.premium title="Kunden" subtitle="Kundenverwaltung mit Kundengruppen Gold, Silber und Diamond.">
+<x-layouts.premium title="Kunden" subtitle="Kundenverwaltung mit individuell verwaltbaren Kundengruppen.">
     @if (session('success'))
         <div class="premium-alert">{{ session('success') }}</div>
     @endif
@@ -59,7 +59,7 @@
                             </td>
 
                             <td>
-                                <span class="premium-badge ok">{{ $customer->group?->name ?? '—' }}</span>
+                                <x-customer-group-badge :group="$customer->group" />
                             </td>
 
                             <td>

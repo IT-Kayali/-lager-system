@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ApplicationSetting;
+use App\Models\CustomerGroup;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -18,6 +19,10 @@ class SettingsController extends Controller
             'reservationHours' => ApplicationSetting::reservationHours(),
             'loginBackgroundPath' => $loginBackgroundPath,
             'loginBackgroundUrl' => $loginBackgroundPath ? route('login.background', [], false) : null,
+            'customerGroups' => CustomerGroup::query()
+                ->withCount('customers')
+                ->ordered()
+                ->get(),
         ]);
     }
 
@@ -98,7 +103,7 @@ class SettingsController extends Controller
         return Storage::disk('public')->response($path);
     }
 
-public function loginLogo()
+    public function loginLogo()
     {
         $path = ApplicationSetting::loginLogoPath();
 
