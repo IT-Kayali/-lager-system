@@ -1,5 +1,24 @@
 @csrf
 
+@php
+    $hasDifferentDeliveryAddress = old('delivery_address_different') !== null
+        ? (bool) old('delivery_address_different')
+        : collect([
+            $customer->delivery_street,
+            $customer->delivery_house_number,
+            $customer->delivery_postal_code,
+            $customer->delivery_city,
+            $customer->delivery_country,
+        ])->filter(fn ($value) => filled($value))->values()->all()
+            !== collect([
+                $customer->billing_street,
+                $customer->billing_house_number,
+                $customer->billing_postal_code,
+                $customer->billing_city,
+                $customer->billing_country,
+            ])->filter(fn ($value) => filled($value))->values()->all();
+@endphp
+
 <div class="premium-form-grid">
     <div class="premium-form-field">
         <label for="company_name">Firmenname / Kundenname *</label>
@@ -66,73 +85,89 @@
 </div>
 
 <div class="premium-card" style="box-shadow:none; margin-top:22px;">
-    <h2 style="font-size:20px; font-weight:900; margin:0 0 14px;">Lieferadresse</h2>
-
-    <div class="premium-form-grid">
-        <div class="premium-form-field">
-            <label>Straße</label>
-            <input name="delivery_street" class="premium-input" value="{{ old('delivery_street', $customer->delivery_street) }}">
-            @error('delivery_street') <div class="premium-error">{{ $message }}</div> @enderror
-        </div>
-
-        <div class="premium-form-field">
-            <label>Hausnummer</label>
-            <input name="delivery_house_number" class="premium-input" value="{{ old('delivery_house_number', $customer->delivery_house_number) }}">
-            @error('delivery_house_number') <div class="premium-error">{{ $message }}</div> @enderror
-        </div>
-
-        <div class="premium-form-field">
-            <label>PLZ</label>
-            <input name="delivery_postal_code" class="premium-input" value="{{ old('delivery_postal_code', $customer->delivery_postal_code) }}">
-            @error('delivery_postal_code') <div class="premium-error">{{ $message }}</div> @enderror
-        </div>
-
-        <div class="premium-form-field">
-            <label>Stadt</label>
-            <input name="delivery_city" class="premium-input" value="{{ old('delivery_city', $customer->delivery_city) }}">
-            @error('delivery_city') <div class="premium-error">{{ $message }}</div> @enderror
-        </div>
-
-        <div class="premium-form-field full">
-            <label>Land</label>
-            <input name="delivery_country" class="premium-input" value="{{ old('delivery_country', $customer->delivery_country ?: 'Deutschland') }}">
-            @error('delivery_country') <div class="premium-error">{{ $message }}</div> @enderror
-        </div>
-    </div>
-</div>
-
-<div class="premium-card" style="box-shadow:none; margin-top:22px;">
     <h2 style="font-size:20px; font-weight:900; margin:0 0 14px;">Rechnungsadresse</h2>
 
     <div class="premium-form-grid">
         <div class="premium-form-field">
-            <label>Straße</label>
-            <input name="billing_street" class="premium-input" value="{{ old('billing_street', $customer->billing_street) }}">
+            <label for="billing_street">Straße</label>
+            <input id="billing_street" name="billing_street" class="premium-input" value="{{ old('billing_street', $customer->billing_street) }}">
             @error('billing_street') <div class="premium-error">{{ $message }}</div> @enderror
         </div>
 
         <div class="premium-form-field">
-            <label>Hausnummer</label>
-            <input name="billing_house_number" class="premium-input" value="{{ old('billing_house_number', $customer->billing_house_number) }}">
+            <label for="billing_house_number">Hausnummer</label>
+            <input id="billing_house_number" name="billing_house_number" class="premium-input" value="{{ old('billing_house_number', $customer->billing_house_number) }}">
             @error('billing_house_number') <div class="premium-error">{{ $message }}</div> @enderror
         </div>
 
         <div class="premium-form-field">
-            <label>PLZ</label>
-            <input name="billing_postal_code" class="premium-input" value="{{ old('billing_postal_code', $customer->billing_postal_code) }}">
+            <label for="billing_postal_code">PLZ</label>
+            <input id="billing_postal_code" name="billing_postal_code" class="premium-input" value="{{ old('billing_postal_code', $customer->billing_postal_code) }}">
             @error('billing_postal_code') <div class="premium-error">{{ $message }}</div> @enderror
         </div>
 
         <div class="premium-form-field">
-            <label>Stadt</label>
-            <input name="billing_city" class="premium-input" value="{{ old('billing_city', $customer->billing_city) }}">
+            <label for="billing_city">Stadt</label>
+            <input id="billing_city" name="billing_city" class="premium-input" value="{{ old('billing_city', $customer->billing_city) }}">
             @error('billing_city') <div class="premium-error">{{ $message }}</div> @enderror
         </div>
 
         <div class="premium-form-field full">
-            <label>Land</label>
-            <input name="billing_country" class="premium-input" value="{{ old('billing_country', $customer->billing_country ?: 'Deutschland') }}">
+            <label for="billing_country">Land</label>
+            <input id="billing_country" name="billing_country" class="premium-input" value="{{ old('billing_country', $customer->billing_country ?: 'Deutschland') }}">
             @error('billing_country') <div class="premium-error">{{ $message }}</div> @enderror
+        </div>
+    </div>
+
+    <label for="delivery_address_different" style="display:flex; align-items:center; gap:10px; margin-top:20px; font-weight:900; cursor:pointer;">
+        <input
+            id="delivery_address_different"
+            name="delivery_address_different"
+            type="checkbox"
+            value="1"
+            @checked($hasDifferentDeliveryAddress)
+            style="width:18px; height:18px; accent-color:#e3ca6e;"
+        >
+        <span>Lieferadresse weicht von der Rechnungsadresse ab</span>
+    </label>
+
+    <div class="premium-muted" style="margin-top:8px;">
+        Ohne Haken wird die Rechnungsadresse automatisch auch als Lieferadresse gespeichert.
+    </div>
+</div>
+
+<div id="delivery-address-card" class="premium-card" style="box-shadow:none; margin-top:22px;" @unless($hasDifferentDeliveryAddress) hidden @endunless>
+    <h2 style="font-size:20px; font-weight:900; margin:0 0 14px;">Abweichende Lieferadresse</h2>
+
+    <div class="premium-form-grid">
+        <div class="premium-form-field">
+            <label for="delivery_street">Straße</label>
+            <input id="delivery_street" name="delivery_street" class="premium-input" value="{{ old('delivery_street', $customer->delivery_street) }}">
+            @error('delivery_street') <div class="premium-error">{{ $message }}</div> @enderror
+        </div>
+
+        <div class="premium-form-field">
+            <label for="delivery_house_number">Hausnummer</label>
+            <input id="delivery_house_number" name="delivery_house_number" class="premium-input" value="{{ old('delivery_house_number', $customer->delivery_house_number) }}">
+            @error('delivery_house_number') <div class="premium-error">{{ $message }}</div> @enderror
+        </div>
+
+        <div class="premium-form-field">
+            <label for="delivery_postal_code">PLZ</label>
+            <input id="delivery_postal_code" name="delivery_postal_code" class="premium-input" value="{{ old('delivery_postal_code', $customer->delivery_postal_code) }}">
+            @error('delivery_postal_code') <div class="premium-error">{{ $message }}</div> @enderror
+        </div>
+
+        <div class="premium-form-field">
+            <label for="delivery_city">Stadt</label>
+            <input id="delivery_city" name="delivery_city" class="premium-input" value="{{ old('delivery_city', $customer->delivery_city) }}">
+            @error('delivery_city') <div class="premium-error">{{ $message }}</div> @enderror
+        </div>
+
+        <div class="premium-form-field full">
+            <label for="delivery_country">Land</label>
+            <input id="delivery_country" name="delivery_country" class="premium-input" value="{{ old('delivery_country', $customer->delivery_country ?: 'Deutschland') }}">
+            @error('delivery_country') <div class="premium-error">{{ $message }}</div> @enderror
         </div>
     </div>
 </div>
@@ -156,3 +191,27 @@
         Zurück
     </a>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkbox = document.getElementById('delivery_address_different');
+        const card = document.getElementById('delivery-address-card');
+        const deliveryFields = card ? Array.from(card.querySelectorAll('input, textarea, select')) : [];
+
+        function updateDeliveryAddressVisibility() {
+            if (!checkbox || !card) {
+                return;
+            }
+
+            const isDifferent = checkbox.checked;
+            card.hidden = !isDifferent;
+
+            deliveryFields.forEach((field) => {
+                field.disabled = !isDifferent;
+            });
+        }
+
+        checkbox?.addEventListener('change', updateDeliveryAddressVisibility);
+        updateDeliveryAddressVisibility();
+    });
+</script>
