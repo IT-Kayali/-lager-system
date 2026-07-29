@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
-use App\Models\Offer;
 use App\Models\CustomerGroup;
+use App\Models\Offer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -44,7 +44,6 @@ class CustomerController extends Controller
             'selectedGroup' => $group,
         ]);
     }
-
 
     public function show(Customer $customer): View
     {
@@ -127,20 +126,13 @@ class CustomerController extends Controller
 
     private function validatedData(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'customer_group_id' => ['required', 'integer', 'exists:customer_groups,id'],
             'company_name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
             'phone_country_code' => ['required', 'string', 'max:10'],
             'phone' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:255'],
-
-            'delivery_street' => ['nullable', 'string', 'max:255'],
-            'delivery_house_number' => ['nullable', 'string', 'max:50'],
-            'delivery_postal_code' => ['nullable', 'string', 'max:50'],
-            'delivery_city' => ['nullable', 'string', 'max:255'],
-            'delivery_country' => ['nullable', 'string', 'max:255'],
-            'delivery_address' => ['nullable', 'string', 'max:3000'],
 
             'billing_street' => ['nullable', 'string', 'max:255'],
             'billing_house_number' => ['nullable', 'string', 'max:50'],
@@ -149,9 +141,30 @@ class CustomerController extends Controller
             'billing_country' => ['nullable', 'string', 'max:255'],
             'billing_address' => ['nullable', 'string', 'max:3000'],
 
+            'delivery_address_different' => ['nullable', 'boolean'],
+            'delivery_street' => ['nullable', 'string', 'max:255'],
+            'delivery_house_number' => ['nullable', 'string', 'max:50'],
+            'delivery_postal_code' => ['nullable', 'string', 'max:50'],
+            'delivery_city' => ['nullable', 'string', 'max:255'],
+            'delivery_country' => ['nullable', 'string', 'max:255'],
+            'delivery_address' => ['nullable', 'string', 'max:3000'],
+
             'vat_number' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:5000'],
         ]);
+
+        if (! $request->boolean('delivery_address_different')) {
+            $data['delivery_street'] = $data['billing_street'] ?? null;
+            $data['delivery_house_number'] = $data['billing_house_number'] ?? null;
+            $data['delivery_postal_code'] = $data['billing_postal_code'] ?? null;
+            $data['delivery_city'] = $data['billing_city'] ?? null;
+            $data['delivery_country'] = $data['billing_country'] ?? null;
+            $data['delivery_address'] = $data['billing_address'] ?? null;
+        }
+
+        unset($data['delivery_address_different']);
+
+        return $data;
     }
 
     private function groups()
