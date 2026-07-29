@@ -23,6 +23,7 @@ class CustomerGroup extends Model
         'slug',
         'description',
         'color',
+        'text_color',
     ];
 
     public function customers(): HasMany
@@ -53,7 +54,7 @@ class CustomerGroup extends Model
         return self::DEFAULT_COLORS[$this->slug] ?? '#475569';
     }
 
-    public function textColor(): string
+    public function automaticTextColor(): string
     {
         $hex = ltrim($this->displayColor(), '#');
         $red = hexdec(substr($hex, 0, 2));
@@ -62,6 +63,22 @@ class CustomerGroup extends Model
         $luminance = (($red * 299) + ($green * 587) + ($blue * 114)) / 1000;
 
         return $luminance >= 150 ? '#111827' : '#FFFFFF';
+    }
+
+    public function textColor(): string
+    {
+        $color = strtoupper((string) $this->text_color);
+
+        if (preg_match('/^#[0-9A-F]{6}$/', $color) === 1) {
+            return $color;
+        }
+
+        return $this->automaticTextColor();
+    }
+
+    public function usesAutomaticTextColor(): bool
+    {
+        return preg_match('/^#[0-9A-Fa-f]{6}$/', (string) $this->text_color) !== 1;
     }
 
     public function badgeStyle(): string
