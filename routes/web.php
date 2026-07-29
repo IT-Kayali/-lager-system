@@ -38,6 +38,10 @@ Route::middleware(['auth'])->group(function () {
         ->name('settings.reservation.update')
         ->middleware('role:manager');
 
+    Route::put('settings/button-appearance', [SettingsController::class, 'updateButtonAppearance'])
+        ->name('settings.button-appearance.update')
+        ->middleware('role:manager');
+
     Route::put('settings/login-appearance', [SettingsController::class, 'updateLoginAppearance'])
         ->name('settings.login-appearance.update')
         ->middleware('role:manager');

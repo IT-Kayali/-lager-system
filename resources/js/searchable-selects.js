@@ -5,6 +5,13 @@ const collator = new Intl.Collator('de-DE', {
     sensitivity: 'base',
 });
 
+const DROPDOWN_VIEWPORT_GAP = 10;
+const DROPDOWN_MIN_SPACE = 180;
+const DROPDOWN_MAX_CONTENT_HEIGHT = 320;
+
+let activeDropdown = null;
+let dropdownPositionFrame = null;
+
 function normalizeText(text) {
     return (text || '').replace(/\s+/g, ' ').trim();
 }
@@ -58,8 +65,6 @@ function isPlaceholderOption(option) {
 function sortKey(option) {
     let text = normalizeText(option.dataset.name || option.textContent);
 
-    // Bei Produktoptionen nur nach Bezeichnung/Nummer vor dem Trennzeichen sortieren:
-    // "150 | 9.519,000 verfügbar" => "150"
     if (text.includes('|')) {
         text = text.split('|')[0].trim();
     }
@@ -70,7 +75,6 @@ function sortKey(option) {
 function normalizeOfferProductOptionLabels(select) {
     select.querySelectorAll('option').forEach((option) => {
         const text = normalizeText(option.textContent);
-
         const match = text.match(/^(.+?)\s*\|\s*Verfügbar:\s*([^|]+)\s*\|\s*Max:\s*(.+)$/);
 
         if (!match) return;
@@ -110,21 +114,12 @@ function sortSelectOptions(select) {
 
     select.replaceChildren(...placeholders, ...realOptions);
 
-    /*
-     * Wichtig:
-     * Bei Create-Formularen soll nicht automatisch der erste/letzte echte Wert
-     * ausgewählt werden. Wenn kein Wert bewusst gewählt wurde, bleibt der
-     * Platzhalter aktiv.
-     */
     if (!oldValue && !hadExplicitSelected && placeholders.length > 0 && !isCountrySelect(select)) {
         select.value = '';
         placeholders[0].selected = true;
         return;
     }
 
-    /*
-     * Bei Länder-Vorwahl soll Deutschland standardmäßig ausgewählt sein.
-     */
     if ((!oldValue || oldValue === '+49') && isCountrySelect(select)) {
         const germany = Array.from(select.options).find((option) => option.value === '+49|DE');
 
@@ -139,6 +134,116 @@ function sortSelectOptions(select) {
         select.value = oldValue;
     }
 }
+
+function clearDropdownPosition(instance) {
+    if (!instance?.dropdown) return;
+
+    instance.dropdown.classList.remove('ts-dropdown-fixed', 'dropdown-above');
+
+    ['position', 'top', 'left', 'width', 'max-width', 'margin'].forEach((property) => {
+        instance.dropdown.style.removeProperty(property);
+    });
+
+    instance.dropdown
+        .querySelector('.ts-dropdown-content')
+        ?.style.removeProperty('max-height');
+}
+
+function positionActiveDropdown() {
+    dropdownPositionFrame = null;
+
+    const instance = activeDropdown;
+
+    if (!instance?.isOpen || !instance.control || !instance.dropdown) {
+        return;
+    }
+
+    const controlRect = instance.control.getBoundingClientRect();
+
+    if (
+        controlRect.width <= 0 ||
+        controlRect.height <= 0 ||
+        controlRect.bottom < 0 ||
+        controlRect.top > window.innerHeight
+    ) {
+        instance.close();
+        return;
+    }
+
+    const availableBelow = window.innerHeight - controlRect.bottom - DROPDOWN_VIEWPORT_GAP;
+    const availableAbove = controlRect.top - DROPDOWN_VIEWPORT_GAP;
+    const openAbove = availableBelow < DROPDOWN_MIN_SPACE && availableAbove > availableBelow;
+    const availableSpace = Math.max(110, openAbove ? availableAbove : availableBelow);
+
+    const dropdown = instance.dropdown;
+    const content = dropdown.querySelector('.ts-dropdown-content');
+    const viewportWidth = Math.max(0, window.innerWidth - (DROPDOWN_VIEWPORT_GAP * 2));
+    const width = Math.min(controlRect.width, viewportWidth);
+    const left = Math.min(
+        Math.max(DROPDOWN_VIEWPORT_GAP, controlRect.left),
+        Math.max(DROPDOWN_VIEWPORT_GAP, window.innerWidth - width - DROPDOWN_VIEWPORT_GAP)
+    );
+
+    dropdown.classList.add('ts-dropdown-fixed');
+    dropdown.classList.toggle('dropdown-above', openAbove);
+
+    dropdown.style.setProperty('position', 'fixed', 'important');
+    dropdown.style.setProperty('left', `${Math.round(left)}px`, 'important');
+    dropdown.style.setProperty('width', `${Math.round(width)}px`, 'important');
+    dropdown.style.setProperty('max-width', `${Math.round(viewportWidth)}px`, 'important');
+    dropdown.style.setProperty('margin', '0', 'important');
+
+    if (content) {
+        const dropdownChrome = Math.max(18, dropdown.offsetHeight - content.offsetHeight);
+        const contentHeight = Math.max(
+            90,
+            Math.min(DROPDOWN_MAX_CONTENT_HEIGHT, availableSpace - dropdownChrome)
+        );
+
+        content.style.setProperty('max-height', `${Math.floor(contentHeight)}px`, 'important');
+    }
+
+    const dropdownHeight = dropdown.getBoundingClientRect().height;
+    const proposedTop = openAbove
+        ? controlRect.top - dropdownHeight - DROPDOWN_VIEWPORT_GAP
+        : controlRect.bottom + DROPDOWN_VIEWPORT_GAP;
+    const top = Math.min(
+        Math.max(DROPDOWN_VIEWPORT_GAP, proposedTop),
+        Math.max(DROPDOWN_VIEWPORT_GAP, window.innerHeight - dropdownHeight - DROPDOWN_VIEWPORT_GAP)
+    );
+
+    dropdown.style.setProperty('top', `${Math.round(top)}px`, 'important');
+}
+
+function scheduleDropdownPosition() {
+    if (!activeDropdown || dropdownPositionFrame !== null) {
+        return;
+    }
+
+    dropdownPositionFrame = window.requestAnimationFrame(positionActiveDropdown);
+}
+
+function activateDropdownPosition(instance) {
+    if (activeDropdown && activeDropdown !== instance) {
+        clearDropdownPosition(activeDropdown);
+    }
+
+    activeDropdown = instance;
+    scheduleDropdownPosition();
+}
+
+function deactivateDropdownPosition(instance) {
+    clearDropdownPosition(instance);
+
+    if (activeDropdown === instance) {
+        activeDropdown = null;
+    }
+}
+
+window.addEventListener('scroll', scheduleDropdownPosition, true);
+window.addEventListener('resize', scheduleDropdownPosition);
+window.visualViewport?.addEventListener('resize', scheduleDropdownPosition);
+window.visualViewport?.addEventListener('scroll', scheduleDropdownPosition);
 
 function initSearchableSelects() {
     document.querySelectorAll('select').forEach((select) => {
@@ -167,8 +272,6 @@ function initSearchableSelects() {
             searchField: enableSearch ? ['text', 'name', 'dial'] : [],
             controlInput: enableSearch ? '<input />' : null,
             dropdownParent: 'body',
-
-            // Wichtig: Tom Select soll unsere DOM-Reihenfolge behalten.
             sortField: [{ field: '$order', direction: 'asc' }],
 
             render: {
@@ -213,6 +316,9 @@ function initSearchableSelects() {
                 },
             },
         });
+
+        instance.on('dropdown_open', () => activateDropdownPosition(instance));
+        instance.on('dropdown_close', () => deactivateDropdownPosition(instance));
 
         instance.wrapper.classList.remove(
             'premium-select',

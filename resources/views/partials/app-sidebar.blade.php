@@ -1,3 +1,5 @@
+@include('partials.application-theme')
+
 @php
     $sidebarLogoPath = \App\Models\ApplicationSetting::loginLogoPath();
     $sidebarLogoUrl = $sidebarLogoPath

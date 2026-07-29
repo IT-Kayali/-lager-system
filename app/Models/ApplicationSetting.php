@@ -6,6 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class ApplicationSetting extends Model
 {
+    public const DEFAULT_BUTTON_THEME = [
+        'primary_button_background' => '#D4AA20',
+        'primary_button_text' => '#171716',
+        'secondary_button_background' => '#111111',
+        'secondary_button_text' => '#FFFFFF',
+    ];
+
     protected $fillable = [
         'key',
         'value',
@@ -39,6 +46,26 @@ class ApplicationSetting extends Model
         return max(1, min(720, $hours));
     }
 
+    public static function buttonThemeDefaults(): array
+    {
+        return self::DEFAULT_BUTTON_THEME;
+    }
+
+    public static function buttonTheme(): array
+    {
+        $stored = static::query()
+            ->whereIn('key', array_keys(self::DEFAULT_BUTTON_THEME))
+            ->pluck('value', 'key');
+
+        $theme = [];
+
+        foreach (self::DEFAULT_BUTTON_THEME as $key => $default) {
+            $theme[$key] = static::normalizeHexColor($stored->get($key), $default);
+        }
+
+        return $theme;
+    }
+
     public static function loginBackgroundPath(): ?string
     {
         $path = trim((string) static::getValue('login_background_path', ''));
@@ -46,13 +73,12 @@ class ApplicationSetting extends Model
         return $path !== '' ? $path : null;
     }
 
-public static function loginLogoPath(): ?string
+    public static function loginLogoPath(): ?string
     {
         $path = trim((string) static::getValue('login_logo_path', ''));
 
         return $path !== '' ? $path : null;
     }
-
 
     public static function loginEyebrow(): string
     {
@@ -62,7 +88,6 @@ public static function loginLogoPath(): ?string
         )) ?: 'Sicherer Zugriff';
     }
 
-
     public static function loginTitle(): string
     {
         return trim((string) static::getValue(
@@ -71,12 +96,20 @@ public static function loginLogoPath(): ?string
         )) ?: 'Alles im Lager sofort im Blick.';
     }
 
-
     public static function loginSubtitle(): string
     {
         return trim((string) static::getValue(
             'login_subtitle',
             'Modernes Dashboard für Bestände, Angebote, Rechnungen und Warnungen — schnell, klar und sicher.'
         )) ?: 'Modernes Dashboard für Bestände, Angebote, Rechnungen und Warnungen — schnell, klar und sicher.';
+    }
+
+    private static function normalizeHexColor(mixed $value, string $default): string
+    {
+        $color = strtoupper(trim((string) $value));
+
+        return preg_match('/^#[0-9A-F]{6}$/', $color) === 1
+            ? $color
+            : strtoupper($default);
     }
 }
