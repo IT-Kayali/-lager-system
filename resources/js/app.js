@@ -86,12 +86,29 @@ function initCleanWarningsPageColors() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', initCleanWarningsPageColors);
-document.addEventListener('livewire:navigated', initCleanWarningsPageColors);
+/**
+ * Offer quantities are limited by available stock and the database, not by the
+ * old 5,000 gram browser limit. This also covers dynamically added rows.
+ */
+function initUnlimitedOfferQuantities() {
+    if (!window.location.pathname.includes('/offers')) {
+        return;
+    }
 
-new MutationObserver(() => {
+    document
+        .querySelectorAll('input[name$="[quantity]"], input[data-name="quantity"]')
+        .forEach((input) => input.removeAttribute('max'));
+}
+
+function initializeDynamicUi() {
     initCleanWarningsPageColors();
-}).observe(document.documentElement, {
+    initUnlimitedOfferQuantities();
+}
+
+document.addEventListener('DOMContentLoaded', initializeDynamicUi);
+document.addEventListener('livewire:navigated', initializeDynamicUi);
+
+new MutationObserver(initializeDynamicUi).observe(document.documentElement, {
     childList: true,
     subtree: true,
 });
