@@ -134,6 +134,7 @@ class PriceTierDefinitionController extends Controller
     private function normalizedTiers(array $tiers): Collection
     {
         return collect($tiers)
+            ->filter(fn ($tier) => is_array($tier))
             ->map(fn (array $tier) => [
                 'id' => filled($tier['id'] ?? null) ? (int) $tier['id'] : null,
                 'label' => trim((string) ($tier['label'] ?? '')),
