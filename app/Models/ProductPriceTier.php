@@ -85,36 +85,56 @@ class ProductPriceTier extends Model
 
     public static function ensureForProduct(Product $product): void
     {
-        $groups = CustomerGroup::query()->get();
+        $groupIds = CustomerGroup::query()->pluck('id');
         $definitions = self::definitions();
 
-        foreach ($groups as $group) {
-            foreach ($definitions as $definition) {
-                $tier = self::query()->firstOrNew([
-                    'product_id' => $product->id,
-                    'customer_group_id' => $group->id,
-                    'tier_key' => $definition->key,
-                ]);
-
-                if (! $tier->exists) {
-                    $tier->price = 0;
-                }
-
-                $tier->fill([
-                    'tier_label' => $definition->label,
-                    'min_grams' => $definition->min_grams,
-                    'max_grams' => $definition->max_grams,
-                ])->save();
-            }
-        }
+        self::upsertRows(collect([$product->id]), $groupIds, $definitions);
     }
 
     public static function synchronizeAll(): void
     {
+        $groupIds = CustomerGroup::query()->pluck('id');
+        $definitions = self::definitions();
+
         Product::query()
             ->select('id')
-            ->cursor()
-            ->each(fn (Product $product) => self::ensureForProduct($product));
+            ->chunkById(100, function (Collection $products) use ($groupIds, $definitions): void {
+                self::upsertRows($products->pluck('id'), $groupIds, $definitions);
+            });
+    }
+
+    private static function upsertRows(Collection $productIds, Collection $groupIds, Collection $definitions): void
+    {
+        if ($productIds->isEmpty() || $groupIds->isEmpty() || $definitions->isEmpty()) {
+            return;
+        }
+
+        $timestamp = now();
+        $rows = [];
+
+        foreach ($productIds as $productId) {
+            foreach ($groupIds as $groupId) {
+                foreach ($definitions as $definition) {
+                    $rows[] = [
+                        'product_id' => $productId,
+                        'customer_group_id' => $groupId,
+                        'tier_key' => $definition->key,
+                        'tier_label' => $definition->label,
+                        'min_grams' => $definition->min_grams,
+                        'max_grams' => $definition->max_grams,
+                        'price' => 0,
+                        'created_at' => $timestamp,
+                        'updated_at' => $timestamp,
+                    ];
+                }
+            }
+        }
+
+        self::query()->upsert(
+            $rows,
+            ['product_id', 'customer_group_id', 'tier_key'],
+            ['tier_label', 'min_grams', 'max_grams', 'updated_at']
+        );
     }
 
     public function product(): BelongsTo
