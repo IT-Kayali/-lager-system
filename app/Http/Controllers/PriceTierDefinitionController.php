@@ -19,14 +19,13 @@ class PriceTierDefinitionController extends Controller
             'tiers' => ['required', 'array', 'min:1', 'max:50'],
             'tiers.*.id' => ['nullable', 'integer', 'distinct', 'exists:price_tier_definitions,id'],
             'tiers.*.label' => ['required', 'string', 'max:100'],
-            'tiers.*.min_grams' => ['required', 'integer', 'min:1', 'max:5000'],
-            'tiers.*.max_grams' => ['required', 'integer', 'min:1', 'max:5000'],
+            'tiers.*.min_grams' => ['required', 'integer', 'min:1', 'max:999999999'],
+            'tiers.*.max_grams' => ['nullable', 'integer', 'min:1', 'max:999999999'],
         ], [
             'tiers.required' => 'Mindestens eine Preisstufe ist erforderlich.',
             'tiers.min' => 'Mindestens eine Preisstufe ist erforderlich.',
             'tiers.*.label.required' => 'Jede Preisstufe benötigt eine Bezeichnung.',
             'tiers.*.min_grams.required' => 'Das Startgewicht ist erforderlich.',
-            'tiers.*.max_grams.required' => 'Das Endgewicht ist erforderlich.',
         ]);
 
         $validator->after(function ($validator) use ($request): void {
@@ -44,7 +43,21 @@ class PriceTierDefinitionController extends Controller
                 $validator->errors()->add('tiers', 'Die Bezeichnungen der Preisstufen müssen eindeutig sein.');
             }
 
-            foreach ($tiers as $tier) {
+            $ordered = $tiers->sortBy('min_grams')->values();
+            $lastIndex = $ordered->count() - 1;
+
+            foreach ($ordered as $index => $tier) {
+                if ($tier['max_grams'] === null) {
+                    if ($index !== $lastIndex) {
+                        $validator->errors()->add(
+                            'tiers',
+                            "Nur die letzte Preisstufe darf ohne Endgewicht sein. „{$tier['label']}“ ist nicht die letzte Stufe."
+                        );
+                    }
+
+                    continue;
+                }
+
                 if ($tier['min_grams'] > $tier['max_grams']) {
                     $validator->errors()->add(
                         'tiers',
@@ -53,11 +66,14 @@ class PriceTierDefinitionController extends Controller
                 }
             }
 
-            $ordered = $tiers->sortBy('min_grams')->values();
-
             for ($index = 1; $index < $ordered->count(); $index++) {
                 $previous = $ordered[$index - 1];
                 $current = $ordered[$index];
+
+                if ($previous['max_grams'] === null) {
+                    continue;
+                }
+
                 $expectedStart = $previous['max_grams'] + 1;
 
                 if ($current['min_grams'] <= $previous['max_grams']) {
@@ -139,7 +155,9 @@ class PriceTierDefinitionController extends Controller
                 'id' => filled($tier['id'] ?? null) ? (int) $tier['id'] : null,
                 'label' => trim((string) ($tier['label'] ?? '')),
                 'min_grams' => (int) ($tier['min_grams'] ?? 0),
-                'max_grams' => (int) ($tier['max_grams'] ?? 0),
+                'max_grams' => filled($tier['max_grams'] ?? null)
+                    ? (int) $tier['max_grams']
+                    : null,
             ]);
     }
 
