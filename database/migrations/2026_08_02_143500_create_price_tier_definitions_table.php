@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('key')->unique();
             $table->string('label', 100);
             $table->unsignedInteger('min_grams');
-            $table->unsignedInteger('max_grams');
+            $table->unsignedInteger('max_grams')->nullable();
             $table->timestamps();
 
             $table->index(['min_grams', 'max_grams']);
