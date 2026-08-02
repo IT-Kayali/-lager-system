@@ -64,7 +64,11 @@
                                     <td>
                                         <x-customer-group-badge :group="$selectedGroup" />
                                     </td>
-                                    <td>{{ $tier->min_grams }}–{{ $tier->max_grams }} Gramm</td>
+                                    <td>
+                                        {{ $tier->max_grams === null
+                                            ? 'ab ' . $tier->min_grams . ' Gramm'
+                                            : $tier->min_grams . '–' . $tier->max_grams . ' Gramm' }}
+                                    </td>
                                     <td><span class="premium-code">{{ $tier->tier_label }}</span></td>
                                     <td>
                                         <input
