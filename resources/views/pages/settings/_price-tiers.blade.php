@@ -41,7 +41,7 @@
             @method('PUT')
 
             <div class="premium-alert" style="background:#fff8df;border-color:#e3ca6e;color:#5f4a00;">
-                <strong>Wichtig:</strong> Die Bereiche müssen direkt aneinander anschließen. Bestehende Preise bleiben beim Bearbeiten erhalten. Beim Entfernen werden nur die aktuellen Preisfelder gelöscht; alte Angebote und Rechnungen bleiben unverändert.
+                <strong>Wichtig:</strong> Die Bereiche müssen direkt aneinander anschließen. Bei der letzten Preisstufe darf „Bis Gramm“ leer bleiben; sie gilt dann ohne Obergrenze. Bestehende Preise bleiben beim Bearbeiten erhalten.
             </div>
 
             @error('tiers')
@@ -88,7 +88,6 @@
                                         name="tiers[{{ $index }}][min_grams]"
                                         type="number"
                                         min="1"
-                                        max="5000"
                                         step="1"
                                         class="premium-input"
                                         value="{{ $tier['min_grams'] ?? '' }}"
@@ -104,20 +103,24 @@
                                         name="tiers[{{ $index }}][max_grams]"
                                         type="number"
                                         min="1"
-                                        max="5000"
                                         step="1"
                                         class="premium-input"
                                         value="{{ $tier['max_grams'] ?? '' }}"
+                                        placeholder="Leer = unendlich"
                                         data-tier-max
-                                        required
                                     >
+                                    <div class="premium-muted price-tier-help">Nur bei der letzten Stufe leer lassen.</div>
                                     @error("tiers.$index.max_grams")
                                         <div class="premium-error">{{ $message }}</div>
                                     @enderror
                                 </td>
                                 <td>
                                     <strong class="price-tier-range" data-tier-range>
-                                        {{ $tier['min_grams'] ?? '–' }}–{{ $tier['max_grams'] ?? '–' }} Gramm
+                                        @if (filled($tier['max_grams'] ?? null))
+                                            {{ $tier['min_grams'] ?? '–' }}–{{ $tier['max_grams'] }} Gramm
+                                        @else
+                                            ab {{ $tier['min_grams'] ?? '–' }} Gramm
+                                        @endif
                                     </strong>
                                 </td>
                                 <td>
@@ -156,16 +159,17 @@
     <tr data-price-tier-row>
         <td>
             <input type="hidden" data-field="id" value="">
-            <input class="premium-input" maxlength="100" placeholder="z. B. 1500g" data-field="label" data-tier-label required>
+            <input class="premium-input" maxlength="100" placeholder="z. B. 5000g+" data-field="label" data-tier-label required>
         </td>
         <td>
-            <input type="number" min="1" max="5000" step="1" class="premium-input" data-field="min_grams" data-tier-min required>
+            <input type="number" min="1" step="1" class="premium-input" data-field="min_grams" data-tier-min required>
         </td>
         <td>
-            <input type="number" min="1" max="5000" step="1" class="premium-input" data-field="max_grams" data-tier-max required>
+            <input type="number" min="1" step="1" class="premium-input" placeholder="Leer = unendlich" data-field="max_grams" data-tier-max>
+            <div class="premium-muted price-tier-help">Nur bei der letzten Stufe leer lassen.</div>
         </td>
         <td>
-            <strong class="price-tier-range" data-tier-range>– Gramm</strong>
+            <strong class="price-tier-range" data-tier-range>ab – Gramm</strong>
         </td>
         <td>
             <button type="button" class="price-tier-remove" data-remove-price-tier title="Preisstufe entfernen">
@@ -269,6 +273,12 @@
         min-width:140px;
     }
 
+    .price-tier-help {
+        margin-top:6px;
+        font-size:11px;
+        white-space:nowrap;
+    }
+
     .price-tier-range {
         white-space:nowrap;
     }
@@ -328,11 +338,13 @@
 
         function refreshRange(row) {
             const min = row.querySelector('[data-tier-min]')?.value || '–';
-            const max = row.querySelector('[data-tier-max]')?.value || '–';
+            const max = row.querySelector('[data-tier-max]')?.value || '';
             const range = row.querySelector('[data-tier-range]');
 
             if (range) {
-                range.textContent = `${min}–${max} Gramm`;
+                range.textContent = max === ''
+                    ? `ab ${min} Gramm`
+                    : `${min}–${max} Gramm`;
             }
         }
 
@@ -358,6 +370,11 @@
         rows.querySelectorAll('[data-price-tier-row]').forEach(bindRow);
 
         addButton.addEventListener('click', function () {
+            const previousRow = rows.lastElementChild;
+            const previousMaxValue = previousRow
+                ?.querySelector('[data-tier-max]')
+                ?.value
+                ?.trim();
             const fragment = template.content.cloneNode(true);
             const row = fragment.querySelector('[data-price-tier-row]');
             const index = nextIndex++;
@@ -365,6 +382,10 @@
             row.querySelectorAll('[data-field]').forEach((input) => {
                 input.name = `tiers[${index}][${input.dataset.field}]`;
             });
+
+            if (previousMaxValue && !Number.isNaN(Number(previousMaxValue))) {
+                row.querySelector('[data-tier-min]').value = String(Number(previousMaxValue) + 1);
+            }
 
             rows.appendChild(fragment);
             bindRow(rows.lastElementChild);
