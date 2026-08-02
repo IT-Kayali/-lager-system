@@ -232,13 +232,19 @@ class ProductExcelController extends Controller
                     continue;
                 }
 
-                $defaultTier = ProductPriceTier::TIERS[$tierKey] ?? null;
+                $defaultTier = ProductPriceTier::definitionForKey($tierKey);
 
                 $tierLabel = $this->cleanString($row['tier_label'] ?? null)
-                    ?: ($defaultTier['label'] ?? $tierKey);
+                    ?: ($defaultTier?->label ?? $tierKey);
 
-                $minGrams = $this->integer($row['min_grams'] ?? null, $defaultTier['min_grams'] ?? 0);
-                $maxGrams = $this->integer($row['max_grams'] ?? null, $defaultTier['max_grams'] ?? 0);
+                $minGrams = $this->integer(
+                    $row['min_grams'] ?? null,
+                    $defaultTier?->min_grams ?? 0
+                );
+                $maxGrams = $this->nullableInteger(
+                    $row['max_grams'] ?? null,
+                    $defaultTier?->max_grams
+                );
                 $price = $this->decimal($row['price'] ?? 0);
 
                 ProductPriceTier::query()->updateOrCreate(
@@ -351,6 +357,17 @@ class ProductExcelController extends Controller
     }
 
     private function integer(mixed $value, int $default = 0): int
+    {
+        $value = $this->cleanString($value);
+
+        if ($value === '') {
+            return $default;
+        }
+
+        return (int) $value;
+    }
+
+    private function nullableInteger(mixed $value, ?int $default = null): ?int
     {
         $value = $this->cleanString($value);
 
