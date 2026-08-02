@@ -34,6 +34,7 @@ it('shows the default price tier definitions in settings', function () {
         ->get(route('settings.index'))
         ->assertOk()
         ->assertSee('Preisstufen')
+        ->assertSee('Leer = unendlich')
         ->assertSee('50g')
         ->assertSee('1000g');
 
@@ -82,6 +83,63 @@ it('adds a price tier and creates price rows for existing products and groups', 
         'max_grams' => 5000,
         'price' => 0,
     ]);
+});
+
+it('allows the final price tier to have no upper limit', function () {
+    $group = CustomerGroup::create([
+        'name' => 'Gold',
+        'slug' => 'gold',
+        'color' => '#D4AD16',
+    ]);
+
+    $product = Product::create([
+        'name' => 'Großmengenprodukt',
+        'unit' => 'gram',
+        'minimum_stock' => 0,
+    ]);
+
+    $rows = priceTierRows(function (array $rows): array {
+        $rows[] = [
+            'id' => null,
+            'label' => 'Ab 5001g',
+            'min_grams' => 5001,
+            'max_grams' => null,
+        ];
+
+        return $rows;
+    });
+
+    $this->actingAs($this->manager)
+        ->put(route('price-tiers.update'), ['tiers' => $rows])
+        ->assertRedirect(route('settings.index') . '#price-tiers');
+
+    $definition = PriceTierDefinition::query()
+        ->where('label', 'Ab 5001g')
+        ->firstOrFail();
+
+    expect($definition->max_grams)->toBeNull();
+
+    $priceTier = ProductPriceTier::query()
+        ->where('product_id', $product->id)
+        ->where('customer_group_id', $group->id)
+        ->where('tier_key', $definition->key)
+        ->firstOrFail();
+
+    expect($priceTier->max_grams)->toBeNull();
+
+    $matchedTier = ProductPriceTier::query()
+        ->where('product_id', $product->id)
+        ->where('customer_group_id', $group->id)
+        ->where('min_grams', '<=', 6500)
+        ->where(function ($query) {
+            $query
+                ->whereNull('max_grams')
+                ->orWhere('max_grams', '>=', 6500);
+        })
+        ->orderByDesc('min_grams')
+        ->first();
+
+    expect($matchedTier?->tier_key)->toBe($definition->key);
 });
 
 it('updates a tier while preserving existing prices and its technical key', function () {
@@ -187,6 +245,25 @@ it('rejects overlapping or incomplete ranges', function () {
     $this->assertDatabaseHas('price_tier_definitions', [
         'key' => '100g',
         'min_grams' => 91,
+    ]);
+});
+
+it('rejects an unlimited tier when another tier follows it', function () {
+    $rows = priceTierRows(function (array $rows): array {
+        $rows[3]['max_grams'] = null;
+
+        return $rows;
+    });
+
+    $this->actingAs($this->manager)
+        ->from(route('settings.index'))
+        ->put(route('price-tiers.update'), ['tiers' => $rows])
+        ->assertRedirect(route('settings.index'))
+        ->assertSessionHasErrors('tiers');
+
+    $this->assertDatabaseHas('price_tier_definitions', [
+        'key' => '500g',
+        'max_grams' => 750,
     ]);
 });
 
