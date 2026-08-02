@@ -262,7 +262,7 @@ class OfferController extends Controller
             'notes' => ['nullable', 'string', 'max:5000'],
             'items' => ['required', 'array'],
             'items.*.product_id' => ['nullable', 'integer', 'exists:products,id'],
-            'items.*.quantity' => ['nullable', 'numeric', 'min:0.001', 'max:5000'],
+            'items.*.quantity' => ['nullable', 'numeric', 'min:0.001', 'max:999999999.999'],
         ]);
     }
 
@@ -324,7 +324,12 @@ class OfferController extends Controller
                 ->where('product_id', $product->id)
                 ->where('customer_group_id', $customer->customer_group_id)
                 ->where('min_grams', '<=', $item['quantity'])
-                ->where('max_grams', '>=', $item['quantity'])
+                ->where(function ($query) use ($item) {
+                    $query
+                        ->whereNull('max_grams')
+                        ->orWhere('max_grams', '>=', $item['quantity']);
+                })
+                ->orderByDesc('min_grams')
                 ->first();
 
             if (! $tier) {
@@ -412,7 +417,7 @@ class OfferController extends Controller
         return [
             Offer::STATUS_OFFER => 'Angebot',
             Offer::STATUS_IN_PROGRESS => 'In Bearbeitung',
-Offer::STATUS_READY => 'Abholbereit',
+            Offer::STATUS_READY => 'Abholbereit',
             Offer::STATUS_COMPLETED => 'Erledigt',
             Offer::STATUS_CANCELLED => 'Storniert',
             Offer::STATUS_RESERVATION_EXPIRED => 'Reservierung abgelaufen',
