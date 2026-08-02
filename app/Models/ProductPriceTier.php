@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
 
 class ProductPriceTier extends Model
 {
@@ -54,27 +56,85 @@ class ProductPriceTier extends Model
         ];
     }
 
-    public static function ensureForProduct(Product $product): void
+    public static function definitions(): Collection
     {
-        $groups = CustomerGroup::query()->get();
+        if (Schema::hasTable('price_tier_definitions')) {
+            $definitions = PriceTierDefinition::query()->ordered()->get();
 
-        foreach ($groups as $group) {
-            foreach (self::TIERS as $key => $tier) {
-                self::query()->firstOrCreate(
-                    [
-                        'product_id' => $product->id,
-                        'customer_group_id' => $group->id,
-                        'tier_key' => $key,
-                    ],
-                    [
-                        'tier_label' => $tier['label'],
-                        'min_grams' => $tier['min_grams'],
-                        'max_grams' => $tier['max_grams'],
-                        'price' => 0,
-                    ]
-                );
+            if ($definitions->isNotEmpty()) {
+                return $definitions;
             }
         }
+
+        return collect(self::TIERS)
+            ->map(fn (array $tier, string $key) => (object) [
+                'key' => $key,
+                'label' => $tier['label'],
+                'min_grams' => $tier['min_grams'],
+                'max_grams' => $tier['max_grams'],
+            ])
+            ->values();
+    }
+
+    public static function definitionForKey(string $key): ?object
+    {
+        return self::definitions()->first(
+            fn (object $definition) => $definition->key === $key
+        );
+    }
+
+    public static function ensureForProduct(Product $product): void
+    {
+        $groupIds = CustomerGroup::query()->pluck('id');
+        $definitions = self::definitions();
+
+        self::upsertRows(collect([$product->id]), $groupIds, $definitions);
+    }
+
+    public static function synchronizeAll(): void
+    {
+        $groupIds = CustomerGroup::query()->pluck('id');
+        $definitions = self::definitions();
+
+        Product::query()
+            ->select('id')
+            ->chunkById(100, function (Collection $products) use ($groupIds, $definitions): void {
+                self::upsertRows($products->pluck('id'), $groupIds, $definitions);
+            });
+    }
+
+    private static function upsertRows(Collection $productIds, Collection $groupIds, Collection $definitions): void
+    {
+        if ($productIds->isEmpty() || $groupIds->isEmpty() || $definitions->isEmpty()) {
+            return;
+        }
+
+        $timestamp = now();
+        $rows = [];
+
+        foreach ($productIds as $productId) {
+            foreach ($groupIds as $groupId) {
+                foreach ($definitions as $definition) {
+                    $rows[] = [
+                        'product_id' => $productId,
+                        'customer_group_id' => $groupId,
+                        'tier_key' => $definition->key,
+                        'tier_label' => $definition->label,
+                        'min_grams' => $definition->min_grams,
+                        'max_grams' => $definition->max_grams,
+                        'price' => 0,
+                        'created_at' => $timestamp,
+                        'updated_at' => $timestamp,
+                    ];
+                }
+            }
+        }
+
+        self::query()->upsert(
+            $rows,
+            ['product_id', 'customer_group_id', 'tier_key'],
+            ['tier_label', 'min_grams', 'max_grams', 'updated_at']
+        );
     }
 
     public function product(): BelongsTo

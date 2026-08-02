@@ -33,7 +33,9 @@ class PriceController extends Controller
             $tiers = ProductPriceTier::query()
                 ->where('product_id', $selectedProduct->id)
                 ->where('customer_group_id', $selectedGroup->id)
-                ->orderByRaw("FIELD(tier_key, '50g', '100g', '250g', '500g', '1000g')")
+                ->orderBy('min_grams')
+                ->orderBy('max_grams')
+                ->orderBy('id')
                 ->get();
         }
 
