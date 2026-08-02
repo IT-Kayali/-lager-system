@@ -9,6 +9,7 @@
             'min_grams' => $tier->min_grams,
             'max_grams' => $tier->max_grams,
         ]);
+    $nextTierIndex = ((int) $tierRows->keys()->map(fn ($key) => (int) $key)->max()) + 1;
 @endphp
 
 <section id="price-tiers" class="premium-card price-tier-settings" style="margin-top:22px;scroll-margin-top:24px;">
@@ -323,7 +324,7 @@
             return;
         }
 
-        let nextIndex = {{ $tierRows->count() }};
+        let nextIndex = {{ $nextTierIndex }};
 
         function refreshRange(row) {
             const min = row.querySelector('[data-tier-min]')?.value || '–';
