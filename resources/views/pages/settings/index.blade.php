@@ -75,6 +75,7 @@
 
     @include('pages.settings._button-appearance')
     @include('pages.settings._customer-groups')
+    @include('pages.settings._price-tiers')
 
     <section class="premium-card" style="margin-top:22px;">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
