@@ -5,25 +5,11 @@
     <style>
         @page { margin: 18mm 14mm 18mm; }
 
-        @font-face {
-            font-family: 'ExoPDF';
-            font-style: normal;
-            font-weight: 400;
-            src: url("file://{{ public_path('fonts/exo/Exo-Regular.ttf') }}") format("truetype");
-        }
-
-        @font-face {
-            font-family: 'ExoPDF';
-            font-style: normal;
-            font-weight: 700;
-            src: url("file://{{ public_path('fonts/exo/Exo-Bold.ttf') }}") format("truetype");
-        }
-
         * { box-sizing: border-box; }
 
         body {
             margin: 0;
-            font-family: 'ExoPDF', DejaVu Sans, sans-serif;
+            font-family: DejaVu Sans, sans-serif;
             color: #171717;
             font-size: 10pt;
             line-height: 1.35;
