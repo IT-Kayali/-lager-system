@@ -44,7 +44,7 @@ function deliveryNoteWithdrawal(): BranchWithdrawal
     return $withdrawal;
 }
 
-it('shows branch withdrawals in a table with a delivery note action', function () {
+it('shows a simplified branch withdrawal table with the creator and delivery note action', function () {
     $withdrawal = deliveryNoteWithdrawal();
 
     $this->actingAs($this->manager)
@@ -52,7 +52,10 @@ it('shows branch withdrawals in a table with a delivery note action', function (
         ->assertOk()
         ->assertSee('class="premium-table branch-table"', false)
         ->assertSee(route('branch-withdrawals.delivery-note', $withdrawal), false)
-        ->assertSee('Filial-Lieferschein Testprodukt');
+        ->assertSee($this->manager->name)
+        ->assertDontSee('Produkte und Mengen')
+        ->assertDontSee('Filial-Lieferschein Testprodukt')
+        ->assertDontSee('Ausgegeben:');
 });
 
 it('streams an internal branch delivery note as pdf', function () {
