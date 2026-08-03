@@ -14,7 +14,7 @@ class BranchWithdrawalPdfController extends Controller
         abort_unless(auth()->check(), 403);
         abort_unless(auth()->user()?->canAccessMenu(['manager', 'warehouse']), 403);
 
-        $branchWithdrawal->load(['items.product', 'user', 'processor']);
+        $branchWithdrawal->load(['items.product']);
 
         $template = DocumentTemplate::byKey(DocumentTemplate::WITH_COMPANY);
 
@@ -26,8 +26,39 @@ class BranchWithdrawalPdfController extends Controller
             $template->delivery_background_image_path ?: $template->background_image_path
         );
 
-        $pdf = Pdf::loadView('pdf.branch-withdrawal-delivery-note', [
-            'withdrawal' => $branchWithdrawal,
+        $customer = (object) [
+            'id' => 0,
+            'company_name' => $branchWithdrawal->branch_name,
+            'contact_person' => null,
+            'delivery_street' => null,
+            'delivery_house_number' => null,
+            'delivery_postal_code' => null,
+            'delivery_city' => null,
+            'delivery_country' => null,
+            'billing_street' => null,
+            'billing_house_number' => null,
+            'billing_postal_code' => null,
+            'billing_city' => null,
+            'billing_country' => null,
+            'billing_address' => null,
+            'customer_number' => 'INTERNE FILIALE',
+            'number' => null,
+        ];
+
+        $offer = (object) [
+            'customer' => $customer,
+            'items' => $branchWithdrawal->items->map(fn ($item) => (object) [
+                'quantity' => $item->quantity,
+                'product_name' => $item->product?->name ?? 'Gelöschtes Produkt',
+                'description' => $item->product?->name ?? 'Gelöschtes Produkt',
+                'product' => $item->product,
+            ]),
+            'shipping_method' => 'Interne Warenübergabe',
+            'offer_number' => $branchWithdrawal->withdrawal_number,
+        ];
+
+        $pdf = Pdf::loadView('pdf.delivery-note', [
+            'offer' => $offer,
             'template' => $template,
             'logoDataUri' => $logoDataUri,
             'backgroundDataUri' => $backgroundDataUri,
