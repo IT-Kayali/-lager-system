@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BranchWithdrawalController;
+use App\Http\Controllers\BranchWithdrawalPdfController;
 use App\Http\Controllers\PriceTierDefinitionController;
 use Illuminate\Support\Facades\Route;
 
@@ -8,6 +9,9 @@ Route::middleware(['auth'])->group(function () {
     Route::put('settings/price-tiers', [PriceTierDefinitionController::class, 'updateAll'])
         ->name('price-tiers.update')
         ->middleware('role:manager');
+
+    Route::get('branch-withdrawals/{branchWithdrawal}/delivery-note', [BranchWithdrawalPdfController::class, 'stream'])
+        ->name('branch-withdrawals.delivery-note');
 
     Route::get('branch-withdrawals/{branchWithdrawal}/edit', [BranchWithdrawalController::class, 'edit'])
         ->name('branch-withdrawals.edit');
