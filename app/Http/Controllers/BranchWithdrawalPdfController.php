@@ -6,6 +6,7 @@ use App\Models\BranchWithdrawal;
 use App\Models\DocumentTemplate;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\File;
 
 class BranchWithdrawalPdfController extends Controller
 {
@@ -56,6 +57,8 @@ class BranchWithdrawalPdfController extends Controller
             'shipping_method' => 'Interne Warenübergabe',
             'offer_number' => $branchWithdrawal->withdrawal_number,
         ];
+
+        File::ensureDirectoryExists(storage_path('fonts'));
 
         $pdf = Pdf::loadView('pdf.delivery-note', [
             'offer' => $offer,
