@@ -41,12 +41,15 @@ class BatchController extends Controller
 
     public function create(Request $request): View
     {
+        $selectedProduct = Product::query()->find($request->integer('product_id'));
+
         return view('pages.batches.create', [
             'batch' => new ProductBatch([
+                'product_id' => $selectedProduct?->id,
                 'received_at' => now()->toDateString(),
             ]),
             'products' => $this->products(),
-            'selectedProductId' => $request->query('product_id'),
+            'selectedProductId' => $selectedProduct?->id,
         ]);
     }
 
