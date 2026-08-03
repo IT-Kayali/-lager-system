@@ -74,55 +74,70 @@
             </div>
         </section>
 
-        <section class="branch-editor-section">
+        <section class="branch-editor-section branch-items-section">
             <div class="branch-editor-section-head">
-                <span class="branch-editor-section-icon"><i class="bi bi-box-seam"></i></span>
+                <span class="branch-editor-section-icon"><i class="bi bi-table"></i></span>
                 <div>
                     <h2>Produktpositionen</h2>
-                    <p>Sobald Produkt und Menge vollständig sind, öffnet sich automatisch die nächste Position.</p>
+                    <p>Die nächste leere Position wird automatisch vorbereitet. Beim Tippen bleibt der Cursor im Mengenfeld.</p>
                 </div>
             </div>
 
-            <div id="branch-withdrawal-items" class="branch-item-list">
-                @foreach ($itemsForForm as $index => $item)
-                    <div class="branch-item-row" data-item-row>
-                        <div class="premium-form-field">
-                            <label>Produkt</label>
-                            <select name="items[{{ $index }}][product_id]" class="premium-select" data-search="true">
-                                <option value="">Produkt auswählen</option>
-                                @foreach ($products as $product)
-                                    <option value="{{ $product->id }}" @selected((string) ($item['product_id'] ?? '') === (string) $product->id)>
-                                        {{ $product->name }}
-                                        @if ($product->product_code)
-                                            — {{ $product->product_code }}
-                                        @endif
-                                        | {{ number_format((float) $product->available_stock, 2, ',', '.') }} {{ $unitLabels[$product->unit] ?? $product->unit }} verfügbar
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+            <div class="branch-item-table-wrap">
+                <table class="branch-item-table">
+                    <thead>
+                        <tr>
+                            <th class="branch-item-position-column">Pos.</th>
+                            <th>Produkt</th>
+                            <th class="branch-item-quantity-column">Menge</th>
+                            <th class="branch-item-action-column">Aktion</th>
+                        </tr>
+                    </thead>
+                    <tbody id="branch-withdrawal-items">
+                        @foreach ($itemsForForm as $index => $item)
+                            <tr data-item-row>
+                                <td class="branch-item-position" data-position>{{ $index + 1 }}</td>
+                                <td>
+                                    <select name="items[{{ $index }}][product_id]" class="premium-select" data-search="true" aria-label="Produkt Position {{ $index + 1 }}">
+                                        <option value="">Produkt auswählen</option>
+                                        @foreach ($products as $product)
+                                            <option value="{{ $product->id }}" @selected((string) ($item['product_id'] ?? '') === (string) $product->id)>
+                                                {{ $product->name }}
+                                                @if ($product->product_code)
+                                                    — {{ $product->product_code }}
+                                                @endif
+                                                | {{ number_format((float) $product->available_stock, 2, ',', '.') }} {{ $unitLabels[$product->unit] ?? $product->unit }} verfügbar
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </td>
+                                <td>
+                                    <input
+                                        name="items[{{ $index }}][quantity]"
+                                        type="number"
+                                        step="0.001"
+                                        min="0.001"
+                                        max="999999999"
+                                        class="premium-input"
+                                        value="{{ $item['quantity'] ?? '' }}"
+                                        placeholder="z. B. 50"
+                                        aria-label="Menge Position {{ $index + 1 }}"
+                                    >
+                                </td>
+                                <td class="branch-item-action">
+                                    <button type="button" class="premium-icon-btn premium-danger remove-branch-item" title="Position entfernen" aria-label="Position entfernen">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
 
-                        <div class="premium-form-field">
-                            <label>Menge</label>
-                            <input
-                                name="items[{{ $index }}][quantity]"
-                                type="number"
-                                step="0.001"
-                                min="0.001"
-                                max="999999999"
-                                class="premium-input"
-                                value="{{ $item['quantity'] ?? '' }}"
-                                placeholder="z. B. 50"
-                            >
-                        </div>
-
-                        <div class="premium-form-field branch-item-remove-field">
-                            <button type="button" class="premium-icon-btn premium-danger remove-branch-item" title="Position entfernen">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                @endforeach
+            <div class="branch-item-help">
+                <i class="bi bi-info-circle"></i>
+                Enter im Mengenfeld öffnet direkt das Produkt-Dropdown der nächsten Position.
             </div>
         </section>
     </div>
@@ -160,10 +175,10 @@
 </div>
 
 <template id="branch-item-template">
-    <div class="branch-item-row" data-item-row>
-        <div class="premium-form-field">
-            <label>Produkt</label>
-            <select data-name="product_id" class="premium-select" data-search="true">
+    <tr data-item-row>
+        <td class="branch-item-position" data-position></td>
+        <td>
+            <select data-name="product_id" class="premium-select" data-search="true" aria-label="Produkt">
                 <option value="">Produkt auswählen</option>
                 @foreach ($products as $product)
                     <option value="{{ $product->id }}">
@@ -175,19 +190,16 @@
                     </option>
                 @endforeach
             </select>
-        </div>
-
-        <div class="premium-form-field">
-            <label>Menge</label>
-            <input data-name="quantity" type="number" step="0.001" min="0.001" max="999999999" class="premium-input" placeholder="z. B. 50">
-        </div>
-
-        <div class="premium-form-field branch-item-remove-field">
-            <button type="button" class="premium-icon-btn premium-danger remove-branch-item" title="Position entfernen">
+        </td>
+        <td>
+            <input data-name="quantity" type="number" step="0.001" min="0.001" max="999999999" class="premium-input" placeholder="z. B. 50" aria-label="Menge">
+        </td>
+        <td class="branch-item-action">
+            <button type="button" class="premium-icon-btn premium-danger remove-branch-item" title="Position entfernen" aria-label="Position entfernen">
                 <i class="bi bi-trash"></i>
             </button>
-        </div>
-    </div>
+        </td>
+    </tr>
 </template>
 
 <script>
@@ -221,8 +233,19 @@
         function reindex() {
             rows().forEach((row, index) => {
                 const current = fields(row);
-                if (current.product) current.product.name = `items[${index}][product_id]`;
-                if (current.quantity) current.quantity.name = `items[${index}][quantity]`;
+                const position = row.querySelector('[data-position]');
+
+                if (current.product) {
+                    current.product.name = `items[${index}][product_id]`;
+                    current.product.setAttribute('aria-label', `Produkt Position ${index + 1}`);
+                }
+
+                if (current.quantity) {
+                    current.quantity.name = `items[${index}][quantity]`;
+                    current.quantity.setAttribute('aria-label', `Menge Position ${index + 1}`);
+                }
+
+                if (position) position.textContent = String(index + 1);
             });
         }
 
@@ -237,41 +260,54 @@
                 } else {
                     product.focus();
                 }
-            }, 120);
+            }, 80);
         }
 
-        function addRow(focus = false) {
+        function addRow() {
             const fragment = template.content.cloneNode(true);
             const row = fragment.querySelector('[data-item-row]');
             wrapper.appendChild(fragment);
             reindex();
             bind();
             window.initSearchableSelects?.();
-            if (focus && row) focusProduct(row);
+            return row;
         }
 
-        function ensureTrailingRow(triggerRow = null) {
+        function ensureTrailingRow() {
             const currentRows = rows();
             const last = currentRows[currentRows.length - 1];
-            if (!last || complete(last)) addRow(triggerRow === last);
+
+            if (!last || complete(last)) {
+                return addRow();
+            }
+
+            return last;
         }
 
         function removeExtraEmptyRows() {
             const currentRows = rows();
+
             currentRows.forEach((row, index) => {
                 const isLast = index === currentRows.length - 1;
+
                 if (!isLast && !hasData(row) && currentRows.length > 1) {
                     row.querySelector('select')?.tomselect?.destroy();
                     row.remove();
                 }
             });
+
             reindex();
         }
 
-        function changed(row) {
-            const wasLast = row === rows()[rows().length - 1];
-            ensureTrailingRow(wasLast ? row : null);
+        function prepareNextRow() {
+            ensureTrailingRow();
             removeExtraEmptyRows();
+        }
+
+        function nextRowAfter(row) {
+            const currentRows = rows();
+            const index = currentRows.indexOf(row);
+            return index >= 0 ? currentRows[index + 1] : null;
         }
 
         function bind() {
@@ -279,15 +315,36 @@
                 const current = fields(row);
                 const removeButton = row.querySelector('.remove-branch-item');
 
-                [current.product, current.quantity].forEach((field) => {
-                    if (!field || field.dataset.branchBound === '1') return;
-                    field.dataset.branchBound = '1';
-                    field.addEventListener('change', () => changed(row));
-                    field.addEventListener('input', () => changed(row));
-                });
+                if (current.product && current.product.dataset.branchBound !== '1') {
+                    current.product.dataset.branchBound = '1';
+                    current.product.addEventListener('change', prepareNextRow);
+                }
+
+                if (current.quantity && current.quantity.dataset.branchBound !== '1') {
+                    current.quantity.dataset.branchBound = '1';
+
+                    current.quantity.addEventListener('input', function () {
+                        prepareNextRow();
+                    });
+
+                    current.quantity.addEventListener('change', function () {
+                        prepareNextRow();
+                    });
+
+                    current.quantity.addEventListener('keydown', function (event) {
+                        if (event.key !== 'Enter' || !complete(row)) return;
+
+                        event.preventDefault();
+                        prepareNextRow();
+
+                        const next = nextRowAfter(row);
+                        if (next) focusProduct(next);
+                    });
+                }
 
                 if (removeButton && removeButton.dataset.branchBound !== '1') {
                     removeButton.dataset.branchBound = '1';
+
                     removeButton.addEventListener('click', function () {
                         if (rows().length === 1) {
                             current.product?.tomselect?.clear();
@@ -316,7 +373,7 @@
 <style>
     .branch-editor-form { display:grid; gap:22px; }
     .branch-editor-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(320px,420px); gap:22px; align-items:start; }
-    .branch-editor-main { display:grid; gap:22px; }
+    .branch-editor-main { display:grid; gap:22px; min-width:0; }
     .branch-editor-section,
     .branch-status-card { border:1px solid #d8cbb7; border-radius:22px; background:rgba(255,255,255,.9); box-shadow:0 18px 45px rgba(42,36,25,.08); padding:26px; }
     .branch-editor-section-head { display:flex; gap:14px; padding-bottom:18px; margin-bottom:20px; border-bottom:1px solid #e7dece; }
@@ -330,10 +387,23 @@
     .branch-editor-form .premium-select,
     .branch-editor-form .premium-textarea { width:100%; min-height:52px; border:1px solid #c9b895 !important; border-radius:14px !important; background:#fffdf8 !important; color:#111 !important; font-size:16px; font-weight:750; }
     .branch-editor-form .premium-textarea { min-height:110px; resize:vertical; }
-    .branch-item-list { border:1px solid #e1d6c4; border-radius:18px; overflow:hidden; }
-    .branch-item-row { display:grid; grid-template-columns:minmax(260px,1.6fr) minmax(150px,.55fr) auto; gap:14px; align-items:end; padding:16px; border-top:1px solid #e7dece; background:#fff; }
-    .branch-item-row:first-child { border-top:0; }
-    .branch-item-remove-field { display:flex; align-items:end; }
+    .branch-items-section { padding:0; overflow:hidden; }
+    .branch-items-section .branch-editor-section-head { margin:0; padding:24px 26px 18px; }
+    .branch-item-table-wrap { width:100%; overflow-x:auto; }
+    .branch-item-table { width:100%; min-width:760px; border-collapse:collapse; table-layout:fixed; }
+    .branch-item-table th { padding:13px 14px; background:#eee7dc; color:#3a332a; border-bottom:1px solid #8d8069; text-align:left; font-size:12px; font-weight:950; text-transform:uppercase; letter-spacing:.04em; }
+    .branch-item-table td { padding:12px 14px; border-bottom:1px solid #e7dece; vertical-align:middle; background:#fff; }
+    .branch-item-table tbody tr:last-child td { border-bottom:0; }
+    .branch-item-table .premium-input,
+    .branch-item-table .premium-select,
+    .branch-item-table .ts-wrapper { margin:0 !important; }
+    .branch-item-position-column { width:68px; text-align:center !important; }
+    .branch-item-position { color:#8a6a00; text-align:center; font-weight:950; }
+    .branch-item-quantity-column { width:210px; }
+    .branch-item-action-column { width:86px; text-align:center !important; }
+    .branch-item-action { text-align:center; }
+    .branch-item-help { display:flex; align-items:center; gap:8px; padding:13px 18px; border-top:1px solid #e7dece; background:#faf7f0; color:#665f54; font-size:13px; font-weight:750; }
+    .branch-item-help i { color:#8a6a00; }
     .branch-status-card { position:sticky; top:96px; background:radial-gradient(circle at 90% 10%,rgba(212,170,32,.18),transparent 32%),#2d2b25; color:#fff; border-color:rgba(255,232,169,.18); }
     .branch-status-kicker { color:#ffe690; font-size:11px; font-weight:950; text-transform:uppercase; letter-spacing:.1em; }
     .branch-status-card h3 { margin:14px 0 20px; font-size:25px; font-weight:950; }
@@ -346,5 +416,5 @@
     .branch-editor-actions { display:flex; justify-content:flex-end; gap:12px; flex-wrap:wrap; }
     .branch-editor-actions .premium-btn { min-width:180px; }
     @media (max-width:1150px) { .branch-editor-grid { grid-template-columns:1fr; } .branch-status-card { position:static; } }
-    @media (max-width:760px) { .branch-editor-section,.branch-status-card { padding:20px; } .branch-editor-fields,.branch-item-row { grid-template-columns:1fr; } .branch-item-remove-field { justify-content:flex-end; } .branch-editor-actions { display:grid; } .branch-editor-actions .premium-btn { width:100%; } }
+    @media (max-width:760px) { .branch-editor-section,.branch-status-card { padding:20px; } .branch-items-section { padding:0; } .branch-editor-fields { grid-template-columns:1fr; } .branch-editor-actions { display:grid; } .branch-editor-actions .premium-btn { width:100%; } }
 </style>
