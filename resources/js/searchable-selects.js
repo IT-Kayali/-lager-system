@@ -31,6 +31,13 @@ function shouldUseSearch(select) {
     );
 }
 
+function isProductSelect(select) {
+    const name = select.getAttribute('name') || '';
+    const dataName = select.dataset.name || '';
+
+    return name.includes('product_id') || dataName === 'product_id';
+}
+
 function isCountrySelect(select) {
     return select.classList.contains('phone-country-select');
 }
@@ -72,17 +79,31 @@ function sortKey(option) {
     return text;
 }
 
-function normalizeOfferProductOptionLabels(select) {
+function normalizeProductOptionLabels(select) {
+    if (!isProductSelect(select)) return;
+
     select.querySelectorAll('option').forEach((option) => {
-        const text = normalizeText(option.textContent);
-        const match = text.match(/^(.+?)\s*\|\s*Verfügbar:\s*([^|]+)\s*\|\s*Max:\s*(.+)$/);
+        if (isPlaceholderOption(option)) return;
 
-        if (!match) return;
+        const originalText = normalizeText(option.dataset.productName || option.textContent);
+        if (!originalText) return;
 
-        const productName = match[1].trim();
-        const maxUsableQuantity = match[3].trim();
+        let productName = originalText;
+        const pipeIndex = productName.indexOf('|');
 
-        option.textContent = `${productName} | ${maxUsableQuantity} verfügbar`;
+        if (pipeIndex !== -1) {
+            productName = productName.slice(0, pipeIndex).trim();
+
+            const codeSeparatorIndex = productName.lastIndexOf(' — ');
+            if (codeSeparatorIndex > 0) {
+                productName = productName.slice(0, codeSeparatorIndex).trim();
+            }
+        }
+
+        if (!productName) return;
+
+        option.dataset.productName = productName;
+        option.textContent = productName;
     });
 }
 
@@ -251,7 +272,7 @@ function initSearchableSelects() {
         if (select.multiple) return;
         if (select.classList.contains('no-tomselect')) return;
 
-        normalizeOfferProductOptionLabels(select);
+        normalizeProductOptionLabels(select);
         sortSelectOptions(select);
 
         const enableSearch = shouldUseSearch(select);
