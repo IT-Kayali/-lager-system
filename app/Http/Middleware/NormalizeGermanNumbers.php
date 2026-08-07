@@ -15,6 +15,7 @@ class NormalizeGermanNumbers
         'price',
         'amount',
         'shipping_price_gross',
+        'tax_rate',
     ];
 
     public function handle(Request $request, Closure $next): Response
