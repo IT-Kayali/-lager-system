@@ -64,22 +64,22 @@
             <div class="stock-preview-grid">
                 <div class="stock-preview-box">
                     <span>Gesamt</span>
-                    <strong>{{ number_format((float) $product->total_stock, 2, ',', '.') }}</strong>
+                    <strong>{{ \App\Support\GermanNumber::format($product->total_stock) }}</strong>
                 </div>
 
                 <div class="stock-preview-box">
                     <span>Reserviert</span>
-                    <strong>{{ number_format((float) $product->reserved_stock, 2, ',', '.') }}</strong>
+                    <strong>{{ \App\Support\GermanNumber::format($product->reserved_stock) }}</strong>
                 </div>
 
                 <div class="stock-preview-box highlight">
                     <span>Verfügbar</span>
-                    <strong>{{ number_format((float) $product->available_stock, 2, ',', '.') }}</strong>
+                    <strong>{{ \App\Support\GermanNumber::format($product->available_stock) }}</strong>
                 </div>
 
                 <div class="stock-preview-box">
                     <span>Mindestbestand</span>
-                    <strong>{{ number_format((float) $product->minimum_stock, 2, ',', '.') }}</strong>
+                    <strong>{{ \App\Support\GermanNumber::format($product->minimum_stock) }}</strong>
                 </div>
             </div>
         </div>
@@ -161,7 +161,7 @@
 
                     <div>
                         <span>Menge</span>
-                        <strong>{{ number_format((float) $batch->quantity, 2, ',', '.') }} {{ $product->unit === 'gram' ? 'g' : $unitLabel }}</strong>
+                        <strong>{{ \App\Support\GermanNumber::format($batch->quantity) }} {{ $product->unit === 'gram' ? 'g' : $unitLabel }}</strong>
                     </div>
 
                     <div>
