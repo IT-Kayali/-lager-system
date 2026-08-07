@@ -97,7 +97,7 @@
             <div class="premium-muted" style="font-weight:900; text-transform:uppercase; letter-spacing:.08em;">Kundenkonto</div>
 
             <div class="wallet-balance">
-                {{ $walletBalance >= 0 ? '+' : '' }}{{ number_format((float) $walletBalance, 2, ',', '.') }} €
+                {{ $walletBalance >= 0 ? '+' : '' }}{{ \App\Support\GermanNumber::format($walletBalance) }} €
             </div>
 
             <div class="wallet-hint">
@@ -167,7 +167,7 @@
 
                 <div class="premium-form-field">
                     <label>Betrag *</label>
-                    <input name="amount" type="number" step="0.01" min="0.01" class="premium-input" required>
+                    <input name="amount" type="text" inputmode="decimal" class="premium-input" value="{{ old('amount') }}" placeholder="0,00" required>
                     @error('amount') <div class="premium-error">{{ $message }}</div> @enderror
                 </div>
 
@@ -209,12 +209,12 @@
                             <td>{{ $transactionLabels[$transaction->type] ?? $transaction->type }}</td>
                             <td>
                                 <strong class="{{ $transaction->amount >= 0 ? 'wallet-text-positive' : 'wallet-text-negative' }}">
-                                    {{ $transaction->amount >= 0 ? '+' : '' }}{{ number_format((float) $transaction->amount, 2, ',', '.') }} €
+                                    {{ $transaction->amount >= 0 ? '+' : '' }}{{ \App\Support\GermanNumber::format($transaction->amount) }} €
                                 </strong>
                             </td>
                             <td>
                                 <strong class="{{ $transaction->balance_after >= 0 ? 'wallet-text-positive' : 'wallet-text-negative' }}">
-                                    {{ $transaction->balance_after >= 0 ? '+' : '' }}{{ number_format((float) $transaction->balance_after, 2, ',', '.') }} €
+                                    {{ $transaction->balance_after >= 0 ? '+' : '' }}{{ \App\Support\GermanNumber::format($transaction->balance_after) }} €
                                 </strong>
                             </td>
                             <td style="white-space:normal; min-width:220px;">{{ $transaction->note }}</td>
@@ -273,7 +273,7 @@
                                 </span>
                             </td>
                             <td>{{ $offer->items_count }}</td>
-                            <td>{{ number_format((float) $offer->total, 2, ',', '.') }} €</td>
+                            <td>{{ \App\Support\GermanNumber::format($offer->total) }} €</td>
                             <td>
                                 @if ($offer->reserved_until && $offer->status === \App\Models\Offer::STATUS_OFFER)
                                     {{ $offer->reserved_until->format('d.m.Y H:i') }}
