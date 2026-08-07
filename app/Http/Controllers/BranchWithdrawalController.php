@@ -232,7 +232,7 @@ class BranchWithdrawalController extends Controller
 
             if ($quantity > $availableBefore) {
                 throw ValidationException::withMessages([
-                    'items' => "Für „{$product->name}“ sind nur " . number_format($availableBefore, 3, ',', '.') . ' verfügbar.',
+                    'items' => "Für „{$product->name}“ sind nur " . \App\Support\GermanNumber::format($availableBefore) . ' verfügbar.',
                 ]);
             }
 
