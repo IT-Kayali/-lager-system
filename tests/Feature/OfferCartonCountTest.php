@@ -34,6 +34,16 @@ it('binds carton count to the offer form and delivery-only UI', function () {
         ->toContain("help.textContent = 'Nur bei Lieferung. Hat keinen Einfluss auf Preis oder Versandkosten.'");
 });
 
+it('keeps shipping method price and carton count aligned in three desktop columns', function () {
+    $script = file_get_contents(resource_path('js/app.js'));
+
+    expect($script)
+        ->toContain('html body #offer-shipping-card.offer-shipping-modern-card .premium-form-grid')
+        ->toContain('grid-template-columns: minmax(300px, 1.2fr) minmax(220px, .8fr) minmax(190px, .6fr) !important;')
+        ->toContain('@media (max-width: 1150px)')
+        ->toContain('@media (max-width: 760px)');
+});
+
 it('ships the carton count migration with nullable legacy storage', function () {
     $migration = database_path('migrations/2026_08_07_225000_add_carton_count_to_offers_table.php');
 
