@@ -128,13 +128,13 @@
 
         table.items th:nth-child(2),
         table.items td:nth-child(2) {
-            width: 32mm;
+            width: 44mm;
             text-align: center;
         }
 
         table.items th:nth-child(3),
         table.items td:nth-child(3) {
-            width: 44mm;
+            width: 32mm;
             text-align: center;
         }
 
@@ -215,9 +215,9 @@
 
     $estimateRowHeight = function ($item): float {
         $productLines = max(1, (int) ceil(mb_strlen((string) $item->product) / 42));
-        $unitLines = max(1, (int) ceil(mb_strlen((string) $item->unit) / 14));
         $quantityLines = max(1, (int) ceil(mb_strlen((string) $item->quantity) / 14));
-        $lines = max($productLines, $unitLines, $quantityLines);
+        $unitLines = max(1, (int) ceil(mb_strlen((string) $item->unit) / 14));
+        $lines = max($productLines, $quantityLines, $unitLines);
 
         return 8.4 + (($lines - 1) * 4.9);
     };
@@ -292,16 +292,16 @@
                 <thead>
                     <tr>
                         <th>Product</th>
-                        <th>Unit</th>
                         <th>Quantity</th>
+                        <th>Unit</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($page['items'] as $item)
                         <tr>
                             <td>{{ $item->product }}</td>
-                            <td>{{ $item->unit }}</td>
                             <td>{{ $item->quantity }}</td>
+                            <td>{{ $item->unit }}</td>
                         </tr>
                     @endforeach
                 </tbody>
