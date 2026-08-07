@@ -15,6 +15,7 @@ use App\Models\StockMovement;
 use App\Models\Supplier;
 use App\Models\User;
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -415,6 +416,8 @@ class StatisticsService
         $this->applyCustomerFilters($newCustomerQuery, $filters);
         if ($activeCustomerIds->isNotEmpty()) {
             $newCustomerQuery->whereIn('id', $activeCustomerIds);
+        } elseif ($this->hasProductScope($filters)) {
+            $newCustomerQuery->whereRaw('1 = 0');
         }
         if ($from && $to) {
             $newCustomerQuery->whereBetween('created_at', [$from, $to]);
@@ -567,6 +570,7 @@ class StatisticsService
             ->groupBy('product_id')
             ->map(function (Collection $items) {
                 $first = $items->first();
+
                 return [
                     'product_name' => $first['product_name'],
                     'unit' => $first['unit'],
@@ -637,6 +641,7 @@ class StatisticsService
             ->groupBy('customer_id')
             ->map(function (Collection $rows) {
                 $first = $rows->first();
+
                 return [
                     'company_name' => $first->customer?->company_name ?? 'Unbekannt',
                     'customer_number' => $first->customer?->customer_number ?? '—',
@@ -689,6 +694,7 @@ class StatisticsService
             ->groupBy('user_id')
             ->map(function (Collection $offers, $userId) {
                 $user = $userId ? User::find($userId) : null;
+
                 return [
                     'name' => $user?->name ?? 'Unbekannt',
                     'orders' => $offers->count(),
@@ -921,6 +927,7 @@ class StatisticsService
                 ->map(function (Collection $rows) {
                     $first = $rows->first();
                     $customer = $first->offer->customer;
+
                     return [
                         'customer_number' => $customer->customer_number,
                         'company_name' => $customer->company_name,
@@ -948,6 +955,7 @@ class StatisticsService
 
         return $rows->map(function ($row) use ($customers) {
             $customer = $customers[$row->customer_id] ?? null;
+
             return [
                 'customer_number' => $customer?->customer_number ?? '—',
                 'company_name' => $customer?->company_name ?? 'Unbekannt',
@@ -1084,7 +1092,7 @@ class StatisticsService
         return filled($filters['product_id']) || filled($filters['category_id']) || filled($filters['supplier_id']);
     }
 
-    private function applyCompletedDateRange(Builder $query, ?Carbon $from, ?Carbon $to): void
+    private function applyCompletedDateRange(Builder $query, ?CarbonInterface $from, ?CarbonInterface $to): void
     {
         if (! $from || ! $to) {
             return;
@@ -1151,6 +1159,7 @@ class StatisticsService
         }
 
         $integer = (int) $value;
+
         return $integer > 0 ? $integer : null;
     }
 
