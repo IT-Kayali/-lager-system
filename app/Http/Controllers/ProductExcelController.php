@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CustomerGroup;
 use App\Models\Product;
 use App\Models\ProductPriceTier;
+use App\Support\GermanNumber;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -65,6 +66,13 @@ class ProductExcelController extends Controller
             $row++;
         }
 
+        if ($row > 2) {
+            $productsSheet
+                ->getStyle('G2:G' . ($row - 1))
+                ->getNumberFormat()
+                ->setFormatCode('#,##0.00');
+        }
+
         foreach (range('A', 'H') as $column) {
             $productsSheet->getColumnDimension($column)->setAutoSize(true);
         }
@@ -101,6 +109,13 @@ class ProductExcelController extends Controller
 
                 $row++;
             }
+        }
+
+        if ($row > 2) {
+            $priceSheet
+                ->getStyle('G2:G' . ($row - 1))
+                ->getNumberFormat()
+                ->setFormatCode('#,##0.00');
         }
 
         foreach (range('A', 'G') as $column) {
@@ -351,9 +366,9 @@ class ProductExcelController extends Controller
 
     private function decimal(mixed $value): float
     {
-        $value = str_replace(',', '.', $this->cleanString($value));
+        $normalized = GermanNumber::parse($this->cleanString($value));
 
-        return round((float) $value, 2);
+        return round((float) $normalized, 2);
     }
 
     private function integer(mixed $value, int $default = 0): int
