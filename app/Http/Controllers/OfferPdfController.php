@@ -60,14 +60,22 @@ class OfferPdfController extends Controller
             'template' => $template->name,
         ]);
 
-        $pdf = Pdf::loadView($pdfView, [
+        $viewData = [
             'offer' => $offer,
             'template' => $template,
             'title' => $title,
             'documentType' => $type,
             'logoDataUri' => $logoDataUri,
             'backgroundDataUri' => $backgroundDataUri,
-        ])->setPaper('a4');
+        ];
+
+        if ($type === 'delivery-note') {
+            $html = view($pdfView, $viewData)->render();
+            $html = $this->injectCartonCountIntoDeliveryNote($html, $offer, $isNoLogoPdfTemplate);
+            $pdf = Pdf::loadHTML($html)->setPaper('a4');
+        } else {
+            $pdf = Pdf::loadView($pdfView, $viewData)->setPaper('a4');
+        }
 
         $filenamePrefixes = [
             'offer' => 'angebot-',
@@ -76,6 +84,23 @@ class OfferPdfController extends Controller
         ];
 
         return $pdf->stream($filenamePrefixes[$type] . $offer->offer_number . '.pdf');
+    }
+
+    private function injectCartonCountIntoDeliveryNote(string $html, Offer $offer, bool $isNoLogoPdfTemplate): string
+    {
+        if ($offer->shipping_method !== 'Lieferung' || ! $offer->carton_count || $offer->carton_count < 1) {
+            return $html;
+        }
+
+        $shippingLabel = $isNoLogoPdfTemplate ? 'Shipping Method:' : 'Versandart:';
+        $cartonLabel = $isNoLogoPdfTemplate ? 'Number of Cartons:' : 'Anzahl Kartons:';
+
+        $pattern = '/(<tr>\s*<td>' . preg_quote($shippingLabel, '/') . '<\/td>\s*<td>.*?<\/td>\s*<\/tr>)/s';
+        $cartonRow = "\n                    <tr>\n                        <td>{$cartonLabel}</td>\n                        <td>{$offer->carton_count}</td>\n                    </tr>";
+
+        $rendered = preg_replace($pattern, '$1' . $cartonRow, $html, 1);
+
+        return is_string($rendered) ? $rendered : $html;
     }
 
     private function publicStorageDataUri(?string $relativePath): ?string
