@@ -74,11 +74,11 @@ it('renders the rebuilt statistics dashboard for a manager', function () {
 
     $response
         ->assertOk()
-        ->assertSee('ERP Gesamtübersicht')
-        ->assertSee('Weitere ERP-Filter')
-        ->assertSee('Verkauf &amp; Umsatz', false)
-        ->assertSee('Lager &amp; Chargen', false)
-        ->assertSee('Filialausgänge');
+        ->assertSeeText('ERP Gesamtübersicht')
+        ->assertSeeText('Weitere ERP-Filter')
+        ->assertSeeText('Verkauf & Umsatz')
+        ->assertSeeText('Lager & Chargen')
+        ->assertSeeText('Filialausgänge');
 });
 
 it('uses the completion date for completed sales statistics', function () {
