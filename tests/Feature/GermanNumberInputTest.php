@@ -50,6 +50,6 @@ it('uses the central formatter for delivery note quantities', function () {
     foreach ([$german, $english, $branch] as $template) {
         expect($template)
             ->toContain('GermanNumber::format($value)')
-            ->not->toContain("number_format((float) $value, 3, ',', '.')");
+            ->not->toContain('number_format((float) $value, 3');
     }
 });
