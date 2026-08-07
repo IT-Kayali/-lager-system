@@ -196,10 +196,7 @@
     $customerNumber = $customer->customer_number ?? $customer->number ?? ('KD-' . str_pad((string) ($customer->id ?? 0), 5, '0', STR_PAD_LEFT));
     $shippingMethod = $offer->shipping_method ?: '—';
 
-    $formatQty = function ($value): string {
-        $formatted = number_format((float) $value, 3, ',', '.');
-        return rtrim(rtrim($formatted, '0'), ',');
-    };
+    $formatQty = fn ($value): string => \App\Support\GermanNumber::format($value);
 
     $items = $offer->items->values()->map(function ($item) use ($formatQty) {
         $unit = trim((string) ($item->product?->unit ?? ''));

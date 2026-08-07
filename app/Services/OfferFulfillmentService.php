@@ -81,8 +81,8 @@ class OfferFulfillmentService
         if ($quantity > $totalStock) {
             throw new RuntimeException(
                 'Nicht genug Bestand für ' . $product->product_code . ' — ' . $product->name .
-                '. Benötigt: ' . number_format($quantity, 3, ',', '.') .
-                ', vorhanden: ' . number_format($totalStock, 3, ',', '.')
+                '. Benötigt: ' . \App\Support\GermanNumber::format($quantity) .
+                ', vorhanden: ' . \App\Support\GermanNumber::format($totalStock)
             );
         }
 

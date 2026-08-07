@@ -1,3 +1,4 @@
+import './german-numbers';
 import TomSelect from 'tom-select';
 
 const collator = new Intl.Collator('de-DE', {

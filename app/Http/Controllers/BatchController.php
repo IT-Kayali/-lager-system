@@ -150,7 +150,7 @@ class BatchController extends Controller
         if ($requestedQuantity > $product->total_stock) {
             return back()
                 ->withInput()
-                ->with('error', 'Nicht genug Bestand vorhanden. Aktueller Gesamtbestand: ' . number_format($product->total_stock, 3, ',', '.'));
+                ->with('error', 'Nicht genug Bestand vorhanden. Aktueller Gesamtbestand: ' . \App\Support\GermanNumber::format($product->total_stock));
         }
 
         DB::transaction(function () use ($product, $requestedQuantity, $data) {

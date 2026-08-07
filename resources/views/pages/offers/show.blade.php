@@ -117,10 +117,10 @@
                                 <strong>{{ $item->product_name }}</strong>
                                 <div class="premium-muted">{{ $item->product_code }}</div>
                             </td>
-                            <td>{{ number_format((float) $item->quantity, 2, ',', '.') }} {{ $item->unit }}</td>
+                            <td>{{ \App\Support\GermanNumber::format($item->quantity) }} {{ $item->unit }}</td>
                             <td><span class="premium-badge ok">{{ $item->tier_label }}</span></td>
-                            <td>{{ number_format((float) $item->unit_price, 2, ',', '.') }} €</td>
-                            <td>{{ number_format((float) $item->line_total, 2, ',', '.') }} €</td>
+                            <td>{{ \App\Support\GermanNumber::format($item->unit_price) }} €</td>
+                            <td>{{ \App\Support\GermanNumber::format($item->line_total) }} €</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -128,7 +128,7 @@
         </div>
 
         <div style="text-align:right; font-size:22px; font-weight:900; margin-top:18px;">
-            Gesamt: {{ number_format((float) $offer->total, 2, ',', '.') }} €
+            Gesamt: {{ \App\Support\GermanNumber::format($offer->total) }} €
         </div>
     </section>
 </x-layouts.premium>

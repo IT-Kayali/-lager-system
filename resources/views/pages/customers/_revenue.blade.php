@@ -8,12 +8,6 @@
         'pcs' => 'Stk.',
         'stk' => 'Stk.',
     ];
-
-    $formatQuantity = function (float $quantity): string {
-        $formatted = number_format($quantity, 3, ',', '.');
-
-        return rtrim(rtrim($formatted, '0'), ',');
-    };
 @endphp
 
 <section id="customer-revenue" class="premium-card" style="margin-top:18px;">
@@ -47,7 +41,7 @@
         <div class="premium-card" style="padding:16px; box-shadow:none;">
             <div class="premium-muted" style="font-weight:900; text-transform:uppercase; letter-spacing:.06em;">Warenwert</div>
             <div style="font-size:27px; font-weight:950; margin-top:6px;">
-                {{ number_format((float) $customerRevenue, 2, ',', '.') }} €
+                {{ \App\Support\GermanNumber::format($customerRevenue) }} €
             </div>
         </div>
 
@@ -70,10 +64,10 @@
                         $unitLabel = $unitLabels[$unit] ?? $quantityGroup['unit'];
                     @endphp
                     <span style="white-space:nowrap;">
-                        {{ $formatQuantity((float) $quantityGroup['quantity']) }} {{ $unitLabel }}
+                        {{ \App\Support\GermanNumber::format($quantityGroup['quantity']) }} {{ $unitLabel }}
                     </span>@if (! $loop->last) <span class="premium-muted"> · </span> @endif
                 @empty
-                    0
+                    0,00
                 @endforelse
             </div>
         </div>
@@ -99,9 +93,9 @@
                     <tr>
                         <td><strong>{{ $productSale['product_name'] }}</strong></td>
                         <td><span class="premium-code">{{ $productSale['product_code'] }}</span></td>
-                        <td>{{ $formatQuantity((float) $productSale['quantity']) }} {{ $unitLabel }}</td>
+                        <td>{{ \App\Support\GermanNumber::format($productSale['quantity']) }} {{ $unitLabel }}</td>
                         <td>{{ $productSale['sales_count'] }}</td>
-                        <td><strong>{{ number_format((float) $productSale['revenue'], 2, ',', '.') }} €</strong></td>
+                        <td><strong>{{ \App\Support\GermanNumber::format($productSale['revenue']) }} €</strong></td>
                     </tr>
                 @empty
                     <tr>
@@ -115,7 +109,7 @@
                 <tfoot>
                     <tr>
                         <td colspan="4"><strong>Gesamter Warenwert</strong></td>
-                        <td><strong>{{ number_format((float) $customerRevenue, 2, ',', '.') }} €</strong></td>
+                        <td><strong>{{ \App\Support\GermanNumber::format($customerRevenue) }} €</strong></td>
                     </tr>
                 </tfoot>
             @endif

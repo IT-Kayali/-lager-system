@@ -313,7 +313,7 @@ class OfferController extends Controller
             $maxReservable = $this->maxReservableForProduct($product, $ignoreOffer);
 
             if ($requestedQuantity > $maxReservable) {
-                back()->withInput()->with('error', 'Nicht genug frei reservierbarer Bestand für ' . $product->product_code . ' — ' . $product->name . '. Maximal reservierbar: ' . number_format($maxReservable, 3, ',', '.'))->throwResponse();
+                back()->withInput()->with('error', 'Nicht genug frei reservierbarer Bestand für ' . $product->product_code . ' — ' . $product->name . '. Maximal reservierbar: ' . \App\Support\GermanNumber::format($maxReservable))->throwResponse();
             }
         }
 
@@ -337,7 +337,7 @@ class OfferController extends Controller
                 ->first();
 
             if (! $tier) {
-                back()->withInput()->with('error', 'Keine passende Preisstaffel für ' . $product->product_code . ' bei ' . number_format($item['quantity'], 3, ',', '.') . ' Gramm.')->throwResponse();
+                back()->withInput()->with('error', 'Keine passende Preisstaffel für ' . $product->product_code . ' bei ' . \App\Support\GermanNumber::format($item['quantity']) . ' Gramm.')->throwResponse();
             }
 
             $unitPrice = (float) $tier->price;

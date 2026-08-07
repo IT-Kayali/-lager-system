@@ -15,7 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
         ]);
 
-        //
+        $middleware->web(append: [
+            \App\Http\Middleware\NormalizeGermanNumbers::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
