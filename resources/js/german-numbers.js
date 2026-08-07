@@ -1,5 +1,4 @@
 const nativeParseFloat = window.parseFloat.bind(window);
-const nativeNumberParseFloat = Number.parseFloat.bind(Number);
 
 function normalizeGermanNumber(value) {
     if (typeof value !== 'string') {
@@ -49,8 +48,6 @@ function formatGermanNumber(value, maximumFractionDigits = 2) {
     }).format(parsed);
 }
 
-window.parseFloat = (value) => nativeParseFloat(normalizeGermanNumber(String(value ?? '')));
-Number.parseFloat = (value) => nativeNumberParseFloat(normalizeGermanNumber(String(value ?? '')));
 window.parseGermanNumber = parseGermanNumber;
 window.formatGermanNumber = (value) => formatGermanNumber(value, 2);
 
