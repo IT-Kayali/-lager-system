@@ -45,7 +45,7 @@ class CustomerController extends Controller
         ]);
     }
 
-    public function show(Customer $customer): View
+    public function show(Request $request, Customer $customer): View
     {
         $customer->load('group');
 
@@ -53,12 +53,78 @@ class CustomerController extends Controller
             ->withCount('items')
             ->where('customer_id', $customer->id)
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
         $walletTransactions = $customer->walletTransactions()
             ->with(['user', 'offer'])
             ->latest()
-            ->paginate(15, ['*'], 'wallet_page');
+            ->paginate(15, ['*'], 'wallet_page')
+            ->withQueryString();
+
+        $currentYear = (int) now()->format('Y');
+        $customerCreatedYear = (int) ($customer->created_at?->format('Y') ?: $currentYear);
+        $firstRevenueYear = min($customerCreatedYear, $currentYear);
+        $revenueYears = range($firstRevenueYear, $currentYear);
+
+        $requestedRevenueYear = (string) $request->query('revenue_year', 'all');
+        $selectedRevenueYear = 'all';
+
+        if (ctype_digit($requestedRevenueYear)) {
+            $year = (int) $requestedRevenueYear;
+
+            if (in_array($year, $revenueYears, true)) {
+                $selectedRevenueYear = $year;
+            }
+        }
+
+        $completedOffers = Offer::query()
+            ->with('items')
+            ->where('customer_id', $customer->id)
+            ->where('status', Offer::STATUS_COMPLETED)
+            ->get();
+
+        $revenueOffers = $completedOffers
+            ->filter(function (Offer $offer) use ($selectedRevenueYear): bool {
+                if ($selectedRevenueYear === 'all') {
+                    return true;
+                }
+
+                $saleDate = $offer->completed_at ?: $offer->created_at;
+
+                return $saleDate && (int) $saleDate->format('Y') === $selectedRevenueYear;
+            })
+            ->values();
+
+        $revenueItems = $revenueOffers
+            ->flatMap(fn (Offer $offer) => $offer->items)
+            ->values();
+
+        $revenueProductSales = $revenueItems
+            ->groupBy('product_id')
+            ->map(function ($items) {
+                $first = $items->first();
+
+                return [
+                    'product_id' => $first->product_id,
+                    'product_code' => $first->product_code,
+                    'product_name' => $first->product_name,
+                    'unit' => $first->unit,
+                    'quantity' => (float) $items->sum('quantity'),
+                    'revenue' => (float) $items->sum('line_total'),
+                    'sales_count' => $items->pluck('offer_id')->unique()->count(),
+                ];
+            })
+            ->sortByDesc('revenue')
+            ->values();
+
+        $revenueQuantitySummary = $revenueItems
+            ->groupBy(fn ($item) => trim((string) $item->unit) ?: 'unit')
+            ->map(fn ($items, $unit) => [
+                'unit' => (string) $unit,
+                'quantity' => (float) $items->sum('quantity'),
+            ])
+            ->values();
 
         return view('pages.customers.show', [
             'customer' => $customer,
@@ -66,6 +132,13 @@ class CustomerController extends Controller
             'walletTransactions' => $walletTransactions,
             'walletBalance' => $customer->wallet_balance,
             'statusLabels' => Offer::STATUS_LABELS,
+            'revenueYears' => $revenueYears,
+            'selectedRevenueYear' => $selectedRevenueYear,
+            'customerRevenue' => (float) $revenueItems->sum('line_total'),
+            'completedSalesCount' => $revenueOffers->count(),
+            'revenueProductSales' => $revenueProductSales,
+            'revenueProductCount' => $revenueProductSales->count(),
+            'revenueQuantitySummary' => $revenueQuantitySummary,
         ]);
     }
 

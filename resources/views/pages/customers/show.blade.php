@@ -112,6 +112,8 @@
         </section>
     </div>
 
+    @include('pages.customers._revenue')
+
     <div class="premium-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr)); align-items:start; margin-top:18px;">
         <section class="premium-card">
             <h2 style="font-size:20px; font-weight:950; margin:0 0 12px;">Rechnungsadresse</h2>
