@@ -5,7 +5,7 @@ use App\Models\Offer;
 use App\Models\OfferItem;
 use App\Models\Product;
 
-function invoiceWithUnits(array $units, bool $withShipping = false): Offer
+function documentWithUnits(array $units, bool $withShipping = false): Offer
 {
     $offer = new Offer([
         'shipping_method' => $withShipping ? 'Lieferung' : 'Abholung',
@@ -34,16 +34,16 @@ function invoiceWithUnits(array $units, bool $withShipping = false): Offer
     return $offer;
 }
 
-function transformInvoiceTable(Offer $offer, bool $withoutLogo, string $html): string
+function transformOfferDocumentTable(Offer $offer, bool $withoutLogo, string $html): string
 {
     $controller = new OfferPdfController();
-    $method = new ReflectionMethod($controller, 'injectInvoiceProductUnitColumn');
+    $method = new ReflectionMethod($controller, 'injectProductUnitColumnIntoOfferDocument');
     $method->setAccessible(true);
 
     return $method->invoke($controller, $html, $offer, $withoutLogo);
 }
 
-function logoInvoiceTableHtml(bool $includeEmptyRow = false): string
+function logoDocumentTableHtml(bool $includeEmptyRow = false): string
 {
     $emptyRow = $includeEmptyRow
         ? '<tr class="empty-product-row"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>'
@@ -63,7 +63,7 @@ function logoInvoiceTableHtml(bool $includeEmptyRow = false): string
 HTML;
 }
 
-function noLogoInvoiceTableHtml(bool $withShipping = false): string
+function noLogoDocumentTableHtml(bool $withShipping = false): string
 {
     $shippingRow = $withShipping
         ? '<tr><td>Versand</td><td>1,00</td><td>6,00€</td><td>6,00€</td></tr>'
@@ -83,8 +83,8 @@ function noLogoInvoiceTableHtml(bool $withShipping = false): string
 HTML;
 }
 
-it('uses product quantity unit price and sum on german invoice tables', function () {
-    $html = transformInvoiceTable(invoiceWithUnits(['g']), false, logoInvoiceTableHtml(true));
+it('uses five equally wide columns with german labels', function () {
+    $html = transformOfferDocumentTable(documentWithUnits(['g']), false, logoDocumentTableHtml(true));
     $decoded = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
     expect($decoded)
@@ -94,16 +94,25 @@ it('uses product quantity unit price and sum on german invoice tables', function
         ->toContain('Preis')
         ->toContain('Summe')
         ->toContain('>g<')
-        ->toContain('invoice-unit-table')
-        ->toContain('width: 82mm !important')
-        ->toContain('width: 18mm !important');
+        ->toContain('document-unit-table');
+
+    expect(substr_count($decoded, 'width: 20% !important'))->toBe(5);
+
+    expect(strpos($decoded, '>Produkt<'))
+        ->toBeLessThan(strpos($decoded, '>Menge<'));
+    expect(strpos($decoded, '>Menge<'))
+        ->toBeLessThan(strpos($decoded, '>Einheit<'));
+    expect(strpos($decoded, '>Einheit<'))
+        ->toBeLessThan(strpos($decoded, '>Preis<'));
+    expect(strpos($decoded, '>Preis<'))
+        ->toBeLessThan(strpos($decoded, '>Summe<'));
 
     preg_match('/<tr class="empty-product-row">(.*?)<\/tr>/s', $decoded, $emptyRow);
     expect(substr_count($emptyRow[1] ?? '', '<td>'))->toBe(5);
 });
 
-it('uses english invoice labels and product unit without logo', function () {
-    $html = transformInvoiceTable(invoiceWithUnits(['Stk']), true, noLogoInvoiceTableHtml());
+it('uses five equally wide columns with english labels without logo', function () {
+    $html = transformOfferDocumentTable(documentWithUnits(['Stk']), true, noLogoDocumentTableHtml());
     $decoded = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
     expect($decoded)
@@ -113,12 +122,22 @@ it('uses english invoice labels and product unit without logo', function () {
         ->toContain('PRICE')
         ->toContain('TOTAL')
         ->toContain('>Stk<')
-        ->toContain('width: 70mm !important')
-        ->toContain('width: 18mm !important');
+        ->toContain('document-unit-table');
+
+    expect(substr_count($decoded, 'width: 20% !important'))->toBe(5);
+
+    expect(strpos($decoded, '>PRODUCT<'))
+        ->toBeLessThan(strpos($decoded, '>QUANTITY<'));
+    expect(strpos($decoded, '>QUANTITY<'))
+        ->toBeLessThan(strpos($decoded, '>UNIT<'));
+    expect(strpos($decoded, '>UNIT<'))
+        ->toBeLessThan(strpos($decoded, '>PRICE<'));
+    expect(strpos($decoded, '>PRICE<'))
+        ->toBeLessThan(strpos($decoded, '>TOTAL<'));
 });
 
 it('shows a dash as unit for the shipping row', function () {
-    $html = transformInvoiceTable(invoiceWithUnits(['g'], true), true, noLogoInvoiceTableHtml(true));
+    $html = transformOfferDocumentTable(documentWithUnits(['g'], true), true, noLogoDocumentTableHtml(true));
     $decoded = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
     expect($decoded)
@@ -126,11 +145,11 @@ it('shows a dash as unit for the shipping row', function () {
         ->toContain('>—<');
 });
 
-it('keeps the offer pdf on the unchanged template rendering path', function () {
+it('uses the same unit column transformation for offer and invoice pdfs', function () {
     $controller = file_get_contents(app_path('Http/Controllers/OfferPdfController.php'));
 
     expect($controller)
-        ->toContain("} elseif (\$type === 'invoice') {")
-        ->toContain("\$html = \$this->injectInvoiceProductUnitColumn(\$html, \$offer, \$isNoLogoPdfTemplate);")
-        ->toContain("} else {\n            \$pdf = Pdf::loadView(\$pdfView, \$viewData)->setPaper('a4');");
+        ->toContain("if (\$type === 'delivery-note') {")
+        ->toContain("\$html = \$this->injectProductUnitColumnIntoOfferDocument(\$html, \$offer, \$isNoLogoPdfTemplate);")
+        ->not->toContain("elseif (\$type === 'invoice')");
 });
