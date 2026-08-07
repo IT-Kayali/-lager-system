@@ -151,7 +151,7 @@ it('filters completed customer revenue and products by selected year', function 
         ]))
         ->assertOk()
         ->assertSee('300,00 €')
-        ->assertSee('150 g')
+        ->assertSee('150,00 g')
         ->assertSee('Produkt nur 2026')
         ->assertDontSee('Produkt nur 2027')
         ->assertDontSee('Storniertes Produkt');
@@ -185,8 +185,8 @@ it('shows all completed sales when the complete period is selected', function ()
         ->get(route('customers.show', $this->customer))
         ->assertOk()
         ->assertSee('460,00 €')
-        ->assertSee('1.000 g')
-        ->assertSee('6 Stk.')
+        ->assertSee('1.000,00 g')
+        ->assertSee('6,00 Stk.')
         ->assertSee('Duftöl')
         ->assertSee('Flasche');
 });
