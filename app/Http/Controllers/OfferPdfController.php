@@ -73,6 +73,10 @@ class OfferPdfController extends Controller
             $html = view($pdfView, $viewData)->render();
             $html = $this->injectCartonCountIntoDeliveryNote($html, $offer, $isNoLogoPdfTemplate);
             $pdf = Pdf::loadHTML($html)->setPaper('a4');
+        } elseif ($type === 'invoice') {
+            $html = view($pdfView, $viewData)->render();
+            $html = $this->injectInvoiceProductUnitColumn($html, $offer, $isNoLogoPdfTemplate);
+            $pdf = Pdf::loadHTML($html)->setPaper('a4');
         } else {
             $pdf = Pdf::loadView($pdfView, $viewData)->setPaper('a4');
         }
@@ -101,6 +105,177 @@ class OfferPdfController extends Controller
         $rendered = preg_replace($pattern, '$1' . $cartonRow, $html, 1);
 
         return is_string($rendered) ? $rendered : $html;
+    }
+
+    /**
+     * Rechnungen erhalten eine eigene Einheit-Spalte, ohne die gemeinsam
+     * genutzten Angebot/Rechnung-Blade-Dateien oder das Angebotslayout zu ändern.
+     */
+    private function injectInvoiceProductUnitColumn(string $html, Offer $offer, bool $isNoLogoPdfTemplate): string
+    {
+        $units = $offer->items->values()->map(function ($item): string {
+            $unit = trim((string) ($item->product?->unit ?? ''));
+
+            return $unit !== '' ? $unit : '—';
+        })->all();
+
+        if (
+            ($offer->shipping_method ?? null) === 'Lieferung'
+            && (float) ($offer->shipping_price_gross ?? 0) > 0
+        ) {
+            $units[] = '—';
+        }
+
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $previousLibxmlState = libxml_use_internal_errors(true);
+        $loaded = $dom->loadHTML(
+            '<?xml encoding="UTF-8">' . $html,
+            LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+        );
+        libxml_clear_errors();
+        libxml_use_internal_errors($previousLibxmlState);
+
+        if (! $loaded) {
+            return $html;
+        }
+
+        $xpath = new \DOMXPath($dom);
+        $tables = $xpath->query(
+            '//table['
+            . 'contains(concat(" ", normalize-space(@class), " "), " items-table ")'
+            . ' or contains(concat(" ", normalize-space(@class), " "), " items ")'
+            . ']'
+        );
+
+        if ($tables === false || $tables->length === 0) {
+            return $html;
+        }
+
+        $productLabel = $isNoLogoPdfTemplate ? 'PRODUCT' : 'Produkt';
+        $quantityLabel = $isNoLogoPdfTemplate ? 'QUANTITY' : 'Menge';
+        $unitLabel = $isNoLogoPdfTemplate ? 'UNIT' : 'Einheit';
+        $priceLabel = $isNoLogoPdfTemplate ? 'PRICE' : 'Preis';
+        $totalLabel = $isNoLogoPdfTemplate ? 'TOTAL' : 'Summe';
+        $unitIndex = 0;
+
+        foreach ($tables as $table) {
+            if (! $table instanceof \DOMElement) {
+                continue;
+            }
+
+            $table->setAttribute(
+                'class',
+                trim($table->getAttribute('class') . ' invoice-unit-table')
+            );
+
+            $headerNodes = [];
+            $headers = $xpath->query('.//thead/tr[1]/th', $table);
+
+            if ($headers !== false) {
+                foreach ($headers as $header) {
+                    $headerNodes[] = $header;
+                }
+            }
+
+            if (count($headerNodes) >= 4) {
+                $headerNodes[0]->nodeValue = $productLabel;
+                $headerNodes[1]->nodeValue = $quantityLabel;
+                $headerNodes[2]->nodeValue = $priceLabel;
+                $headerNodes[3]->nodeValue = $totalLabel;
+
+                $unitHeader = $dom->createElement('th');
+                $unitHeader->appendChild($dom->createTextNode($unitLabel));
+                $headerNodes[2]->parentNode?->insertBefore($unitHeader, $headerNodes[2]);
+            }
+
+            $rows = $xpath->query('.//tbody/tr', $table);
+
+            if ($rows === false) {
+                continue;
+            }
+
+            foreach ($rows as $row) {
+                if (! $row instanceof \DOMElement) {
+                    continue;
+                }
+
+                $cells = [];
+                foreach ($row->childNodes as $child) {
+                    if ($child instanceof \DOMElement && strtolower($child->tagName) === 'td') {
+                        $cells[] = $child;
+                    }
+                }
+
+                if (count($cells) < 4) {
+                    continue;
+                }
+
+                $rowClasses = ' ' . preg_replace('/\s+/', ' ', trim($row->getAttribute('class'))) . ' ';
+                $isEmptyRow = str_contains($rowClasses, ' empty-product-row ');
+                $unit = $isEmptyRow ? "\u{00A0}" : ($units[$unitIndex] ?? '—');
+
+                if (! $isEmptyRow) {
+                    $unitIndex++;
+                }
+
+                $unitCell = $dom->createElement('td');
+                $unitCell->appendChild($dom->createTextNode($unit));
+                $cells[2]->parentNode?->insertBefore($unitCell, $cells[2]);
+            }
+        }
+
+        $head = $dom->getElementsByTagName('head')->item(0);
+
+        if ($head instanceof \DOMElement) {
+            $style = $dom->createElement('style');
+            $style->setAttribute('id', 'invoice-unit-column-styles');
+            $style->appendChild($dom->createTextNode(
+                $isNoLogoPdfTemplate
+                    ? $this->noLogoInvoiceUnitColumnCss()
+                    : $this->logoInvoiceUnitColumnCss()
+            ));
+            $head->appendChild($style);
+        }
+
+        $rendered = $dom->saveHTML();
+
+        if (! is_string($rendered)) {
+            return $html;
+        }
+
+        return (string) preg_replace('/^<\?xml encoding="UTF-8"\?>\s*/i', '', $rendered);
+    }
+
+    private function logoInvoiceUnitColumnCss(): string
+    {
+        return <<<'CSS'
+.items-table.invoice-unit-table th:nth-child(1),
+.items-table.invoice-unit-table td:nth-child(1) { width: 82mm !important; text-align: left !important; }
+.items-table.invoice-unit-table th:nth-child(2),
+.items-table.invoice-unit-table td:nth-child(2) { width: 20mm !important; text-align: center !important; }
+.items-table.invoice-unit-table th:nth-child(3),
+.items-table.invoice-unit-table td:nth-child(3) { width: 18mm !important; text-align: center !important; }
+.items-table.invoice-unit-table th:nth-child(4),
+.items-table.invoice-unit-table td:nth-child(4) { width: 20mm !important; text-align: right !important; }
+.items-table.invoice-unit-table th:nth-child(5),
+.items-table.invoice-unit-table td:nth-child(5) { width: 20mm !important; text-align: right !important; }
+CSS;
+    }
+
+    private function noLogoInvoiceUnitColumnCss(): string
+    {
+        return <<<'CSS'
+table.items.invoice-unit-table th:nth-child(1),
+table.items.invoice-unit-table td:nth-child(1) { width: 70mm !important; text-align: left !important; }
+table.items.invoice-unit-table th:nth-child(2),
+table.items.invoice-unit-table td:nth-child(2) { width: 22mm !important; text-align: right !important; }
+table.items.invoice-unit-table th:nth-child(3),
+table.items.invoice-unit-table td:nth-child(3) { width: 18mm !important; text-align: center !important; }
+table.items.invoice-unit-table th:nth-child(4),
+table.items.invoice-unit-table td:nth-child(4) { width: 28mm !important; text-align: right !important; }
+table.items.invoice-unit-table th:nth-child(5),
+table.items.invoice-unit-table td:nth-child(5) { width: 32mm !important; text-align: right !important; }
+CSS;
     }
 
     private function publicStorageDataUri(?string $relativePath): ?string
