@@ -10,11 +10,11 @@ it('uses product unit quantity columns on branded delivery notes', function () {
         ->toContain('<td>{{ $item->product }}</td>')
         ->toContain('<td>{{ $item->unit }}</td>')
         ->toContain('<td>{{ $item->quantity }}</td>')
-        ->toContain("'product' => $product")
-        ->toContain("'unit' => $unit !== '' ? $unit : '—'")
-        ->toContain("'quantity' => $quantity")
+        ->toContain("'product' => \$product")
+        ->toContain("'unit' => \$unit !== '' ? \$unit : '—'")
+        ->toContain("'quantity' => \$quantity")
         ->not->toContain('<th>Bezeichnung</th>')
-        ->not->toContain("trim($qty . ' ' . $unit)");
+        ->not->toContain("trim(\$qty . ' ' . \$unit)");
 
     expect(strpos($template, '<th>Produkt</th>'))
         ->toBeLessThan(strpos($template, '<th>Einheit</th>'));
@@ -32,10 +32,10 @@ it('uses product unit quantity columns on no-logo delivery notes', function () {
         ->toContain('<td>{{ $item->product }}</td>')
         ->toContain('<td>{{ $item->unit }}</td>')
         ->toContain('<td>{{ $item->quantity }}</td>')
-        ->toContain("'product' => $product")
-        ->toContain("'unit' => $unit !== '' ? $unit : '—'")
-        ->toContain("'quantity' => $quantity")
-        ->not->toContain("trim($qty . ' ' . $unit)");
+        ->toContain("'product' => \$product")
+        ->toContain("'unit' => \$unit !== '' ? \$unit : '—'")
+        ->toContain("'quantity' => \$quantity")
+        ->not->toContain("trim(\$qty . ' ' . \$unit)");
 
     expect(strpos($template, '<th>Product</th>'))
         ->toBeLessThan(strpos($template, '<th>Unit</th>'));
