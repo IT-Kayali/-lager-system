@@ -73,12 +73,10 @@ class OfferPdfController extends Controller
             $html = view($pdfView, $viewData)->render();
             $html = $this->injectCartonCountIntoDeliveryNote($html, $offer, $isNoLogoPdfTemplate);
             $pdf = Pdf::loadHTML($html)->setPaper('a4');
-        } elseif ($type === 'invoice') {
-            $html = view($pdfView, $viewData)->render();
-            $html = $this->injectInvoiceProductUnitColumn($html, $offer, $isNoLogoPdfTemplate);
-            $pdf = Pdf::loadHTML($html)->setPaper('a4');
         } else {
-            $pdf = Pdf::loadView($pdfView, $viewData)->setPaper('a4');
+            $html = view($pdfView, $viewData)->render();
+            $html = $this->injectProductUnitColumnIntoOfferDocument($html, $offer, $isNoLogoPdfTemplate);
+            $pdf = Pdf::loadHTML($html)->setPaper('a4');
         }
 
         $filenamePrefixes = [
@@ -108,10 +106,10 @@ class OfferPdfController extends Controller
     }
 
     /**
-     * Rechnungen erhalten eine eigene Einheit-Spalte, ohne die gemeinsam
-     * genutzten Angebot/Rechnung-Blade-Dateien oder das Angebotslayout zu ändern.
+     * Angebot und Rechnung erhalten dieselbe fünfspaltige Produkttabelle:
+     * Produkt, Menge, Einheit, Preis und Summe/Total.
      */
-    private function injectInvoiceProductUnitColumn(string $html, Offer $offer, bool $isNoLogoPdfTemplate): string
+    private function injectProductUnitColumnIntoOfferDocument(string $html, Offer $offer, bool $isNoLogoPdfTemplate): string
     {
         $units = $offer->items->values()->map(function ($item): string {
             $unit = trim((string) ($item->product?->unit ?? ''));
@@ -165,7 +163,7 @@ class OfferPdfController extends Controller
 
             $table->setAttribute(
                 'class',
-                trim($table->getAttribute('class') . ' invoice-unit-table')
+                trim($table->getAttribute('class') . ' document-unit-table')
             );
 
             $headerNodes = [];
@@ -228,11 +226,11 @@ class OfferPdfController extends Controller
 
         if ($head instanceof \DOMElement) {
             $style = $dom->createElement('style');
-            $style->setAttribute('id', 'invoice-unit-column-styles');
+            $style->setAttribute('id', 'document-unit-column-styles');
             $style->appendChild($dom->createTextNode(
                 $isNoLogoPdfTemplate
-                    ? $this->noLogoInvoiceUnitColumnCss()
-                    : $this->logoInvoiceUnitColumnCss()
+                    ? $this->noLogoDocumentUnitColumnCss()
+                    : $this->logoDocumentUnitColumnCss()
             ));
             $head->appendChild($style);
         }
@@ -246,35 +244,35 @@ class OfferPdfController extends Controller
         return (string) preg_replace('/^<\?xml encoding="UTF-8"\?>\s*/i', '', $rendered);
     }
 
-    private function logoInvoiceUnitColumnCss(): string
+    private function logoDocumentUnitColumnCss(): string
     {
         return <<<'CSS'
-.items-table.invoice-unit-table th:nth-child(1),
-.items-table.invoice-unit-table td:nth-child(1) { width: 82mm !important; text-align: left !important; }
-.items-table.invoice-unit-table th:nth-child(2),
-.items-table.invoice-unit-table td:nth-child(2) { width: 20mm !important; text-align: center !important; }
-.items-table.invoice-unit-table th:nth-child(3),
-.items-table.invoice-unit-table td:nth-child(3) { width: 18mm !important; text-align: center !important; }
-.items-table.invoice-unit-table th:nth-child(4),
-.items-table.invoice-unit-table td:nth-child(4) { width: 20mm !important; text-align: right !important; }
-.items-table.invoice-unit-table th:nth-child(5),
-.items-table.invoice-unit-table td:nth-child(5) { width: 20mm !important; text-align: right !important; }
+.items-table.document-unit-table th:nth-child(1),
+.items-table.document-unit-table td:nth-child(1) { width: 20% !important; text-align: left !important; }
+.items-table.document-unit-table th:nth-child(2),
+.items-table.document-unit-table td:nth-child(2) { width: 20% !important; text-align: center !important; }
+.items-table.document-unit-table th:nth-child(3),
+.items-table.document-unit-table td:nth-child(3) { width: 20% !important; text-align: center !important; }
+.items-table.document-unit-table th:nth-child(4),
+.items-table.document-unit-table td:nth-child(4) { width: 20% !important; text-align: right !important; }
+.items-table.document-unit-table th:nth-child(5),
+.items-table.document-unit-table td:nth-child(5) { width: 20% !important; text-align: right !important; }
 CSS;
     }
 
-    private function noLogoInvoiceUnitColumnCss(): string
+    private function noLogoDocumentUnitColumnCss(): string
     {
         return <<<'CSS'
-table.items.invoice-unit-table th:nth-child(1),
-table.items.invoice-unit-table td:nth-child(1) { width: 70mm !important; text-align: left !important; }
-table.items.invoice-unit-table th:nth-child(2),
-table.items.invoice-unit-table td:nth-child(2) { width: 22mm !important; text-align: right !important; }
-table.items.invoice-unit-table th:nth-child(3),
-table.items.invoice-unit-table td:nth-child(3) { width: 18mm !important; text-align: center !important; }
-table.items.invoice-unit-table th:nth-child(4),
-table.items.invoice-unit-table td:nth-child(4) { width: 28mm !important; text-align: right !important; }
-table.items.invoice-unit-table th:nth-child(5),
-table.items.invoice-unit-table td:nth-child(5) { width: 32mm !important; text-align: right !important; }
+table.items.document-unit-table th:nth-child(1),
+table.items.document-unit-table td:nth-child(1) { width: 20% !important; text-align: left !important; }
+table.items.document-unit-table th:nth-child(2),
+table.items.document-unit-table td:nth-child(2) { width: 20% !important; text-align: center !important; }
+table.items.document-unit-table th:nth-child(3),
+table.items.document-unit-table td:nth-child(3) { width: 20% !important; text-align: center !important; }
+table.items.document-unit-table th:nth-child(4),
+table.items.document-unit-table td:nth-child(4) { width: 20% !important; text-align: right !important; }
+table.items.document-unit-table th:nth-child(5),
+table.items.document-unit-table td:nth-child(5) { width: 20% !important; text-align: right !important; }
 CSS;
     }
 
