@@ -76,3 +76,29 @@ it('streams an internal branch delivery note as pdf', function () {
         ->assertOk()
         ->assertHeader('content-type', 'application/pdf');
 });
+
+it('uses the standard white delivery note layout with logo and without a background image', function () {
+    $withdrawal = deliveryNoteWithdrawal()->load(['items.product']);
+
+    $template = DocumentTemplate::query()->updateOrCreate(
+        ['key' => DocumentTemplate::WITH_COMPANY],
+        [
+            'name' => 'Mit Firmendaten & Logo',
+            'company_name' => 'Alowidat Test',
+            'show_company_details' => true,
+            'show_logo' => true,
+        ]
+    );
+
+    $html = view('pdf.branch-withdrawal-delivery-note', [
+        'branchWithdrawal' => $withdrawal,
+        'template' => $template,
+        'logoDataUri' => 'data:image/png;base64,AAAA',
+    ])->render();
+
+    expect($html)
+        ->toContain('class="logo"')
+        ->toContain('class="page"')
+        ->toContain('class="items"')
+        ->not->toContain('class="background"');
+});
