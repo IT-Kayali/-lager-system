@@ -168,14 +168,20 @@
 
         table.items th:nth-child(1),
         table.items td:nth-child(1) {
-            width: 58mm;
-            text-align: center;
+            width: 102mm;
+            text-align: left;
         }
 
         table.items th:nth-child(2),
         table.items td:nth-child(2) {
-            width: 126mm;
-            text-align: left;
+            width: 34mm;
+            text-align: center;
+        }
+
+        table.items th:nth-child(3),
+        table.items td:nth-child(3) {
+            width: 48mm;
+            text-align: center;
         }
 
         .ownership {
@@ -284,12 +290,13 @@
 
     $items = $offer->items->values()->map(function ($item) use ($formatQty) {
         $unit = trim((string) ($item->product?->unit ?? ''));
-        $qty = $formatQty($item->quantity);
-        $description = $item->product_name ?? $item->description ?? ($item->product?->name ?? '');
+        $quantity = $formatQty($item->quantity);
+        $product = $item->product_name ?? $item->description ?? ($item->product?->name ?? '');
 
         return (object) [
-            'quantity' => trim($qty . ' ' . $unit),
-            'description' => $description,
+            'product' => $product,
+            'unit' => $unit !== '' ? $unit : '—',
+            'quantity' => $quantity,
         ];
     });
 
@@ -379,15 +386,17 @@
                 <table class="items">
                     <thead>
                         <tr>
+                            <th>Produkt</th>
+                            <th>Einheit</th>
                             <th>Menge</th>
-                            <th>Bezeichnung</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($page['items'] as $item)
                             <tr>
+                                <td>{{ $item->product }}</td>
+                                <td>{{ $item->unit }}</td>
                                 <td>{{ $item->quantity }}</td>
-                                <td>{{ $item->description }}</td>
                             </tr>
                         @endforeach
                     </tbody>
