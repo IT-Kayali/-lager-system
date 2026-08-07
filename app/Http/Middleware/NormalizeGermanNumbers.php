@@ -24,7 +24,7 @@ class NormalizeGermanNumbers
             return $next($request);
         }
 
-        $request->merge($this->normalizeArray($request->all()));
+        $request->merge($this->normalizeArray($request->request->all()));
 
         return $next($request);
     }
