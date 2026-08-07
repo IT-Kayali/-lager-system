@@ -35,7 +35,7 @@ function parseGermanNumber(value) {
     return nativeParseFloat(normalizeGermanNumber(String(value ?? '')));
 }
 
-function formatGermanNumber(value) {
+function formatGermanNumber(value, maximumFractionDigits = 2) {
     const parsed = parseGermanNumber(value);
 
     if (!Number.isFinite(parsed)) {
@@ -44,7 +44,7 @@ function formatGermanNumber(value) {
 
     return new Intl.NumberFormat('de-DE', {
         minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
+        maximumFractionDigits,
         useGrouping: true,
     }).format(parsed);
 }
@@ -52,7 +52,7 @@ function formatGermanNumber(value) {
 window.parseFloat = (value) => nativeParseFloat(normalizeGermanNumber(String(value ?? '')));
 Number.parseFloat = (value) => nativeNumberParseFloat(normalizeGermanNumber(String(value ?? '')));
 window.parseGermanNumber = parseGermanNumber;
-window.formatGermanNumber = formatGermanNumber;
+window.formatGermanNumber = (value) => formatGermanNumber(value, 2);
 
 const decimalFieldSelector = [
     'input[name="quantity"]',
@@ -64,6 +64,14 @@ const decimalFieldSelector = [
     'input[name$="[quantity]"]',
     'input[data-name="quantity"]',
 ].join(',');
+
+function isQuantityField(input) {
+    const name = input.getAttribute('name') || '';
+
+    return name === 'quantity'
+        || name.endsWith('[quantity]')
+        || input.dataset.name === 'quantity';
+}
 
 function enhanceDecimalField(input) {
     if (!(input instanceof HTMLInputElement) || input.dataset.germanNumberEnhanced === '1') {
@@ -78,7 +86,7 @@ function enhanceDecimalField(input) {
 
     const format = () => {
         if (input.value.trim() !== '') {
-            input.value = formatGermanNumber(input.value);
+            input.value = formatGermanNumber(input.value, isQuantityField(input) ? 3 : 2);
         }
     };
 
