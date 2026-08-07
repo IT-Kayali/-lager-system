@@ -122,14 +122,20 @@
 
         table.items th:nth-child(1),
         table.items td:nth-child(1) {
-            width: 56mm;
-            text-align: center;
+            width: 90mm;
+            text-align: left;
         }
 
         table.items th:nth-child(2),
         table.items td:nth-child(2) {
-            width: 110mm;
-            text-align: left;
+            width: 32mm;
+            text-align: center;
+        }
+
+        table.items th:nth-child(3),
+        table.items td:nth-child(3) {
+            width: 44mm;
+            text-align: center;
         }
 
         .page-number {
@@ -197,19 +203,21 @@
 
     $items = $offer->items->values()->map(function ($item) use ($formatQty) {
         $unit = trim((string) ($item->product?->unit ?? ''));
-        $qty = $formatQty($item->quantity);
-        $description = $item->product_name ?? $item->description ?? ($item->product?->name ?? '');
+        $quantity = $formatQty($item->quantity);
+        $product = $item->product_name ?? $item->description ?? ($item->product?->name ?? '');
 
         return (object) [
-            'quantity' => trim($qty . ' ' . $unit),
-            'description' => $description,
+            'product' => $product,
+            'unit' => $unit !== '' ? $unit : '—',
+            'quantity' => $quantity,
         ];
     });
 
     $estimateRowHeight = function ($item): float {
-        $quantityLines = max(1, (int) ceil(mb_strlen((string) $item->quantity) / 18));
-        $descriptionLines = max(1, (int) ceil(mb_strlen((string) $item->description) / 50));
-        $lines = max($quantityLines, $descriptionLines);
+        $productLines = max(1, (int) ceil(mb_strlen((string) $item->product) / 42));
+        $unitLines = max(1, (int) ceil(mb_strlen((string) $item->unit) / 14));
+        $quantityLines = max(1, (int) ceil(mb_strlen((string) $item->quantity) / 14));
+        $lines = max($productLines, $unitLines, $quantityLines);
 
         return 8.4 + (($lines - 1) * 4.9);
     };
@@ -283,15 +291,17 @@
             <table class="items">
                 <thead>
                     <tr>
-                        <th>Quantity</th>
                         <th>Product</th>
+                        <th>Unit</th>
+                        <th>Quantity</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($page['items'] as $item)
                         <tr>
+                            <td>{{ $item->product }}</td>
+                            <td>{{ $item->unit }}</td>
                             <td>{{ $item->quantity }}</td>
-                            <td>{{ $item->description }}</td>
                         </tr>
                     @endforeach
                 </tbody>
