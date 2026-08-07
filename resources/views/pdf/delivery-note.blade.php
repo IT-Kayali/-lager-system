@@ -174,13 +174,13 @@
 
         table.items th:nth-child(2),
         table.items td:nth-child(2) {
-            width: 34mm;
+            width: 48mm;
             text-align: center;
         }
 
         table.items th:nth-child(3),
         table.items td:nth-child(3) {
-            width: 48mm;
+            width: 34mm;
             text-align: center;
         }
 
@@ -387,16 +387,16 @@
                     <thead>
                         <tr>
                             <th>Produkt</th>
-                            <th>Einheit</th>
                             <th>Menge</th>
+                            <th>Einheit</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($page['items'] as $item)
                             <tr>
                                 <td>{{ $item->product }}</td>
-                                <td>{{ $item->unit }}</td>
                                 <td>{{ $item->quantity }}</td>
+                                <td>{{ $item->unit }}</td>
                             </tr>
                         @endforeach
                     </tbody>
