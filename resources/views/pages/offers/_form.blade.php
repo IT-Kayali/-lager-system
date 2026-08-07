@@ -1,5 +1,15 @@
 @csrf
 
+<input
+    type="hidden"
+    name="carton_count"
+    id="carton_count_real"
+    value="{{ old('carton_count', $offer->carton_count ?? '') }}"
+>
+@error('carton_count')
+    <div class="premium-error" data-carton-count-error hidden>{{ $message }}</div>
+@enderror
+
 <div class="premium-form-grid">
     <div class="premium-form-field">
         <label for="customer_id">Kunde *</label>
@@ -546,4 +556,3 @@
     }
 </style>
 <!-- OFFER_SHIPPING_LAYOUT_FIX_END -->
-
