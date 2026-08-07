@@ -54,12 +54,11 @@ class Offer extends Model
         self::STATUS_RESERVATION_EXPIRED => 'Reservierung abgelaufen',
     ];
 
-
-
     protected $fillable = [
-        
-        
-        'shipping_price_gross','shipping_method','offer_number',
+        'shipping_price_gross',
+        'shipping_method',
+        'carton_count',
+        'offer_number',
         'customer_id',
         'user_id',
         'status',
@@ -77,8 +76,9 @@ class Offer extends Model
     protected function casts(): array
     {
         return [
-            
-            'shipping_price_gross' => 'decimal:2','subtotal' => 'decimal:2',
+            'shipping_price_gross' => 'decimal:2',
+            'carton_count' => 'integer',
+            'subtotal' => 'decimal:2',
             'total' => 'decimal:2',
             'reserved_until' => 'datetime',
             'completed_at' => 'datetime',

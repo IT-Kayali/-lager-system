@@ -235,11 +235,182 @@ function ensureOfferProductOnlyStyles() {
     document.head.appendChild(style);
 }
 
+function ensureOfferShippingCartonStyles() {
+    if (document.getElementById('offer-shipping-carton-styles')) {
+        return;
+    }
+
+    const style = document.createElement('style');
+    style.id = 'offer-shipping-carton-styles';
+    style.textContent = `
+        html body #offer-shipping-card.offer-shipping-modern-card .premium-form-grid {
+            display: grid !important;
+            grid-template-columns: minmax(300px, 1.2fr) minmax(220px, .8fr) minmax(190px, .6fr) !important;
+            gap: 22px !important;
+            align-items: start !important;
+        }
+
+        html body #offer-shipping-card.offer-shipping-modern-card .premium-form-field,
+        html body #offer-shipping-card.offer-shipping-modern-card .premium-form-field.full,
+        html body #offer-shipping-card.offer-shipping-modern-card .offer-shipping-carton-field {
+            grid-column: auto !important;
+            width: 100% !important;
+            max-width: none !important;
+            min-width: 0 !important;
+            margin: 0 !important;
+        }
+
+        html body #offer-shipping-card.offer-shipping-modern-card #shipping_method,
+        html body #offer-shipping-card.offer-shipping-modern-card #shipping_price_gross,
+        html body #offer-shipping-card.offer-shipping-modern-card #carton_count {
+            width: 100% !important;
+            max-width: none !important;
+            min-height: 52px !important;
+            box-sizing: border-box !important;
+        }
+
+        html body #offer-shipping-card.offer-shipping-modern-card .premium-muted {
+            margin-top: 8px !important;
+            line-height: 1.4 !important;
+        }
+
+        @media (max-width: 1150px) {
+            html body #offer-shipping-card.offer-shipping-modern-card .premium-form-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            }
+
+            html body #offer-shipping-card.offer-shipping-modern-card .offer-shipping-carton-field {
+                grid-column: 1 / -1 !important;
+                max-width: 360px !important;
+            }
+        }
+
+        @media (max-width: 760px) {
+            html body #offer-shipping-card.offer-shipping-modern-card .premium-form-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            html body #offer-shipping-card.offer-shipping-modern-card .offer-shipping-carton-field {
+                grid-column: auto !important;
+                max-width: none !important;
+            }
+        }
+    `;
+
+    document.head.appendChild(style);
+}
+
+/**
+ * Carton count is operational information only. It is stored with the offer
+ * for later use on the delivery note and never participates in price or stock
+ * calculations.
+ */
+function initOfferShippingCartonCount() {
+    const form = document.getElementById('offer-main-form');
+    const shippingCard = document.getElementById('offer-shipping-card');
+    const method = document.getElementById('shipping_method');
+    const hiddenCartonCount = document.getElementById('carton_count_real');
+
+    if (!form || !shippingCard || !method || !hiddenCartonCount) {
+        return;
+    }
+
+    const heading = shippingCard.querySelector('h3');
+    if (heading && heading.textContent.trim() === 'Versand') {
+        heading.textContent = 'Versandmethode';
+    }
+
+    const grid = shippingCard.querySelector('.premium-form-grid');
+    if (!grid) {
+        return;
+    }
+
+    let cartonField = document.getElementById('carton_count_field');
+    let cartonInput = document.getElementById('carton_count');
+
+    if (!cartonField) {
+        cartonField = document.createElement('div');
+        cartonField.id = 'carton_count_field';
+        cartonField.className = 'premium-form-field full offer-shipping-carton-field';
+
+        const label = document.createElement('label');
+        label.setAttribute('for', 'carton_count');
+        label.textContent = 'Anzahl Kartons *';
+
+        cartonInput = document.createElement('input');
+        cartonInput.id = 'carton_count';
+        cartonInput.type = 'number';
+        cartonInput.step = '1';
+        cartonInput.min = '1';
+        cartonInput.max = '9999';
+        cartonInput.inputMode = 'numeric';
+        cartonInput.className = 'premium-input';
+        cartonInput.placeholder = 'z. B. 3';
+        cartonInput.setAttribute('form', 'offer-main-form');
+        cartonInput.value = hiddenCartonCount.value || '';
+
+        const help = document.createElement('div');
+        help.className = 'premium-muted';
+        help.style.marginTop = '6px';
+        help.textContent = 'Nur bei Lieferung. Hat keinen Einfluss auf Preis oder Versandkosten.';
+
+        cartonField.append(label, cartonInput, help);
+        grid.appendChild(cartonField);
+
+        const serverError = form.querySelector('[data-carton-count-error]');
+        if (serverError) {
+            serverError.hidden = false;
+            cartonField.appendChild(serverError);
+        }
+    }
+
+    if (!cartonInput) {
+        return;
+    }
+
+    function syncCartonCount() {
+        const isDelivery = method.value === 'Lieferung';
+
+        cartonField.style.display = isDelivery ? '' : 'none';
+        cartonInput.disabled = !isDelivery;
+        cartonInput.required = isDelivery;
+
+        if (!isDelivery) {
+            cartonInput.value = '';
+            hiddenCartonCount.value = '';
+            return;
+        }
+
+        hiddenCartonCount.value = cartonInput.value || '';
+    }
+
+    if (method.dataset.cartonCountBound !== '1') {
+        method.dataset.cartonCountBound = '1';
+        method.addEventListener('change', syncCartonCount);
+        method.addEventListener('input', syncCartonCount);
+    }
+
+    if (cartonInput.dataset.cartonCountBound !== '1') {
+        cartonInput.dataset.cartonCountBound = '1';
+        cartonInput.addEventListener('change', syncCartonCount);
+        cartonInput.addEventListener('input', syncCartonCount);
+    }
+
+    if (form.dataset.cartonCountBound !== '1') {
+        form.dataset.cartonCountBound = '1';
+        form.addEventListener('submit', syncCartonCount);
+    }
+
+    syncCartonCount();
+}
+
 function initializeDynamicUi() {
     initCleanWarningsPageColors();
     initUnlimitedOfferQuantities();
     ensureOfferProductOnlyStyles();
     initOfferProductOnlyPositions();
+    ensureOfferShippingCartonStyles();
+    initOfferShippingCartonCount();
 }
 
 initializeDynamicUi();

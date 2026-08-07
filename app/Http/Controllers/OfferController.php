@@ -88,6 +88,7 @@ class OfferController extends Controller
                 'template_type' => $data['template_type'],
                 'shipping_method' => $data['shipping_method'] ?? null,
                 'shipping_price_gross' => $data['shipping_price_gross'] ?? null,
+                'carton_count' => $data['carton_count'] ?? null,
                 'document_type' => 'offer',
                 'subtotal' => $total,
                 'total' => $total,
@@ -158,6 +159,7 @@ class OfferController extends Controller
                 'template_type' => $data['template_type'],
                 'shipping_method' => $data['shipping_method'] ?? null,
                 'shipping_price_gross' => $data['shipping_price_gross'] ?? null,
+                'carton_count' => $data['carton_count'] ?? null,
                 'subtotal' => $total,
                 'total' => $total,
                 'notes' => $data['notes'] ?? null,
@@ -259,6 +261,7 @@ class OfferController extends Controller
             'template_type' => ['required', 'string', 'in:with_company,without_company'],
             'shipping_method' => ['required', 'string', 'in:Lieferung,Abholung'],
             'shipping_price_gross' => ['nullable', 'numeric', 'min:0', 'max:999999.99'],
+            'carton_count' => ['nullable', 'required_if:shipping_method,Lieferung', 'integer', 'min:1', 'max:9999'],
             'notes' => ['nullable', 'string', 'max:5000'],
             'items' => ['required', 'array'],
             'items.*.product_id' => ['nullable', 'integer', 'exists:products,id'],
@@ -270,6 +273,7 @@ class OfferController extends Controller
     {
         if (($data['shipping_method'] ?? null) === 'Abholung') {
             $data['shipping_price_gross'] = null;
+            $data['carton_count'] = null;
         }
 
         return $data;
