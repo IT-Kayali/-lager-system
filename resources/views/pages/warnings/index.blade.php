@@ -117,15 +117,15 @@
 
                                 <td>{{ $manufacturerName }}</td>
 
-                                <td>{{ number_format((float) $row['total_stock'], 2, ',', '.') }}</td>
+                                <td>{{ \App\Support\GermanNumber::format($row['total_stock']) }}</td>
 
-                                <td>{{ number_format((float) $row['reserved_stock'], 2, ',', '.') }}</td>
+                                <td>{{ \App\Support\GermanNumber::format($row['reserved_stock']) }}</td>
 
-                                <td>{{ number_format((float) $row['available_stock'], 2, ',', '.') }}</td>
+                                <td>{{ \App\Support\GermanNumber::format($row['available_stock']) }}</td>
 
-                                <td>{{ number_format((float) $row['minimum_stock'], 2, ',', '.') }}</td>
+                                <td>{{ \App\Support\GermanNumber::format($row['minimum_stock']) }}</td>
 
-                                <td>{{ number_format((float) $row['max_reservable'], 2, ',', '.') }}</td>
+                                <td>{{ \App\Support\GermanNumber::format($row['max_reservable']) }}</td>
 
                                 <td>
                                     <span class="premium-badge {{ $row['status'] }}">
