@@ -19,52 +19,17 @@ class BranchWithdrawalPdfController extends Controller
 
         $template = DocumentTemplate::byKey(DocumentTemplate::WITH_COMPANY);
 
-        $logoDataUri = $this->publicStorageDataUri(
-            $template->delivery_logo_path ?: $template->logo_path
-        );
-
-        $backgroundDataUri = $this->publicStorageDataUri(
-            $template->delivery_background_image_path ?: $template->background_image_path
-        );
-
-        $customer = (object) [
-            'id' => 0,
-            'company_name' => $branchWithdrawal->branch_name,
-            'contact_person' => null,
-            'delivery_street' => null,
-            'delivery_house_number' => null,
-            'delivery_postal_code' => null,
-            'delivery_city' => null,
-            'delivery_country' => null,
-            'billing_street' => null,
-            'billing_house_number' => null,
-            'billing_postal_code' => null,
-            'billing_city' => null,
-            'billing_country' => null,
-            'billing_address' => null,
-            'customer_number' => 'INTERNE FILIALE',
-            'number' => null,
-        ];
-
-        $offer = (object) [
-            'customer' => $customer,
-            'items' => $branchWithdrawal->items->map(fn ($item) => (object) [
-                'quantity' => $item->quantity,
-                'product_name' => $item->product?->name ?? 'Gelöschtes Produkt',
-                'description' => $item->product?->name ?? 'Gelöschtes Produkt',
-                'product' => $item->product,
-            ]),
-            'shipping_method' => 'Interne Warenübergabe',
-            'offer_number' => $branchWithdrawal->withdrawal_number,
-        ];
+        // Wie beim normalen Lieferschein mit Logo: ausschließlich das eigene
+        // Lieferschein-Logo verwenden. Der Filial-Lieferschein bekommt bewusst
+        // kein Hintergrundbild, damit das Layout identisch weiß und schlicht bleibt.
+        $logoDataUri = $this->publicStorageDataUri($template->delivery_logo_path);
 
         File::ensureDirectoryExists(storage_path('fonts'));
 
-        $pdf = Pdf::loadView('pdf.delivery-note', [
-            'offer' => $offer,
+        $pdf = Pdf::loadView('pdf.branch-withdrawal-delivery-note', [
+            'branchWithdrawal' => $branchWithdrawal,
             'template' => $template,
             'logoDataUri' => $logoDataUri,
-            'backgroundDataUri' => $backgroundDataUri,
         ])->setPaper('a4');
 
         return $pdf->stream(
