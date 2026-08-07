@@ -12,5 +12,5 @@ it('disables the category filter only inside the offer editor', function () {
 
 it('keeps the category system files available', function () {
     expect(file_exists(app_path('Models/ProductCategory.php')))->toBeTrue()
-        ->and(file_exists(resource_path('views/pages/categories/index.blade.php')))->toBeTrue();
+        ->and(file_exists(resource_path('views/pages/product-categories/index.blade.php')))->toBeTrue();
 });
