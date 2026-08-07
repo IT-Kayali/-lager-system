@@ -220,10 +220,7 @@
 
     $senderLine = trim($companyName . ' – ' . $companyStreet . ' – ' . $companyCity);
 
-    $formatQty = function ($value): string {
-        $formatted = number_format((float) $value, 3, ',', '.');
-        return rtrim(rtrim($formatted, '0'), ',');
-    };
+    $formatQty = fn ($value): string => \App\Support\GermanNumber::format($value);
 
     $items = $branchWithdrawal->items->values()->map(function ($item) use ($formatQty) {
         $unit = trim((string) ($item->product?->unit ?? ''));
