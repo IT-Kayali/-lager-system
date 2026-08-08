@@ -90,7 +90,7 @@
                     </table>
                 </div>
 
-                @if (auth()->user()?->isManager())
+                @if (auth()->user()?->hasRole([\App\Models\User::ROLE_MANAGER, \App\Models\User::ROLE_SALES]))
                     <div style="display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;">
                         <button class="premium-btn gold" type="submit">
                             <i class="bi bi-save"></i>
@@ -99,7 +99,7 @@
                     </div>
                 @else
                     <div class="premium-placeholder" style="margin-top:18px;">
-                        Du kannst Preise sehen, aber nur Manager dürfen Preise ändern.
+                        Du kannst Preise sehen, aber nicht ändern.
                     </div>
                 @endif
             </form>
