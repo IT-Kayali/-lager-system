@@ -12,10 +12,6 @@ use InvalidArgumentException;
 
 class OfferPdfController extends Controller
 {
-    public function __construct(private readonly DocumentItemSorter $documentItemSorter)
-    {
-    }
-
     public function stream(Offer $offer, string $type): Response
     {
         $documentLabels = [
@@ -29,7 +25,7 @@ class OfferPdfController extends Controller
         }
 
         $offer->load(['customer.group', 'items.product.categories']);
-        $offer->setRelation('items', $this->documentItemSorter->sort($offer->items));
+        $offer->setRelation('items', app(DocumentItemSorter::class)->sort($offer->items));
 
         $template = DocumentTemplate::byKey($offer->template_type);
         $title = $documentLabels[$type];
