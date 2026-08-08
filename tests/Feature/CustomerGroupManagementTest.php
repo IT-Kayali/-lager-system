@@ -4,16 +4,16 @@ use App\Models\Customer;
 use App\Models\CustomerGroup;
 use App\Models\User;
 
-function managerUser(): User
+function customerGroupAdminUser(): User
 {
     return User::factory()->create([
-        'role' => User::ROLE_MANAGER,
+        'role' => User::ROLE_ADMIN,
         'is_active' => true,
     ]);
 }
 
-it('allows a manager to create a customer group with manual colors', function () {
-    $this->actingAs(managerUser())
+it('allows an admin to create a customer group with manual colors', function () {
+    $this->actingAs(customerGroupAdminUser())
         ->post(route('customer-groups.store'), [
             'name' => 'Platin',
             'description' => 'Platin-Kunden',
@@ -33,7 +33,7 @@ it('allows a manager to create a customer group with manual colors', function ()
 });
 
 it('stores no text color when automatic contrast is enabled', function () {
-    $this->actingAs(managerUser())
+    $this->actingAs(customerGroupAdminUser())
         ->post(route('customer-groups.store'), [
             'name' => 'Bronze',
             'color' => '#92400E',
@@ -56,7 +56,7 @@ it('updates a group without changing its technical slug', function () {
         'color' => '#D4AD16',
     ]);
 
-    $this->actingAs(managerUser())
+    $this->actingAs(customerGroupAdminUser())
         ->put(route('customer-groups.update', $group), [
             'name' => 'Premium Gold',
             'description' => 'Bevorzugte Kunden',
@@ -83,7 +83,7 @@ it('clears a manual text color when automatic contrast is enabled', function () 
         'text_color' => '#FFFF00',
     ]);
 
-    $this->actingAs(managerUser())
+    $this->actingAs(customerGroupAdminUser())
         ->put(route('customer-groups.update', $group), [
             'name' => 'Diamond',
             'color' => '#2563EB',
@@ -113,7 +113,7 @@ it('does not delete a group that still has customers', function () {
         'company_name' => 'Testkunde',
     ]);
 
-    $this->actingAs(managerUser())
+    $this->actingAs(customerGroupAdminUser())
         ->delete(route('customer-groups.destroy', $group))
         ->assertSessionHas('error');
 
@@ -127,7 +127,7 @@ it('does not delete the last remaining customer group', function () {
         'color' => '#475569',
     ]);
 
-    $this->actingAs(managerUser())
+    $this->actingAs(customerGroupAdminUser())
         ->delete(route('customer-groups.destroy', $group))
         ->assertSessionHas('error');
 
@@ -147,7 +147,7 @@ it('deletes an unused group when another group remains', function () {
         'color' => '#64748B',
     ]);
 
-    $this->actingAs(managerUser())
+    $this->actingAs(customerGroupAdminUser())
         ->delete(route('customer-groups.destroy', $unused))
         ->assertRedirect(route('settings.index') . '#customer-groups');
 
