@@ -18,7 +18,7 @@ class CategoryPriorityService
     {
         return DB::transaction(function () use ($attributes): ProductCategory {
             $priority = (int) $attributes['priority'];
-            $this->shiftRangeUp($priority, null);
+            $this->shiftRangeUp($priority);
 
             return ProductCategory::create($attributes);
         });
@@ -65,7 +65,7 @@ class CategoryPriorityService
             $category->delete();
 
             if ($priority !== null) {
-                $this->shiftRangeDown($priority + 1, null);
+                $this->shiftRangeDown($priority + 1);
             }
         });
     }
@@ -81,7 +81,7 @@ class CategoryPriorityService
         }
 
         if ($excludeId !== null) {
-            $query->whereKeyNot($excludeId);
+            $query->where('id', '!=', $excludeId);
         }
 
         $query->increment('priority', self::TEMP_OFFSET);
@@ -94,7 +94,7 @@ class CategoryPriorityService
         }
 
         if ($excludeId !== null) {
-            $shifted->whereKeyNot($excludeId);
+            $shifted->where('id', '!=', $excludeId);
         }
 
         $shifted->decrement('priority', self::TEMP_OFFSET - 1);
@@ -111,7 +111,7 @@ class CategoryPriorityService
         }
 
         if ($excludeId !== null) {
-            $query->whereKeyNot($excludeId);
+            $query->where('id', '!=', $excludeId);
         }
 
         $query->increment('priority', self::TEMP_OFFSET);
@@ -124,7 +124,7 @@ class CategoryPriorityService
         }
 
         if ($excludeId !== null) {
-            $shifted->whereKeyNot($excludeId);
+            $shifted->where('id', '!=', $excludeId);
         }
 
         $shifted->decrement('priority', self::TEMP_OFFSET + 1);
