@@ -4,18 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\BranchWithdrawal;
 use App\Models\DocumentTemplate;
+use App\Services\DocumentItemSorter;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
 
 class BranchWithdrawalPdfController extends Controller
 {
+    public function __construct(private readonly DocumentItemSorter $documentItemSorter)
+    {
+    }
+
     public function stream(BranchWithdrawal $branchWithdrawal): Response
     {
         abort_unless(auth()->check(), 403);
         abort_unless(auth()->user()?->canAccessMenu(['manager', 'warehouse']), 403);
 
-        $branchWithdrawal->load(['items.product']);
+        $branchWithdrawal->load(['items.product.categories']);
+        $branchWithdrawal->setRelation('items', $this->documentItemSorter->sort($branchWithdrawal->items));
 
         $template = DocumentTemplate::byKey(DocumentTemplate::WITH_COMPANY);
 
