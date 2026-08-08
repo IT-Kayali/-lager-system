@@ -66,6 +66,20 @@ class ApplicationSetting extends Model
         return $theme;
     }
 
+    public static function siteName(): string
+    {
+        $fallback = (string) config('app.name', 'Lagerverwaltung');
+
+        return trim((string) static::getValue('site_name', $fallback)) ?: $fallback;
+    }
+
+    public static function siteFaviconPath(): ?string
+    {
+        $path = trim((string) static::getValue('site_favicon_path', ''));
+
+        return $path !== '' ? $path : null;
+    }
+
     public static function loginBackgroundPath(): ?string
     {
         $path = trim((string) static::getValue('login_background_path', ''));
