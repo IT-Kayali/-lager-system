@@ -1,5 +1,6 @@
 @include('partials.application-theme')
 @include('partials.unified-app-chrome')
+@include('partials.browser-branding-runtime')
 
 @php
     $user = auth()->user();
