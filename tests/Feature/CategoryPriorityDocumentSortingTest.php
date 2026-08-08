@@ -101,12 +101,12 @@ it('uses the same sorter for offer invoice delivery note and branch delivery not
     expect($offerPdfController)
         ->toContain('DocumentItemSorter')
         ->toContain("items.product.categories")
-        ->toContain("setRelation('items', \$this->documentItemSorter->sort(\$offer->items))");
+        ->toContain("setRelation('items', app(DocumentItemSorter::class)->sort(\$offer->items))");
 
     expect($branchPdfController)
         ->toContain('DocumentItemSorter')
         ->toContain("items.product.categories")
-        ->toContain("setRelation('items', \$this->documentItemSorter->sort(\$branchWithdrawal->items))");
+        ->toContain("setRelation('items', app(DocumentItemSorter::class)->sort(\$branchWithdrawal->items))");
 });
 
 it('shows category priority in the editor and category overview', function () {
