@@ -29,6 +29,8 @@ Route::get('/login-background', [SettingsController::class, 'loginBackground'])
     ->name('login.background');
 Route::get('/login-logo', [SettingsController::class, 'loginLogo'])
     ->name('login.logo');
+Route::get('/site-favicon', [SettingsController::class, 'siteFavicon'])
+    ->name('site.favicon');
 
 Route::middleware(['auth'])->group(function () {
     /*
