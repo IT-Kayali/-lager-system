@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Support\Str;
-
 it('loads the unified app chrome globally through the sidebar', function () {
     $sidebar = file_get_contents(resource_path('views/partials/app-sidebar.blade.php'));
 
@@ -69,7 +67,7 @@ it('keeps page specific action buttons available outside the removed global head
 it('contains responsive toolbar rules for smaller screens', function () {
     $chrome = file_get_contents(resource_path('views/partials/unified-app-chrome.blade.php'));
 
-    expect(Str::of($chrome))
+    expect($chrome)
         ->toContain('@media (max-width: 1240px)')
         ->toContain('@media (max-width: 820px)')
         ->toContain('@media (max-width: 560px)');
