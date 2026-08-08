@@ -7,8 +7,8 @@ use App\Models\ProductPriceTier;
 use App\Models\User;
 
 beforeEach(function () {
-    $this->manager = User::factory()->create([
-        'role' => User::ROLE_MANAGER,
+    $this->admin = User::factory()->create([
+        'role' => User::ROLE_ADMIN,
         'is_active' => true,
     ]);
 });
@@ -30,7 +30,7 @@ function priceTierRows(?callable $change = null): array
 }
 
 it('shows the default price tier definitions in settings', function () {
-    $this->actingAs($this->manager)
+    $this->actingAs($this->admin)
         ->get(route('settings.index'))
         ->assertOk()
         ->assertSee('Preisstufen')
@@ -66,7 +66,7 @@ it('adds a price tier and creates price rows for existing products and groups', 
         return $rows;
     });
 
-    $this->actingAs($this->manager)
+    $this->actingAs($this->admin)
         ->put(route('price-tiers.update'), ['tiers' => $rows])
         ->assertRedirect(route('settings.index') . '#price-tiers');
 
@@ -109,7 +109,7 @@ it('allows the final price tier to have no upper limit', function () {
         return $rows;
     });
 
-    $this->actingAs($this->manager)
+    $this->actingAs($this->admin)
         ->put(route('price-tiers.update'), ['tiers' => $rows])
         ->assertRedirect(route('settings.index') . '#price-tiers');
 
@@ -176,7 +176,7 @@ it('updates a tier while preserving existing prices and its technical key', func
         return $rows;
     });
 
-    $this->actingAs($this->manager)
+    $this->actingAs($this->admin)
         ->put(route('price-tiers.update'), ['tiers' => $rows])
         ->assertRedirect(route('settings.index') . '#price-tiers');
 
@@ -217,7 +217,7 @@ it('removes a tier and keeps the remaining ranges valid', function () {
         return $rows;
     });
 
-    $this->actingAs($this->manager)
+    $this->actingAs($this->admin)
         ->put(route('price-tiers.update'), ['tiers' => $rows])
         ->assertRedirect(route('settings.index') . '#price-tiers');
 
@@ -236,7 +236,7 @@ it('rejects overlapping or incomplete ranges', function () {
         return $rows;
     });
 
-    $this->actingAs($this->manager)
+    $this->actingAs($this->admin)
         ->from(route('settings.index'))
         ->put(route('price-tiers.update'), ['tiers' => $rows])
         ->assertRedirect(route('settings.index'))
@@ -255,7 +255,7 @@ it('rejects an unlimited tier when another tier follows it', function () {
         return $rows;
     });
 
-    $this->actingAs($this->manager)
+    $this->actingAs($this->admin)
         ->from(route('settings.index'))
         ->put(route('price-tiers.update'), ['tiers' => $rows])
         ->assertRedirect(route('settings.index'))
@@ -268,7 +268,7 @@ it('rejects an unlimited tier when another tier follows it', function () {
 });
 
 it('does not allow all price tiers to be removed', function () {
-    $this->actingAs($this->manager)
+    $this->actingAs($this->admin)
         ->from(route('settings.index'))
         ->put(route('price-tiers.update'), ['tiers' => []])
         ->assertRedirect(route('settings.index'))
@@ -277,13 +277,15 @@ it('does not allow all price tiers to be removed', function () {
     expect(PriceTierDefinition::query()->count())->toBe(5);
 });
 
-it('blocks non managers from changing price tiers', function () {
-    $wholesale = User::factory()->create([
-        'role' => User::ROLE_WHOLESALE,
-        'is_active' => true,
-    ]);
+it('blocks non admins from changing global price tiers', function () {
+    foreach ([User::ROLE_MANAGER, User::ROLE_SALES] as $role) {
+        $user = User::factory()->create([
+            'role' => $role,
+            'is_active' => true,
+        ]);
 
-    $this->actingAs($wholesale)
-        ->put(route('price-tiers.update'), ['tiers' => priceTierRows()])
-        ->assertForbidden();
+        $this->actingAs($user)
+            ->put(route('price-tiers.update'), ['tiers' => priceTierRows()])
+            ->assertForbidden();
+    }
 });
