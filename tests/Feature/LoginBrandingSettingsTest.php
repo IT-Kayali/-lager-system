@@ -25,6 +25,8 @@ it('stores the login texts and site name from settings', function () {
         ->and(ApplicationSetting::loginTitle())->toBe('Willkommen im Lager')
         ->and(ApplicationSetting::loginSubtitle())->toBe('Alle Bestände und Bestellungen sicher im Blick.');
 
+    $this->post(route('logout'));
+
     $this->get(route('login'))
         ->assertOk()
         ->assertSee('<title>Login · Alowidat Lager</title>', false)
@@ -68,6 +70,8 @@ it('uploads logo background and favicon and serves the favicon publicly', functi
 
     $this->get(route('site.favicon'))
         ->assertOk();
+
+    $this->post(route('logout'));
 
     $this->get(route('login'))
         ->assertOk()
