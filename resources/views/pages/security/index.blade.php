@@ -14,7 +14,7 @@
             <div>
                 <h2 style="font-size:20px; font-weight:900; margin:0;">Benutzer & Rollen</h2>
                 <p class="premium-muted" style="margin:4px 0 0;">
-                    Menüpunkte werden je nach Rolle vollständig ausgeblendet.
+                    Admin hat Vollzugriff. Manager, Lager und Verkauf sehen nur die für ihre Rolle freigegebenen Bereiche.
                 </p>
             </div>
 
@@ -41,7 +41,7 @@
                         <tr>
                             <td><strong>{{ $user->name }}</strong></td>
                             <td>{{ $user->email }}</td>
-                            <td><span class="premium-badge ok">{{ $user->role }}</span></td>
+                            <td><span class="premium-badge ok">{{ $user->roleLabel() }}</span></td>
                             <td>
                                 @if ($user->is_active)
                                     <span class="premium-badge ok">Aktiv</span>
