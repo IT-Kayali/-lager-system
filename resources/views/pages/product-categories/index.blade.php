@@ -1,4 +1,4 @@
-<x-layouts.premium title="Produktkategorien" subtitle="Verwalte Produktgruppen, Farben und Zuordnungen.">
+<x-layouts.premium title="Produktkategorien" subtitle="Verwalte Produktgruppen, Prioritäten, Farben und Zuordnungen.">
     @if (session('success'))
         <div class="premium-alert">{{ session('success') }}</div>
     @endif
@@ -48,6 +48,7 @@
                 <thead>
                     <tr>
                         <th>Kategorie</th>
+                        <th>Priorität</th>
                         <th>Beschreibung</th>
                         <th>Produkte</th>
                         <th>Status</th>
@@ -75,6 +76,12 @@
                                         <small>{{ $category->color ?: '#d4af37' }}</small>
                                     </span>
                                 </a>
+                            </td>
+
+                            <td>
+                                <span class="category-priority-pill" title="Dokument-Reihenfolge">
+                                    {{ $category->priority ?? '—' }}
+                                </span>
                             </td>
 
                             <td>
@@ -125,7 +132,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5">
+                            <td colspan="6">
                                 <div class="category-empty-state">
                                     <i class="bi bi-tags"></i>
                                     <strong>Noch keine Kategorien vorhanden.</strong>
@@ -212,7 +219,7 @@
         }
 
         .modern-category-table {
-            min-width: 920px;
+            min-width: 1020px;
         }
 
         .modern-category-table thead th {
@@ -266,6 +273,18 @@
             font-size: 12px;
             font-weight: 850;
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        }
+
+        .category-priority-pill {
+            min-width: 42px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            background: #2d2b25;
+            color: #ffe690;
+            font-weight: 950;
         }
 
         .category-description {
@@ -383,19 +402,21 @@
 
         .modern-category-table th:nth-child(1),
         .modern-category-table td:nth-child(1) {
-            width: 290px;
+            width: 280px;
         }
 
-        .modern-category-table th:nth-child(3),
-        .modern-category-table td:nth-child(3),
+        .modern-category-table th:nth-child(2),
+        .modern-category-table td:nth-child(2),
         .modern-category-table th:nth-child(4),
-        .modern-category-table td:nth-child(4) {
-            width: 130px;
+        .modern-category-table td:nth-child(4),
+        .modern-category-table th:nth-child(5),
+        .modern-category-table td:nth-child(5) {
+            width: 120px;
             text-align: center;
         }
 
-        .modern-category-table th:nth-child(5),
-        .modern-category-table td:nth-child(5) {
+        .modern-category-table th:nth-child(6),
+        .modern-category-table td:nth-child(6) {
             width: 150px;
             text-align: right;
         }
