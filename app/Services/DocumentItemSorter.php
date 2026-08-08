@@ -41,11 +41,13 @@ class DocumentItemSorter
             return PHP_INT_MAX;
         }
 
-        $categories = $product->relationLoaded('categories')
-            ? $product->getRelation('categories')
-            : collect();
+        if (method_exists($product, 'relationLoaded') && $product->relationLoaded('categories')) {
+            $categories = $product->getRelation('categories');
+        } else {
+            $categories = collect($product->categories ?? []);
+        }
 
-        $priority = $categories
+        $priority = collect($categories)
             ->pluck('priority')
             ->filter(fn ($value) => $value !== null)
             ->map(fn ($value) => (int) $value)
