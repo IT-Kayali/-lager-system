@@ -19,9 +19,12 @@
         </div>
         <flux:menu.separator />
         <flux:menu.radio.group>
-            <flux:menu.item :href="route('settings.index')" icon="cog" wire:navigate>
-                Einstellungen
-            </flux:menu.item>
+            @if (auth()->user()?->isAdmin())
+                <flux:menu.item :href="route('settings.index')" icon="cog" wire:navigate>
+                    Einstellungen
+                </flux:menu.item>
+            @endif
+
             <form method="POST" action="{{ route('logout') }}" class="w-full">
                 @csrf
                 <flux:menu.item
