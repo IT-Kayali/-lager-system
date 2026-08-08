@@ -3,12 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\ProductCategory;
+use App\Services\CategoryPriorityService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ProductCategoryController extends Controller
 {
+    public function __construct(private readonly CategoryPriorityService $priorityService)
+    {
+    }
+
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('search'));
@@ -22,6 +27,8 @@ class ProductCategoryController extends Controller
                         ->orWhere('description', 'like', "%{$search}%");
                 });
             })
+            ->orderByRaw('CASE WHEN priority IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('priority')
             ->orderBy('name')
             ->paginate(20)
             ->withQueryString();
@@ -36,6 +43,7 @@ class ProductCategoryController extends Controller
     {
         return view('pages.product-categories.create', [
             'category' => new ProductCategory([
+                'priority' => $this->priorityService->nextPriority(),
                 'is_active' => true,
                 'color' => '#d4af37',
             ]),
@@ -44,7 +52,7 @@ class ProductCategoryController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        ProductCategory::create($this->validatedData($request));
+        $this->priorityService->create($this->validatedData($request));
 
         return redirect()
             ->route('product-categories.index')
@@ -73,7 +81,7 @@ class ProductCategoryController extends Controller
 
     public function update(Request $request, ProductCategory $productCategory): RedirectResponse
     {
-        $productCategory->update($this->validatedData($request));
+        $this->priorityService->update($productCategory, $this->validatedData($request));
 
         return redirect()
             ->route('product-categories.index')
@@ -88,7 +96,7 @@ class ProductCategoryController extends Controller
                 ->with('error', 'Kategorie kann nicht gelöscht werden, weil noch Produkte zugeordnet sind.');
         }
 
-        $productCategory->delete();
+        $this->priorityService->delete($productCategory);
 
         return redirect()
             ->route('product-categories.index')
@@ -99,12 +107,14 @@ class ProductCategoryController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'priority' => ['required', 'integer', 'min:1', 'max:999999'],
             'slug' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:3000'],
             'color' => ['nullable', 'string', 'max:20'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
+        $data['priority'] = (int) $data['priority'];
         $data['is_active'] = $request->boolean('is_active');
 
         return $data;

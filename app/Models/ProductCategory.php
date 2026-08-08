@@ -10,6 +10,7 @@ class ProductCategory extends Model
 {
     protected $fillable = [
         'name',
+        'priority',
         'slug',
         'description',
         'color',
@@ -19,6 +20,7 @@ class ProductCategory extends Model
     protected function casts(): array
     {
         return [
+            'priority' => 'integer',
             'is_active' => 'boolean',
         ];
     }
@@ -31,7 +33,6 @@ class ProductCategory extends Model
             }
         });
     }
-
 
     public function getRouteName(): string
     {

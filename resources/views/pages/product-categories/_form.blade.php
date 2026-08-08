@@ -10,7 +10,7 @@
 
                 <div>
                     <h2>Basisdaten</h2>
-                    <p>Name, Slug und Beschreibung der Kategorie.</p>
+                    <p>Name, Priorität, Slug und Beschreibung der Kategorie.</p>
                 </div>
             </div>
 
@@ -22,6 +22,22 @@
                 </div>
 
                 <div class="premium-form-field">
+                    <label for="priority">Priorität *</label>
+                    <input
+                        id="priority"
+                        name="priority"
+                        type="number"
+                        min="1"
+                        step="1"
+                        class="premium-input"
+                        value="{{ old('priority', $category->priority) }}"
+                        required
+                    >
+                    <div class="category-priority-hint">1 = zuerst auf Angebot, Rechnung und Lieferscheinen. Andere Kategorien werden beim Verschieben automatisch angepasst.</div>
+                    @error('priority') <div class="premium-error">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="premium-form-field full">
                     <label for="slug">Slug optional</label>
                     <input id="slug" name="slug" class="premium-input" value="{{ old('slug', $category->slug) }}" placeholder="wird automatisch erzeugt">
                     @error('slug') <div class="premium-error">{{ $message }}</div> @enderror
@@ -95,7 +111,7 @@
                 </div>
 
                 <div class="category-preview-description">
-                    {{ old('description', $category->description ?: 'Beschreibung der Kategorie') }}
+                    Priorität {{ old('priority', $category->priority ?: '—') }} · {{ old('description', $category->description ?: 'Beschreibung der Kategorie') }}
                 </div>
             </div>
         </div>
@@ -220,6 +236,14 @@
     .category-editor-form .premium-textarea {
         min-height: 150px;
         resize: vertical;
+    }
+
+    .category-priority-hint {
+        margin-top: 7px;
+        color: #665f54;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.4;
     }
 
     .category-color-control {

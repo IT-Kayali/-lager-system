@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use App\Models\DocumentTemplate;
 use App\Models\Offer;
+use App\Services\DocumentItemSorter;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
 use InvalidArgumentException;
@@ -23,7 +24,8 @@ class OfferPdfController extends Controller
             throw new InvalidArgumentException('Ungültiger Dokumenttyp.');
         }
 
-        $offer->load(['customer.group', 'items.product']);
+        $offer->load(['customer.group', 'items.product.categories']);
+        $offer->setRelation('items', app(DocumentItemSorter::class)->sort($offer->items));
 
         $template = DocumentTemplate::byKey($offer->template_type);
         $title = $documentLabels[$type];
