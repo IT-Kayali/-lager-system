@@ -63,11 +63,20 @@
                             </td>
 
                             <td>
-                                <div>{{ $customer->email ?: '—' }}</div>
+                                <div class="customer-contact-stack">
+                                    @if ($customer->email)
+                                        <a href="mailto:{{ $customer->email }}">
+                                            <i class="bi bi-envelope"></i>
+                                            {{ $customer->email }}
+                                        </a>
+                                    @else
+                                        <span class="premium-muted">Keine E-Mail</span>
+                                    @endif
 
-                                @if ($customer->phone)
-                                    <x-whatsapp-link :number="$customer->phone" :label="$customer->phone" :country-code="$customer->phone_country_code" />
-                                @endif
+                                    @if ($customer->phone)
+                                        <x-whatsapp-link :number="$customer->phone" :label="$customer->phone" :country-code="$customer->phone_country_code" />
+                                    @endif
+                                </div>
                             </td>
 
                             <td>{{ $customer->billing_city ?: $customer->delivery_city ?: $customer->city ?: '—' }}</td>
@@ -127,6 +136,26 @@
         .customers-search-inline .premium-btn {
             height: 46px !important;
             white-space: nowrap !important;
+        }
+
+        .customer-contact-stack {
+            display: grid;
+            gap: 5px;
+        }
+
+        .customer-contact-stack > a {
+            color: #211d17;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .customer-contact-stack > a:hover {
+            color: #9a7300;
+        }
+
+        .customer-contact-stack > a i {
+            margin-right: 6px;
+            color: #7b5c00;
         }
 
         @media (max-width: 700px) {
