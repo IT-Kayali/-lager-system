@@ -21,9 +21,9 @@ class AdminUserSeeder extends Seeder
         User::updateOrCreate(
             ['email' => $email],
             [
-                'name' => env('ADMIN_NAME', 'Manager'),
+                'name' => env('ADMIN_NAME', 'Admin'),
                 'password' => Hash::make($password),
-                'role' => User::ROLE_MANAGER,
+                'role' => User::ROLE_ADMIN,
                 'is_active' => true,
             ]
         );
