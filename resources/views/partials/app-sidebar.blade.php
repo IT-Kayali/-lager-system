@@ -1,4 +1,5 @@
 @include('partials.application-theme')
+@include('partials.unified-app-chrome')
 
 @php
     $sidebarLogoPath = \App\Models\ApplicationSetting::loginLogoPath();
