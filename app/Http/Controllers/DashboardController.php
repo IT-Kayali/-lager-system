@@ -7,14 +7,29 @@ use App\Models\Offer;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\ReservationReleaseService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function __invoke(ReservationReleaseService $reservationReleaseService): View
+    public function __invoke(ReservationReleaseService $reservationReleaseService): View|RedirectResponse
     {
+        $user = auth()->user();
+
+        abort_unless($user?->is_active, 403, 'Dieser Benutzer ist deaktiviert.');
+
+        if ($user->isWarehouse()) {
+            return redirect()->route('products.index');
+        }
+
+        if ($user->isSales()) {
+            return redirect()->route('offers.index');
+        }
+
+        abort_unless($user->hasRole(User::ROLE_MANAGER), 403, 'Keine Berechtigung für das Dashboard.');
+
         $reservationReleaseService->releaseExpired();
 
         $products = Schema::hasTable('products')

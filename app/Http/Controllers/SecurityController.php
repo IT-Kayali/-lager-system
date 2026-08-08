@@ -25,7 +25,7 @@ class SecurityController extends Controller
             ->withQueryString();
 
         $users = User::query()
-            ->orderByRaw("FIELD(role, 'manager', 'wholesale', 'warehouse')")
+            ->orderByRaw("CASE role WHEN 'admin' THEN 1 WHEN 'manager' THEN 2 WHEN 'warehouse' THEN 3 WHEN 'sales' THEN 4 ELSE 99 END")
             ->orderBy('name')
             ->get();
 

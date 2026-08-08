@@ -66,10 +66,10 @@ class SystemUserController extends Controller
 
         $data['is_active'] = $request->boolean('is_active');
 
-        if (! $data['is_active'] && $this->isLastActiveManager($user)) {
+        if ($this->wouldRemoveLastActiveAdmin($user, $data)) {
             return back()
                 ->withInput()
-                ->with('error', 'Der letzte aktive Manager darf nicht deaktiviert werden.');
+                ->with('error', 'Der letzte aktive Admin darf nicht deaktiviert oder zu einer anderen Rolle geändert werden.');
         }
 
         if ($user->id === auth()->id() && ! $data['is_active']) {
@@ -108,10 +108,10 @@ class SystemUserController extends Controller
                 ->with('error', 'Du kannst deinen eigenen Account nicht löschen.');
         }
 
-        if ($this->isLastActiveManager($user)) {
+        if ($this->isLastActiveAdmin($user)) {
             return redirect()
                 ->route('security.index')
-                ->with('error', 'Der letzte aktive Manager darf nicht gelöscht werden.');
+                ->with('error', 'Der letzte aktive Admin darf nicht gelöscht werden.');
         }
 
         $email = $user->email;
@@ -129,25 +129,41 @@ class SystemUserController extends Controller
             ->with('success', 'Benutzer wurde gelöscht.');
     }
 
-    private function isLastActiveManager(User $user): bool
+    private function wouldRemoveLastActiveAdmin(User $user, array $data): bool
     {
-        if ($user->role !== User::ROLE_MANAGER) {
+        if (! $user->isAdmin() || ! $user->is_active) {
+            return false;
+        }
+
+        $staysActiveAdmin = ($data['role'] ?? null) === User::ROLE_ADMIN
+            && (bool) ($data['is_active'] ?? false);
+
+        if ($staysActiveAdmin) {
             return false;
         }
 
         return User::query()
-            ->where('role', User::ROLE_MANAGER)
+            ->where('role', User::ROLE_ADMIN)
             ->where('is_active', true)
             ->where('id', '!=', $user->id)
-            ->count() === 0;
+            ->doesntExist();
+    }
+
+    private function isLastActiveAdmin(User $user): bool
+    {
+        if (! $user->isAdmin() || ! $user->is_active) {
+            return false;
+        }
+
+        return User::query()
+            ->where('role', User::ROLE_ADMIN)
+            ->where('is_active', true)
+            ->where('id', '!=', $user->id)
+            ->doesntExist();
     }
 
     private function roles(): array
     {
-        return [
-            User::ROLE_MANAGER => 'Manager / Chef',
-            User::ROLE_WHOLESALE => 'Großhandel / Wholesale',
-            User::ROLE_WAREHOUSE => 'Lager / Warehouse',
-        ];
+        return User::ROLE_LABELS;
     }
 }
