@@ -16,3 +16,12 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 @endif
+
+@if ($browserPageTitle === 'Login')
+    <style>
+        html body:has(input[name="email"]):has(input[name="password"]) main .login-info p,
+        html body:has(input[name="email"]):has(input[name="password"]) form.login-card p {
+            color: #ffffff !important;
+        }
+    </style>
+@endif
