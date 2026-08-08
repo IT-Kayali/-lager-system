@@ -4,14 +4,14 @@ use App\Models\ApplicationSetting;
 use App\Models\User;
 
 beforeEach(function () {
-    $this->manager = User::factory()->create([
-        'role' => User::ROLE_MANAGER,
+    $this->admin = User::factory()->create([
+        'role' => User::ROLE_ADMIN,
         'is_active' => true,
     ]);
 });
 
-it('allows a manager to update the global button colors', function () {
-    $this->actingAs($this->manager)
+it('allows an admin to update the global button colors', function () {
+    $this->actingAs($this->admin)
         ->put(route('settings.button-appearance.update'), [
             'primary_button_background' => '#123456',
             'primary_button_text' => '#FEDCBA',
@@ -46,7 +46,7 @@ it('allows a manager to update the global button colors', function () {
 });
 
 it('rejects invalid button colors', function () {
-    $this->actingAs($this->manager)
+    $this->actingAs($this->admin)
         ->from(route('settings.index'))
         ->put(route('settings.button-appearance.update'), [
             'primary_button_background' => 'gold',
@@ -73,7 +73,7 @@ it('restores the default button colors', function () {
         ApplicationSetting::putValue($key, $value, 'color');
     }
 
-    $this->actingAs($this->manager)
+    $this->actingAs($this->admin)
         ->put(route('settings.button-appearance.update'), [
             'primary_button_background' => '#000001',
             'primary_button_text' => '#000002',
@@ -98,18 +98,20 @@ it('uses safe defaults when stored button colors are invalid', function () {
         ->toMatchArray(ApplicationSetting::buttonThemeDefaults());
 });
 
-it('blocks non managers from changing button colors', function () {
-    $wholesale = User::factory()->create([
-        'role' => User::ROLE_WHOLESALE,
-        'is_active' => true,
-    ]);
+it('blocks managers and sales from changing global button colors', function () {
+    foreach ([User::ROLE_MANAGER, User::ROLE_SALES] as $role) {
+        $user = User::factory()->create([
+            'role' => $role,
+            'is_active' => true,
+        ]);
 
-    $this->actingAs($wholesale)
-        ->put(route('settings.button-appearance.update'), [
-            'primary_button_background' => '#123456',
-            'primary_button_text' => '#FFFFFF',
-            'secondary_button_background' => '#111111',
-            'secondary_button_text' => '#FFFFFF',
-        ])
-        ->assertForbidden();
+        $this->actingAs($user)
+            ->put(route('settings.button-appearance.update'), [
+                'primary_button_background' => '#123456',
+                'primary_button_text' => '#FFFFFF',
+                'secondary_button_background' => '#111111',
+                'secondary_button_text' => '#FFFFFF',
+            ])
+            ->assertForbidden();
+    }
 });
