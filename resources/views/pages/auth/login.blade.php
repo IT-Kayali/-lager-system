@@ -6,11 +6,6 @@
     $loginEyebrow = \App\Models\ApplicationSetting::loginEyebrow();
     $loginTitle = \App\Models\ApplicationSetting::loginTitle();
     $loginSubtitle = \App\Models\ApplicationSetting::loginSubtitle();
-    $loginLogoPath = \App\Models\ApplicationSetting::loginLogoPath();
-    $loginLogoUrl = $loginLogoPath ? route('login.logo', [], false) : null;
-    $loginEyebrow = \App\Models\ApplicationSetting::loginEyebrow();
-    $loginTitle = \App\Models\ApplicationSetting::loginTitle();
-    $loginSubtitle = \App\Models\ApplicationSetting::loginSubtitle();
 @endphp
 
 <!DOCTYPE html>
@@ -18,7 +13,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login · {{ config('app.name', 'Lagerverwaltung') }}</title>
+    @include('partials.browser-branding', ['pageTitle' => 'Login'])
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -146,8 +141,6 @@
             margin-bottom: 34px;
         }
 
-
-
         .login-info h1 {
             max-width: 680px;
             margin: 14px 0 18px;
@@ -161,7 +154,7 @@
         .login-info p {
             max-width: 590px;
             margin: 0;
-            color: rgba(255, 255, 255, .86);
+            color: #ffffff !important;
             font-size: clamp(16px, 1.4vw, 20px);
             font-weight: 750;
             line-height: 1.65;
@@ -226,7 +219,7 @@
 
         .login-card p {
             margin: 0;
-            color: #675d4f;
+            color: #ffffff !important;
             font-size: 15px;
             font-weight: 800;
             line-height: 1.45;
@@ -385,7 +378,7 @@
                         </div>
                     </div>
                 @endif
-<span class="login-kicker">{{ $loginEyebrow }}</span>
+                <span class="login-kicker">{{ $loginEyebrow }}</span>
                 <h1>{{ $loginTitle }}</h1>
                 <p>{{ $loginSubtitle }}</p>
             </section>

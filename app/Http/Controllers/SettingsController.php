@@ -14,12 +14,22 @@ class SettingsController extends Controller
     public function index(): View
     {
         $loginBackgroundPath = ApplicationSetting::loginBackgroundPath();
+        $loginLogoPath = ApplicationSetting::loginLogoPath();
+        $siteFaviconPath = ApplicationSetting::siteFaviconPath();
 
         return view('pages.settings.index', [
             'reservationHours' => ApplicationSetting::reservationHours(),
             'buttonTheme' => ApplicationSetting::buttonTheme(),
+            'siteName' => ApplicationSetting::siteName(),
+            'siteFaviconPath' => $siteFaviconPath,
+            'siteFaviconUrl' => $siteFaviconPath ? route('site.favicon', [], false) : null,
             'loginBackgroundPath' => $loginBackgroundPath,
             'loginBackgroundUrl' => $loginBackgroundPath ? route('login.background', [], false) : null,
+            'loginLogoPath' => $loginLogoPath,
+            'loginLogoUrl' => $loginLogoPath ? route('login.logo', [], false) : null,
+            'loginEyebrow' => ApplicationSetting::loginEyebrow(),
+            'loginTitle' => ApplicationSetting::loginTitle(),
+            'loginSubtitle' => ApplicationSetting::loginSubtitle(),
             'customerGroups' => CustomerGroup::query()
                 ->withCount('customers')
                 ->ordered()
@@ -87,52 +97,77 @@ class SettingsController extends Controller
 
     public function updateLoginAppearance(Request $request): RedirectResponse
     {
-        $request->validate([
+        $data = $request->validate([
+            'site_name' => ['required', 'string', 'max:80'],
+            'login_eyebrow' => ['required', 'string', 'max:80'],
+            'login_title' => ['required', 'string', 'max:120'],
+            'login_subtitle' => ['required', 'string', 'max:240'],
             'login_background' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'login_logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'site_favicon' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:1024'],
             'remove_login_background' => ['nullable', 'boolean'],
+            'remove_login_logo' => ['nullable', 'boolean'],
+            'remove_site_favicon' => ['nullable', 'boolean'],
         ]);
 
-        $currentPath = ApplicationSetting::loginBackgroundPath();
+        ApplicationSetting::putValue(
+            'site_name',
+            trim($data['site_name']),
+            'string',
+            'Name der Anwendung im Browser-Tab'
+        );
+        ApplicationSetting::putValue(
+            'login_eyebrow',
+            trim($data['login_eyebrow']),
+            'string',
+            'Kleine Überschrift der Anmeldeseite'
+        );
+        ApplicationSetting::putValue(
+            'login_title',
+            trim($data['login_title']),
+            'string',
+            'Hauptüberschrift der Anmeldeseite'
+        );
+        ApplicationSetting::putValue(
+            'login_subtitle',
+            trim($data['login_subtitle']),
+            'string',
+            'Beschreibungstext der Anmeldeseite'
+        );
 
-        if ($request->boolean('remove_login_background')) {
-            if ($currentPath) {
-                Storage::disk('public')->delete($currentPath);
-            }
+        $this->updateStoredImage(
+            $request,
+            'login_background',
+            'remove_login_background',
+            ApplicationSetting::loginBackgroundPath(),
+            'login-backgrounds',
+            'login_background_path',
+            'Hintergrundbild der Anmeldeseite'
+        );
 
-            ApplicationSetting::putValue(
-                'login_background_path',
-                '',
-                'string',
-                'Hintergrundbild der Anmeldeseite'
-            );
+        $this->updateStoredImage(
+            $request,
+            'login_logo',
+            'remove_login_logo',
+            ApplicationSetting::loginLogoPath(),
+            'login-logos',
+            'login_logo_path',
+            'Logo der Anmeldeseite'
+        );
 
-            return redirect()
-                ->route('settings.index')
-                ->with('success', 'Login-Hintergrund wurde entfernt.');
-        }
-
-        if ($request->hasFile('login_background')) {
-            if ($currentPath) {
-                Storage::disk('public')->delete($currentPath);
-            }
-
-            $path = $request->file('login_background')->store('login-backgrounds', 'public');
-
-            ApplicationSetting::putValue(
-                'login_background_path',
-                $path,
-                'string',
-                'Hintergrundbild der Anmeldeseite'
-            );
-
-            return redirect()
-                ->route('settings.index')
-                ->with('success', 'Login-Hintergrund wurde gespeichert.');
-        }
+        $this->updateStoredImage(
+            $request,
+            'site_favicon',
+            'remove_site_favicon',
+            ApplicationSetting::siteFaviconPath(),
+            'site-favicons',
+            'site_favicon_path',
+            'Favicon der Anwendung'
+        );
 
         return redirect()
-            ->route('settings.index')
-            ->with('success', 'Keine Änderung am Login-Hintergrund vorgenommen.');
+            ->to(route('settings.index') . '#login-appearance')
+            ->with('success', 'Login- und Browser-Einstellungen wurden gespeichert.');
     }
 
     public function loginBackground()
@@ -154,5 +189,49 @@ class SettingsController extends Controller
         );
 
         return Storage::disk('public')->response($path);
+    }
+
+    public function siteFavicon()
+    {
+        $path = ApplicationSetting::siteFaviconPath();
+
+        abort_unless(
+            $path && Storage::disk('public')->exists($path),
+            404
+        );
+
+        return Storage::disk('public')->response($path);
+    }
+
+    private function updateStoredImage(
+        Request $request,
+        string $fileField,
+        string $removeField,
+        ?string $currentPath,
+        string $directory,
+        string $settingKey,
+        string $description
+    ): void {
+        if ($request->boolean($removeField)) {
+            if ($currentPath) {
+                Storage::disk('public')->delete($currentPath);
+            }
+
+            ApplicationSetting::putValue($settingKey, '', 'string', $description);
+
+            return;
+        }
+
+        if (! $request->hasFile($fileField)) {
+            return;
+        }
+
+        $newPath = $request->file($fileField)->store($directory, 'public');
+
+        if ($currentPath) {
+            Storage::disk('public')->delete($currentPath);
+        }
+
+        ApplicationSetting::putValue($settingKey, $newPath, 'string', $description);
     }
 }
