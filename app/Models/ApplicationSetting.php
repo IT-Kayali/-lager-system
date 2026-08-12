@@ -53,6 +53,13 @@ class ApplicationSetting extends Model
         return max(0, min(1000, $percentage));
     }
 
+    public static function defaultBatchExpiryMonths(): int
+    {
+        $months = (int) static::getValue('default_batch_expiry_months', 24);
+
+        return max(1, min(240, $months));
+    }
+
     public static function buttonThemeDefaults(): array
     {
         return self::DEFAULT_BUTTON_THEME;
