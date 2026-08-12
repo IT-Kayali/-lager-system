@@ -20,6 +20,7 @@ class SettingsController extends Controller
         return view('pages.settings.index', [
             'reservationHours' => ApplicationSetting::reservationHours(),
             'lowStockWarningPercentage' => ApplicationSetting::lowStockWarningPercentage(),
+            'defaultBatchExpiryMonths' => ApplicationSetting::defaultBatchExpiryMonths(),
             'buttonTheme' => ApplicationSetting::buttonTheme(),
             'siteName' => ApplicationSetting::siteName(),
             'siteFaviconPath' => $siteFaviconPath,
@@ -72,6 +73,24 @@ class SettingsController extends Controller
         return redirect()
             ->to(route('settings.index') . '#low-stock-warning')
             ->with('success', 'Warnschwelle für niedrigen Bestand wurde gespeichert.');
+    }
+
+    public function updateBatchExpiry(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'default_batch_expiry_months' => ['required', 'integer', 'min:1', 'max:240'],
+        ]);
+
+        ApplicationSetting::putValue(
+            'default_batch_expiry_months',
+            $data['default_batch_expiry_months'],
+            'integer',
+            'Standard-Ablaufzeit für neu angelegte Chargen in Monaten'
+        );
+
+        return redirect()
+            ->to(route('settings.index') . '#batch-expiry')
+            ->with('success', 'Standard-Ablaufzeit für Chargen wurde gespeichert.');
     }
 
     public function updateButtonAppearance(Request $request): RedirectResponse
