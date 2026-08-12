@@ -66,7 +66,8 @@ Route::middleware(['auth'])->group(function () {
 
     /*
      * Dashboard entscheidet selbst über das rollenabhängige Login-Ziel:
-     * Admin/Manager -> Dashboard, Lager -> Produkte, Verkauf -> Angebote.
+     * Admin/Manager -> Dashboard, Lager -> Produkte, Verkauf -> Angebote,
+     * CRM -> Kundenliste.
      */
     Route::get('/dashboard', DashboardController::class)
         ->name('dashboard');
@@ -176,8 +177,37 @@ Route::middleware(['auth'])->group(function () {
         ->name('customers.wallet-transactions.store')
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES);
 
-    Route::resource('customers', CustomerController::class)
-        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES);
+    /*
+     * CRM/Kundenpflege darf ausschließlich Kunden suchen, anlegen und bearbeiten.
+     * Kundenprofil/Vorschau, Löschen und Wallet bleiben Manager/Verkauf vorbehalten.
+     */
+    Route::get('/customers', [CustomerController::class, 'index'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES . ',' . User::ROLE_CRM)
+        ->name('customers.index');
+
+    Route::get('/customers/create', [CustomerController::class, 'create'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES . ',' . User::ROLE_CRM)
+        ->name('customers.create');
+
+    Route::post('/customers', [CustomerController::class, 'store'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES . ',' . User::ROLE_CRM)
+        ->name('customers.store');
+
+    Route::get('/customers/{customer}/edit', [CustomerController::class, 'edit'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES . ',' . User::ROLE_CRM)
+        ->name('customers.edit');
+
+    Route::match(['put', 'patch'], '/customers/{customer}', [CustomerController::class, 'update'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES . ',' . User::ROLE_CRM)
+        ->name('customers.update');
+
+    Route::get('/customers/{customer}', [CustomerController::class, 'show'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES)
+        ->name('customers.show');
+
+    Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES)
+        ->name('customers.destroy');
 
     Route::get('/prices', [PriceController::class, 'index'])
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES)

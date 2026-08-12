@@ -15,6 +15,7 @@ class User extends Authenticatable
     public const ROLE_MANAGER = 'manager';
     public const ROLE_WAREHOUSE = 'warehouse';
     public const ROLE_SALES = 'sales';
+    public const ROLE_CRM = 'crm';
 
     /**
      * Legacy alias so existing tests/code using the former wholesale constant
@@ -27,6 +28,7 @@ class User extends Authenticatable
         self::ROLE_MANAGER => 'Manager',
         self::ROLE_WAREHOUSE => 'Lager',
         self::ROLE_SALES => 'Verkauf',
+        self::ROLE_CRM => 'CRM / Kundenpflege',
     ];
 
     protected $fillable = [
@@ -89,6 +91,11 @@ class User extends Authenticatable
     public function isWarehouse(): bool
     {
         return $this->role === self::ROLE_WAREHOUSE;
+    }
+
+    public function isCrm(): bool
+    {
+        return $this->role === self::ROLE_CRM;
     }
 
     public function canAccessMenu(array $roles): bool
