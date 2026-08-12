@@ -121,6 +121,19 @@ class Product extends Model
         return max(0, $this->total_stock - (float) $this->minimum_stock - $this->reserved_stock);
     }
 
+    public function getLowStockWarningThresholdAttribute(): float
+    {
+        $minimum = (float) $this->minimum_stock;
+
+        if ($minimum <= 0) {
+            return 0.0;
+        }
+
+        $percentage = ApplicationSetting::lowStockWarningPercentage();
+
+        return $minimum + ($minimum * ($percentage / 100));
+    }
+
     public function getStockStatusAttribute(): string
     {
         $available = (float) $this->available_stock;
@@ -134,7 +147,7 @@ class Product extends Model
             return 'critical';
         }
 
-        if ($available <= ($minimum * 1.10)) {
+        if ($available <= $this->low_stock_warning_threshold) {
             return 'low';
         }
 

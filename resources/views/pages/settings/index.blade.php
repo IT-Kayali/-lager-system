@@ -73,6 +73,51 @@
         </section>
     </div>
 
+    <section id="low-stock-warning" class="premium-card" style="margin-top:22px;scroll-margin-top:24px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+            <span style="width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:#f3e8be;color:#7b5c00;font-size:20px;">
+                <i class="bi bi-exclamation-triangle"></i>
+            </span>
+            <div>
+                <h2 style="margin:0;font-size:22px;font-weight:950;">Warnung bei niedrigem Bestand</h2>
+                <p class="premium-muted" style="margin:4px 0 0;">Lege den prozentualen Zuschlag auf den Mindestbestand fest, ab dem ein Produkt als „Niedriger Bestand“ markiert wird.</p>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ route('settings.low-stock-warning.update') }}">
+            @csrf
+            @method('PUT')
+
+            <div class="premium-form-field" style="max-width:520px;">
+                <label for="low_stock_warning_percentage">Zuschlag auf Mindestbestand in % *</label>
+                <input
+                    id="low_stock_warning_percentage"
+                    name="low_stock_warning_percentage"
+                    type="number"
+                    min="0"
+                    max="1000"
+                    step="0.1"
+                    class="premium-input"
+                    value="{{ old('low_stock_warning_percentage', $lowStockWarningPercentage) }}"
+                    required
+                >
+
+                <div class="premium-muted" style="margin-top:8px;line-height:1.55;">
+                    Beispiel: Mindestbestand 500 und Einstellung 100 % ergibt eine Warnschwelle von 1.000. Von 501 bis 1.000 gilt der Bestand als niedrig, bei 500 oder weniger als kritisch.
+                </div>
+
+                @error('low_stock_warning_percentage')
+                    <div class="premium-error">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <button class="premium-btn gold" type="submit" style="margin-top:18px;">
+                <i class="bi bi-save"></i>
+                Warnschwelle speichern
+            </button>
+        </form>
+    </section>
+
     @include('pages.settings._button-appearance')
     @include('pages.settings._customer-groups')
     @include('pages.settings._price-tiers')
