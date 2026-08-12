@@ -79,11 +79,11 @@
                             <th>Code-Nummer</th>
                             <th>Einheit</th>
                             <th>Lieferant</th>
-                            <th class="warning-number">Gesamt</th>
-                            <th class="warning-number">Reserviert</th>
-                            <th class="warning-number">Verfügbar</th>
-                            <th class="warning-number">Mindestbestand</th>
-                            <th class="warning-number">Warnschwelle</th>
+                            <th>Gesamt</th>
+                            <th>Reserviert</th>
+                            <th>Verfügbar</th>
+                            <th>Mindestbestand</th>
+                            <th>Warnschwelle</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -110,11 +110,11 @@
                                 <td>{{ $product->serial_number ?: '—' }}</td>
                                 <td>{{ $product->unit ?: '—' }}</td>
                                 <td>{{ $supplier?->company_name ?: ($product->supplier ?: '—') }}</td>
-                                <td class="warning-number">{{ \App\Support\GermanNumber::format($row['total_stock']) }}</td>
-                                <td class="warning-number">{{ \App\Support\GermanNumber::format($row['reserved_stock']) }}</td>
-                                <td class="warning-number">{{ \App\Support\GermanNumber::format($row['available_stock']) }}</td>
-                                <td class="warning-number">{{ \App\Support\GermanNumber::format($row['minimum_stock']) }}</td>
-                                <td class="warning-number">{{ \App\Support\GermanNumber::format($row['warning_threshold']) }}</td>
+                                <td>{{ \App\Support\GermanNumber::format($row['total_stock']) }}</td>
+                                <td>{{ \App\Support\GermanNumber::format($row['reserved_stock']) }}</td>
+                                <td>{{ \App\Support\GermanNumber::format($row['available_stock']) }}</td>
+                                <td>{{ \App\Support\GermanNumber::format($row['minimum_stock']) }}</td>
+                                <td>{{ \App\Support\GermanNumber::format($row['warning_threshold']) }}</td>
                                 <td>
                                     <span class="premium-badge {{ $row['status'] }}">
                                         {{ $labels[$row['status']] ?? $row['status'] }}
@@ -160,6 +160,7 @@
             vertical-align: middle;
             overflow: hidden;
             text-overflow: ellipsis;
+            text-align: left !important;
         }
 
         .warnings-table th {
@@ -171,11 +172,6 @@
 
         .warnings-table td {
             white-space: nowrap;
-        }
-
-        .warnings-table .warning-number {
-            text-align: right;
-            font-variant-numeric: tabular-nums;
         }
 
         .warning-product-link {
