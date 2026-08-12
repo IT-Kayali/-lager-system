@@ -19,6 +19,7 @@ class SettingsController extends Controller
 
         return view('pages.settings.index', [
             'reservationHours' => ApplicationSetting::reservationHours(),
+            'lowStockWarningPercentage' => ApplicationSetting::lowStockWarningPercentage(),
             'buttonTheme' => ApplicationSetting::buttonTheme(),
             'siteName' => ApplicationSetting::siteName(),
             'siteFaviconPath' => $siteFaviconPath,
@@ -53,6 +54,24 @@ class SettingsController extends Controller
         return redirect()
             ->route('settings.index')
             ->with('success', 'Reservierungsdauer wurde gespeichert.');
+    }
+
+    public function updateLowStockWarning(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'low_stock_warning_percentage' => ['required', 'numeric', 'min:0', 'max:1000'],
+        ]);
+
+        ApplicationSetting::putValue(
+            'low_stock_warning_percentage',
+            $data['low_stock_warning_percentage'],
+            'decimal',
+            'Prozentualer Zuschlag auf den Mindestbestand für die Warnung Niedriger Bestand'
+        );
+
+        return redirect()
+            ->to(route('settings.index') . '#low-stock-warning')
+            ->with('success', 'Warnschwelle für niedrigen Bestand wurde gespeichert.');
     }
 
     public function updateButtonAppearance(Request $request): RedirectResponse
