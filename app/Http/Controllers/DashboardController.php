@@ -28,6 +28,10 @@ class DashboardController extends Controller
             return redirect()->route('offers.index');
         }
 
+        if ($user->isCrm()) {
+            return redirect()->route('customers.index');
+        }
+
         abort_unless($user->hasRole(User::ROLE_MANAGER), 403, 'Keine Berechtigung für das Dashboard.');
 
         $reservationReleaseService->releaseExpired();
