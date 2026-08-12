@@ -3431,3 +3431,32 @@ body:has(.warning-filter-total) table td:nth-child(9) .premium-actions {
     }
 }
 
+
+/* =========================================================
+   Warnungsseite – Tabelle vollständig linksbündig
+   ========================================================= */
+
+.warnings-table th,
+.warnings-table td,
+.warnings-table thead th,
+.warnings-table tbody td,
+.premium-table.warnings-table th,
+.premium-table.warnings-table td {
+    text-align: left !important;
+}
+
+/* Globale Ausrichtungen der Zahlenspalten überschreiben */
+.warnings-table th:nth-child(n),
+.warnings-table td:nth-child(n),
+.premium-table.warnings-table th:nth-child(n),
+.premium-table.warnings-table td:nth-child(n) {
+    text-align: left !important;
+}
+
+/* Inhalte innerhalb der Zellen ebenfalls links */
+.warnings-table th > *,
+.warnings-table td > * {
+    text-align: left !important;
+    justify-content: flex-start !important;
+}
+

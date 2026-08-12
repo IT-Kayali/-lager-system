@@ -188,6 +188,10 @@ Route::middleware(['auth'])->group(function () {
         ->name('prices.update');
 
     /* Manager-Bereiche */
+    Route::get('/warnings/export', [WarningController::class, 'export'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE)
+        ->name('warnings.export');
+
     Route::get('/warnings', [WarningController::class, 'index'])
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE)
         ->name('warnings.index');
