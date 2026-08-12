@@ -71,7 +71,7 @@
             'route' => 'customers.index',
             'active' => 'customers.*',
             'icon' => 'bi-people',
-            'roles' => [\App\Models\User::ROLE_MANAGER, \App\Models\User::ROLE_SALES],
+            'roles' => [\App\Models\User::ROLE_MANAGER, \App\Models\User::ROLE_SALES, \App\Models\User::ROLE_CRM],
             'section' => 'main',
         ],
         [
