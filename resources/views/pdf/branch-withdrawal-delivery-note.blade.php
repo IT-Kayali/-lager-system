@@ -156,14 +156,14 @@
 
         table.items th:nth-child(1),
         table.items td:nth-child(1) {
-            width: 58mm;
-            text-align: center;
+            width: 126mm;
+            text-align: left;
         }
 
         table.items th:nth-child(2),
         table.items td:nth-child(2) {
-            width: 126mm;
-            text-align: left;
+            width: 58mm;
+            text-align: center;
         }
 
         .ownership {
@@ -312,15 +312,15 @@
                 <table class="items">
                     <thead>
                         <tr>
-                            <th>Menge</th>
                             <th>Bezeichnung</th>
+                            <th>Menge</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($page['items'] as $item)
                             <tr>
-                                <td>{{ $item->quantity }}</td>
                                 <td>{{ $item->description }}</td>
+                                <td>{{ $item->quantity }}</td>
                             </tr>
                         @endforeach
                     </tbody>
