@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Support\GermanNumber;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -46,21 +45,17 @@ class WarningController extends Controller
         $sheet->setTitle('Bestandswarnungen');
 
         $sheet->fromArray([[
-            'Produktcode',
             'Produkt',
-            'Herstellerbezeichnung',
-            'Seriennummer',
+            'Bezeichnung durch Hersteller',
+            'Code-Nummer',
             'Einheit',
-            'Lieferant-Nr.',
             'Lieferant',
             'Gesamtbestand',
             'Reserviert',
             'Verfügbar',
             'Mindestbestand',
             'Warnschwelle',
-            'Max. reservierbar',
             'Status',
-            'Beschreibung',
         ]]);
 
         $rowNumber = 2;
@@ -70,40 +65,36 @@ class WarningController extends Controller
             $product = $row['product'];
 
             $sheet->fromArray([[
-                $product->product_code,
                 $product->name,
                 $product->manufacturer_designation,
                 $product->serial_number,
                 $product->unit,
-                $product->supplierRecord?->supplier_number,
                 $product->supplierRecord?->company_name ?: $product->supplier,
                 (float) $row['total_stock'],
                 (float) $row['reserved_stock'],
                 (float) $row['available_stock'],
                 (float) $row['minimum_stock'],
                 (float) $row['warning_threshold'],
-                (float) $row['max_reservable'],
                 $this->statusLabel($row['status']),
-                $product->description,
             ]], null, 'A' . $rowNumber);
 
             $rowNumber++;
         }
 
         if ($rowNumber > 2) {
-            foreach (['H', 'I', 'J', 'K', 'L', 'M'] as $column) {
+            foreach (['F', 'G', 'H', 'I', 'J'] as $column) {
                 $sheet->getStyle($column . '2:' . $column . ($rowNumber - 1))
                     ->getNumberFormat()
                     ->setFormatCode('#,##0.00');
             }
         }
 
-        foreach (range('A', 'O') as $column) {
+        foreach (range('A', 'K') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         $sheet->freezePane('A2');
-        $sheet->setAutoFilter('A1:O' . max(1, $rowNumber - 1));
+        $sheet->setAutoFilter('A1:K' . max(1, $rowNumber - 1));
 
         $path = storage_path('app/bestandswarnungen-' . now()->format('Y-m-d-His') . '.xlsx');
         (new Xlsx($spreadsheet))->save($path);
