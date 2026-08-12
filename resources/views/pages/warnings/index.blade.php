@@ -29,9 +29,6 @@
         <div class="premium-toolbar">
             <div>
                 <h2 style="font-size:20px; font-weight:900; margin:0;">Bestandswarnungen</h2>
-                <p class="premium-muted" style="margin:4px 0 0;">
-                    OK-Produkte werden hier nicht angezeigt. Statuslogik: Niedrig bis 10% über Mindestbestand, Kritisch bei Mindestbestand oder darunter.
-                </p>
             </div>
 
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -47,9 +44,9 @@
                     Kritisch
                 </a>
 
-                <a href="{{ route('products.index') }}" class="premium-btn">
-                    <i class="bi bi-box-seam"></i>
-                    Alle Produkte öffnen
+                <a href="{{ route('warnings.export', ['filter' => $filter]) }}" class="premium-btn gold">
+                    <i class="bi bi-file-earmark-excel"></i>
+                    Excel exportieren
                 </a>
             </div>
         </div>
@@ -59,31 +56,25 @@
                 Keine Bestandswarnungen vorhanden. Alle Produkte sind aktuell im grünen Bereich.
             </div>
         @else
-            <div class="premium-table-wrap warnings-table-wrap">
-                <table class="premium-table warnings-table">
-                    <colgroup>
-                        <col style="width:18%;">
-                        <col style="width:13%;">
-                        <col style="width:11%;">
-                        <col style="width:11%;">
-                        <col style="width:11%;">
-                        <col style="width:12%;">
-                        <col style="width:12%;">
-                        <col style="width:7%;">
-                        <col style="width:5%;">
-                    </colgroup>
-
+            <div class="premium-table-wrap warnings-table-wrap" style="overflow-x:auto;">
+                <table class="premium-table warnings-table" style="min-width:1780px;">
                     <thead>
                         <tr>
+                            <th>Produktcode</th>
                             <th>Produkt</th>
                             <th>Hersteller</th>
+                            <th>Seriennummer</th>
+                            <th>Einheit</th>
+                            <th>Lieferant-Nr.</th>
+                            <th>Lieferant</th>
                             <th>Gesamt</th>
                             <th>Reserviert</th>
                             <th>Verfügbar</th>
                             <th>Mindestbestand</th>
+                            <th>Warnschwelle</th>
                             <th>Max. reservierbar</th>
                             <th>Status</th>
-                            <th>Aktion</th>
+                            <th>Beschreibung</th>
                         </tr>
                     </thead>
 
@@ -91,18 +82,7 @@
                         @foreach ($products as $row)
                             @php
                                 $product = $row['product'];
-
-                                $productName = data_get($product, 'name')
-                                    ?: data_get($product, 'designation')
-                                    ?: data_get($product, 'product_name')
-                                    ?: '—';
-
-                                $manufacturerName = data_get($product, 'manufacturer')
-                                    ?: data_get($product, 'manufacturer_name')
-                                    ?: data_get($product, 'manufacturer_designation')
-                                    ?: data_get($product, 'supplierRecord.company_name')
-                                    ?: '—';
-
+                                $supplier = $product->supplierRecord;
                                 $labels = [
                                     'ok' => 'OK',
                                     'low' => 'Niedrig',
@@ -111,20 +91,24 @@
                             @endphp
 
                             <tr class="warning-row-{{ $row['status'] }}">
+                                <td>{{ $product->product_code ?: '—' }}</td>
+
                                 <td>
-                                    <strong>{{ $productName }}</strong>
+                                    <a href="{{ route('products.show', $product) }}" style="font-weight:900;color:inherit;text-decoration:underline;text-underline-offset:3px;">
+                                        {{ $product->name ?: '—' }}
+                                    </a>
                                 </td>
 
-                                <td>{{ $manufacturerName }}</td>
-
+                                <td>{{ $product->manufacturer_designation ?: '—' }}</td>
+                                <td>{{ $product->serial_number ?: '—' }}</td>
+                                <td>{{ $product->unit ?: '—' }}</td>
+                                <td>{{ $supplier?->supplier_number ?: '—' }}</td>
+                                <td>{{ $supplier?->company_name ?: ($product->supplier ?: '—') }}</td>
                                 <td>{{ \App\Support\GermanNumber::format($row['total_stock']) }}</td>
-
                                 <td>{{ \App\Support\GermanNumber::format($row['reserved_stock']) }}</td>
-
                                 <td>{{ \App\Support\GermanNumber::format($row['available_stock']) }}</td>
-
                                 <td>{{ \App\Support\GermanNumber::format($row['minimum_stock']) }}</td>
-
+                                <td>{{ \App\Support\GermanNumber::format($row['warning_threshold']) }}</td>
                                 <td>{{ \App\Support\GermanNumber::format($row['max_reservable']) }}</td>
 
                                 <td>
@@ -133,20 +117,8 @@
                                     </span>
                                 </td>
 
-                                <td>
-                                    <div class="premium-actions warning-actions">
-                                        <a class="premium-icon-btn" href="{{ route('products.edit', $product) }}" title="Produkt bearbeiten">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-
-                                        <a class="premium-icon-btn" href="{{ route('branch-withdrawals.create', ['product_id' => $product->id]) }}" title="Filialausgang buchen">
-                                            <i class="bi bi-shop"></i>
-                                        </a>
-
-                                        <a class="premium-icon-btn" href="{{ route('batches.create', ['product_id' => $product->id]) }}" title="Bestand buchen">
-                                            <i class="bi bi-plus-lg"></i>
-                                        </a>
-                                    </div>
+                                <td style="min-width:260px;white-space:normal;">
+                                    {{ $product->description ?: '—' }}
                                 </td>
                             </tr>
                         @endforeach
