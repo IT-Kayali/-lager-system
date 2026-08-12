@@ -3,12 +3,17 @@
 use App\Http\Controllers\BranchWithdrawalController;
 use App\Http\Controllers\BranchWithdrawalPdfController;
 use App\Http\Controllers\PriceTierDefinitionController;
+use App\Http\Controllers\SettingsController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {
     Route::put('settings/price-tiers', [PriceTierDefinitionController::class, 'updateAll'])
         ->name('price-tiers.update')
+        ->middleware('role:' . User::ROLE_ADMIN);
+
+    Route::put('settings/low-stock-warning', [SettingsController::class, 'updateLowStockWarning'])
+        ->name('settings.low-stock-warning.update')
         ->middleware('role:' . User::ROLE_ADMIN);
 
     Route::get('branch-withdrawals/{branchWithdrawal}/delivery-note', [BranchWithdrawalPdfController::class, 'stream'])
