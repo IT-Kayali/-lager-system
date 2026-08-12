@@ -9,6 +9,10 @@
         </div>
     @endif
 
+    @php
+        $crmCustomerCare = auth()->user()?->isCrm() ?? false;
+    @endphp
+
     <section class="premium-card">
         <div class="premium-toolbar">
             <form method="GET" action="{{ route('customers.index') }}" class="premium-search customers-search-inline">
@@ -85,21 +89,25 @@
 
                             <td>
                                 <div class="premium-actions">
-                                    <a class="premium-icon-btn" href="{{ route('customers.show', $customer) }}" title="Kundenprofil anzeigen">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
+                                    @unless ($crmCustomerCare)
+                                        <a class="premium-icon-btn" href="{{ route('customers.show', $customer) }}" title="Kundenprofil anzeigen">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    @endunless
 
                                     <a class="premium-icon-btn" href="{{ route('customers.edit', $customer) }}" title="Bearbeiten">
                                         <i class="bi bi-pencil"></i>
                                     </a>
 
-                                    <form method="POST" action="{{ route('customers.destroy', $customer) }}" onsubmit="return confirm('Kunde wirklich löschen?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="premium-icon-btn premium-danger" type="submit" title="Löschen">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
+                                    @unless ($crmCustomerCare)
+                                        <form method="POST" action="{{ route('customers.destroy', $customer) }}" onsubmit="return confirm('Kunde wirklich löschen?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="premium-icon-btn premium-danger" type="submit" title="Löschen">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    @endunless
                                 </div>
                             </td>
                         </tr>
