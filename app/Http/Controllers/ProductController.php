@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ApplicationSetting;
 use App\Models\Product;
 use App\Models\ProductBatch;
 use App\Models\ProductCategory;
@@ -9,6 +10,7 @@ use App\Models\Supplier;
 use App\Models\StockMovement;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -39,7 +41,6 @@ class ProductController extends Controller
 
         return view('pages.products.index', compact('products', 'search'));
     }
-
 
     public function show(Product $product): View
     {
@@ -87,12 +88,18 @@ class ProductController extends Controller
                 ->values();
 
             foreach ($initialBatches as $row) {
+                $receivedAt = Carbon::parse(($row['received_at'] ?? null) ?: now()->toDateString())->startOfDay();
+                $expiresAt = ($row['expires_at'] ?? null) ?: $receivedAt
+                    ->copy()
+                    ->addMonthsNoOverflow(ApplicationSetting::defaultBatchExpiryMonths())
+                    ->toDateString();
+
                 $batch = ProductBatch::create([
                     'product_id' => $product->id,
                     'batch_number' => ($row['batch_number'] ?? null) ?: null,
                     'quantity' => (float) ($row['quantity'] ?? 0),
-                    'received_at' => ($row['received_at'] ?? null) ?: now()->toDateString(),
-                    'expires_at' => ($row['expires_at'] ?? null) ?: null,
+                    'received_at' => $receivedAt->toDateString(),
+                    'expires_at' => $expiresAt,
                 ]);
 
                 StockMovement::create([
@@ -124,10 +131,10 @@ class ProductController extends Controller
     {
         $data = $this->validatedData($request);
 
-        
         $categoryIds = $data['category_ids'] ?? [];
         unset($data['category_ids']);
-$product->update($data);
+
+        $product->update($data);
         $product->categories()->sync($categoryIds);
 
         return redirect()

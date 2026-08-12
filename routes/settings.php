@@ -16,6 +16,10 @@ Route::middleware(['auth'])->group(function () {
         ->name('settings.low-stock-warning.update')
         ->middleware('role:' . User::ROLE_ADMIN);
 
+    Route::put('settings/batch-expiry', [SettingsController::class, 'updateBatchExpiry'])
+        ->name('settings.batch-expiry.update')
+        ->middleware('role:' . User::ROLE_ADMIN);
+
     Route::get('branch-withdrawals/{branchWithdrawal}/delivery-note', [BranchWithdrawalPdfController::class, 'stream'])
         ->name('branch-withdrawals.delivery-note')
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE);

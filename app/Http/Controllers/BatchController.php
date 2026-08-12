@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ApplicationSetting;
 use App\Models\Product;
 use App\Models\ProductBatch;
 use App\Models\StockMovement;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -42,20 +44,25 @@ class BatchController extends Controller
     public function create(Request $request): View
     {
         $selectedProduct = Product::query()->find($request->integer('product_id'));
+        $receivedAt = now()->startOfDay();
+        $defaultExpiryMonths = ApplicationSetting::defaultBatchExpiryMonths();
 
         return view('pages.batches.create', [
             'batch' => new ProductBatch([
                 'product_id' => $selectedProduct?->id,
-                'received_at' => now()->toDateString(),
+                'received_at' => $receivedAt->toDateString(),
+                'expires_at' => $receivedAt->copy()->addMonthsNoOverflow($defaultExpiryMonths)->toDateString(),
             ]),
             'products' => $this->products(),
             'selectedProductId' => $selectedProduct?->id,
+            'defaultBatchExpiryMonths' => $defaultExpiryMonths,
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validatedData($request);
+        $data = $this->applyDefaultExpiry($data);
 
         DB::transaction(function () use ($data) {
             $batch = ProductBatch::create($data);
@@ -81,12 +88,14 @@ class BatchController extends Controller
             'batch' => $batch,
             'products' => $this->products(),
             'selectedProductId' => $batch->product_id,
+            'defaultBatchExpiryMonths' => ApplicationSetting::defaultBatchExpiryMonths(),
         ]);
     }
 
     public function update(Request $request, ProductBatch $batch): RedirectResponse
     {
         $data = $this->validatedData($request, $batch);
+        $data = $this->applyDefaultExpiry($data);
 
         DB::transaction(function () use ($batch, $data) {
             $oldQuantity = (float) $batch->quantity;
@@ -156,6 +165,8 @@ class BatchController extends Controller
         DB::transaction(function () use ($product, $requestedQuantity, $data) {
             $remaining = $requestedQuantity;
 
+            // Das Ablaufdatum ist bewusst KEIN Auswahl- oder Sperrkriterium.
+            // Auch abgelaufene Chargen bleiben verkaufbar und werden normal nach FIFO entnommen.
             $batches = ProductBatch::query()
                 ->where('product_id', $product->id)
                 ->where('quantity', '>', 0)
@@ -212,6 +223,21 @@ class BatchController extends Controller
             'received_at' => ['required', 'date'],
             'expires_at' => ['nullable', 'date'],
         ]);
+    }
+
+    private function applyDefaultExpiry(array $data): array
+    {
+        if (! empty($data['expires_at'])) {
+            return $data;
+        }
+
+        $receivedAt = Carbon::parse($data['received_at'])->startOfDay();
+        $data['expires_at'] = $receivedAt
+            ->copy()
+            ->addMonthsNoOverflow(ApplicationSetting::defaultBatchExpiryMonths())
+            ->toDateString();
+
+        return $data;
     }
 
     private function products()
