@@ -1,3 +1,5 @@
+@include('pages.settings._batch-expiry')
+
 <section id="button-appearance" class="premium-card" style="margin-top:22px;scroll-margin-top:24px;">
     <details @if ($errors->hasAny([
         'primary_button_background',
