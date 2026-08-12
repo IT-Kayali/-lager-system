@@ -44,6 +44,14 @@ Route::middleware(['auth'])->group(function () {
         ->name('settings.reservation.update')
         ->middleware('role:' . User::ROLE_ADMIN);
 
+    Route::put('settings/low-stock-warning', [SettingsController::class, 'updateLowStockWarning'])
+        ->name('settings.low-stock-warning.update')
+        ->middleware('role:' . User::ROLE_ADMIN);
+
+    Route::put('settings/batch-expiry', [SettingsController::class, 'updateBatchExpiry'])
+        ->name('settings.batch-expiry.update')
+        ->middleware('role:' . User::ROLE_ADMIN);
+
     Route::put('settings/button-appearance', [SettingsController::class, 'updateButtonAppearance'])
         ->name('settings.button-appearance.update')
         ->middleware('role:' . User::ROLE_ADMIN);
