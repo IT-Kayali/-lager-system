@@ -57,24 +57,20 @@
             </div>
         @else
             <div class="premium-table-wrap warnings-table-wrap" style="overflow-x:auto;">
-                <table class="premium-table warnings-table" style="min-width:1780px;">
+                <table class="premium-table warnings-table" style="min-width:1320px; table-layout:auto;">
                     <thead>
                         <tr>
-                            <th>Produktcode</th>
                             <th>Produkt</th>
-                            <th>Hersteller</th>
-                            <th>Seriennummer</th>
+                            <th>Bezeichnung durch Hersteller</th>
+                            <th>Code-Nummer</th>
                             <th>Einheit</th>
-                            <th>Lieferant-Nr.</th>
                             <th>Lieferant</th>
                             <th>Gesamt</th>
                             <th>Reserviert</th>
                             <th>Verfügbar</th>
                             <th>Mindestbestand</th>
                             <th>Warnschwelle</th>
-                            <th>Max. reservierbar</th>
                             <th>Status</th>
-                            <th>Beschreibung</th>
                         </tr>
                     </thead>
 
@@ -91,34 +87,26 @@
                             @endphp
 
                             <tr class="warning-row-{{ $row['status'] }}">
-                                <td>{{ $product->product_code ?: '—' }}</td>
-
-                                <td>
+                                <td style="min-width:150px;">
                                     <a href="{{ route('products.show', $product) }}" style="font-weight:900;color:inherit;text-decoration:underline;text-underline-offset:3px;">
                                         {{ $product->name ?: '—' }}
                                     </a>
                                 </td>
 
-                                <td>{{ $product->manufacturer_designation ?: '—' }}</td>
-                                <td>{{ $product->serial_number ?: '—' }}</td>
+                                <td style="min-width:180px;">{{ $product->manufacturer_designation ?: '—' }}</td>
+                                <td style="min-width:120px;">{{ $product->serial_number ?: '—' }}</td>
                                 <td>{{ $product->unit ?: '—' }}</td>
-                                <td>{{ $supplier?->supplier_number ?: '—' }}</td>
-                                <td>{{ $supplier?->company_name ?: ($product->supplier ?: '—') }}</td>
+                                <td style="min-width:150px;">{{ $supplier?->company_name ?: ($product->supplier ?: '—') }}</td>
                                 <td>{{ \App\Support\GermanNumber::format($row['total_stock']) }}</td>
                                 <td>{{ \App\Support\GermanNumber::format($row['reserved_stock']) }}</td>
                                 <td>{{ \App\Support\GermanNumber::format($row['available_stock']) }}</td>
                                 <td>{{ \App\Support\GermanNumber::format($row['minimum_stock']) }}</td>
                                 <td>{{ \App\Support\GermanNumber::format($row['warning_threshold']) }}</td>
-                                <td>{{ \App\Support\GermanNumber::format($row['max_reservable']) }}</td>
 
-                                <td>
+                                <td style="min-width:100px;">
                                     <span class="premium-badge {{ $row['status'] }}">
                                         {{ $labels[$row['status']] ?? $row['status'] }}
                                     </span>
-                                </td>
-
-                                <td style="min-width:260px;white-space:normal;">
-                                    {{ $product->description ?: '—' }}
                                 </td>
                             </tr>
                         @endforeach
