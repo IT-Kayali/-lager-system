@@ -46,6 +46,13 @@ class ApplicationSetting extends Model
         return max(1, min(720, $hours));
     }
 
+    public static function lowStockWarningPercentage(): float
+    {
+        $percentage = (float) static::getValue('low_stock_warning_percentage', 10);
+
+        return max(0, min(1000, $percentage));
+    }
+
     public static function buttonThemeDefaults(): array
     {
         return self::DEFAULT_BUTTON_THEME;
