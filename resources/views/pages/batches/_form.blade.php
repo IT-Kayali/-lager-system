@@ -12,7 +12,9 @@
         'expires_at',
         ! empty($batch->expires_at)
             ? \Illuminate\Support\Carbon::parse($batch->expires_at)->format('Y-m-d')
-            : ''
+            : \Illuminate\Support\Carbon::parse($receivedValue)
+                ->addMonthsNoOverflow($defaultBatchExpiryMonths ?? 24)
+                ->format('Y-m-d')
     );
 
     $selectedProduct = ($products ?? collect())->firstWhere('id', (int) old('product_id', $batch->product_id ?? 0));
@@ -103,14 +105,19 @@
                 </div>
 
                 <div class="premium-form-field">
-                    <label for="expires_at">Ablaufdatum optional</label>
+                    <label for="expires_at">Ablaufdatum</label>
                     <input
                         id="expires_at"
                         name="expires_at"
                         type="date"
                         class="premium-input"
                         value="{{ $expiresValue }}"
+                        data-default-months="{{ $defaultBatchExpiryMonths ?? 24 }}"
+                        data-auto-expiry="{{ $batch->exists ? '0' : '1' }}"
                     >
+                    <div class="premium-muted" style="margin-top:8px;line-height:1.45;">
+                        Wird bei neuen Chargen automatisch {{ $defaultBatchExpiryMonths ?? 24 }} Monate nach dem Wareneingang gesetzt. Du kannst das Datum jederzeit manuell früher oder später wählen. Das Ablaufdatum ist nur eine Information und sperrt den Verkauf nicht.
+                    </div>
                     @error('expires_at') <div class="premium-error">{{ $message }}</div> @enderror
                 </div>
             </div>
@@ -151,7 +158,7 @@
 
             <div class="batch-fifo-note">
                 <i class="bi bi-info-circle"></i>
-                FIFO nutzt das Wareneingangsdatum. Die älteste verfügbare Charge wird zuerst entnommen.
+                FIFO nutzt ausschließlich das Wareneingangsdatum. Das Ablaufdatum ist informativ und hat keine Auswirkung auf Verkauf oder Entnahme.
             </div>
         </section>
     </aside>
@@ -168,6 +175,63 @@
         Zurück
     </a>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const received = document.getElementById('received_at');
+        const expires = document.getElementById('expires_at');
+
+        if (!received || !expires || expires.dataset.expiryBound === '1') {
+            return;
+        }
+
+        expires.dataset.expiryBound = '1';
+        let autoExpiry = expires.dataset.autoExpiry === '1';
+        const defaultMonths = Number.parseInt(expires.dataset.defaultMonths || '24', 10);
+
+        function toIsoDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function addMonthsNoOverflow(isoDate, months) {
+            if (!isoDate) return '';
+
+            const [year, month, day] = isoDate.split('-').map(Number);
+            if (!year || !month || !day) return '';
+
+            const targetMonthIndex = (month - 1) + months;
+            const targetYear = year + Math.floor(targetMonthIndex / 12);
+            const targetMonth = ((targetMonthIndex % 12) + 12) % 12;
+            const lastDay = new Date(targetYear, targetMonth + 1, 0).getDate();
+            const safeDay = Math.min(day, lastDay);
+
+            return toIsoDate(new Date(targetYear, targetMonth, safeDay));
+        }
+
+        function updateAutomaticExpiry() {
+            if (!autoExpiry) return;
+            expires.value = addMonthsNoOverflow(received.value, defaultMonths);
+        }
+
+        received.addEventListener('change', updateAutomaticExpiry);
+        received.addEventListener('input', updateAutomaticExpiry);
+
+        expires.addEventListener('input', function () {
+            autoExpiry = false;
+            expires.dataset.autoExpiry = '0';
+        });
+
+        expires.addEventListener('change', function () {
+            autoExpiry = false;
+            expires.dataset.autoExpiry = '0';
+        });
+
+        updateAutomaticExpiry();
+    });
+</script>
 
 <style>
     .batch-editor-card {
