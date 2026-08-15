@@ -60,6 +60,14 @@
                 </thead>
                 <tbody>
                     @forelse ($offers as $offer)
+                        @php
+                            $statusClass = match ($offer->status) {
+                                \App\Models\Offer::STATUS_IN_PROGRESS => 'progress',
+                                \App\Models\Offer::STATUS_READY => 'ready',
+                                \App\Models\Offer::STATUS_COMPLETED => 'completed',
+                                default => 'neutral',
+                            };
+                        @endphp
                         <tr>
                             <td>
                                 <a href="{{ route('warehouse.offers.show', $offer) }}" style="color:#111; font-weight:900; text-decoration:none;">
@@ -80,7 +88,7 @@
                             </td>
 
                             <td>
-                                <span class="premium-badge ok">{{ $offer->statusLabel() }}</span>
+                                <span class="warehouse-status-badge {{ $statusClass }}">{{ $offer->statusLabel() }}</span>
                             </td>
 
                             <td>
@@ -123,4 +131,12 @@
             {{ $offers->links() }}
         </div>
     </section>
+
+    <style>
+        .warehouse-status-badge { display:inline-flex; align-items:center; min-height:32px; padding:7px 11px; border-radius:999px; font-size:12px; font-weight:950; white-space:nowrap; }
+        .warehouse-status-badge.progress { background:#dbeafe; color:#1d4ed8; }
+        .warehouse-status-badge.ready { background:#fef3c7; color:#b45309; }
+        .warehouse-status-badge.completed { background:#dcfce7; color:#166534; }
+        .warehouse-status-badge.neutral { background:#f3f4f6; color:#374151; }
+    </style>
 </x-layouts.premium>

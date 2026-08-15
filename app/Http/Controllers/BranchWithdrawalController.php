@@ -23,6 +23,12 @@ class BranchWithdrawalController extends Controller
         abort_unless(auth()->user()?->canAccessMenu(['manager', 'warehouse']), 403);
     }
 
+    private function authorizeManagerAction(): void
+    {
+        $this->authorizeAccess();
+        abort_unless(auth()->user()?->isManager(), 403);
+    }
+
     public function index(): View
     {
         $this->authorizeAccess();
@@ -37,7 +43,7 @@ class BranchWithdrawalController extends Controller
 
     public function create(Request $request): View
     {
-        $this->authorizeAccess();
+        $this->authorizeManagerAction();
 
         $selectedProduct = $request->filled('product_id')
             ? Product::query()->find($request->integer('product_id'))
@@ -64,7 +70,7 @@ class BranchWithdrawalController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $this->authorizeAccess();
+        $this->authorizeManagerAction();
         $data = $this->validatedData($request);
 
         DB::transaction(function () use ($data): void {
@@ -99,7 +105,7 @@ class BranchWithdrawalController extends Controller
 
     public function edit(BranchWithdrawal $branchWithdrawal): View
     {
-        $this->authorizeAccess();
+        $this->authorizeManagerAction();
         $branchWithdrawal->load('items.product');
 
         return view('pages.branch-withdrawals.edit', [
@@ -115,6 +121,11 @@ class BranchWithdrawalController extends Controller
     public function update(Request $request, BranchWithdrawal $branchWithdrawal): RedirectResponse
     {
         $this->authorizeAccess();
+
+        if (! auth()->user()?->isManager()) {
+            return $this->updateWarehouseStatus($request, $branchWithdrawal);
+        }
+
         $data = $this->validatedData($request);
 
         DB::transaction(function () use ($branchWithdrawal, $data): void {
@@ -150,10 +161,52 @@ class BranchWithdrawalController extends Controller
             ->with('success', 'Filialausgang und Lagerbestand wurden aktualisiert.');
     }
 
+    private function updateWarehouseStatus(Request $request, BranchWithdrawal $branchWithdrawal): RedirectResponse
+    {
+        $data = $request->validate([
+            'status' => ['required', Rule::in(array_keys(BranchWithdrawal::statusLabels()))],
+        ]);
+
+        DB::transaction(function () use ($branchWithdrawal, $data): void {
+            $withdrawal = BranchWithdrawal::query()
+                ->lockForUpdate()
+                ->findOrFail($branchWithdrawal->id);
+
+            $withdrawal->load('items');
+
+            $oldStatus = $withdrawal->status;
+            $newStatus = $data['status'];
+
+            if ($oldStatus === $newStatus) {
+                return;
+            }
+
+            if ($oldStatus === BranchWithdrawal::STATUS_ISSUED && $newStatus !== BranchWithdrawal::STATUS_ISSUED) {
+                $this->rollbackWithdrawal($withdrawal);
+                $withdrawal->refresh();
+            }
+
+            $withdrawal->update([
+                'status' => $newStatus,
+                'processed_by' => null,
+                'processed_at' => null,
+            ]);
+
+            if ($newStatus === BranchWithdrawal::STATUS_ISSUED && $oldStatus !== BranchWithdrawal::STATUS_ISSUED) {
+                $this->issueWithdrawal($withdrawal);
+            }
+
+            $this->syncLegacyFields($withdrawal);
+        });
+
+        return redirect()
+            ->route('branch-withdrawals.index')
+            ->with('success', 'Status des Filialausgangs wurde aktualisiert.');
+    }
+
     public function destroy(BranchWithdrawal $branchWithdrawal): RedirectResponse
     {
-        $this->authorizeAccess();
-        abort_unless(auth()->user()?->isManager(), 403);
+        $this->authorizeManagerAction();
 
         DB::transaction(function () use ($branchWithdrawal): void {
             $withdrawal = BranchWithdrawal::query()

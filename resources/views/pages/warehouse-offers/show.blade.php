@@ -16,6 +16,12 @@
         $postalCode = $customer?->delivery_postal_code ?: $customer?->billing_postal_code;
         $city = $customer?->delivery_city ?: $customer?->billing_city ?: $customer?->city;
         $country = $customer?->delivery_country ?: $customer?->billing_country;
+        $statusClass = match ($offer->status) {
+            \App\Models\Offer::STATUS_IN_PROGRESS => 'progress',
+            \App\Models\Offer::STATUS_READY => 'ready',
+            \App\Models\Offer::STATUS_COMPLETED => 'completed',
+            default => 'neutral',
+        };
     @endphp
 
     <section class="premium-card" style="margin-bottom:22px;">
@@ -25,7 +31,7 @@
                 <div class="premium-muted" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px;">
                     <span>{{ $customer?->company_name ?: '—' }}</span>
                     <span>·</span>
-                    <span class="premium-badge ok">{{ $offer->statusLabel() }}</span>
+                    <span class="warehouse-status-badge {{ $statusClass }}">{{ $offer->statusLabel() }}</span>
                 </div>
             </div>
 
@@ -140,4 +146,12 @@
             </table>
         </div>
     </section>
+
+    <style>
+        .warehouse-status-badge { display:inline-flex; align-items:center; min-height:32px; padding:7px 11px; border-radius:999px; font-size:12px; font-weight:950; white-space:nowrap; }
+        .warehouse-status-badge.progress { background:#dbeafe; color:#1d4ed8; }
+        .warehouse-status-badge.ready { background:#fef3c7; color:#b45309; }
+        .warehouse-status-badge.completed { background:#dcfce7; color:#166534; }
+        .warehouse-status-badge.neutral { background:#f3f4f6; color:#374151; }
+    </style>
 </x-layouts.premium>
