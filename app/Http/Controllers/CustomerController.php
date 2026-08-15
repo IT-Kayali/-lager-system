@@ -33,7 +33,8 @@ class CustomerController extends Controller
             ->when($group !== '', function ($query) use ($group) {
                 $query->whereHas('group', fn ($groupQuery) => $groupQuery->where('slug', $group));
             })
-            ->latest()
+            ->orderByRaw('LOWER(company_name) ASC')
+            ->orderBy('id')
             ->paginate(15)
             ->withQueryString();
 
@@ -206,14 +207,12 @@ class CustomerController extends Controller
             'phone_country_code' => ['required', 'string', 'max:10'],
             'phone' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:255'],
-
             'billing_street' => ['nullable', 'string', 'max:255'],
             'billing_house_number' => ['nullable', 'string', 'max:50'],
             'billing_postal_code' => ['nullable', 'string', 'max:50'],
             'billing_city' => ['nullable', 'string', 'max:255'],
             'billing_country' => ['nullable', 'string', 'max:255'],
             'billing_address' => ['nullable', 'string', 'max:3000'],
-
             'delivery_address_different' => ['nullable', 'boolean'],
             'delivery_street' => ['nullable', 'string', 'max:255'],
             'delivery_house_number' => ['nullable', 'string', 'max:50'],
@@ -221,7 +220,6 @@ class CustomerController extends Controller
             'delivery_city' => ['nullable', 'string', 'max:255'],
             'delivery_country' => ['nullable', 'string', 'max:255'],
             'delivery_address' => ['nullable', 'string', 'max:3000'],
-
             'vat_number' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:5000'],
         ]);
