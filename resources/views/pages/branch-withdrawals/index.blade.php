@@ -9,6 +9,10 @@
         </div>
     @endif
 
+    @php
+        $isManager = auth()->user()?->isManager();
+    @endphp
+
     <section class="branch-header-card">
         <div>
             <div class="branch-eyebrow">Filialworkflow</div>
@@ -16,10 +20,12 @@
             <p>Offene Vorgänge verändern den Bestand nicht. Erst der Status „Ausgegeben“ bucht die Ware per FIFO ab.</p>
         </div>
 
-        <a href="{{ route('branch-withdrawals.create') }}" class="premium-btn gold">
-            <i class="bi bi-plus-lg"></i>
-            Filialausgang erstellen
-        </a>
+        @if ($isManager)
+            <a href="{{ route('branch-withdrawals.create') }}" class="premium-btn gold">
+                <i class="bi bi-plus-lg"></i>
+                Filialausgang erstellen
+            </a>
+        @endif
     </section>
 
     <section class="branch-table-card">
@@ -27,7 +33,7 @@
             <div class="branch-empty-state">
                 <i class="bi bi-shop"></i>
                 <strong>Noch keine Filialausgänge vorhanden.</strong>
-                <span>Erstelle den ersten Vorgang mit einer oder mehreren Produktpositionen.</span>
+                <span>{{ $isManager ? 'Erstelle den ersten Vorgang mit einer oder mehreren Produktpositionen.' : 'Aktuell liegen keine Filialausgänge zur Bearbeitung vor.' }}</span>
             </div>
         @else
             <div class="premium-table-wrap branch-table-wrap">
@@ -72,7 +78,22 @@
                                 </td>
 
                                 <td>
-                                    <span class="branch-status-badge {{ $statusClass }}">{{ $statusLabel }}</span>
+                                    @if ($isManager)
+                                        <span class="branch-status-badge {{ $statusClass }}">{{ $statusLabel }}</span>
+                                    @else
+                                        <form method="POST" action="{{ route('branch-withdrawals.update', $withdrawal) }}" class="branch-status-form">
+                                            @csrf
+                                            @method('PUT')
+                                            <select name="status" class="premium-select branch-status-select" aria-label="Status für {{ $withdrawal->withdrawal_number }} ändern">
+                                                @foreach (\App\Models\BranchWithdrawal::statusLabels() as $statusValue => $statusText)
+                                                    <option value="{{ $statusValue }}" @selected($withdrawal->status === $statusValue)>{{ $statusText }}</option>
+                                                @endforeach
+                                            </select>
+                                            <button type="submit" class="premium-icon-btn" title="Status speichern" aria-label="Status speichern">
+                                                <i class="bi bi-check-lg"></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 </td>
 
                                 <td>
@@ -100,16 +121,16 @@
 
                                 <td>
                                     <div class="branch-actions">
-                                        <a
-                                            href="{{ route('branch-withdrawals.edit', $withdrawal) }}"
-                                            class="premium-icon-btn"
-                                            title="Bearbeiten"
-                                            aria-label="Filialausgang bearbeiten"
-                                        >
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
+                                        @if ($isManager)
+                                            <a
+                                                href="{{ route('branch-withdrawals.edit', $withdrawal) }}"
+                                                class="premium-icon-btn"
+                                                title="Bearbeiten"
+                                                aria-label="Filialausgang bearbeiten"
+                                            >
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
 
-                                        @if (auth()->user()?->isManager())
                                             <form method="POST" action="{{ route('branch-withdrawals.destroy', $withdrawal) }}" onsubmit="return confirm('Filialausgang wirklich löschen? Bereits ausgegebene Mengen werden automatisch zurückgebucht.');">
                                                 @csrf
                                                 @method('DELETE')
@@ -117,6 +138,8 @@
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>
+                                        @else
+                                            <span class="branch-role-note">Nur Statusänderung</span>
                                         @endif
                                     </div>
                                 </td>
@@ -151,6 +174,9 @@
         .branch-status-badge.progress { background:#dbeafe; color:#1d4ed8; }
         .branch-status-badge.issued { background:#dcfce7; color:#166534; }
         .branch-status-badge.cancelled { background:#fee2e2; color:#991b1b; }
+        .branch-status-form { display:flex; align-items:center; gap:7px; margin:0; min-width:220px; }
+        .branch-status-select { min-width:165px; min-height:38px; }
+        .branch-role-note { color:#665f54; font-size:12px; font-weight:850; white-space:nowrap; }
         .branch-employee-name { display:inline-block; min-width:120px; color:#111; font-size:13px; font-weight:950; }
         .branch-note-text { display:inline-block; max-width:260px; color:#3a332a; font-weight:750; }
         .branch-actions { display:flex; gap:8px; align-items:center; }
