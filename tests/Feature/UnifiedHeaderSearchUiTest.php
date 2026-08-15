@@ -59,7 +59,7 @@ it('keeps page specific action buttons available outside the removed global head
 
     expect($offerPage)
         ->toContain('Neues Angebot')
-        ->toContain('PDF-Vorlagen');
+        ->not->toContain('PDF-Vorlagen');
 
     expect($categoryPage)->toContain('Neue Kategorie');
 });
