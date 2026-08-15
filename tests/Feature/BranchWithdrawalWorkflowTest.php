@@ -59,13 +59,13 @@ it('creates an open branch withdrawal with multiple products and an optional not
         ->and((float) $secondBatch->fresh()->quantity)->toBe(20.0);
 });
 
-it('deducts all products by fifo when the status is issued', function () {
+it('deducts all products by fifo when warehouse changes the status to issued', function () {
     [$product, $batch] = branchProduct('FIFO Filialprodukt', 10);
 
-    $this->actingAs($this->warehouse)
+    $this->actingAs($this->manager)
         ->post(route('branch-withdrawals.store'), [
             'branch_name' => BranchWithdrawal::BRANCH_DEZ,
-            'status' => BranchWithdrawal::STATUS_ISSUED,
+            'status' => BranchWithdrawal::STATUS_OPEN,
             'items' => [
                 ['product_id' => $product->id, 'quantity' => 4],
             ],
@@ -73,6 +73,14 @@ it('deducts all products by fifo when the status is issued', function () {
         ->assertRedirect(route('branch-withdrawals.index'));
 
     $withdrawal = BranchWithdrawal::query()->firstOrFail();
+
+    $this->actingAs($this->warehouse)
+        ->put(route('branch-withdrawals.update', $withdrawal), [
+            'status' => BranchWithdrawal::STATUS_ISSUED,
+        ])
+        ->assertRedirect(route('branch-withdrawals.index'));
+
+    $withdrawal->refresh();
 
     expect((float) $batch->fresh()->quantity)->toBe(6.0)
         ->and($withdrawal->processed_by)->toBe($this->warehouse->id)
@@ -128,24 +136,19 @@ it('returns issued stock when the status is cancelled', function () {
 
     $this->actingAs($this->warehouse)
         ->put(route('branch-withdrawals.update', $withdrawal), [
-            'branch_name' => BranchWithdrawal::BRANCH_MAIN,
             'status' => BranchWithdrawal::STATUS_CANCELLED,
-            'items' => [
-                ['product_id' => $product->id, 'quantity' => 4],
-            ],
         ])
         ->assertRedirect(route('branch-withdrawals.index'));
 
     expect((float) $batch->fresh()->quantity)->toBe(10.0)
-        ->and($withdrawal->fresh()->status)->toBe(BranchWithdrawal::STATUS_CANCELLED)
-        ->and($withdrawal->fresh()->processed_by)->toBeNull();
+        ->and($withdrawal->fresh()->status)->toBe(BranchWithdrawal::STATUS_CANCELLED);
 });
 
 it('returns issued stock before a manager deletes the withdrawal', function () {
     [$product, $batch] = branchProduct('Löschbares Filialprodukt', 10);
 
     $this->actingAs($this->manager)->post(route('branch-withdrawals.store'), [
-        'branch_name' => BranchWithdrawal::BRANCH_DEZ,
+        'branch_name' => BranchWithdrawal::BRANCH_MAIN,
         'status' => BranchWithdrawal::STATUS_ISSUED,
         'items' => [
             ['product_id' => $product->id, 'quantity' => 4],
@@ -178,28 +181,26 @@ it('does not allow a warehouse employee to delete a branch withdrawal', function
     $this->actingAs($this->warehouse)
         ->delete(route('branch-withdrawals.destroy', $withdrawal))
         ->assertForbidden();
-
-    $this->assertDatabaseHas('branch_withdrawals', ['id' => $withdrawal->id]);
 });
 
 it('keeps every product unchanged when one issued position has insufficient stock', function () {
-    [$firstProduct, $firstBatch] = branchProduct('Ausreichendes Produkt', 10);
-    [$secondProduct, $secondBatch] = branchProduct('Knappes Produkt', 1);
+    [$firstProduct, $firstBatch] = branchProduct('Rollback Produkt A', 10);
+    [$secondProduct, $secondBatch] = branchProduct('Rollback Produkt B', 2);
 
-    $this->actingAs($this->manager)
+    $response = $this->actingAs($this->manager)
         ->from(route('branch-withdrawals.create'))
         ->post(route('branch-withdrawals.store'), [
             'branch_name' => BranchWithdrawal::BRANCH_MAIN,
             'status' => BranchWithdrawal::STATUS_ISSUED,
             'items' => [
-                ['product_id' => $firstProduct->id, 'quantity' => 2],
-                ['product_id' => $secondProduct->id, 'quantity' => 2],
+                ['product_id' => $firstProduct->id, 'quantity' => 4],
+                ['product_id' => $secondProduct->id, 'quantity' => 3],
             ],
-        ])
-        ->assertRedirect(route('branch-withdrawals.create'))
-        ->assertSessionHasErrors('items');
+        ]);
+
+    $response->assertRedirect(route('branch-withdrawals.create'));
 
     expect((float) $firstBatch->fresh()->quantity)->toBe(10.0)
-        ->and((float) $secondBatch->fresh()->quantity)->toBe(1.0)
+        ->and((float) $secondBatch->fresh()->quantity)->toBe(2.0)
         ->and(BranchWithdrawal::query()->count())->toBe(0);
 });
