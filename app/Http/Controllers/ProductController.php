@@ -35,7 +35,7 @@ class ProductController extends Controller
                         ->orWhere('serial_number', 'like', "%{$search}%");
                 });
             })
-            ->latest()
+            ->naturalNameOrder()
             ->paginate(15)
             ->withQueryString();
 
@@ -46,7 +46,7 @@ class ProductController extends Controller
     {
         $product->load([
             'supplierRecord',
-            'categories',
+            'categories' => fn ($query) => $query->orderByRaw('LOWER(name) ASC')->orderBy('id'),
             'batches' => fn ($query) => $query
                 ->orderBy('received_at')
                 ->orderBy('id'),
@@ -65,7 +65,8 @@ class ProductController extends Controller
         ]);
 
         $suppliers = Supplier::query()
-            ->orderBy('company_name')
+            ->orderByRaw('LOWER(company_name) ASC')
+            ->orderBy('id')
             ->get();
 
         return view('pages.products.create', compact('product', 'suppliers'));
@@ -121,7 +122,8 @@ class ProductController extends Controller
     public function edit(Product $product): View
     {
         $suppliers = Supplier::query()
-            ->orderBy('company_name')
+            ->orderByRaw('LOWER(company_name) ASC')
+            ->orderBy('id')
             ->get();
 
         return view('pages.products.edit', compact('product', 'suppliers'));

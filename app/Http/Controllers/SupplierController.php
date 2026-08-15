@@ -26,7 +26,8 @@ class SupplierController extends Controller
                         ->orWhere('city', 'like', "%{$search}%");
                 });
             })
-            ->latest()
+            ->orderByRaw('LOWER(company_name) ASC')
+            ->orderBy('id')
             ->paginate(15)
             ->withQueryString();
 
@@ -65,7 +66,7 @@ class SupplierController extends Controller
                     ->orWhere('supplier', $supplier->company_name)
                     ->orWhere('supplier', $supplier->supplier_number);
             })
-            ->orderBy('name')
+            ->naturalNameOrder()
             ->get();
 
         return view('pages.suppliers.show', [
@@ -123,13 +124,11 @@ class SupplierController extends Controller
             'phone' => ['nullable', 'string', 'max:255'],
             'whatsapp_country_code' => ['nullable', 'string', 'max:10'],
             'whatsapp' => ['nullable', 'string', 'max:255'],
-
             'street' => ['nullable', 'string', 'max:255'],
             'house_number' => ['nullable', 'string', 'max:50'],
             'postal_code' => ['nullable', 'string', 'max:50'],
             'city' => ['nullable', 'string', 'max:255'],
             'country' => ['nullable', 'string', 'max:255'],
-
             'notes' => ['nullable', 'string', 'max:3000'],
         ]);
     }

@@ -54,7 +54,32 @@ class Product extends Model
         });
     }
 
+    public function scopeNaturalNameOrder($query)
+    {
+        $driver = $query->getConnection()->getDriverName();
 
+        if ($driver === 'mysql' || $driver === 'mariadb') {
+            return $query
+                ->orderByRaw("CASE WHEN name REGEXP '^[0-9]' THEN 0 ELSE 1 END")
+                ->orderByRaw('CASE WHEN name REGEXP \'^[0-9]\' THEN CAST(name AS UNSIGNED) ELSE 0 END')
+                ->orderByRaw('LOWER(name) ASC')
+                ->orderBy('id');
+        }
+
+        if ($driver === 'pgsql') {
+            return $query
+                ->orderByRaw("CASE WHEN name ~ '^[0-9]' THEN 0 ELSE 1 END")
+                ->orderByRaw("CASE WHEN name ~ '^[0-9]' THEN CAST(SUBSTRING(name FROM '^[0-9]+') AS BIGINT) ELSE 0 END")
+                ->orderByRaw('LOWER(name) ASC')
+                ->orderBy('id');
+        }
+
+        return $query
+            ->orderByRaw("CASE WHEN name GLOB '[0-9]*' THEN 0 ELSE 1 END")
+            ->orderByRaw("CASE WHEN name GLOB '[0-9]*' THEN CAST(name AS INTEGER) ELSE 0 END")
+            ->orderByRaw('LOWER(name) ASC')
+            ->orderBy('id');
+    }
 
     public function resolveRouteBinding($value, $field = null)
     {

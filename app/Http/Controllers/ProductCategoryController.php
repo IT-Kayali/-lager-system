@@ -27,9 +27,8 @@ class ProductCategoryController extends Controller
                         ->orWhere('description', 'like', "%{$search}%");
                 });
             })
-            ->orderByRaw('CASE WHEN priority IS NULL THEN 1 ELSE 0 END')
-            ->orderBy('priority')
-            ->orderBy('name')
+            ->orderByRaw('LOWER(name) ASC')
+            ->orderBy('id')
             ->paginate(20)
             ->withQueryString();
 
@@ -64,7 +63,7 @@ class ProductCategoryController extends Controller
         $productCategory->load([
             'products' => fn ($query) => $query
                 ->with('supplierRecord')
-                ->orderBy('name'),
+                ->naturalNameOrder(),
         ]);
 
         return view('pages.product-categories.show', [
