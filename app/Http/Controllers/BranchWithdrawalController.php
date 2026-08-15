@@ -20,13 +20,26 @@ class BranchWithdrawalController extends Controller
     private function authorizeAccess(): void
     {
         abort_unless(auth()->check(), 403);
-        abort_unless(auth()->user()?->canAccessMenu(['manager', 'warehouse']), 403);
+        abort_unless(auth()->user()?->canAccessMenu(['manager', 'warehouse', 'sales']), 403);
     }
 
     private function authorizeManagerAction(): void
     {
         $this->authorizeAccess();
         abort_unless(auth()->user()?->isManager(), 403);
+    }
+
+    private function authorizeCreateAction(): void
+    {
+        $this->authorizeAccess();
+        abort_unless(auth()->user()?->isManager() || auth()->user()?->isSales(), 403);
+    }
+
+    private function indexRouteName(): string
+    {
+        return auth()->user()?->isSales()
+            ? 'sales.branch-withdrawals.index'
+            : 'branch-withdrawals.index';
     }
 
     public function index(): View
@@ -43,7 +56,7 @@ class BranchWithdrawalController extends Controller
 
     public function create(Request $request): View
     {
-        $this->authorizeManagerAction();
+        $this->authorizeCreateAction();
 
         $selectedProduct = $request->filled('product_id')
             ? Product::query()->find($request->integer('product_id'))
@@ -70,8 +83,12 @@ class BranchWithdrawalController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $this->authorizeManagerAction();
+        $this->authorizeCreateAction();
         $data = $this->validatedData($request);
+
+        if (auth()->user()?->isSales()) {
+            $data['status'] = BranchWithdrawal::STATUS_OPEN;
+        }
 
         DB::transaction(function () use ($data): void {
             $firstItem = $data['items'][0];
@@ -99,7 +116,7 @@ class BranchWithdrawalController extends Controller
         });
 
         return redirect()
-            ->route('branch-withdrawals.index')
+            ->route($this->indexRouteName())
             ->with('success', 'Filialausgang wurde gespeichert.');
     }
 
@@ -121,6 +138,8 @@ class BranchWithdrawalController extends Controller
     public function update(Request $request, BranchWithdrawal $branchWithdrawal): RedirectResponse
     {
         $this->authorizeAccess();
+
+        abort_if(auth()->user()?->isSales(), 403);
 
         if (! auth()->user()?->isManager()) {
             return $this->updateWarehouseStatus($request, $branchWithdrawal);
