@@ -74,11 +74,11 @@ it('renders the rebuilt statistics dashboard for a manager', function () {
 
     $response
         ->assertOk()
-        ->assertSeeText('ERP Gesamtübersicht')
-        ->assertSeeText('Weitere ERP-Filter')
-        ->assertSeeText('Verkauf & Umsatz')
-        ->assertSeeText('Lager & Chargen')
-        ->assertSeeText('Filialausgänge');
+        ->assertSeeText('Umsatzentwicklung')
+        ->assertSeeText('Angebotsstatus')
+        ->assertSeeText('Top 10 Produkte')
+        ->assertSeeText('Top 10 Kunden')
+        ->assertSeeText('Lagerübersicht');
 });
 
 it('uses the completion date for completed sales statistics', function () {
@@ -91,16 +91,14 @@ it('uses the completion date for completed sales statistics', function () {
         ->toContain("whereBetween('created_at', [\$from, \$to])");
 });
 
-it('contains all new ERP filter dimensions in the statistics view', function () {
+it('contains the active filter dimensions in the simplified statistics view', function () {
     $view = file_get_contents(resource_path('views/pages/statistics/index.blade.php'));
 
     expect($view)
-        ->toContain('name="customer_group_id"')
-        ->toContain('name="category_id"')
-        ->toContain('name="supplier_id"')
-        ->toContain('name="user_id"')
-        ->toContain('name="shipping_method"')
-        ->toContain('name="branch"')
-        ->toContain('name="branch_status"')
-        ->toContain('name="movement_type"');
+        ->toContain('name="period"')
+        ->toContain('name="customer_id"')
+        ->toContain('name="product_id"')
+        ->toContain('name="status"')
+        ->toContain('name="date_from"')
+        ->toContain('name="date_to"');
 });
