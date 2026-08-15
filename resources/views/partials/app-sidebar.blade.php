@@ -1,5 +1,6 @@
 @include('partials.application-theme')
 @include('partials.unified-app-chrome')
+@include('partials.unified-status-colors')
 @include('partials.browser-branding-runtime')
 
 @php
@@ -17,6 +18,22 @@
         ? 'warehouse.offers.*'
         : 'offers.*';
 
+    $productsRoute = $user?->isSales()
+        ? 'sales.products.index'
+        : 'products.index';
+
+    $productsActive = $user?->isSales()
+        ? 'sales.products.*'
+        : 'products.*';
+
+    $branchWithdrawalsRoute = $user?->isSales()
+        ? 'sales.branch-withdrawals.index'
+        : 'branch-withdrawals.index';
+
+    $branchWithdrawalsActive = $user?->isSales()
+        ? 'sales.branch-withdrawals.*'
+        : 'branch-withdrawals.*';
+
     $navItems = [
         [
             'label' => 'Dashboard',
@@ -28,10 +45,10 @@
         ],
         [
             'label' => 'Produkte',
-            'route' => 'products.index',
-            'active' => 'products.*',
+            'route' => $productsRoute,
+            'active' => $productsActive,
             'icon' => 'bi-box-seam',
-            'roles' => [\App\Models\User::ROLE_MANAGER, \App\Models\User::ROLE_WAREHOUSE],
+            'roles' => [\App\Models\User::ROLE_MANAGER, \App\Models\User::ROLE_WAREHOUSE, \App\Models\User::ROLE_SALES],
             'section' => 'main',
         ],
         [
@@ -52,10 +69,10 @@
         ],
         [
             'label' => 'Filialausgang',
-            'route' => 'branch-withdrawals.index',
-            'active' => 'branch-withdrawals.*',
+            'route' => $branchWithdrawalsRoute,
+            'active' => $branchWithdrawalsActive,
             'icon' => 'bi-shop',
-            'roles' => [\App\Models\User::ROLE_MANAGER, \App\Models\User::ROLE_WAREHOUSE],
+            'roles' => [\App\Models\User::ROLE_MANAGER, \App\Models\User::ROLE_WAREHOUSE, \App\Models\User::ROLE_SALES],
             'section' => 'main',
         ],
         [
