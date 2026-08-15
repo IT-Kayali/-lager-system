@@ -44,13 +44,6 @@
         </div>
 
         <div class="offers-action-buttons">
-            @if (auth()->user()?->isManager())
-                <a href="{{ route('document-templates.index') }}" class="premium-btn">
-                    <i class="bi bi-file-earmark-richtext"></i>
-                    PDF-Vorlagen
-                </a>
-            @endif
-
             <a href="{{ route('offers.create') }}" class="premium-btn gold">
                 <i class="bi bi-plus-lg"></i>
                 Neues Angebot
