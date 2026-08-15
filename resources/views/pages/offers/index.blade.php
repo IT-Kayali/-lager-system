@@ -44,13 +44,6 @@
         </div>
 
         <div class="offers-action-buttons">
-            @if (auth()->user()?->isManager())
-                <a href="{{ route('document-templates.index') }}" class="premium-btn">
-                    <i class="bi bi-file-earmark-richtext"></i>
-                    PDF-Vorlagen
-                </a>
-            @endif
-
             <a href="{{ route('offers.create') }}" class="premium-btn gold">
                 <i class="bi bi-plus-lg"></i>
                 Neues Angebot
@@ -270,8 +263,8 @@
         .offers-modern-card {
             border: 1px solid #d8cbb7;
             border-radius: 22px;
-            background: rgba(255, 255, 255, .86);
-            box-shadow: 0 18px 45px rgba(42, 36, 25, .08);
+            background: rgba(255,255,255,.86);
+            box-shadow: 0 18px 45px rgba(42,36,25,.08);
             overflow: hidden;
         }
 
@@ -349,25 +342,10 @@
             white-space: nowrap;
         }
 
-        .offer-status-pill.open {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .offer-status-pill.reserved {
-            background: #fef3c7;
-            color: #b45309;
-        }
-
-        .offer-status-pill.completed {
-            background: #e0f2fe;
-            color: #075985;
-        }
-
-        .offer-status-pill.critical {
-            background: #fee2e2;
-            color: #991b1b;
-        }
+        .offer-status-pill.open { background:#dcfce7; color:#166534; }
+        .offer-status-pill.reserved { background:#fef3c7; color:#b45309; }
+        .offer-status-pill.completed { background:#e0f2fe; color:#075985; }
+        .offer-status-pill.critical { background:#fee2e2; color:#991b1b; }
 
         .offer-items-count {
             min-width: 38px;
@@ -402,25 +380,10 @@
             white-space: nowrap;
         }
 
-        .offer-muted {
-            color: #665f54;
-            font-weight: 850;
-        }
-
-        .offer-pdf-actions {
-            justify-content: center !important;
-            gap: 7px !important;
-        }
-
-        .offer-row-actions {
-            justify-content: flex-end !important;
-            gap: 7px !important;
-        }
-
-        .offer-row-actions form,
-        .offer-pdf-actions form {
-            margin: 0;
-        }
+        .offer-muted { color:#665f54; font-weight:850; }
+        .offer-pdf-actions { justify-content:center !important; gap:7px !important; }
+        .offer-row-actions { justify-content:flex-end !important; gap:7px !important; }
+        .offer-row-actions form, .offer-pdf-actions form { margin:0; }
 
         .premium-icon-btn {
             width: 36px;
@@ -435,7 +398,7 @@
             color: #111111;
             text-decoration: none;
             cursor: pointer;
-            transition: transform .16s ease, border-color .16s ease, background .16s ease;
+            transition: transform .16s ease,border-color .16s ease,background .16s ease;
         }
 
         .premium-icon-btn:hover {
@@ -446,40 +409,31 @@
         }
 
         .premium-icon-btn.premium-danger,
-        .premium-danger {
-            color: #991b1b;
-        }
+        .premium-danger { color:#991b1b; }
 
         .premium-icon-btn.premium-danger:hover,
         .premium-danger:hover {
-            border-color: #ef4444;
-            background: #fee2e2;
-            color: #991b1b;
+            border-color:#ef4444;
+            background:#fee2e2;
+            color:#991b1b;
         }
 
         .offers-empty-state {
-            display: grid;
-            place-items: center;
-            gap: 8px;
-            padding: 56px 16px;
-            text-align: center;
-            color: #665f54;
+            display:grid;
+            place-items:center;
+            gap:8px;
+            padding:56px 16px;
+            text-align:center;
+            color:#665f54;
         }
 
-        .offers-empty-state i {
-            font-size: 38px;
-            color: #8a6a00;
-        }
-
-        .offers-empty-state strong {
-            color: #111111;
-            font-size: 18px;
-        }
+        .offers-empty-state i { font-size:38px; color:#8a6a00; }
+        .offers-empty-state strong { color:#111111; font-size:18px; }
 
         .offers-pagination {
-            padding: 16px 18px;
-            border-top: 1px solid #e7dece;
-            background: #f8f2e7;
+            padding:16px 18px;
+            border-top:1px solid #e7dece;
+            background:#f8f2e7;
         }
 
         .offers-modern-table th:nth-child(4),
@@ -490,36 +444,23 @@
         .offers-modern-table td:nth-child(6),
         .offers-modern-table th:nth-child(7),
         .offers-modern-table td:nth-child(7) {
-            text-align: center !important;
+            text-align:center !important;
         }
 
         .offers-modern-table th:nth-child(8),
         .offers-modern-table td:nth-child(8) {
-            text-align: right !important;
+            text-align:right !important;
         }
 
-        @media (max-width: 1250px) {
-            .offers-page-actions {
-                grid-template-columns: 1fr;
-            }
-
-            .offers-action-buttons {
-                justify-content: flex-start;
-            }
+        @media (max-width:1250px) {
+            .offers-page-actions { grid-template-columns:1fr; }
+            .offers-action-buttons { justify-content:flex-start; }
         }
 
-        @media (max-width: 700px) {
-            .offers-search-modern {
-                display: grid;
-            }
-
-            .offers-search-field {
-                min-width: 0;
-            }
-
-            .offers-action-buttons {
-                display: grid;
-            }
+        @media (max-width:700px) {
+            .offers-search-modern { display:grid; }
+            .offers-search-field { min-width:0; }
+            .offers-action-buttons { display:grid; }
         }
     </style>
 </x-layouts.premium>
