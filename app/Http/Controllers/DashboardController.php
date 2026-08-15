@@ -36,10 +36,7 @@ class DashboardController extends Controller
 
         $reservationReleaseService->releaseExpired();
 
-        $products = Schema::hasTable('products')
-            ? Product::query()->get()
-            : collect();
-
+        $products = Schema::hasTable('products') ? Product::query()->get() : collect();
         $criticalProducts = $products->filter(fn (Product $product) => $product->stock_status === 'critical')->count();
         $lowProducts = $products->filter(fn (Product $product) => $product->stock_status === 'low')->count();
 
@@ -55,9 +52,57 @@ class DashboardController extends Controller
         ];
 
         $latestActivities = Schema::hasTable('activity_logs')
-            ? ActivityLog::query()->with('user')->latest()->limit(8)->get()
+            ? ActivityLog::query()->with('user')->latest()->limit(20)->get()
             : collect();
 
-        return view('dashboard', compact('stats', 'latestActivities'));
+        $salesRanking = collect();
+
+        if (Schema::hasTable('products') && Schema::hasTable('offer_items') && Schema::hasTable('offers')) {
+            $salesRanking = DB::table('products')
+                ->leftJoin('offer_items', 'offer_items.product_id', '=', 'products.id')
+                ->leftJoin('offers', function ($join): void {
+                    $join->on('offers.id', '=', 'offer_items.offer_id')
+                        ->where('offers.status', '=', Offer::STATUS_COMPLETED);
+                })
+                ->select([
+                    'products.id',
+                    'products.name',
+                    'products.created_at',
+                    DB::raw('COALESCE(SUM(CASE WHEN offers.id IS NOT NULL THEN offer_items.quantity ELSE 0 END), 0) as sold_quantity'),
+                ])
+                ->groupBy('products.id', 'products.name', 'products.created_at')
+                ->get();
+        }
+
+        $topSellingProducts = $salesRanking
+            ->sort(function ($a, $b): int {
+                $quantityComparison = (float) $b->sold_quantity <=> (float) $a->sold_quantity;
+                if ($quantityComparison !== 0) {
+                    return $quantityComparison;
+                }
+
+                return strcmp((string) $a->created_at, (string) $b->created_at);
+            })
+            ->take(10)
+            ->values();
+
+        $leastSellingProducts = $salesRanking
+            ->sort(function ($a, $b): int {
+                $quantityComparison = (float) $a->sold_quantity <=> (float) $b->sold_quantity;
+                if ($quantityComparison !== 0) {
+                    return $quantityComparison;
+                }
+
+                return strcmp((string) $a->created_at, (string) $b->created_at);
+            })
+            ->take(10)
+            ->values();
+
+        return view('dashboard', compact(
+            'stats',
+            'latestActivities',
+            'topSellingProducts',
+            'leastSellingProducts'
+        ));
     }
 }
