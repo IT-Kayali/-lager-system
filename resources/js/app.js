@@ -35,7 +35,6 @@ function initCleanWarningsPageColors() {
     cards.forEach((card) => {
         const text = card.textContent.replace(/\s+/g, ' ').trim();
 
-        // Die große Tabelle/Section darf NICHT gefärbt werden.
         if (
             text.includes('Bestandswarnungen') ||
             text.includes('OK-Produkte') ||
@@ -86,10 +85,6 @@ function initCleanWarningsPageColors() {
     });
 }
 
-/**
- * Offer quantities are limited by available stock and the database, not by the
- * old 5,000 gram browser limit. This also covers dynamically added rows.
- */
 function initUnlimitedOfferQuantities() {
     if (!window.location.pathname.includes('/offers')) {
         return;
@@ -171,15 +166,6 @@ function restoreAllOfferProducts(productSelect) {
     }
 }
 
-/**
- * Categories remain available everywhere in the system. In the offer editor,
- * however, positions intentionally consist only of product + quantity.
- *
- * Older offer templates still contain the optional category-filter enhancer.
- * Marking the product select as already handled prevents that enhancer from
- * inserting the category dropdown. The fallback cleanup also handles a field
- * that may already have been inserted during navigation or a DOM refresh.
- */
 function initOfferProductOnlyPositions() {
     const offerItems = document.querySelector('#offer-main-form #offer-items');
 
@@ -300,11 +286,6 @@ function ensureOfferShippingCartonStyles() {
     document.head.appendChild(style);
 }
 
-/**
- * Carton count is operational information only. It is stored with the offer
- * for later use on the delivery note and never participates in price or stock
- * calculations.
- */
 function initOfferShippingCartonCount() {
     const form = document.getElementById('offer-main-form');
     const shippingCard = document.getElementById('offer-shipping-card');
@@ -446,6 +427,60 @@ function extendErrorToastLifetime() {
     });
 }
 
+function initClickablePreviewRows() {
+    if (!document.getElementById('clickable-preview-row-styles')) {
+        const style = document.createElement('style');
+        style.id = 'clickable-preview-row-styles';
+        style.textContent = `
+            table tbody tr[data-preview-row="1"] {
+                cursor: pointer;
+            }
+
+            table tbody tr[data-preview-row="1"]:focus-visible {
+                outline: 2px solid #d4aa20;
+                outline-offset: -2px;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    document.querySelectorAll('table tbody tr').forEach((row) => {
+        if (row.dataset.previewRow === '1') {
+            return;
+        }
+
+        const previewLink = row.querySelector('a[title="Vorschau"]');
+        if (!previewLink?.href) {
+            return;
+        }
+
+        row.dataset.previewRow = '1';
+        row.tabIndex = 0;
+        row.setAttribute('aria-label', 'Vorschau öffnen');
+
+        const isInteractiveTarget = (target) => Boolean(target.closest(
+            'a, button, form, input, select, textarea, label, [role="button"], [contenteditable="true"]'
+        ));
+
+        row.addEventListener('click', (event) => {
+            if (isInteractiveTarget(event.target)) {
+                return;
+            }
+
+            window.location.href = previewLink.href;
+        });
+
+        row.addEventListener('keydown', (event) => {
+            if (event.key !== 'Enter' || isInteractiveTarget(event.target)) {
+                return;
+            }
+
+            event.preventDefault();
+            window.location.href = previewLink.href;
+        });
+    });
+}
+
 function initializeDynamicUi() {
     initCleanWarningsPageColors();
     initUnlimitedOfferQuantities();
@@ -454,6 +489,7 @@ function initializeDynamicUi() {
     ensureOfferShippingCartonStyles();
     initOfferShippingCartonCount();
     extendErrorToastLifetime();
+    initClickablePreviewRows();
 }
 
 initializeDynamicUi();
