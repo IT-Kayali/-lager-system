@@ -18,7 +18,7 @@
                     <select name="search_field" class="premium-input products-search-select" aria-label="Suchfeld auswählen">
                         <option value="all" @selected(($searchField ?? 'all') === 'all')>Alle</option>
                         <option value="name" @selected(($searchField ?? 'all') === 'name')>Produktbezeichnung</option>
-                        <option value="manufacturer" @selected(($searchField ?? 'all') === 'manufacturer')>Hersteller</option>
+                        <option value="manufacturer" @selected(($searchField ?? 'all') === 'manufacturer')>Fake Name</option>
                         <option value="code" @selected(($searchField ?? 'all') === 'code')>Code-Nummer</option>
                         <option value="supplier" @selected(($searchField ?? 'all') === 'supplier')>Lieferant</option>
                     </select>
@@ -69,7 +69,7 @@
                 <thead>
                     <tr>
                         <th>Produktbezeichnung</th>
-                        <th>Hersteller</th>
+                        <th>Fake Name</th>
                         <th>Code-Nummer</th>
                         <th>Lieferant</th>
                         <th>Verfügbare Menge</th>
