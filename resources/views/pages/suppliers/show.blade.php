@@ -141,7 +141,7 @@
                 <thead>
                     <tr>
                         <th>Produktbezeichnung</th>
-                        <th>Bezeichnung durch Hersteller</th>
+                        <th>Fake Name</th>
                         <th>Code-Nummer</th>
                         <th>Verfügbare Menge</th>
                         <th>Status</th>
