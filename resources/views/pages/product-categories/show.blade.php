@@ -50,7 +50,7 @@
                     <input id="category-product-search" class="premium-input" type="search" placeholder="Produktbezeichnung suchen..." autocomplete="off">
                     <button id="category-product-search-clear" type="button" class="category-product-search-clear" title="Suche löschen" aria-label="Suche löschen"><i class="bi bi-x-lg"></i></button>
                 </div>
-                <a class="premium-btn gold" href="{{ route('products.create') }}"><i class="bi bi-plus-lg"></i> Produkt hinzufügen</a>
+                <a class="premium-btn gold" href="{{ route('products.create', ['category_id' => $category->id]) }}"><i class="bi bi-plus-lg"></i> Produkt hinzufügen</a>
             </div>
         </div>
 
