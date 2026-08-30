@@ -47,7 +47,10 @@ class OfferPdfController extends Controller
             $pdfView = $isNoLogoPdfTemplate ? 'pdf.offer-document-ohne' : 'pdf.offer-document';
 
             // Angebot/Rechnung nutzt NUR eigene Angebot/Rechnung-Dateien.
-            $logoDataUri = $this->publicStorageDataUri($template->logo_path);
+            $logoDataUri = $isNoLogoPdfTemplate
+                ? null
+                : $this->publicStorageDataUri($template->logo_path);
+
             $backgroundDataUri = $this->publicStorageDataUri($template->background_image_path);
         }
 
@@ -113,10 +116,9 @@ class OfferPdfController extends Controller
      */
     private function injectProductUnitColumnIntoOfferDocument(string $html, Offer $offer, bool $isNoLogoPdfTemplate): string
     {
-        $units = $offer->items->values()->map(function ($item): string {
-            $unit = trim((string) ($item->product?->unit ?? ''));
-
-            return $unit !== '' ? $unit : '—';
+        $unitLocale = $isNoLogoPdfTemplate ? 'en' : 'de';
+        $units = $offer->items->values()->map(function ($item) use ($unitLocale): string {
+            return $item->product?->unitLabel($unitLocale) ?? '—';
         })->all();
 
         $hasShippingRow = (
