@@ -119,10 +119,12 @@ class OfferPdfController extends Controller
             return $unit !== '' ? $unit : '—';
         })->all();
 
-        if (
+        $hasShippingRow = (
             ($offer->shipping_method ?? null) === 'Lieferung'
             && (float) ($offer->shipping_price_gross ?? 0) > 0
-        ) {
+        );
+
+        if ($hasShippingRow) {
             $units[] = '—';
         }
 
@@ -157,6 +159,7 @@ class OfferPdfController extends Controller
         $priceLabel = $isNoLogoPdfTemplate ? 'PRICE' : 'Preis';
         $totalLabel = $isNoLogoPdfTemplate ? 'TOTAL' : 'Summe';
         $unitIndex = 0;
+        $productRowCount = $offer->items->count();
 
         foreach ($tables as $table) {
             if (! $table instanceof \DOMElement) {
@@ -212,7 +215,12 @@ class OfferPdfController extends Controller
 
                 $rowClasses = ' ' . preg_replace('/\s+/', ' ', trim($row->getAttribute('class'))) . ' ';
                 $isEmptyRow = str_contains($rowClasses, ' empty-product-row ');
+                $isShippingRow = ! $isEmptyRow && $hasShippingRow && $unitIndex >= $productRowCount;
                 $unit = $isEmptyRow ? "\u{00A0}" : ($units[$unitIndex] ?? '—');
+
+                if ($isShippingRow) {
+                    $cells[1]->nodeValue = '—';
+                }
 
                 if (! $isEmptyRow) {
                     $unitIndex++;
