@@ -47,7 +47,7 @@
             <div class="category-products-actions">
                 <div class="category-product-search">
                     <i class="bi bi-search"></i>
-                    <input id="category-product-search" class="premium-input" type="search" placeholder="Produkt suchen..." autocomplete="off">
+                    <input id="category-product-search" class="premium-input" type="search" placeholder="Produktbezeichnung suchen..." autocomplete="off">
                     <button id="category-product-search-clear" type="button" class="category-product-search-clear" title="Suche löschen" aria-label="Suche löschen"><i class="bi bi-x-lg"></i></button>
                 </div>
                 <a class="premium-btn gold" href="{{ route('products.create') }}"><i class="bi bi-plus-lg"></i> Produkt hinzufügen</a>
@@ -94,7 +94,8 @@
                 const term = input.value.trim().toLocaleLowerCase('de');
                 let visible = 0;
                 rows.forEach((row) => {
-                    const matches = term === '' || row.textContent.toLocaleLowerCase('de').includes(term);
+                    const productName = row.querySelector('.product-link')?.textContent.trim().toLocaleLowerCase('de') ?? '';
+                    const matches = term === '' || productName.includes(term);
                     row.hidden = !matches;
                     if (matches) visible++;
                 });
