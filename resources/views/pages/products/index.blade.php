@@ -6,16 +6,6 @@
         $branchCreateRoute = $isSales ? 'sales.branch-withdrawals.create' : 'branch-withdrawals.create';
     @endphp
 
-    @if (session('success'))
-        <div class="premium-alert">{{ session('success') }}</div>
-    @endif
-
-    @if (session('error'))
-        <div class="premium-alert" style="border-color: rgba(239,68,68,.25); background: rgba(239,68,68,.10); color:#991b1b;">
-            {{ session('error') }}
-        </div>
-    @endif
-
     <section class="products-page-actions">
         <div class="products-page-search-card">
             <form method="GET" action="{{ route($productIndexRoute) }}" class="products-search-modern">
