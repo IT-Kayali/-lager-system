@@ -56,7 +56,7 @@
 
         <div class="category-products-table-shell">
             <table class="category-products-table" id="category-products-table">
-                <thead><tr><th>Produktbezeichnung</th><th>Bezeichnung durch Hersteller</th><th>Code-Nummer</th><th>Lieferant</th><th>Verfügbare Menge</th><th>Status</th><th>Aktion</th></tr></thead>
+                <thead><tr><th>Produktbezeichnung</th><th>Fake Name</th><th>Code-Nummer</th><th>Lieferant</th><th>Verfügbare Menge</th><th>Status</th><th>Aktion</th></tr></thead>
                 <tbody>
                     @forelse ($category->products as $product)
                         @php
