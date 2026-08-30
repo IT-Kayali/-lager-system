@@ -404,6 +404,48 @@ function initOfferShippingCartonCount() {
     syncCartonCount();
 }
 
+function ensureExtendedErrorToastStyles() {
+    if (document.getElementById('extended-error-toast-styles')) {
+        return;
+    }
+
+    const style = document.createElement('style');
+    style.id = 'extended-error-toast-styles';
+    style.textContent = `
+        .premium-toast.error[data-extended-lifetime="1"]::after {
+            animation-duration: 15s !important;
+        }
+    `;
+
+    document.head.appendChild(style);
+}
+
+function extendErrorToastLifetime() {
+    ensureExtendedErrorToastStyles();
+
+    document.querySelectorAll('.premium-toast.error:not([data-extended-lifetime="1"])').forEach((toast) => {
+        const replacement = toast.cloneNode(true);
+        replacement.dataset.extendedLifetime = '1';
+        toast.replaceWith(replacement);
+
+        const closeButton = replacement.querySelector('.premium-toast-close');
+        let removed = false;
+
+        function removeReplacement() {
+            if (removed || !replacement.isConnected) {
+                return;
+            }
+
+            removed = true;
+            replacement.style.animation = 'premiumToastOut .18s ease forwards';
+            window.setTimeout(() => replacement.remove(), 180);
+        }
+
+        closeButton?.addEventListener('click', removeReplacement);
+        window.setTimeout(removeReplacement, 15000);
+    });
+}
+
 function initializeDynamicUi() {
     initCleanWarningsPageColors();
     initUnlimitedOfferQuantities();
@@ -411,6 +453,7 @@ function initializeDynamicUi() {
     initOfferProductOnlyPositions();
     ensureOfferShippingCartonStyles();
     initOfferShippingCartonCount();
+    extendErrorToastLifetime();
 }
 
 initializeDynamicUi();
