@@ -248,6 +248,7 @@ function ensureOfferShippingCartonStyles() {
 
         html body #offer-shipping-card.offer-shipping-modern-card #shipping_method,
         html body #offer-shipping-card.offer-shipping-modern-card #shipping_price_gross,
+        html body #offer-shipping-card.offer-shipping-modern-card #shipping_price_net,
         html body #offer-shipping-card.offer-shipping-modern-card #carton_count {
             width: 100% !important;
             max-width: none !important;
@@ -385,6 +386,91 @@ function initOfferShippingCartonCount() {
     syncCartonCount();
 }
 
+function initOfferShippingNetPrice() {
+    const form = document.getElementById('offer-main-form');
+    const field = document.getElementById('shipping_price_gross_field');
+    const grossInput = document.getElementById('shipping_price_gross');
+    const grossReal = document.getElementById('shipping_price_gross_real');
+    const method = document.getElementById('shipping_method');
+
+    if (!form || !field || !grossInput || !method) {
+        return;
+    }
+
+    let netInput = document.getElementById('shipping_price_net');
+
+    if (!netInput) {
+        const label = field.querySelector('label[for="shipping_price_gross"], label');
+        if (label) {
+            label.setAttribute('for', 'shipping_price_net');
+            label.textContent = 'Versandpreis netto';
+        }
+
+        const grossValue = Number.parseFloat(grossInput.value);
+
+        netInput = document.createElement('input');
+        netInput.id = 'shipping_price_net';
+        netInput.type = 'number';
+        netInput.step = '0.01';
+        netInput.min = '0';
+        netInput.className = grossInput.className || 'premium-input';
+        netInput.placeholder = 'z. B. 5.80';
+        netInput.value = Number.isFinite(grossValue)
+            ? (grossValue / 1.19).toFixed(2)
+            : '';
+
+        grossInput.type = 'hidden';
+        grossInput.removeAttribute('class');
+        grossInput.insertAdjacentElement('beforebegin', netInput);
+
+        const help = field.querySelector('.premium-muted');
+        if (help) {
+            help.textContent = 'Netto eingeben. 19 % MwSt. werden automatisch berechnet. Wird in Angebot und Rechnung angezeigt, nicht im Lieferschein.';
+        }
+    }
+
+    function syncNetToGross() {
+        const isDelivery = method.value === 'Lieferung';
+
+        netInput.style.display = isDelivery ? '' : 'none';
+        netInput.disabled = !isDelivery;
+
+        if (!isDelivery) {
+            netInput.value = '';
+            grossInput.value = '';
+            if (grossReal) grossReal.value = '';
+            return;
+        }
+
+        const netValue = Number.parseFloat(netInput.value);
+        const grossValue = Number.isFinite(netValue)
+            ? (Math.round((netValue * 1.19 + Number.EPSILON) * 100) / 100).toFixed(2)
+            : '';
+
+        grossInput.value = grossValue;
+        if (grossReal) grossReal.value = grossValue;
+    }
+
+    if (netInput.dataset.netShippingBound !== '1') {
+        netInput.dataset.netShippingBound = '1';
+        netInput.addEventListener('input', syncNetToGross);
+        netInput.addEventListener('change', syncNetToGross);
+    }
+
+    if (method.dataset.netShippingBound !== '1') {
+        method.dataset.netShippingBound = '1';
+        method.addEventListener('input', syncNetToGross);
+        method.addEventListener('change', syncNetToGross);
+    }
+
+    if (form.dataset.netShippingBound !== '1') {
+        form.dataset.netShippingBound = '1';
+        form.addEventListener('submit', syncNetToGross);
+    }
+
+    syncNetToGross();
+}
+
 function ensureExtendedErrorToastStyles() {
     if (document.getElementById('extended-error-toast-styles')) {
         return;
@@ -488,6 +574,7 @@ function initializeDynamicUi() {
     initOfferProductOnlyPositions();
     ensureOfferShippingCartonStyles();
     initOfferShippingCartonCount();
+    initOfferShippingNetPrice();
     extendErrorToastLifetime();
     initClickablePreviewRows();
 }
