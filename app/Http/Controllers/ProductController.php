@@ -24,23 +24,61 @@ class ProductController extends Controller
         app(\App\Services\ReservationReleaseService::class)->releaseExpired();
 
         $search = trim((string) $request->query('search'));
+        $searchField = (string) $request->query('search_field', 'all');
+        $exact = $request->boolean('exact');
 
-        $products = Product::query()->with('categories')
+        $allowedSearchFields = ['all', 'name', 'manufacturer', 'code', 'supplier'];
+        if (! in_array($searchField, $allowedSearchFields, true)) {
+            $searchField = 'all';
+        }
+
+        $products = Product::query()
+            ->with('categories')
+            ->with('supplierRecord')
             ->with(['batches' => fn ($query) => $query->orderBy('received_at')->orderBy('id')])
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($subQuery) use ($search) {
-                    $subQuery
-                        ->where('product_code', 'like', "%{$search}%")
-                        ->orWhere('name', 'like', "%{$search}%")
-                        ->orWhere('supplier', 'like', "%{$search}%")
-                        ->orWhere('serial_number', 'like', "%{$search}%");
+            ->when($search !== '', function ($query) use ($search, $searchField, $exact) {
+                $operator = $exact ? '=' : 'like';
+                $value = $exact ? $search : "%{$search}%";
+
+                $query->where(function ($subQuery) use ($searchField, $operator, $value) {
+                    switch ($searchField) {
+                        case 'name':
+                            $subQuery->where('name', $operator, $value);
+                            break;
+
+                        case 'manufacturer':
+                            $subQuery->where('manufacturer_designation', $operator, $value);
+                            break;
+
+                        case 'code':
+                            $subQuery
+                                ->where('serial_number', $operator, $value)
+                                ->orWhere('product_code', $operator, $value);
+                            break;
+
+                        case 'supplier':
+                            $subQuery
+                                ->where('supplier', $operator, $value)
+                                ->orWhereHas('supplierRecord', fn ($supplierQuery) => $supplierQuery->where('company_name', $operator, $value));
+                            break;
+
+                        default:
+                            $subQuery
+                                ->where('name', $operator, $value)
+                                ->orWhere('manufacturer_designation', $operator, $value)
+                                ->orWhere('serial_number', $operator, $value)
+                                ->orWhere('product_code', $operator, $value)
+                                ->orWhere('supplier', $operator, $value)
+                                ->orWhereHas('supplierRecord', fn ($supplierQuery) => $supplierQuery->where('company_name', $operator, $value));
+                            break;
+                    }
                 });
             })
             ->naturalNameOrder()
             ->paginate(15)
             ->withQueryString();
 
-        return view('pages.products.index', compact('products', 'search'));
+        return view('pages.products.index', compact('products', 'search', 'searchField', 'exact'));
     }
 
     public function show(Product $product): View
