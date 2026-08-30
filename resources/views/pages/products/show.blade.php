@@ -80,7 +80,7 @@
         <h2 class="preview-title">Produktdaten</h2>
         <div class="details-grid">
             <div><span>Bezeichnung</span><strong>{{ $product->name }}</strong></div>
-            <div><span>Bezeichnung durch Hersteller</span><strong>{{ $product->manufacturer_designation ?: '—' }}</strong></div>
+            <div><span>Fake Name</span><strong>{{ $product->manufacturer_designation ?: '—' }}</strong></div>
             <div><span>Code-Nummer</span><strong>{{ $product->serial_number ?: '—' }}</strong></div>
             <div><span>Einheit</span><strong>{{ $unitLabel }}</strong></div>
             <div><span>Lieferant</span><strong>{{ $supplierName }}</strong></div>
