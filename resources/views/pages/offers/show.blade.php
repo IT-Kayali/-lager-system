@@ -117,7 +117,7 @@
                                 <strong>{{ $item->product_name }}</strong>
                                 <div class="premium-muted">{{ $item->product_code }}</div>
                             </td>
-                            <td>{{ \App\Support\GermanNumber::format($item->quantity) }} {{ $item->unit }}</td>
+                            <td>{{ \App\Support\GermanNumber::format($item->quantity) }} {{ $item->product?->unitLabel('de') ?? (['gram' => 'Gramm', 'liter' => 'Liter', 'piece' => 'Stück'][$item->unit] ?? ($item->unit ?: '—')) }}</td>
                             <td><span class="premium-badge ok">{{ $item->tier_label }}</span></td>
                             <td>{{ \App\Support\GermanNumber::format($item->unit_price) }} €</td>
                             <td>{{ \App\Support\GermanNumber::format($item->line_total) }} €</td>
