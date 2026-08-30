@@ -111,7 +111,7 @@
                 <h3 class="stats-title">Top 10 Kunden</h3><p class="stats-sub">Kunden nach Verkaufsumsatz</p>
                 <div class="stats-scroll"><table class="stats-table"><thead><tr><th>Kunde</th><th>Verkäufe</th><th>Umsatz</th></tr></thead><tbody>
                 @forelse($customerStats['top'] ?? [] as $row)
-                    <tr><td>{{ $row->company_name }}</td><td>{{ $row->orders_count ?? 0 }}</td><td>{{ number_format((float)$row->revenue,2,',','.') }} €</td></tr>
+                    <tr><td>{{ $row['company_name'] ?? 'Unbekannt' }}</td><td>{{ $row['orders_count'] ?? 0 }}</td><td>{{ number_format((float)($row['revenue'] ?? 0),2,',','.') }} €</td></tr>
                 @empty<tr><td colspan="3" class="stats-empty">Noch keine Kundendaten vorhanden.</td></tr>@endforelse
                 </tbody></table></div>
             </div>
