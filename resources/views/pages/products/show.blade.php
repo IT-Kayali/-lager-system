@@ -4,8 +4,7 @@
         $productIndexRoute = $isSales ? 'sales.products.index' : 'products.index';
         $branchCreateRoute = $isSales ? 'sales.branch-withdrawals.create' : 'branch-withdrawals.create';
         $statusLabels = ['ok' => 'OK', 'low' => 'Niedrig', 'critical' => 'Kritisch'];
-        $unitLabels = ['gram' => 'Gramm', 'liter' => 'Liter', 'piece' => 'Stück'];
-        $unitLabel = $unitLabels[$product->unit] ?? $product->unit;
+        $unitLabel = $product->unitLabel('de');
         $supplierName = $product->supplierRecord?->company_name ?: $product->supplier ?: '—';
     @endphp
 
@@ -113,7 +112,7 @@
             @forelse ($product->batches as $batch)
                 <article class="batch-preview-card">
                     <div><strong>{{ $batch->batch_number }}</strong><span>{{ $batch->received_at ? $batch->received_at->format('d.m.Y') : '—' }}</span></div>
-                    <div><span>Menge</span><strong>{{ \App\Support\GermanNumber::format($batch->quantity) }} {{ $product->unit === 'gram' ? 'g' : $unitLabel }}</strong></div>
+                    <div><span>Menge</span><strong>{{ \App\Support\GermanNumber::format($batch->quantity) }} {{ $unitLabel }}</strong></div>
                     <div><span>Ablaufdatum</span><strong>{{ $batch->expires_at ? $batch->expires_at->format('d.m.Y') : '—' }}</strong></div>
 
                     @unless($isSales)

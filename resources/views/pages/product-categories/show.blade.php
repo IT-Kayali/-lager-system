@@ -3,7 +3,6 @@
         $statusLabel = $category->is_active ? 'Aktiv' : 'Inaktiv';
         $statusClass = $category->is_active ? 'ok' : 'critical';
         $statusLabels = ['ok' => 'OK', 'low' => 'Niedrig', 'critical' => 'Kritisch'];
-        $unitShortLabels = ['gram' => 'g', 'liter' => 'L', 'piece' => 'Stk.'];
     @endphp
 
     <section class="category-preview-hero" style="--cat-color: {{ $category->color ?: '#d4af37' }};">
@@ -60,7 +59,7 @@
                 <tbody>
                     @forelse ($category->products as $product)
                         @php
-                            $unitShort = $unitShortLabels[$product->unit] ?? $product->unit;
+                            $unitLabel = $product->unitLabel('de');
                             $supplierName = $product->supplierRecord?->company_name ?: $product->supplier ?: '—';
                         @endphp
                         <tr data-category-product-row>
@@ -68,7 +67,7 @@
                             <td>{{ $product->manufacturer_designation ?: '—' }}</td>
                             <td>{{ $product->serial_number ?: '—' }}</td>
                             <td>{{ $supplierName }}</td>
-                            <td><strong>{{ number_format((float) $product->available_stock, 2, ',', '.') }}</strong><span class="unit-small">{{ $unitShort }}</span></td>
+                            <td><strong>{{ number_format((float) $product->available_stock, 2, ',', '.') }}</strong><span class="unit-small">{{ $unitLabel }}</span></td>
                             <td><span class="premium-badge {{ $product->stock_status }}">{{ $statusLabels[$product->stock_status] ?? $product->stock_status }}</span></td>
                             <td><a class="premium-icon-btn" href="{{ route('products.show', ['product' => $product->name]) }}" title="Vorschau"><i class="bi bi-eye"></i></a></td>
                         </tr>

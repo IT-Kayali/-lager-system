@@ -113,10 +113,9 @@ class OfferPdfController extends Controller
      */
     private function injectProductUnitColumnIntoOfferDocument(string $html, Offer $offer, bool $isNoLogoPdfTemplate): string
     {
-        $units = $offer->items->values()->map(function ($item): string {
-            $unit = trim((string) ($item->product?->unit ?? ''));
-
-            return $unit !== '' ? $unit : '—';
+        $unitLocale = $isNoLogoPdfTemplate ? 'en' : 'de';
+        $units = $offer->items->values()->map(function ($item) use ($unitLocale): string {
+            return $item->product?->unitLabel($unitLocale) ?? '—';
         })->all();
 
         $hasShippingRow = (

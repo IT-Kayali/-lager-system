@@ -2,12 +2,6 @@
     @php
         $products = $products ?? collect();
 
-        $unitShortLabels = [
-            'gram' => 'g',
-            'liter' => 'L',
-            'piece' => 'Stk.',
-        ];
-
         $statusLabels = [
             'ok' => 'OK',
             'low' => 'Niedrig',
@@ -152,7 +146,7 @@
                 <tbody>
                     @forelse ($products as $product)
                         @php
-                            $unitShort = $unitShortLabels[$product->unit] ?? $product->unit;
+                            $unitLabel = $product->unitLabel('de');
                         @endphp
 
                         <tr>
@@ -167,7 +161,7 @@
 
                             <td>
                                 <strong>{{ number_format((float) $product->available_stock, 2, ',', '.') }}</strong>
-                                <span class="unit-small">{{ $unitShort }}</span>
+                                <span class="unit-small">{{ $unitLabel }}</span>
                             </td>
 
                             <td>

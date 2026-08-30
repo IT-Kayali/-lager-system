@@ -118,6 +118,23 @@ class Product extends Model
         return $this->hasMany(OfferItem::class);
     }
 
+    public function unitLabel(string $locale = 'de'): string
+    {
+        $labels = $locale === 'en'
+            ? [
+                'gram' => 'Gram',
+                'liter' => 'Liter',
+                'piece' => 'Piece',
+            ]
+            : [
+                'gram' => 'Gramm',
+                'liter' => 'Liter',
+                'piece' => 'Stück',
+            ];
+
+        return $labels[$this->unit] ?? ($this->unit ?: '—');
+    }
+
     public function getTotalStockAttribute(): float
     {
         return (float) $this->batches()->sum('quantity');
