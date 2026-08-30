@@ -47,10 +47,7 @@ class OfferPdfController extends Controller
             $pdfView = $isNoLogoPdfTemplate ? 'pdf.offer-document-ohne' : 'pdf.offer-document';
 
             // Angebot/Rechnung nutzt NUR eigene Angebot/Rechnung-Dateien.
-            $logoDataUri = $isNoLogoPdfTemplate
-                ? null
-                : $this->publicStorageDataUri($template->logo_path);
-
+            $logoDataUri = $this->publicStorageDataUri($template->logo_path);
             $backgroundDataUri = $this->publicStorageDataUri($template->background_image_path);
         }
 
