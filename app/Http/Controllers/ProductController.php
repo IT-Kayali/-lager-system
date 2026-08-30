@@ -8,6 +8,7 @@ use App\Models\ProductBatch;
 use App\Models\ProductCategory;
 use App\Models\Supplier;
 use App\Models\StockMovement;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -146,11 +147,29 @@ class ProductController extends Controller
 
     public function destroy(Product $product): RedirectResponse
     {
-        $product->delete();
+        try {
+            $product->delete();
+        } catch (QueryException $exception) {
+            if ($this->isForeignKeyConstraintViolation($exception)) {
+                return redirect()
+                    ->route('products.index')
+                    ->with('error', 'Produkt kann nicht gelöscht werden, da es bereits in Angeboten, Lagerbewegungen oder anderen Vorgängen verwendet wurde. Historische Daten bleiben dadurch erhalten.');
+            }
+
+            throw $exception;
+        }
 
         return redirect()
             ->route('products.index')
             ->with('success', 'Produkt wurde gelöscht.');
+    }
+
+    private function isForeignKeyConstraintViolation(QueryException $exception): bool
+    {
+        $sqlState = (string) ($exception->errorInfo[0] ?? $exception->getCode());
+        $driverCode = (int) ($exception->errorInfo[1] ?? 0);
+
+        return $sqlState === '23000' && in_array($driverCode, [1451, 1452], true);
     }
 
     private function validatedInitialBatchData(Request $request): array
