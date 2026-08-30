@@ -132,7 +132,7 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product): RedirectResponse
     {
-        $data = $this->validatedData($request);
+        $data = $this->validatedData($request, $product);
 
         $categoryIds = $data['category_ids'] ?? [];
         unset($data['category_ids']);
@@ -189,10 +189,16 @@ class ProductController extends Controller
         ]);
     }
 
-    private function validatedData(Request $request): array
+    private function validatedData(Request $request, ?Product $product = null): array
     {
+        $uniqueProductName = Rule::unique('products', 'name');
+
+        if ($product) {
+            $uniqueProductName->ignore($product->id);
+        }
+
         return $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255', $uniqueProductName],
             'manufacturer_designation' => ['nullable', 'string', 'max:255'],
             'serial_number' => ['nullable', 'string', 'max:255'],
             'unit' => ['required', Rule::in(array_keys($this->units()))],
@@ -202,6 +208,8 @@ class ProductController extends Controller
             'description' => ['nullable', 'string', 'max:5000'],
             'category_ids' => ['nullable', 'array'],
             'category_ids.*' => ['integer', 'exists:product_categories,id'],
+        ], [
+            'name.unique' => 'Ein Produkt mit derselben Produktbezeichnung ist bereits vorhanden.',
         ]);
     }
 
