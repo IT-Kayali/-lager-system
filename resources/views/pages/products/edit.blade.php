@@ -5,4 +5,14 @@
             @include('pages.products._form')
         </form>
     </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const label = document.querySelector('label[for="manufacturer_designation"]');
+
+            if (label) {
+                label.textContent = 'Fake Name';
+            }
+        });
+    </script>
 </x-layouts.premium>
