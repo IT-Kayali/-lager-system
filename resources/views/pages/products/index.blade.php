@@ -82,8 +82,7 @@
                     @forelse ($products as $product)
                         @php
                             $statusLabels = ['ok' => 'OK', 'low' => 'Niedrig', 'critical' => 'Kritisch'];
-                            $unitShortLabels = ['gram' => 'g', 'liter' => 'L', 'piece' => 'Stk.'];
-                            $unitShort = $unitShortLabels[$product->unit] ?? $product->unit;
+                            $unitLabel = $product->unitLabel('de');
                             $supplierName = $product->supplierRecord?->company_name ?: $product->supplier ?: '—';
                             $codeNumber = $product->serial_number ?: ($product->product_code ?: '—');
                             $stockStatus = $product->stock_status;
@@ -100,7 +99,7 @@
                             <td>{{ $supplierName }}</td>
                             <td>
                                 <span class="products-stock-value {{ $stockStatus }}">{{ number_format((float) $product->available_stock, 2, ',', '.') }}</span>
-                                <span class="unit-small">{{ $unitShort }}</span>
+                                <span class="unit-small">{{ $unitLabel }}</span>
                             </td>
                             <td>
                                 <span class="products-status-pill {{ $stockStatus }}">{{ $statusLabels[$stockStatus] ?? $stockStatus }}</span>
