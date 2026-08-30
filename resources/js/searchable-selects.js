@@ -39,6 +39,10 @@ function isProductSelect(select) {
     return name.includes('product_id') || dataName === 'product_id';
 }
 
+function isOfferProductSelect(select) {
+    return isProductSelect(select) && Boolean(select.closest('#offer-main-form'));
+}
+
 function isCountrySelect(select) {
     return select.classList.contains('phone-country-select');
 }
@@ -278,6 +282,7 @@ function initSearchableSelects() {
 
         const enableSearch = shouldUseSearch(select);
         const countrySelect = isCountrySelect(select);
+        const offerProductSelect = isOfferProductSelect(select);
 
         const firstOption = select.querySelector('option[value=""]');
         const placeholder =
@@ -288,7 +293,7 @@ function initSearchableSelects() {
 
         const instance = new TomSelect(select, {
             create: false,
-            allowEmptyOption: true,
+            allowEmptyOption: !offerProductSelect,
             maxOptions: 1000,
             placeholder: placeholder,
             searchField: enableSearch ? ['text', 'name', 'dial'] : [],
