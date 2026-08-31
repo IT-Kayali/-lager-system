@@ -4,10 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class Product extends Model
 {
@@ -113,9 +113,31 @@ class Product extends Model
         return $this->hasMany(ProductPriceTier::class);
     }
 
+    public function manualPriceRules(): HasMany
+    {
+        return $this->hasMany(ManualPriceRule::class);
+    }
+
     public function offerItems(): HasMany
     {
         return $this->hasMany(OfferItem::class);
+    }
+
+    public function usesPriceTiers(): bool
+    {
+        if (! Schema::hasColumn('product_categories', 'price_tiers_enabled')) {
+            return true;
+        }
+
+        $categories = $this->relationLoaded('categories')
+            ? $this->categories
+            : $this->categories()->get(['product_categories.id', 'price_tiers_enabled']);
+
+        if ($categories->isEmpty()) {
+            return true;
+        }
+
+        return $categories->contains(fn (ProductCategory $category) => $category->price_tiers_enabled);
     }
 
     public function unitLabel(string $locale = 'de'): string

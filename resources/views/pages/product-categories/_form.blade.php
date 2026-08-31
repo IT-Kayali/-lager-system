@@ -61,7 +61,7 @@
 
                 <div>
                     <h2>Darstellung</h2>
-                    <p>Farbe und Status festlegen.</p>
+                    <p>Farbe, Status und Preislogik festlegen.</p>
                 </div>
             </div>
 
@@ -100,6 +100,23 @@
                         <small>Kategorie ist in Formularen auswählbar.</small>
                     </span>
                 </label>
+            </div>
+
+            <div class="premium-form-field">
+                <label>Preislogik</label>
+
+                <label class="category-active-toggle">
+                    <input type="hidden" name="price_tiers_enabled" value="0">
+                    <input type="checkbox" name="price_tiers_enabled" value="1" @checked(old('price_tiers_enabled', $category->price_tiers_enabled ?? true))>
+
+                    <span class="category-active-switch"></span>
+
+                    <span class="category-active-copy">
+                        <strong>Preisstaffel aktiv</strong>
+                        <small>Aktiv: bestehende Preisstaffeln pro Produkt und Kundengruppe. Aus: freie Mengenregeln pro Produkt und Kundengruppe.</small>
+                    </span>
+                </label>
+                @error('price_tiers_enabled') <div class="premium-error">{{ $message }}</div> @enderror
             </div>
 
             <div class="category-preview-card">
