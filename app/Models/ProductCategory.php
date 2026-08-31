@@ -15,6 +15,7 @@ class ProductCategory extends Model
         'description',
         'color',
         'is_active',
+        'price_tiers_enabled',
     ];
 
     protected function casts(): array
@@ -22,6 +23,7 @@ class ProductCategory extends Model
         return [
             'priority' => 'integer',
             'is_active' => 'boolean',
+            'price_tiers_enabled' => 'boolean',
         ];
     }
 
