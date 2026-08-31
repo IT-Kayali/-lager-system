@@ -18,7 +18,10 @@ return new class extends Migration
             $table->string('label')->nullable();
             $table->timestamps();
 
-            $table->index(['product_id', 'customer_group_id', 'min_quantity']);
+            $table->index(
+                ['product_id', 'customer_group_id', 'min_quantity'],
+                'manual_price_product_group_min_idx'
+            );
         });
     }
 
