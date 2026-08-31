@@ -6,13 +6,19 @@
 @endphp
 
 <x-layouts.premium title="Filialausgang erstellen" subtitle="Mehrere Produkte für eine Filiale vorbereiten und den Ausgabestatus verwalten.">
-    <form class="branch-editor-form" method="POST" action="{{ route($storeRoute) }}">
+    <form class="branch-editor-form branch-editor-form-create" method="POST" action="{{ route($storeRoute) }}">
         @if ($isSales)
             <input type="hidden" name="status" value="{{ \App\Models\BranchWithdrawal::STATUS_OPEN }}">
         @endif
 
         @include('pages.branch-withdrawals._form', ['submitLabel' => 'Filialausgang speichern'])
     </form>
+
+    <style>
+        .branch-editor-form-create > .premium-alert {
+            display: none !important;
+        }
+    </style>
 
     @if ($isSales)
         <script>
