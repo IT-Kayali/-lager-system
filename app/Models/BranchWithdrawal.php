@@ -13,6 +13,11 @@ class BranchWithdrawal extends Model
     public const STATUS_ISSUED = 'issued';
     public const STATUS_CANCELLED = 'cancelled';
 
+    public const RESERVING_STATUSES = [
+        self::STATUS_OPEN,
+        self::STATUS_IN_PROGRESS,
+    ];
+
     public const BRANCH_MAIN = 'Hauptfiliale';
     public const BRANCH_DEZ = 'DEZ Filiale';
 

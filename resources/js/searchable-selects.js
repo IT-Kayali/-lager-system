@@ -43,6 +43,10 @@ function isOfferProductSelect(select) {
     return isProductSelect(select) && Boolean(select.closest('#offer-main-form'));
 }
 
+function isBranchWithdrawalProductSelect(select) {
+    return isProductSelect(select) && Boolean(select.closest('.branch-editor-form'));
+}
+
 function isCountrySelect(select) {
     return select.classList.contains('phone-country-select');
 }
@@ -283,6 +287,7 @@ function initSearchableSelects() {
         const enableSearch = shouldUseSearch(select);
         const countrySelect = isCountrySelect(select);
         const offerProductSelect = isOfferProductSelect(select);
+        const branchWithdrawalProductSelect = isBranchWithdrawalProductSelect(select);
 
         const firstOption = select.querySelector('option[value=""]');
         const placeholder =
@@ -293,7 +298,7 @@ function initSearchableSelects() {
 
         const instance = new TomSelect(select, {
             create: false,
-            allowEmptyOption: !offerProductSelect,
+            allowEmptyOption: !offerProductSelect && !branchWithdrawalProductSelect,
             maxOptions: 1000,
             placeholder: placeholder,
             searchField: enableSearch ? ['text', 'name', 'dial'] : [],
