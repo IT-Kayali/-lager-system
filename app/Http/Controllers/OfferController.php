@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
 use App\Models\ApplicationSetting;
+use App\Models\BranchWithdrawal;
 use App\Models\Customer;
+use App\Models\ManualPriceRule;
 use App\Models\Offer;
 use App\Models\Product;
 use App\Models\ProductPriceTier;
@@ -295,6 +297,7 @@ class OfferController extends Controller
         $productIds = $cleanItems->pluck('product_id')->unique()->values();
 
         $products = Product::query()
+            ->with('categories')
             ->whereIn('id', $productIds)
             ->get()
             ->keyBy('id');
@@ -321,56 +324,94 @@ class OfferController extends Controller
 
         foreach ($cleanItems as $item) {
             $product = $products->get($item['product_id']);
-
-            ProductPriceTier::ensureForProduct($product);
-
-            $tier = ProductPriceTier::query()
-                ->where('product_id', $product->id)
-                ->where('customer_group_id', $customer->customer_group_id)
-                ->where('min_grams', '<=', $item['quantity'])
-                ->where(function ($query) use ($item) {
-                    $query
-                        ->whereNull('max_grams')
-                        ->orWhere('max_grams', '>=', $item['quantity']);
-                })
-                ->orderByDesc('min_grams')
-                ->first();
-
-            if (! $tier) {
-                back()->withInput()->with('error', 'Keine passende Preisstaffel für ' . $product->product_code . ' bei ' . \App\Support\GermanNumber::format($item['quantity']) . ' Gramm.')->throwResponse();
-            }
-
-            $unitPrice = (float) $tier->price;
             $quantity = (float) $item['quantity'];
-            $lineTotal = round($quantity * $unitPrice, 2);
+
+            if ($product->usesPriceTiers()) {
+                ProductPriceTier::ensureForProduct($product);
+
+                $tier = ProductPriceTier::query()
+                    ->where('product_id', $product->id)
+                    ->where('customer_group_id', $customer->customer_group_id)
+                    ->where('min_grams', '<=', $quantity)
+                    ->where(function ($query) use ($quantity) {
+                        $query
+                            ->whereNull('max_grams')
+                            ->orWhere('max_grams', '>=', $quantity);
+                    })
+                    ->orderByDesc('min_grams')
+                    ->first();
+
+                if (! $tier) {
+                    back()->withInput()->with('error', 'Keine passende Preisstaffel für ' . $product->product_code . ' bei ' . \App\Support\GermanNumber::format($quantity) . ' ' . $product->unitLabel('de') . '.')->throwResponse();
+                }
+
+                $pricingId = $tier->id;
+                $pricingKey = $tier->tier_key;
+                $pricingLabel = $tier->tier_label;
+                $unitPrice = (float) $tier->price;
+            } else {
+                $rule = ManualPriceRule::query()
+                    ->where('product_id', $product->id)
+                    ->where('customer_group_id', $customer->customer_group_id)
+                    ->where('min_quantity', '<=', $quantity)
+                    ->where(function ($query) use ($quantity) {
+                        $query
+                            ->whereNull('max_quantity')
+                            ->orWhere('max_quantity', '>=', $quantity);
+                    })
+                    ->orderByDesc('min_quantity')
+                    ->first();
+
+                if (! $rule) {
+                    back()->withInput()->with('error', 'Keine passende manuelle Preisregel für ' . $product->product_code . ' bei ' . \App\Support\GermanNumber::format($quantity) . ' ' . $product->unitLabel('de') . ' und der Kundengruppe ' . ($customer->group?->name ?? '—') . '.')->throwResponse();
+                }
+
+                $pricingId = null;
+                $pricingKey = 'manual:' . $rule->id;
+                $pricingLabel = $rule->label ?: $this->manualRuleLabel($product, $rule);
+                $unitPrice = (float) $rule->price;
+            }
 
             $prepared[] = [
                 'product' => $product,
-                'tier' => $tier,
+                'product_price_tier_id' => $pricingId,
+                'tier_key' => $pricingKey,
+                'tier_label' => $pricingLabel,
                 'quantity' => $quantity,
                 'unit_price' => $unitPrice,
-                'line_total' => $lineTotal,
+                'line_total' => round($quantity * $unitPrice, 2),
             ];
         }
 
         return $prepared;
     }
 
+    private function manualRuleLabel(Product $product, ManualPriceRule $rule): string
+    {
+        $min = \App\Support\GermanNumber::format($rule->min_quantity);
+        $unit = $product->unitLabel('de');
+
+        if ($rule->max_quantity === null) {
+            return 'ab ' . $min . ' ' . $unit;
+        }
+
+        return $min . '–' . \App\Support\GermanNumber::format($rule->max_quantity) . ' ' . $unit;
+    }
+
     private function syncOfferItems(Offer $offer, array $preparedItems): void
     {
         foreach ($preparedItems as $preparedItem) {
             $product = $preparedItem['product'];
-            $tier = $preparedItem['tier'];
 
             $offer->items()->create([
                 'product_id' => $product->id,
-                'product_price_tier_id' => $tier->id,
+                'product_price_tier_id' => $preparedItem['product_price_tier_id'],
                 'product_code' => $product->product_code,
                 'product_name' => $product->name,
                 'quantity' => $preparedItem['quantity'],
                 'unit' => $product->unit,
-                'tier_key' => $tier->tier_key,
-                'tier_label' => $tier->tier_label,
+                'tier_key' => $preparedItem['tier_key'],
+                'tier_label' => $preparedItem['tier_label'],
                 'unit_price' => $preparedItem['unit_price'],
                 'line_total' => $preparedItem['line_total'],
             ]);
@@ -379,14 +420,26 @@ class OfferController extends Controller
 
     private function maxReservableForProduct(Product $product, ?Offer $ignoreOffer = null): float
     {
-        $reserved = DB::table('offer_items')
+        $offerReserved = DB::table('offer_items')
             ->join('offers', 'offers.id', '=', 'offer_items.offer_id')
             ->where('offer_items.product_id', $product->id)
             ->whereIn('offers.status', Offer::RESERVING_STATUSES)
             ->when($ignoreOffer, fn ($query) => $query->where('offers.id', '!=', $ignoreOffer->id))
             ->sum('offer_items.quantity');
 
-        return max(0, $product->total_stock - (float) $product->minimum_stock - (float) $reserved);
+        $branchReserved = DB::table('branch_withdrawal_items')
+            ->join('branch_withdrawals', 'branch_withdrawals.id', '=', 'branch_withdrawal_items.branch_withdrawal_id')
+            ->where('branch_withdrawal_items.product_id', $product->id)
+            ->whereIn('branch_withdrawals.status', BranchWithdrawal::RESERVING_STATUSES)
+            ->sum('branch_withdrawal_items.quantity');
+
+        return max(
+            0,
+            $product->total_stock
+            - (float) $product->minimum_stock
+            - (float) $offerReserved
+            - (float) $branchReserved
+        );
     }
 
     private function canEdit(Offer $offer): bool
@@ -405,7 +458,7 @@ class OfferController extends Controller
 
     private function products()
     {
-        return Product::query()->orderBy('name')->get();
+        return Product::query()->with('categories')->orderBy('name')->get();
     }
 
     private function templates(): array
