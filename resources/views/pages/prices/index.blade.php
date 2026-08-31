@@ -1,12 +1,23 @@
-<x-layouts.premium title="Preise" subtitle="Preisstaffeln pro Produkt, Kundengruppe und Gewichtsstufe.">
+<x-layouts.premium title="Preise" subtitle="Preise pro Produkt, Kundengruppe und Mengenbereich verwalten.">
     @if (session('success'))
         <div class="premium-alert">{{ session('success') }}</div>
+    @endif
+
+    @if ($errors->any())
+        <div class="premium-alert" style="border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.10);color:#991b1b;">
+            <strong>Bitte prüfe die Preisangaben.</strong>
+            <ul style="margin:8px 0 0 18px;">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
     @endif
 
     <section class="premium-card">
         <form method="GET" action="{{ route('prices.index') }}" class="premium-toolbar">
             <div class="premium-search">
-                <select name="product_id" class="premium-select" style="min-width: 280px;" onchange="this.form.submit()">
+                <select name="product_id" class="premium-select" style="min-width:280px;" onchange="this.form.submit()">
                     @forelse ($products as $product)
                         <option value="{{ $product->id }}" @selected($selectedProduct?->id === $product->id)>
                             {{ $product->name }}
@@ -16,7 +27,7 @@
                     @endforelse
                 </select>
 
-                <select name="customer_group_id" class="premium-select" style="min-width: 190px;" onchange="this.form.submit()">
+                <select name="customer_group_id" class="premium-select" style="min-width:190px;" onchange="this.form.submit()">
                     @foreach ($groups as $group)
                         <option value="{{ $group->id }}" @selected($selectedGroup?->id === $group->id)>
                             {{ $group->name }}
@@ -32,77 +43,213 @@
         </form>
 
         @if (! $selectedProduct)
-            <div class="premium-placeholder">
-                Bitte zuerst ein Produkt anlegen. Danach werden automatisch leere Preisstaffeln erstellt.
-            </div>
+            <div class="premium-placeholder">Bitte zuerst ein Produkt anlegen.</div>
+        @elseif (! $selectedGroup)
+            <div class="premium-placeholder">Bitte zuerst eine Kundengruppe anlegen.</div>
         @else
-            <form method="POST" action="{{ route('prices.update') }}">
+            <div class="pricing-mode-info">
+                <div>
+                    <span class="pricing-mode-kicker">Preislogik</span>
+                    <strong>{{ $usesPriceTiers ? 'Kategorie-Preisstaffel' : 'Manuelle Produktregeln' }}</strong>
+                    <small>
+                        @if ($usesPriceTiers)
+                            Die Kategorie verwendet die bestehenden Staffelbereiche. Die Preise bleiben für dieses Produkt und diese Kundengruppe individuell.
+                        @else
+                            Für dieses Produkt werden freie Von-/Bis-Mengen und Preise für die ausgewählte Kundengruppe verwendet.
+                        @endif
+                    </small>
+                </div>
+                <span class="premium-badge {{ $usesPriceTiers ? 'ok' : '' }}">{{ $selectedProduct->unitLabel('de') }}</span>
+            </div>
+
+            <form method="POST" action="{{ route('prices.update') }}" id="pricing-form">
                 @csrf
                 @method('PUT')
 
                 <input type="hidden" name="product_id" value="{{ $selectedProduct->id }}">
                 <input type="hidden" name="customer_group_id" value="{{ $selectedGroup->id }}">
 
-                <div class="premium-table-wrap">
-                    <table class="premium-table">
-                        <thead>
-                            <tr>
-                                <th>Produkt</th>
-                                <th>Kundengruppe</th>
-                                <th>Gewichtsbereich</th>
-                                <th>Preisstufe</th>
-                                <th>Preis</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($tiers as $tier)
+                @if ($usesPriceTiers)
+                    <div class="premium-table-wrap">
+                        <table class="premium-table">
+                            <thead>
                                 <tr>
-                                    <td>
-                                        <strong>{{ $selectedProduct->name }}</strong>
-                                        <div class="premium-muted">{{ $selectedProduct->product_code }}</div>
-                                    </td>
-                                    <td>
-                                        <x-customer-group-badge :group="$selectedGroup" />
-                                    </td>
-                                    <td>
-                                        {{ $tier->max_grams === null
-                                            ? 'ab ' . $tier->min_grams . ' Gramm'
-                                            : $tier->min_grams . '–' . $tier->max_grams . ' Gramm' }}
-                                    </td>
-                                    <td><span class="premium-code">{{ $tier->tier_label }}</span></td>
-                                    <td>
-                                        <input
-                                            name="prices[{{ $tier->id }}]"
-                                            type="number"
-                                            step="0.01"
-                                            min="0"
-                                            class="premium-input"
-                                            style="max-width: 180px;"
-                                            value="{{ old('prices.' . $tier->id, $tier->price) }}"
-                                        >
-                                        @error('prices.' . $tier->id)
-                                            <div class="premium-error">{{ $message }}</div>
-                                        @enderror
-                                    </td>
+                                    <th>Produkt</th>
+                                    <th>Kundengruppe</th>
+                                    <th>Mengenbereich</th>
+                                    <th>Preisstufe</th>
+                                    <th>Preis pro Einheit</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                @foreach ($tiers as $tier)
+                                    <tr>
+                                        <td>
+                                            <strong>{{ $selectedProduct->name }}</strong>
+                                            <div class="premium-muted">{{ $selectedProduct->product_code }}</div>
+                                        </td>
+                                        <td><x-customer-group-badge :group="$selectedGroup" /></td>
+                                        <td>
+                                            {{ $tier->max_grams === null
+                                                ? 'ab ' . \App\Support\GermanNumber::format($tier->min_grams) . ' ' . $selectedProduct->unitLabel('de')
+                                                : \App\Support\GermanNumber::format($tier->min_grams) . '–' . \App\Support\GermanNumber::format($tier->max_grams) . ' ' . $selectedProduct->unitLabel('de') }}
+                                        </td>
+                                        <td><span class="premium-code">{{ $tier->tier_label }}</span></td>
+                                        <td>
+                                            <input
+                                                name="prices[{{ $tier->id }}]"
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                class="premium-input"
+                                                style="max-width:180px;"
+                                                value="{{ old('prices.' . $tier->id, $tier->price) }}"
+                                            >
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    @php
+                        $oldRules = old('rules');
+                        $rulesForForm = $oldRules !== null
+                            ? collect($oldRules)
+                            : $manualRules->map(fn ($rule) => [
+                                'min_quantity' => \App\Support\GermanNumber::input($rule->min_quantity),
+                                'max_quantity' => $rule->max_quantity !== null ? \App\Support\GermanNumber::input($rule->max_quantity) : '',
+                                'price' => $rule->price,
+                                'label' => $rule->label,
+                            ]);
+
+                        if ($rulesForForm->isEmpty()) {
+                            $rulesForForm = collect([[
+                                'min_quantity' => '1',
+                                'max_quantity' => '',
+                                'price' => '',
+                                'label' => '',
+                            ]]);
+                        }
+                    @endphp
+
+                    <div class="manual-rule-head">
+                        <div>
+                            <h3>Manuelle Mengenregeln</h3>
+                            <p>Beispiel: 1–5 Stück = 3,00 € pro Stück, 6–10 Stück = 2,70 €. Leeres „Bis“ bedeutet unbegrenzt.</p>
+                        </div>
+                        <button type="button" class="premium-btn" id="add-price-rule">
+                            <i class="bi bi-plus-lg"></i>
+                            Regel hinzufügen
+                        </button>
+                    </div>
+
+                    <div class="premium-table-wrap">
+                        <table class="premium-table manual-price-table">
+                            <thead>
+                                <tr>
+                                    <th>Von</th>
+                                    <th>Bis</th>
+                                    <th>Einheit</th>
+                                    <th>Preis pro Einheit</th>
+                                    <th>Bezeichnung optional</th>
+                                    <th>Aktion</th>
+                                </tr>
+                            </thead>
+                            <tbody id="manual-price-rules">
+                                @foreach ($rulesForForm as $index => $rule)
+                                    <tr data-price-rule>
+                                        <td><input name="rules[{{ $index }}][min_quantity]" type="number" step="0.001" min="0.001" class="premium-input" value="{{ $rule['min_quantity'] ?? '' }}" required></td>
+                                        <td><input name="rules[{{ $index }}][max_quantity]" type="number" step="0.001" min="0.001" class="premium-input" value="{{ $rule['max_quantity'] ?? '' }}" placeholder="unbegrenzt"></td>
+                                        <td><strong>{{ $selectedProduct->unitLabel('de') }}</strong></td>
+                                        <td><input name="rules[{{ $index }}][price]" type="number" step="0.01" min="0" class="premium-input" value="{{ $rule['price'] ?? '' }}" required></td>
+                                        <td><input name="rules[{{ $index }}][label]" class="premium-input" maxlength="100" value="{{ $rule['label'] ?? '' }}" placeholder="z. B. Kartonpreis"></td>
+                                        <td><button type="button" class="premium-icon-btn premium-danger remove-price-rule" title="Regel entfernen"><i class="bi bi-trash"></i></button></td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <template id="manual-price-rule-template">
+                        <tr data-price-rule>
+                            <td><input data-name="min_quantity" type="number" step="0.001" min="0.001" class="premium-input" required></td>
+                            <td><input data-name="max_quantity" type="number" step="0.001" min="0.001" class="premium-input" placeholder="unbegrenzt"></td>
+                            <td><strong>{{ $selectedProduct->unitLabel('de') }}</strong></td>
+                            <td><input data-name="price" type="number" step="0.01" min="0" class="premium-input" required></td>
+                            <td><input data-name="label" class="premium-input" maxlength="100" placeholder="z. B. Kartonpreis"></td>
+                            <td><button type="button" class="premium-icon-btn premium-danger remove-price-rule" title="Regel entfernen"><i class="bi bi-trash"></i></button></td>
+                        </tr>
+                    </template>
+                @endif
 
                 @if (auth()->user()?->hasRole([\App\Models\User::ROLE_MANAGER, \App\Models\User::ROLE_SALES]))
-                    <div style="display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;">
+                    <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;">
                         <button class="premium-btn gold" type="submit">
                             <i class="bi bi-save"></i>
-                            Alle Preise speichern
+                            {{ $usesPriceTiers ? 'Alle Preise speichern' : 'Preisregeln speichern' }}
                         </button>
                     </div>
                 @else
-                    <div class="premium-placeholder" style="margin-top:18px;">
-                        Du kannst Preise sehen, aber nicht ändern.
-                    </div>
+                    <div class="premium-placeholder" style="margin-top:18px;">Du kannst Preise sehen, aber nicht ändern.</div>
                 @endif
             </form>
         @endif
     </section>
+
+    @if ($selectedProduct && $selectedGroup && ! $usesPriceTiers)
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const body = document.getElementById('manual-price-rules');
+                const template = document.getElementById('manual-price-rule-template');
+                const addButton = document.getElementById('add-price-rule');
+
+                if (!body || !template || !addButton) return;
+
+                const rows = () => Array.from(body.querySelectorAll('[data-price-rule]'));
+
+                const reindex = () => {
+                    rows().forEach((row, index) => {
+                        ['min_quantity', 'max_quantity', 'price', 'label'].forEach((field) => {
+                            const input = row.querySelector(`[name*="[${field}]"]`) || row.querySelector(`[data-name="${field}"]`);
+                            if (input) input.name = `rules[${index}][${field}]`;
+                        });
+                    });
+                };
+
+                const bindRemove = () => {
+                    body.querySelectorAll('.remove-price-rule').forEach((button) => {
+                        if (button.dataset.bound === '1') return;
+                        button.dataset.bound = '1';
+                        button.addEventListener('click', () => {
+                            const row = button.closest('[data-price-rule]');
+                            if (!row) return;
+
+                            if (rows().length === 1) {
+                                row.querySelectorAll('input').forEach((input) => input.value = '');
+                                return;
+                            }
+
+                            row.remove();
+                            reindex();
+                        });
+                    });
+                };
+
+                addButton.addEventListener('click', () => {
+                    body.appendChild(template.content.cloneNode(true));
+                    reindex();
+                    bindRemove();
+                    rows().at(-1)?.querySelector('input')?.focus();
+                });
+
+                reindex();
+                bindRemove();
+            });
+        </script>
+    @endif
+
+    <style>
+        .pricing-mode-info{display:flex;justify-content:space-between;gap:18px;align-items:center;margin:0 0 18px;padding:16px 18px;border:1px solid #d8cbb7;border-radius:18px;background:#fffdf8}.pricing-mode-info>div{display:grid;gap:4px}.pricing-mode-info strong{font-size:18px}.pricing-mode-info small{color:#665f54;font-weight:700;line-height:1.4}.pricing-mode-kicker{color:#8a6a00;font-size:11px;font-weight:950;text-transform:uppercase;letter-spacing:.08em}.manual-rule-head{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:14px}.manual-rule-head h3{margin:0;font-size:20px}.manual-rule-head p{margin:5px 0 0;color:#665f54;font-weight:700}.manual-price-table{min-width:980px}.manual-price-table th:nth-child(1),.manual-price-table th:nth-child(2){width:150px}.manual-price-table th:nth-child(3){width:110px}.manual-price-table th:nth-child(4){width:180px}.manual-price-table th:nth-child(6){width:80px;text-align:center}.manual-price-table td:nth-child(6){text-align:center}.premium-icon-btn{width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #d8cbb7;border-radius:10px;background:#fffdf8;cursor:pointer}.premium-icon-btn.premium-danger{color:#991b1b}@media(max-width:720px){.pricing-mode-info,.manual-rule-head{align-items:stretch;flex-direction:column}.manual-rule-head .premium-btn{width:100%}}
+    </style>
 </x-layouts.premium>
