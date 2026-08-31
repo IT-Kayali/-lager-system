@@ -142,15 +142,25 @@ class Product extends Model
 
     public function getReservedStockAttribute(): float
     {
-        if (! Schema::hasTable('offers') || ! Schema::hasTable('offer_items')) {
-            return 0.0;
+        $reserved = 0.0;
+
+        if (Schema::hasTable('offers') && Schema::hasTable('offer_items')) {
+            $reserved += (float) DB::table('offer_items')
+                ->join('offers', 'offers.id', '=', 'offer_items.offer_id')
+                ->where('offer_items.product_id', $this->id)
+                ->whereIn('offers.status', Offer::RESERVING_STATUSES)
+                ->sum('offer_items.quantity');
         }
 
-        return (float) DB::table('offer_items')
-            ->join('offers', 'offers.id', '=', 'offer_items.offer_id')
-            ->where('offer_items.product_id', $this->id)
-            ->whereIn('offers.status', Offer::RESERVING_STATUSES)
-            ->sum('offer_items.quantity');
+        if (Schema::hasTable('branch_withdrawals') && Schema::hasTable('branch_withdrawal_items')) {
+            $reserved += (float) DB::table('branch_withdrawal_items')
+                ->join('branch_withdrawals', 'branch_withdrawals.id', '=', 'branch_withdrawal_items.branch_withdrawal_id')
+                ->where('branch_withdrawal_items.product_id', $this->id)
+                ->whereIn('branch_withdrawals.status', BranchWithdrawal::RESERVING_STATUSES)
+                ->sum('branch_withdrawal_items.quantity');
+        }
+
+        return $reserved;
     }
 
     public function getAvailableStockAttribute(): float
