@@ -63,7 +63,7 @@ class BranchWithdrawalController extends Controller
             : null;
 
         $withdrawal = new BranchWithdrawal([
-            'branch_name' => BranchWithdrawal::BRANCH_MAIN,
+            'branch_name' => null,
             'status' => BranchWithdrawal::STATUS_OPEN,
         ]);
 
@@ -91,6 +91,10 @@ class BranchWithdrawalController extends Controller
         }
 
         DB::transaction(function () use ($data): void {
+            if ($data['status'] !== BranchWithdrawal::STATUS_CANCELLED) {
+                $this->validateItemsAvailability($data['items']);
+            }
+
             $firstItem = $data['items'][0];
 
             $withdrawal = BranchWithdrawal::query()->create([
@@ -117,7 +121,7 @@ class BranchWithdrawalController extends Controller
 
         return redirect()
             ->route($this->indexRouteName())
-            ->with('success', 'Filialausgang wurde gespeichert.');
+            ->with('success', 'Filialausgang wurde gespeichert. Die Ware ist reserviert.');
     }
 
     public function edit(BranchWithdrawal $branchWithdrawal): View
@@ -156,6 +160,12 @@ class BranchWithdrawalController extends Controller
 
             if ($withdrawal->isIssued()) {
                 $this->rollbackWithdrawal($withdrawal);
+                $withdrawal->refresh();
+                $withdrawal->load('items');
+            }
+
+            if ($data['status'] !== BranchWithdrawal::STATUS_CANCELLED) {
+                $this->validateItemsAvailability($data['items'], $withdrawal->id);
             }
 
             $withdrawal->update([
@@ -243,7 +253,7 @@ class BranchWithdrawalController extends Controller
 
         return redirect()
             ->route('branch-withdrawals.index')
-            ->with('success', 'Filialausgang wurde gelöscht. Bereits ausgegebene Mengen wurden zurückgebucht.');
+            ->with('success', 'Filialausgang wurde gelöscht. Reservierungen wurden freigegeben und bereits ausgegebene Mengen zurückgebucht.');
     }
 
     private function validatedData(Request $request): array
@@ -264,6 +274,7 @@ class BranchWithdrawalController extends Controller
             'items.*.product_id' => ['required', 'integer', 'distinct', 'exists:products,id'],
             'items.*.quantity' => ['required', 'numeric', 'gt:0', 'max:999999999'],
         ], [
+            'branch_name.required' => 'Bitte wähle eine Filiale aus.',
             'items.required' => 'Mindestens eine Produktposition ist erforderlich.',
             'items.min' => 'Mindestens eine Produktposition ist erforderlich.',
             'items.*.product_id.required' => 'Bitte wähle für jede Position ein Produkt aus.',
@@ -271,6 +282,47 @@ class BranchWithdrawalController extends Controller
             'items.*.quantity.required' => 'Bitte trage für jede Position eine Menge ein.',
             'items.*.quantity.gt' => 'Die Menge muss größer als 0 sein.',
         ]);
+    }
+
+    private function validateItemsAvailability(array $items, ?int $excludeWithdrawalId = null): void
+    {
+        foreach (collect($items)->sortBy('product_id') as $item) {
+            $product = Product::query()
+                ->lockForUpdate()
+                ->findOrFail((int) $item['product_id']);
+
+            $requested = round((float) $item['quantity'], 3);
+            $totalStock = round((float) ProductBatch::query()
+                ->where('product_id', $product->id)
+                ->sum('quantity'), 3);
+
+            $offerReserved = round((float) DB::table('offer_items')
+                ->join('offers', 'offers.id', '=', 'offer_items.offer_id')
+                ->where('offer_items.product_id', $product->id)
+                ->whereIn('offers.status', \App\Models\Offer::RESERVING_STATUSES)
+                ->sum('offer_items.quantity'), 3);
+
+            $branchReservedQuery = DB::table('branch_withdrawal_items')
+                ->join('branch_withdrawals', 'branch_withdrawals.id', '=', 'branch_withdrawal_items.branch_withdrawal_id')
+                ->where('branch_withdrawal_items.product_id', $product->id)
+                ->whereIn('branch_withdrawals.status', BranchWithdrawal::RESERVING_STATUSES);
+
+            if ($excludeWithdrawalId !== null) {
+                $branchReservedQuery->where('branch_withdrawals.id', '!=', $excludeWithdrawalId);
+            }
+
+            $branchReserved = round((float) $branchReservedQuery->sum('branch_withdrawal_items.quantity'), 3);
+            $available = max(0, round($totalStock - $offerReserved - $branchReserved, 3));
+
+            if ($requested > $available) {
+                throw ValidationException::withMessages([
+                    'items' => "Für „{$product->name}“ sind nur "
+                        . \App\Support\GermanNumber::format($available)
+                        . ' ' . $product->unitLabel('de')
+                        . ' verfügbar. Der Filialausgang wurde nicht erstellt.',
+                ]);
+            }
+        }
     }
 
     private function replaceItems(BranchWithdrawal $withdrawal, array $items): void
