@@ -44,6 +44,7 @@ class ProductCategoryController extends Controller
             'category' => new ProductCategory([
                 'priority' => $this->priorityService->nextPriority(),
                 'is_active' => true,
+                'price_tiers_enabled' => true,
                 'color' => '#d4af37',
             ]),
         ]);
@@ -111,10 +112,12 @@ class ProductCategoryController extends Controller
             'description' => ['nullable', 'string', 'max:3000'],
             'color' => ['nullable', 'string', 'max:20'],
             'is_active' => ['nullable', 'boolean'],
+            'price_tiers_enabled' => ['nullable', 'boolean'],
         ]);
 
         $data['priority'] = (int) $data['priority'];
         $data['is_active'] = $request->boolean('is_active');
+        $data['price_tiers_enabled'] = $request->boolean('price_tiers_enabled');
 
         return $data;
     }
