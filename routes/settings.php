@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BranchWithdrawalController;
 use App\Http\Controllers\BranchWithdrawalPdfController;
+use App\Http\Controllers\OfferInternalNoteController;
 use App\Http\Controllers\PriceTierDefinitionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SettingsController;
@@ -21,6 +22,9 @@ Route::middleware(['auth'])->group(function () {
         ->name('settings.batch-expiry.update')
         ->middleware('role:' . User::ROLE_ADMIN);
 
+    Route::post('offer-notes/{offer}', [OfferInternalNoteController::class, 'store'])
+        ->name('offer-notes.store');
+
     Route::get('branch-withdrawals/{branchWithdrawal}/delivery-note', [BranchWithdrawalPdfController::class, 'stream'])
         ->name('branch-withdrawals.delivery-note')
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE);
@@ -37,10 +41,6 @@ Route::middleware(['auth'])->group(function () {
         ->name('branch-withdrawals.destroy')
         ->middleware('role:' . User::ROLE_MANAGER);
 
-    /*
-     * Verkauf erhält ausschließlich lesenden Produktzugriff.
-     * Die normalen Produkt-Schreibwege bleiben Manager/Lager vorbehalten.
-     */
     Route::get('verkauf/produkte', [ProductController::class, 'index'])
         ->name('sales.products.index')
         ->middleware('role:' . User::ROLE_SALES);
@@ -49,10 +49,6 @@ Route::middleware(['auth'])->group(function () {
         ->name('sales.products.show')
         ->middleware('role:' . User::ROLE_SALES);
 
-    /*
-     * Verkauf darf Filialausgänge ansehen und neu erfassen.
-     * Nachträgliche Bearbeitung/Statuspflege bleibt Manager bzw. Lager vorbehalten.
-     */
     Route::get('verkauf/filialausgaenge', [BranchWithdrawalController::class, 'index'])
         ->name('sales.branch-withdrawals.index')
         ->middleware('role:' . User::ROLE_SALES);
@@ -65,13 +61,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('sales.branch-withdrawals.store')
         ->middleware('role:' . User::ROLE_SALES);
 
-    /* Persönliche Konto-/Sicherheitsseiten bleiben für jeden angemeldeten Benutzer erreichbar. */
-    Route::livewire('settings/profile', 'pages::settings.profile')
-        ->name('profile.edit');
-
-    Route::livewire('settings/appearance', 'pages::settings.appearance')
-        ->name('appearance.edit');
-
-    Route::livewire('settings/security', 'pages::settings.security')
-        ->name('security.edit');
+    Route::livewire('settings/profile', 'pages::settings.profile')->name('profile.edit');
+    Route::livewire('settings/appearance', 'pages::settings.appearance')->name('appearance.edit');
+    Route::livewire('settings/security', 'pages::settings.security')->name('security.edit');
 });

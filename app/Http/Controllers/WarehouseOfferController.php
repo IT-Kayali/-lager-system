@@ -60,7 +60,7 @@ class WarehouseOfferController extends Controller
     public function show(Offer $offer): View
     {
         $this->authorizeWarehouseOffer($offer);
-        $offer->load(['customer.group', 'items.product']);
+        $offer->load(['customer.group', 'items.product', 'internalNotes.user']);
 
         return view('pages.warehouse-offers.show', [
             'offer' => $offer,
@@ -68,24 +68,15 @@ class WarehouseOfferController extends Controller
         ]);
     }
 
-    public function updateStatus(
-        Request $request,
-        Offer $offer,
-        OfferFulfillmentService $fulfillmentService
-    ): RedirectResponse {
+    public function updateStatus(Request $request, Offer $offer, OfferFulfillmentService $fulfillmentService): RedirectResponse
+    {
         $this->authorizeWarehouseOffer($offer);
-
-        $data = $request->validate([
-            'status' => ['required', 'string'],
-        ]);
-
+        $data = $request->validate(['status' => ['required', 'string']]);
         $newStatus = $data['status'];
         $allowedStatuses = array_keys($this->nextStatuses($offer));
 
         if (! in_array($newStatus, $allowedStatuses, true)) {
-            return redirect()
-                ->route('warehouse.offers.show', $offer)
-                ->with('error', 'Dieser Statuswechsel ist für Lager nicht erlaubt.');
+            return redirect()->route('warehouse.offers.show', $offer)->with('error', 'Dieser Statuswechsel ist für Lager nicht erlaubt.');
         }
 
         $oldStatus = $offer->status;
@@ -94,10 +85,7 @@ class WarehouseOfferController extends Controller
             if ($newStatus === Offer::STATUS_COMPLETED) {
                 $fulfillmentService->complete($offer);
             } else {
-                $offer->update([
-                    'status' => $newStatus,
-                ]);
-
+                $offer->update(['status' => $newStatus]);
                 ActivityLog::record('offer.status.updated', $offer, [
                     'offer_number' => $offer->offer_number,
                     'old_status' => $oldStatus,
@@ -106,55 +94,32 @@ class WarehouseOfferController extends Controller
                 ]);
             }
 
-            return redirect()
-                ->route('warehouse.offers.show', $offer)
-                ->with('success', 'Status wurde geändert.');
+            return redirect()->route('warehouse.offers.show', $offer)->with('success', 'Status wurde geändert.');
         } catch (\Throwable $exception) {
-            return redirect()
-                ->route('warehouse.offers.show', $offer)
-                ->with('error', $exception->getMessage());
+            return redirect()->route('warehouse.offers.show', $offer)->with('error', $exception->getMessage());
         }
     }
 
     public function deliveryNote(Offer $offer): Response
     {
         $this->authorizeWarehouseOffer($offer);
-
         return app(OfferPdfController::class)->stream($offer, 'delivery-note');
     }
 
     private function authorizeWarehouseOffer(Offer $offer): void
     {
-        abort_unless(
-            in_array($offer->status, self::VISIBLE_STATUSES, true),
-            403,
-            'Dieses Angebot ist für Lager nicht freigegeben.'
-        );
+        abort_unless(in_array($offer->status, self::VISIBLE_STATUSES, true), 403, 'Dieses Angebot ist für Lager nicht freigegeben.');
     }
 
-    /**
-     * Lager arbeitet ausschließlich vorwärts:
-     * In Bearbeitung -> Abholbereit -> Erledigt.
-     * Stornieren, zurück auf Angebot und Reservierung abgelaufen bleiben Verkauf/Manager vorbehalten.
-     *
-     * @return array<string, string>
-     */
     private function nextStatuses(Offer $offer): array
     {
         return match ($offer->status) {
-            Offer::STATUS_IN_PROGRESS => [
-                Offer::STATUS_READY => Offer::STATUS_LABELS[Offer::STATUS_READY],
-            ],
-            Offer::STATUS_READY => [
-                Offer::STATUS_COMPLETED => Offer::STATUS_LABELS[Offer::STATUS_COMPLETED],
-            ],
+            Offer::STATUS_IN_PROGRESS => [Offer::STATUS_READY => Offer::STATUS_LABELS[Offer::STATUS_READY]],
+            Offer::STATUS_READY => [Offer::STATUS_COMPLETED => Offer::STATUS_LABELS[Offer::STATUS_COMPLETED]],
             default => [],
         };
     }
 
-    /**
-     * @return array<string, string>
-     */
     private function statusLabels(): array
     {
         return [

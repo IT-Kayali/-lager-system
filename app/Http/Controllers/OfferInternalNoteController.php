@@ -25,8 +25,6 @@ class OfferInternalNoteController extends Controller
             'note_id' => $note->id,
         ]);
 
-        return redirect()
-            ->route('offers.show', $offer)
-            ->with('success', 'Interne Notiz wurde hinzugefügt.');
+        return back()->with('success', 'Interne Notiz wurde hinzugefügt.');
     }
 }
