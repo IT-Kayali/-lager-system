@@ -14,6 +14,10 @@ Route::middleware(['auth'])->group(function () {
         ->name('price-tiers.update')
         ->middleware('role:' . User::ROLE_ADMIN);
 
+    Route::put('settings/offer-numbering', [SettingsController::class, 'updateOfferNumber'])
+        ->name('settings.offer-numbering.update')
+        ->middleware('role:' . User::ROLE_ADMIN);
+
     Route::put('settings/low-stock-warning', [SettingsController::class, 'updateLowStockWarning'])
         ->name('settings.low-stock-warning.update')
         ->middleware('role:' . User::ROLE_ADMIN);
