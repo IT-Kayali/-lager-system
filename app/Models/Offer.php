@@ -34,12 +34,25 @@ class Offer extends Model
     {
         static::creating(function (Offer $offer): void {
             if (! $offer->offer_number) {
-                $year = now()->format('Y');
-                $lastNumber = Offer::query()->where('offer_number', 'like', 'ANG-' . $year . '-%')->orderByDesc('id')->value('offer_number');
-                $lastSequence = $lastNumber ? (int) substr($lastNumber, -3) : 0;
-                $offer->offer_number = 'ANG-' . $year . '-' . str_pad((string) ($lastSequence + 1), 3, '0', STR_PAD_LEFT);
+                $offer->offer_number = static::nextOfferNumber();
             }
         });
+    }
+
+    public static function nextOfferNumber(): string
+    {
+        $start = ApplicationSetting::offerNumberStart();
+        $highestExisting = static::query()
+            ->pluck('offer_number')
+            ->filter(fn ($number) => preg_match('/^\d+$/', (string) $number) === 1)
+            ->map(fn ($number) => (int) $number)
+            ->max();
+
+        $next = $highestExisting === null
+            ? $start
+            : max($start, $highestExisting + 1);
+
+        return str_pad((string) $next, ApplicationSetting::offerNumberDigits(), '0', STR_PAD_LEFT);
     }
 
     public function customer(): BelongsTo { return $this->belongsTo(Customer::class); }
