@@ -54,7 +54,7 @@
     $oldItems = old('items');
     $itemsForForm = $oldItems ? collect($oldItems) : collect($formItems);
     if ($itemsForForm->isEmpty()) {
-        $itemsForForm = collect([['product_id' => '', 'quantity' => '']]);
+        $itemsForForm = collect([['product_id' => '', 'quantity' => '', 'line_total' => '']]);
     }
 
     $unitLabels = [
@@ -67,7 +67,7 @@
 <div id="offer-items" class="offer-items-list">
     @foreach ($itemsForForm as $index => $item)
         <div class="premium-card offer-item-row" style="padding:14px; box-shadow:none;">
-            <div class="premium-form-grid" style="grid-template-columns: 1.8fr .8fr auto;">
+            <div class="premium-form-grid" style="grid-template-columns: 1.8fr .8fr .8fr auto;">
                 <div class="premium-form-field">
                     <label>Produkt</label>
                     <select name="items[{{ $index }}][product_id]" class="premium-select">
@@ -95,6 +95,20 @@
                     >
                 </div>
 
+                <div class="premium-form-field offer-line-total-field">
+                    <label>Gesamtpreis</label>
+                    <input
+                        name="items[{{ $index }}][line_total]"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        class="premium-input offer-line-total-input"
+                        value="{{ $item['line_total'] ?? '' }}"
+                        placeholder="automatisch"
+                    >
+                    <div class="premium-muted offer-line-total-hint" style="margin-top:6px;">Automatisch berechnet, kann manuell angepasst werden.</div>
+                </div>
+
                 <div class="premium-form-field" style="display:flex; align-items:end;">
                     <button type="button" class="premium-icon-btn premium-danger remove-offer-item" title="Position entfernen">
                         <i class="bi bi-trash"></i>
@@ -103,6 +117,11 @@
             </div>
         </div>
     @endforeach
+</div>
+
+<div class="offer-price-summary">
+    <span class="premium-muted">Produkt-Gesamtsumme</span>
+    <strong id="offer-products-total">0,00 €</strong>
 </div>
 
 <div class="offer-form-actions">
@@ -119,7 +138,7 @@
 
 <template id="offer-item-template">
     <div class="premium-card offer-item-row" style="padding:14px; box-shadow:none;">
-        <div class="premium-form-grid" style="grid-template-columns: 1.8fr .8fr auto;">
+        <div class="premium-form-grid" style="grid-template-columns: 1.8fr .8fr .8fr auto;">
             <div class="premium-form-field">
                 <label>Produkt</label>
                 <select data-name="product_id" class="premium-select">
@@ -138,6 +157,12 @@
                 <input data-name="quantity" type="number" step="0.01" min="0.01" max="5000" class="premium-input" placeholder="z. B. 50">
             </div>
 
+            <div class="premium-form-field offer-line-total-field">
+                <label>Gesamtpreis</label>
+                <input data-name="line_total" type="number" step="0.01" min="0" class="premium-input offer-line-total-input" placeholder="automatisch">
+                <div class="premium-muted offer-line-total-hint" style="margin-top:6px;">Automatisch berechnet, kann manuell angepasst werden.</div>
+            </div>
+
             <div class="premium-form-field" style="display:flex; align-items:end;">
                 <button type="button" class="premium-icon-btn premium-danger remove-offer-item" title="Position entfernen">
                     <i class="bi bi-trash"></i>
@@ -151,33 +176,113 @@
     document.addEventListener('DOMContentLoaded', function () {
         const wrapper = document.getElementById('offer-items');
         const template = document.getElementById('offer-item-template');
+        const customer = document.getElementById('customer_id');
+        const totalOutput = document.getElementById('offer-products-total');
+        const pricePreviewUrl = @json(route('offers.price-preview'));
 
         function getRows() {
             return Array.from(wrapper.querySelectorAll('.offer-item-row'));
         }
 
-        function rowHasData(row) {
-            const product = row.querySelector('select[name*="[product_id]"], select[data-name="product_id"]');
-            const quantity = row.querySelector('input[name*="[quantity]"], input[data-name="quantity"]');
+        function getRowFields(row) {
+            return {
+                product: row.querySelector('select[name*="[product_id]"], select[data-name="product_id"]'),
+                quantity: row.querySelector('input[name*="[quantity]"], input[data-name="quantity"]'),
+                total: row.querySelector('input[name*="[line_total]"], input[data-name="line_total"]'),
+                hint: row.querySelector('.offer-line-total-hint'),
+            };
+        }
 
+        function rowHasData(row) {
+            const { product, quantity } = getRowFields(row);
             return Boolean(product && product.value) || Boolean(quantity && quantity.value);
         }
 
         function rowIsComplete(row) {
-            const product = row.querySelector('select[name*="[product_id]"], select[data-name="product_id"]');
-            const quantity = row.querySelector('input[name*="[quantity]"], input[data-name="quantity"]');
+            const { product, quantity } = getRowFields(row);
+            return Boolean(product && product.value) && Boolean(quantity && Number(quantity.value) > 0);
+        }
 
-            return Boolean(product && product.value) && Boolean(quantity && quantity.value);
+        function formatMoney(value) {
+            return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(value || 0));
+        }
+
+        function updateGrandTotal() {
+            const total = getRows().reduce((sum, row) => {
+                const field = getRowFields(row).total;
+                const value = field && field.value !== '' ? Number(field.value) : 0;
+                return sum + (Number.isFinite(value) ? value : 0);
+            }, 0);
+
+            if (totalOutput) {
+                totalOutput.textContent = formatMoney(total);
+            }
+        }
+
+        function markInitialState(row) {
+            if (row.dataset.priceStateInitialized === '1') return;
+            const { product, quantity, total } = getRowFields(row);
+            row.dataset.priceStateInitialized = '1';
+            row.dataset.initialProduct = product?.value || '';
+            row.dataset.initialQuantity = quantity?.value || '';
+            row.dataset.preserveInitialTotal = total?.value !== '' ? '1' : '0';
+            if (total) total.dataset.manualOverride = total.value !== '' ? '1' : '0';
+        }
+
+        async function refreshAutomaticPrice(row, force = false) {
+            const { product, quantity, total, hint } = getRowFields(row);
+            if (!product || !quantity || !total) return;
+
+            markInitialState(row);
+
+            if (!force && row.dataset.preserveInitialTotal === '1'
+                && product.value === row.dataset.initialProduct
+                && quantity.value === row.dataset.initialQuantity) {
+                updateGrandTotal();
+                return;
+            }
+
+            row.dataset.preserveInitialTotal = '0';
+
+            if (!customer?.value || !product.value || !quantity.value || Number(quantity.value) <= 0) {
+                if (total.dataset.manualOverride !== '1') total.value = '';
+                if (hint) hint.textContent = 'Automatisch berechnet, kann manuell angepasst werden.';
+                updateGrandTotal();
+                return;
+            }
+
+            const requestId = String((Number(row.dataset.priceRequestId || 0) + 1));
+            row.dataset.priceRequestId = requestId;
+
+            try {
+                const url = new URL(pricePreviewUrl, window.location.origin);
+                url.searchParams.set('customer_id', customer.value);
+                url.searchParams.set('product_id', product.value);
+                url.searchParams.set('quantity', quantity.value);
+
+                const response = await fetch(url.toString(), {
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    credentials: 'same-origin',
+                });
+
+                if (!response.ok) throw new Error('Preis konnte nicht berechnet werden.');
+                const data = await response.json();
+                if (row.dataset.priceRequestId !== requestId) return;
+
+                total.value = Number(data.line_total || 0).toFixed(2);
+                total.dataset.manualOverride = '0';
+                if (hint) hint.textContent = `Automatisch: ${formatMoney(data.unit_price)} je Einheit · ${data.tier_label || 'Preisregel'}`;
+                updateGrandTotal();
+            } catch (error) {
+                if (hint) hint.textContent = 'Automatischer Preis konnte nicht geladen werden. Gesamtpreis kann manuell eingetragen werden.';
+            }
         }
 
         function reindexRows() {
             getRows().forEach((row, index) => {
                 row.querySelectorAll('[data-name], select[name], input[name]').forEach((field) => {
-                    const key = field.dataset.name || field.name.match(/\[(product_id|quantity)\]/)?.[1];
-
-                    if (key) {
-                        field.name = `items[${index}][${key}]`;
-                    }
+                    const key = field.dataset.name || field.name.match(/\[(product_id|quantity|line_total)\]/)?.[1];
+                    if (key) field.name = `items[${index}][${key}]`;
                 });
             });
         }
@@ -192,64 +297,80 @@
         function ensureTrailingEmptyRow() {
             const rows = getRows();
             const lastRow = rows[rows.length - 1];
-
-            if (!lastRow || rowIsComplete(lastRow)) {
-                addEmptyRow();
-            }
+            if (!lastRow || rowIsComplete(lastRow)) addEmptyRow();
         }
 
         function removeExtraEmptyRows() {
             const rows = getRows();
-
             rows.forEach((row, index) => {
-                const isLast = index === rows.length - 1;
-
-                if (!isLast && !rowHasData(row) && rows.length > 1) {
-                    row.remove();
-                }
+                if (index !== rows.length - 1 && !rowHasData(row) && rows.length > 1) row.remove();
             });
-
             reindexRows();
         }
 
         function bindRowEvents() {
             getRows().forEach((row) => {
-                const product = row.querySelector('select[name*="[product_id]"], select[data-name="product_id"]');
-                const quantity = row.querySelector('input[name*="[quantity]"], input[data-name="quantity"]');
+                markInitialState(row);
+                const { product, quantity, total } = getRowFields(row);
                 const removeButton = row.querySelector('.remove-offer-item');
 
                 [product, quantity].forEach((field) => {
-                    if (!field || field.dataset.autoBound === '1') {
-                        return;
-                    }
-
+                    if (!field || field.dataset.autoBound === '1') return;
                     field.dataset.autoBound = '1';
 
-                    field.addEventListener('change', function () {
-                        ensureTrailingEmptyRow();
-                        removeExtraEmptyRows();
-                    });
+                    const changed = function () {
+                        const sameAsInitial = product?.value === row.dataset.initialProduct
+                            && quantity?.value === row.dataset.initialQuantity
+                            && row.dataset.preserveInitialTotal === '1';
 
-                    field.addEventListener('input', function () {
+                        if (!sameAsInitial && total) {
+                            total.dataset.manualOverride = '0';
+                        }
+
                         ensureTrailingEmptyRow();
                         removeExtraEmptyRows();
-                    });
+                        refreshAutomaticPrice(row);
+                    };
+
+                    field.addEventListener('change', changed);
+                    field.addEventListener('input', changed);
                 });
+
+                if (total && total.dataset.totalBound !== '1') {
+                    total.dataset.totalBound = '1';
+                    total.addEventListener('input', function () {
+                        total.dataset.manualOverride = '1';
+                        row.dataset.preserveInitialTotal = '0';
+                        const hint = row.querySelector('.offer-line-total-hint');
+                        if (hint) hint.textContent = 'Manuell angepasster Gesamtpreis für dieses Angebot.';
+                        updateGrandTotal();
+                    });
+                }
 
                 if (removeButton && removeButton.dataset.autoBound !== '1') {
                     removeButton.dataset.autoBound = '1';
-
                     removeButton.addEventListener('click', function () {
-                        const rows = getRows();
-
-                        if (rows.length > 1) {
+                        if (getRows().length > 1) {
                             row.remove();
                             reindexRows();
                             ensureTrailingEmptyRow();
                             removeExtraEmptyRows();
+                            updateGrandTotal();
                         }
                     });
                 }
+            });
+        }
+
+        if (customer && customer.dataset.priceBound !== '1') {
+            customer.dataset.priceBound = '1';
+            customer.addEventListener('change', function () {
+                getRows().forEach((row) => {
+                    row.dataset.preserveInitialTotal = '0';
+                    const total = getRowFields(row).total;
+                    if (total) total.dataset.manualOverride = '0';
+                    refreshAutomaticPrice(row, true);
+                });
             });
         }
 
@@ -257,6 +378,7 @@
         reindexRows();
         ensureTrailingEmptyRow();
         removeExtraEmptyRows();
+        updateGrandTotal();
     });
 </script>
 
@@ -371,7 +493,7 @@
     }
 
     .offer-item-row > .premium-form-grid {
-        grid-template-columns: minmax(220px, .75fr) minmax(320px, 1.45fr) minmax(150px, .55fr) auto !important;
+        grid-template-columns: minmax(180px, .65fr) minmax(280px, 1.35fr) minmax(140px, .5fr) minmax(170px, .55fr) auto !important;
         gap: 14px !important;
         align-items: end !important;
     }
@@ -424,6 +546,28 @@
 
     #offer-shipping-card .premium-form-field.full {
         grid-column: auto;
+    }
+
+    .offer-price-summary {
+        display:flex;
+        align-items:center;
+        justify-content:flex-end;
+        gap:14px;
+        padding:16px 20px;
+        border:1px solid #d8cbb7;
+        border-radius:16px;
+        background:#fffdf8;
+    }
+
+    .offer-price-summary strong {
+        font-size:24px;
+        font-weight:950;
+        color:#111;
+    }
+
+    .offer-line-total-input[data-manual-override="1"] {
+        border-color:#b99119 !important;
+        box-shadow:0 0 0 3px rgba(185,145,25,.10);
     }
 
     .offer-form-actions {
