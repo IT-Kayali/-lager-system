@@ -43,9 +43,18 @@ function isOfferProductSelect(select) {
     return isProductSelect(select) && Boolean(select.closest('#offer-main-form'));
 }
 
-function isOfferCustomerSelect(select) {
-    return select.getAttribute('name') === 'customer_id'
-        && Boolean(select.closest('#offer-main-form'));
+function isOfferPlaceholderSelect(select) {
+    const name = select.getAttribute('name') || '';
+    const id = select.getAttribute('id') || '';
+
+    return (
+        Boolean(select.closest('#offer-main-form'))
+        && (
+            name === 'customer_id'
+            || name === 'template_type'
+            || isProductSelect(select)
+        )
+    ) || id === 'shipping_method';
 }
 
 function isBranchWithdrawalProductSelect(select) {
@@ -292,7 +301,7 @@ function initSearchableSelects() {
         const enableSearch = shouldUseSearch(select);
         const countrySelect = isCountrySelect(select);
         const offerProductSelect = isOfferProductSelect(select);
-        const offerCustomerSelect = isOfferCustomerSelect(select);
+        const offerPlaceholderSelect = isOfferPlaceholderSelect(select);
         const branchWithdrawalProductSelect = isBranchWithdrawalProductSelect(select);
 
         const firstOption = select.querySelector('option[value=""]');
@@ -304,7 +313,7 @@ function initSearchableSelects() {
 
         const instance = new TomSelect(select, {
             create: false,
-            allowEmptyOption: !offerProductSelect && !offerCustomerSelect && !branchWithdrawalProductSelect,
+            allowEmptyOption: !offerPlaceholderSelect && !branchWithdrawalProductSelect,
             maxOptions: 1000,
             placeholder: placeholder,
             searchField: enableSearch ? ['text', 'name', 'dial'] : [],
