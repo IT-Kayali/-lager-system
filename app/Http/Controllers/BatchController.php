@@ -18,19 +18,52 @@ class BatchController extends Controller
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('search'));
+        $searchField = (string) $request->query('search_field', 'all');
+        $exact = $request->boolean('exact');
+
+        $allowedSearchFields = ['all', 'batch', 'product', 'code', 'manufacturer'];
+        if (! in_array($searchField, $allowedSearchFields, true)) {
+            $searchField = 'all';
+        }
 
         $batches = ProductBatch::query()
             ->with('product')
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($subQuery) use ($search) {
-                    $subQuery
-                        ->where('batch_number', 'like', "%{$search}%")
-                        ->orWhereHas('product', function ($productQuery) use ($search) {
-                            $productQuery
-                                ->where('product_code', 'like', "%{$search}%")
-                                ->orWhere('name', 'like', "%{$search}%")
-                                ->orWhere('manufacturer', 'like', "%{$search}%");
-                        });
+            ->when($search !== '', function ($query) use ($search, $searchField, $exact) {
+                $operator = $exact ? '=' : 'like';
+                $value = $exact ? $search : "%{$search}%";
+
+                $query->where(function ($subQuery) use ($searchField, $operator, $value) {
+                    switch ($searchField) {
+                        case 'batch':
+                            $subQuery->where('batch_number', $operator, $value);
+                            break;
+
+                        case 'product':
+                            $subQuery->whereHas('product', fn ($productQuery) => $productQuery->where('name', $operator, $value));
+                            break;
+
+                        case 'code':
+                            $subQuery->whereHas('product', fn ($productQuery) => $productQuery
+                                ->where('product_code', $operator, $value)
+                                ->orWhere('serial_number', $operator, $value));
+                            break;
+
+                        case 'manufacturer':
+                            $subQuery->whereHas('product', fn ($productQuery) => $productQuery->where('manufacturer_designation', $operator, $value));
+                            break;
+
+                        default:
+                            $subQuery
+                                ->where('batch_number', $operator, $value)
+                                ->orWhereHas('product', function ($productQuery) use ($operator, $value) {
+                                    $productQuery
+                                        ->where('name', $operator, $value)
+                                        ->orWhere('product_code', $operator, $value)
+                                        ->orWhere('serial_number', $operator, $value)
+                                        ->orWhere('manufacturer_designation', $operator, $value);
+                                });
+                            break;
+                    }
                 });
             })
             ->orderBy('received_at')
@@ -38,7 +71,7 @@ class BatchController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return view('pages.batches.index', compact('batches', 'search'));
+        return view('pages.batches.index', compact('batches', 'search', 'searchField', 'exact'));
     }
 
     public function create(Request $request): View
