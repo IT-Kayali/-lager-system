@@ -26,9 +26,13 @@
 
     <div class="premium-form-field">
         <label for="template_type">PDF-Vorlage *</label>
+        @php
+            $selectedTemplateType = old('template_type', $offer->template_type ?? '');
+        @endphp
         <select id="template_type" name="template_type" class="premium-select" required>
+            <option value="">PDF-Vorlage auswählen</option>
             @foreach ($templates as $value => $label)
-                <option value="{{ $value }}" @selected(old('template_type', $offer->template_type ?: 'with_company') === $value)>
+                <option value="{{ $value }}" @selected((string) $selectedTemplateType === (string) $value)>
                     {{ $label }}
                 </option>
             @endforeach
