@@ -96,7 +96,7 @@
             'route' => 'suppliers.index',
             'active' => 'suppliers.*',
             'icon' => 'bi-truck',
-            'roles' => [\App\Models\User::ROLE_MANAGER, \App\Models\User::ROLE_SALES],
+            'roles' => [\App\Models\User::ROLE_MANAGER, \App\Models\User::ROLE_WAREHOUSE],
             'section' => 'main',
         ],
         [

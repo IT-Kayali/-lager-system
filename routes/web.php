@@ -72,7 +72,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{offer}/lieferschein', [WarehouseOfferController::class, 'deliveryNote'])->name('delivery-note');
     });
 
-    Route::resource('suppliers', SupplierController::class)->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES);
+    Route::resource('suppliers', SupplierController::class)->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE);
     Route::post('customers/{customer}/wallet-transactions', [CustomerWalletTransactionController::class, 'store'])->name('customers.wallet-transactions.store')->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES);
     Route::get('/customers', [CustomerController::class, 'index'])->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES . ',' . User::ROLE_CRM)->name('customers.index');
     Route::get('/customers/create', [CustomerController::class, 'create'])->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES . ',' . User::ROLE_CRM)->name('customers.create');
