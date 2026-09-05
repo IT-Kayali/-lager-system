@@ -116,7 +116,7 @@
 
     .offer-category-product-row {
         display: grid !important;
-        grid-template-columns: minmax(170px, .65fr) minmax(260px, 1.25fr) minmax(140px, .5fr) minmax(170px, .55fr) auto !important;
+        grid-template-columns: minmax(165px, .58fr) minmax(250px, 1.18fr) minmax(135px, .48fr) minmax(215px, .76fr) auto !important;
         gap: 12px !important;
         align-items: end !important;
     }
