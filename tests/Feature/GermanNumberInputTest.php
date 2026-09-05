@@ -38,6 +38,7 @@ it('keeps German number handling scoped and preserves quantity precision', funct
         ->toContain('minimumFractionDigits: 2')
         ->toContain('isQuantityField(input) ? 3 : 2')
         ->toContain("input.inputMode = 'decimal'")
+        ->toContain("input.type === 'hidden'")
         ->not->toContain('window.parseFloat =')
         ->not->toContain('Number.parseFloat =');
 });
