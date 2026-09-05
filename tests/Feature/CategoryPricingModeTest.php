@@ -153,3 +153,82 @@ it('applies the matching manual rule and customer group when an offer is created
         ->and($item->tier_label)->toBe('Mengenpreis')
         ->and($item->product_price_tier_id)->toBeNull();
 });
+
+
+it('allows a manual total for one offer position without changing the pricing rule', function () {
+    $manager = pricingModeManager();
+    $group = pricingModeGroup('offer-override');
+    $product = manualPricingProduct('Sonderpreisprodukt');
+
+    ProductBatch::query()->create([
+        'product_id' => $product->id,
+        'quantity' => 100,
+        'received_at' => now()->subDay()->toDateString(),
+    ]);
+
+    ManualPriceRule::query()->create([
+        'product_id' => $product->id,
+        'customer_group_id' => $group->id,
+        'min_quantity' => 1,
+        'max_quantity' => 10,
+        'price' => 2.70,
+        'label' => 'Standardpreis',
+    ]);
+
+    $customer = Customer::query()->create([
+        'customer_group_id' => $group->id,
+        'company_name' => 'Sonderpreis Kunde',
+    ]);
+
+    $this->actingAs($manager)
+        ->post(route('offers.store'), [
+            'customer_id' => $customer->id,
+            'template_type' => 'with_company',
+            'shipping_method' => 'Abholung',
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 7, 'line_total' => 14.00],
+            ],
+        ])
+        ->assertRedirect();
+
+    $offer = Offer::query()->with('items')->latest('id')->firstOrFail();
+    $item = $offer->items->firstOrFail();
+
+    expect((float) $item->line_total)->toBe(14.0)
+        ->and((float) $item->unit_price)->toBe(2.0)
+        ->and((float) $offer->total)->toBe(14.0)
+        ->and((float) ManualPriceRule::query()->where('product_id', $product->id)->value('price'))->toBe(2.7);
+});
+
+it('returns the automatic position total for the live price preview', function () {
+    $manager = pricingModeManager();
+    $group = pricingModeGroup('offer-preview');
+    $product = manualPricingProduct('Vorschauprodukt');
+
+    ManualPriceRule::query()->create([
+        'product_id' => $product->id,
+        'customer_group_id' => $group->id,
+        'min_quantity' => 1,
+        'max_quantity' => 10,
+        'price' => 2.70,
+        'label' => 'Vorschaupreis',
+    ]);
+
+    $customer = Customer::query()->create([
+        'customer_group_id' => $group->id,
+        'company_name' => 'Vorschau Kunde',
+    ]);
+
+    $this->actingAs($manager)
+        ->getJson(route('offers.price-preview', [
+            'customer_id' => $customer->id,
+            'product_id' => $product->id,
+            'quantity' => 7,
+        ]))
+        ->assertOk()
+        ->assertJson([
+            'unit_price' => 2.7,
+            'line_total' => 18.9,
+            'tier_label' => 'Vorschaupreis',
+        ]);
+});

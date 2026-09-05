@@ -54,6 +54,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/offers', [OfferController::class, 'index'])->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES)->name('offers.index');
     Route::get('/offers/create', [OfferController::class, 'create'])->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES)->name('offers.create');
+    Route::get('/offers/price-preview', [OfferController::class, 'pricePreview'])->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES)->name('offers.price-preview');
     Route::post('/offers', [OfferController::class, 'store'])->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES)->name('offers.store');
     Route::get('/offers/{offer}', [OfferController::class, 'show'])->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES)->name('offers.show');
     Route::get('/offers/{offer}/edit', [OfferController::class, 'edit'])->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES)->name('offers.edit');

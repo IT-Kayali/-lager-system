@@ -54,7 +54,7 @@
     $oldItems = old('items');
     $itemsForForm = $oldItems ? collect($oldItems) : collect($formItems);
     if ($itemsForForm->isEmpty()) {
-        $itemsForForm = collect([['product_id' => '', 'quantity' => '']]);
+        $itemsForForm = collect([['product_id' => '', 'quantity' => '', 'line_total' => '']]);
     }
 
     $unitLabels = [
@@ -67,7 +67,7 @@
 <div id="offer-items" class="offer-items-list">
     @foreach ($itemsForForm as $index => $item)
         <div class="premium-card offer-item-row" style="padding:14px; box-shadow:none;">
-            <div class="premium-form-grid" style="grid-template-columns: 1.8fr .8fr auto;">
+            <div class="premium-form-grid" style="grid-template-columns: 1.8fr .8fr .8fr auto;">
                 <div class="premium-form-field">
                     <label>Produkt</label>
                     <select name="items[{{ $index }}][product_id]" class="premium-select">
@@ -95,14 +95,40 @@
                     >
                 </div>
 
-                <div class="premium-form-field" style="display:flex; align-items:end;">
-                    <button type="button" class="premium-icon-btn premium-danger remove-offer-item" title="Position entfernen">
-                        <i class="bi bi-trash"></i>
-                    </button>
+                <div class="premium-form-field offer-line-total-field">
+                    <div class="offer-line-total-label-row">
+                        <label>Gesamtpreis</label>
+                        <span class="offer-auto-price-badge">
+                            Auto: <strong class="offer-auto-price-value">—</strong>
+                        </span>
+                    </div>
+                    <div class="offer-line-total-control-row">
+                        <div class="offer-line-total-input-wrap">
+                            <input
+                                name="items[{{ $index }}][line_total]"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                class="premium-input offer-line-total-input"
+                                value="{{ $item['line_total'] ?? '' }}"
+                                placeholder="0,00"
+                            >
+                            <span class="offer-line-total-currency">€</span>
+                        </div>
+                        <button type="button" class="premium-icon-btn premium-danger remove-offer-item offer-line-delete-btn" title="Position entfernen">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                    <div class="premium-muted offer-line-total-hint">Automatisch berechnet · manuell änderbar</div>
                 </div>
             </div>
         </div>
     @endforeach
+</div>
+
+<div class="offer-price-summary">
+    <span class="premium-muted">Summe (netto)</span>
+    <strong id="offer-products-total">0,00 €</strong>
 </div>
 
 <div class="offer-form-actions">
@@ -119,7 +145,7 @@
 
 <template id="offer-item-template">
     <div class="premium-card offer-item-row" style="padding:14px; box-shadow:none;">
-        <div class="premium-form-grid" style="grid-template-columns: 1.8fr .8fr auto;">
+        <div class="premium-form-grid" style="grid-template-columns: 1.8fr .8fr .8fr auto;">
             <div class="premium-form-field">
                 <label>Produkt</label>
                 <select data-name="product_id" class="premium-select">
@@ -138,10 +164,23 @@
                 <input data-name="quantity" type="number" step="0.01" min="0.01" max="5000" class="premium-input" placeholder="z. B. 50">
             </div>
 
-            <div class="premium-form-field" style="display:flex; align-items:end;">
-                <button type="button" class="premium-icon-btn premium-danger remove-offer-item" title="Position entfernen">
-                    <i class="bi bi-trash"></i>
-                </button>
+            <div class="premium-form-field offer-line-total-field">
+                <div class="offer-line-total-label-row">
+                    <label>Gesamtpreis</label>
+                    <span class="offer-auto-price-badge">
+                        Auto: <strong class="offer-auto-price-value">—</strong>
+                    </span>
+                </div>
+                <div class="offer-line-total-control-row">
+                    <div class="offer-line-total-input-wrap">
+                        <input data-name="line_total" type="number" step="0.01" min="0" class="premium-input offer-line-total-input" placeholder="0,00">
+                        <span class="offer-line-total-currency">€</span>
+                    </div>
+                    <button type="button" class="premium-icon-btn premium-danger remove-offer-item offer-line-delete-btn" title="Position entfernen">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+                <div class="premium-muted offer-line-total-hint">Automatisch berechnet · manuell änderbar</div>
             </div>
         </div>
     </div>
@@ -151,40 +190,159 @@
     document.addEventListener('DOMContentLoaded', function () {
         const wrapper = document.getElementById('offer-items');
         const template = document.getElementById('offer-item-template');
+        const customer = document.getElementById('customer_id');
+        const totalOutput = document.getElementById('offer-products-total');
+        const pricePreviewUrl = @json(route('offers.price-preview'));
 
         function getRows() {
             return Array.from(wrapper.querySelectorAll('.offer-item-row'));
         }
 
-        function rowHasData(row) {
-            const product = row.querySelector('select[name*="[product_id]"], select[data-name="product_id"]');
-            const quantity = row.querySelector('input[name*="[quantity]"], input[data-name="quantity"]');
+        function getRowFields(row) {
+            return {
+                product: row.querySelector('select[name*="[product_id]"], select[data-name="product_id"]'),
+                quantity: row.querySelector('input[name*="[quantity]"], input[data-name="quantity"]'),
+                total: row.querySelector('input[name*="[line_total]"], input[data-name="line_total"]'),
+                autoValue: row.querySelector('.offer-auto-price-value'),
+                badge: row.querySelector('.offer-auto-price-badge'),
+                hint: row.querySelector('.offer-line-total-hint'),
+            };
+        }
 
+        function rowHasData(row) {
+            const { product, quantity } = getRowFields(row);
             return Boolean(product && product.value) || Boolean(quantity && quantity.value);
         }
 
         function rowIsComplete(row) {
-            const product = row.querySelector('select[name*="[product_id]"], select[data-name="product_id"]');
-            const quantity = row.querySelector('input[name*="[quantity]"], input[data-name="quantity"]');
+            const { product, quantity } = getRowFields(row);
+            return Boolean(product && product.value) && Boolean(quantity && Number(quantity.value) > 0);
+        }
 
-            return Boolean(product && product.value) && Boolean(quantity && quantity.value);
+        function formatMoney(value) {
+            return new Intl.NumberFormat('de-DE', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            }).format(Number(value || 0)) + ' €';
+        }
+
+        function updateGrandTotal() {
+            const total = getRows().reduce((sum, row) => {
+                const field = getRowFields(row).total;
+                const value = field && field.value !== '' ? Number(field.value) : 0;
+                return sum + (Number.isFinite(value) ? value : 0);
+            }, 0);
+
+            if (totalOutput) totalOutput.textContent = formatMoney(total);
+        }
+
+        function markInitialState(row) {
+            if (row.dataset.priceStateInitialized === '1') return;
+            const { product, quantity, total } = getRowFields(row);
+            row.dataset.priceStateInitialized = '1';
+            row.dataset.initialProduct = product?.value || '';
+            row.dataset.initialQuantity = quantity?.value || '';
+            row.dataset.initialTotal = total?.value || '';
+            row.dataset.keepSavedTotal = total?.value !== '' ? '1' : '0';
+            if (total) total.dataset.manualOverride = '0';
+        }
+
+        function setWaitingState(row) {
+            const { autoValue, badge, hint } = getRowFields(row);
+            if (autoValue) autoValue.textContent = '—';
+
+            if (!customer?.value) {
+                if (badge) badge.classList.add('is-waiting');
+                if (hint) hint.textContent = 'Kunde auswählen, damit der automatische Preis berechnet wird.';
+            } else {
+                if (badge) badge.classList.remove('is-waiting');
+                if (hint) hint.textContent = 'Produkt und Menge auswählen · manuell änderbar';
+            }
+        }
+
+        async function refreshAutomaticPrice(row, forceOverwrite = false) {
+            const { product, quantity, total, autoValue, badge, hint } = getRowFields(row);
+            if (!product || !quantity || !total) return;
+
+            markInitialState(row);
+
+            if (!customer?.value || !product.value || !quantity.value || Number(quantity.value) <= 0) {
+                if (total.dataset.manualOverride !== '1' && row.dataset.keepSavedTotal !== '1') total.value = '';
+                setWaitingState(row);
+                updateGrandTotal();
+                return;
+            }
+
+            const requestId = String(Number(row.dataset.priceRequestId || 0) + 1);
+            row.dataset.priceRequestId = requestId;
+
+            try {
+                const url = new URL(pricePreviewUrl, window.location.origin);
+                url.searchParams.set('customer_id', customer.value);
+                url.searchParams.set('product_id', product.value);
+                url.searchParams.set('quantity', quantity.value);
+
+                const response = await fetch(url.toString(), {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                });
+
+                if (!response.ok) throw new Error('Preis konnte nicht berechnet werden.');
+
+                const data = await response.json();
+                if (row.dataset.priceRequestId !== requestId) return;
+
+                const automaticTotal = Number(data.line_total || 0);
+                if (autoValue) autoValue.textContent = formatMoney(automaticTotal);
+                if (badge) badge.classList.remove('is-waiting');
+
+                const savedTotal = row.dataset.keepSavedTotal === '1' && row.dataset.initialTotal !== ''
+                    ? Number(row.dataset.initialTotal)
+                    : null;
+
+                const shouldKeepSavedTotal = savedTotal !== null
+                    && product.value === row.dataset.initialProduct
+                    && quantity.value === row.dataset.initialQuantity
+                    && !forceOverwrite;
+
+                if (shouldKeepSavedTotal) {
+                    total.value = Number(savedTotal).toFixed(2);
+                    const differs = Math.abs(Number(savedTotal) - automaticTotal) > 0.004;
+                    total.dataset.manualOverride = differs ? '1' : '0';
+                    if (hint) {
+                        hint.textContent = differs
+                            ? 'Manuell angepasst · Automatik bleibt rechts sichtbar'
+                            : `${formatMoney(data.unit_price)} je Einheit · ${data.tier_label || 'Preisregel'}`;
+                    }
+                } else if (total.dataset.manualOverride !== '1' || forceOverwrite) {
+                    total.value = automaticTotal.toFixed(2);
+                    total.dataset.manualOverride = '0';
+                    row.dataset.keepSavedTotal = '0';
+                    if (hint) hint.textContent = `${formatMoney(data.unit_price)} je Einheit · ${data.tier_label || 'Preisregel'}`;
+                }
+
+                updateGrandTotal();
+            } catch (error) {
+                if (autoValue) autoValue.textContent = '—';
+                if (badge) badge.classList.add('is-waiting');
+                if (hint) hint.textContent = 'Automatischer Preis konnte nicht geladen werden. Gesamtpreis kann manuell eingetragen werden.';
+            }
         }
 
         function reindexRows() {
             getRows().forEach((row, index) => {
                 row.querySelectorAll('[data-name], select[name], input[name]').forEach((field) => {
-                    const key = field.dataset.name || field.name.match(/\[(product_id|quantity)\]/)?.[1];
-
-                    if (key) {
-                        field.name = `items[${index}][${key}]`;
-                    }
+                    const key = field.dataset.name || field.name.match(/\[(product_id|quantity|line_total)\]/)?.[1];
+                    if (key) field.name = `items[${index}][${key}]`;
                 });
             });
         }
 
         function addEmptyRow() {
-            const clone = template.content.cloneNode(true);
-            wrapper.appendChild(clone);
+            wrapper.appendChild(template.content.cloneNode(true));
             reindexRows();
             bindRowEvents();
         }
@@ -192,64 +350,76 @@
         function ensureTrailingEmptyRow() {
             const rows = getRows();
             const lastRow = rows[rows.length - 1];
-
-            if (!lastRow || rowIsComplete(lastRow)) {
-                addEmptyRow();
-            }
+            if (!lastRow || rowIsComplete(lastRow)) addEmptyRow();
         }
 
         function removeExtraEmptyRows() {
             const rows = getRows();
-
             rows.forEach((row, index) => {
-                const isLast = index === rows.length - 1;
-
-                if (!isLast && !rowHasData(row) && rows.length > 1) {
-                    row.remove();
-                }
+                if (index !== rows.length - 1 && !rowHasData(row) && rows.length > 1) row.remove();
             });
-
             reindexRows();
         }
 
         function bindRowEvents() {
             getRows().forEach((row) => {
-                const product = row.querySelector('select[name*="[product_id]"], select[data-name="product_id"]');
-                const quantity = row.querySelector('input[name*="[quantity]"], input[data-name="quantity"]');
+                markInitialState(row);
+                const { product, quantity, total, hint } = getRowFields(row);
                 const removeButton = row.querySelector('.remove-offer-item');
 
                 [product, quantity].forEach((field) => {
-                    if (!field || field.dataset.autoBound === '1') {
-                        return;
-                    }
-
+                    if (!field || field.dataset.autoBound === '1') return;
                     field.dataset.autoBound = '1';
 
-                    field.addEventListener('change', function () {
+                    const changed = function () {
+                        row.dataset.keepSavedTotal = '0';
+                        if (total) total.dataset.manualOverride = '0';
                         ensureTrailingEmptyRow();
                         removeExtraEmptyRows();
-                    });
+                        refreshAutomaticPrice(row, true);
+                    };
 
-                    field.addEventListener('input', function () {
-                        ensureTrailingEmptyRow();
-                        removeExtraEmptyRows();
-                    });
+                    field.addEventListener('change', changed);
+                    field.addEventListener('input', changed);
                 });
+
+                if (total && total.dataset.totalBound !== '1') {
+                    total.dataset.totalBound = '1';
+                    total.addEventListener('input', function () {
+                        total.dataset.manualOverride = '1';
+                        row.dataset.keepSavedTotal = '0';
+                        if (hint) hint.textContent = 'Manuell angepasst · Automatik bleibt rechts sichtbar';
+                        updateGrandTotal();
+                    });
+                }
 
                 if (removeButton && removeButton.dataset.autoBound !== '1') {
                     removeButton.dataset.autoBound = '1';
-
                     removeButton.addEventListener('click', function () {
-                        const rows = getRows();
-
-                        if (rows.length > 1) {
+                        if (getRows().length > 1) {
                             row.remove();
                             reindexRows();
                             ensureTrailingEmptyRow();
                             removeExtraEmptyRows();
+                            updateGrandTotal();
                         }
                     });
                 }
+
+                setWaitingState(row);
+                if (rowIsComplete(row) && customer?.value) refreshAutomaticPrice(row, false);
+            });
+        }
+
+        if (customer && customer.dataset.priceBound !== '1') {
+            customer.dataset.priceBound = '1';
+            customer.addEventListener('change', function () {
+                getRows().forEach((row) => {
+                    row.dataset.keepSavedTotal = '0';
+                    const total = getRowFields(row).total;
+                    if (total) total.dataset.manualOverride = '0';
+                    refreshAutomaticPrice(row, true);
+                });
             });
         }
 
@@ -257,6 +427,7 @@
         reindexRows();
         ensureTrailingEmptyRow();
         removeExtraEmptyRows();
+        updateGrandTotal();
     });
 </script>
 
@@ -371,9 +542,25 @@
     }
 
     .offer-item-row > .premium-form-grid {
-        grid-template-columns: minmax(220px, .75fr) minmax(320px, 1.45fr) minmax(150px, .55fr) auto !important;
+        grid-template-columns: 560px 220px 300px !important;
         gap: 14px !important;
-        align-items: end !important;
+        align-items: start !important;
+        justify-content: start !important;
+        width: 100% !important;
+    }
+
+    .offer-item-row > .premium-form-grid > .premium-form-field {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    .offer-item-row .premium-select,
+    .offer-item-row .premium-input,
+    .offer-item-row .ts-wrapper,
+    .offer-item-row .ts-control {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     .offer-category-filter-field {
@@ -426,6 +613,115 @@
         grid-column: auto;
     }
 
+    .offer-line-total-field {
+        min-width: 0;
+    }
+
+    .offer-line-total-label-row {
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:8px;
+        min-height:18px;
+        margin-bottom:9px;
+    }
+
+    .offer-line-total-label-row label {
+        margin-bottom:0 !important;
+    }
+
+    .offer-auto-price-badge {
+        display:inline-flex;
+        align-items:center;
+        gap:4px;
+        padding:4px 8px;
+        border-radius:999px;
+        background:#f3e8be;
+        color:#66510c;
+        font-size:11px;
+        font-weight:850;
+        white-space:nowrap;
+    }
+
+    .offer-auto-price-badge.is-waiting {
+        background:#f2eee7;
+        color:#7a7368;
+    }
+
+    .offer-line-total-control-row {
+        display:flex;
+        align-items:center;
+        gap:8px;
+        width:100%;
+    }
+
+    .offer-line-total-input-wrap {
+        position:relative;
+        margin-top:0;
+        flex:1 1 auto;
+        min-width:0;
+    }
+
+    .offer-line-delete-btn {
+        flex:0 0 40px;
+        width:40px !important;
+        height:40px !important;
+        margin:0 !important;
+        align-self:center !important;
+    }
+
+    .offer-line-total-input {
+        padding-right:38px !important;
+        font-weight:900 !important;
+    }
+
+    .offer-line-total-currency {
+        position:absolute;
+        top:50%;
+        right:14px;
+        transform:translateY(-50%);
+        color:#665f54;
+        font-size:14px;
+        font-weight:900;
+        pointer-events:none;
+    }
+
+    .offer-line-total-hint {
+        min-height:18px;
+        margin-top:5px !important;
+        font-size:11px !important;
+        line-height:1.25 !important;
+    }
+
+    .offer-price-summary {
+        display:flex;
+        align-items:center;
+        justify-content:flex-end;
+        gap:16px;
+        min-height:62px;
+        padding:14px 20px;
+        border:1px solid #d8cbb7;
+        border-radius:16px;
+        background:#fffdf8;
+    }
+
+    .offer-price-summary .premium-muted {
+        font-size:13px !important;
+        font-weight:850 !important;
+        color:#665f54 !important;
+    }
+
+    .offer-price-summary strong {
+        font-size:24px;
+        font-weight:950;
+        color:#111;
+    }
+
+    .offer-line-total-input[data-manual-override="1"] {
+        border-color:#b99119 !important;
+        box-shadow:0 0 0 3px rgba(185,145,25,.10);
+    }
+
     .offer-form-actions {
         display: flex;
         justify-content: flex-end;
@@ -453,7 +749,7 @@
         font-weight: 700 !important;
     }
 
-    @media (max-width: 1150px) {
+    @media (max-width: 1250px) {
         .offer-editor-form > .premium-form-grid,
         #offer-shipping-card .premium-form-grid {
             grid-template-columns: 1fr;
@@ -464,7 +760,7 @@
         }
 
         .offer-item-row > .premium-form-grid {
-            grid-template-columns: 1fr 1fr !important;
+            grid-template-columns: minmax(0, 1fr) 190px 280px !important;
         }
     }
 
@@ -479,6 +775,12 @@
 
         .offer-item-row > .premium-form-grid {
             grid-template-columns: 1fr !important;
+        }
+
+        .offer-line-total-control-row {
+            display:grid;
+            grid-template-columns:minmax(0, 1fr) 40px;
+            gap:8px;
         }
 
         .offer-form-actions {
