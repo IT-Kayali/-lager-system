@@ -102,25 +102,24 @@
                             Auto: <strong class="offer-auto-price-value">—</strong>
                         </span>
                     </div>
-                    <div class="offer-line-total-input-wrap">
-                        <input
-                            name="items[{{ $index }}][line_total]"
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            class="premium-input offer-line-total-input"
-                            value="{{ $item['line_total'] ?? '' }}"
-                            placeholder="0,00"
-                        >
-                        <span class="offer-line-total-currency">€</span>
+                    <div class="offer-line-total-control-row">
+                        <div class="offer-line-total-input-wrap">
+                            <input
+                                name="items[{{ $index }}][line_total]"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                class="premium-input offer-line-total-input"
+                                value="{{ $item['line_total'] ?? '' }}"
+                                placeholder="0,00"
+                            >
+                            <span class="offer-line-total-currency">€</span>
+                        </div>
+                        <button type="button" class="premium-icon-btn premium-danger remove-offer-item offer-line-delete-btn" title="Position entfernen">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </div>
                     <div class="premium-muted offer-line-total-hint">Automatisch berechnet · manuell änderbar</div>
-                </div>
-
-                <div class="premium-form-field" style="display:flex; align-items:end;">
-                    <button type="button" class="premium-icon-btn premium-danger remove-offer-item" title="Position entfernen">
-                        <i class="bi bi-trash"></i>
-                    </button>
                 </div>
             </div>
         </div>
@@ -172,17 +171,16 @@
                         Auto: <strong class="offer-auto-price-value">—</strong>
                     </span>
                 </div>
-                <div class="offer-line-total-input-wrap">
-                    <input data-name="line_total" type="number" step="0.01" min="0" class="premium-input offer-line-total-input" placeholder="0,00">
-                    <span class="offer-line-total-currency">€</span>
+                <div class="offer-line-total-control-row">
+                    <div class="offer-line-total-input-wrap">
+                        <input data-name="line_total" type="number" step="0.01" min="0" class="premium-input offer-line-total-input" placeholder="0,00">
+                        <span class="offer-line-total-currency">€</span>
+                    </div>
+                    <button type="button" class="premium-icon-btn premium-danger remove-offer-item offer-line-delete-btn" title="Position entfernen">
+                        <i class="bi bi-trash"></i>
+                    </button>
                 </div>
                 <div class="premium-muted offer-line-total-hint">Automatisch berechnet · manuell änderbar</div>
-            </div>
-
-            <div class="premium-form-field" style="display:flex; align-items:end;">
-                <button type="button" class="premium-icon-btn premium-danger remove-offer-item" title="Position entfernen">
-                    <i class="bi bi-trash"></i>
-                </button>
             </div>
         </div>
     </div>
@@ -544,7 +542,7 @@
     }
 
     .offer-item-row > .premium-form-grid {
-        grid-template-columns: 560px 220px 250px 44px !important;
+        grid-template-columns: 560px 220px 300px !important;
         gap: 14px !important;
         align-items: start !important;
         justify-content: start !important;
@@ -554,12 +552,6 @@
     .offer-item-row > .premium-form-grid > .premium-form-field {
         min-width: 0 !important;
         width: 100% !important;
-    }
-
-    .offer-item-row > .premium-form-grid > .premium-form-field:last-child {
-        width: 44px !important;
-        padding-top: 31px !important;
-        align-self: start !important;
     }
 
     .offer-item-row .premium-select,
@@ -656,9 +648,26 @@
         color:#7a7368;
     }
 
+    .offer-line-total-control-row {
+        display:flex;
+        align-items:center;
+        gap:8px;
+        width:100%;
+    }
+
     .offer-line-total-input-wrap {
         position:relative;
         margin-top:0;
+        flex:1 1 auto;
+        min-width:0;
+    }
+
+    .offer-line-delete-btn {
+        flex:0 0 40px;
+        width:40px !important;
+        height:40px !important;
+        margin:0 !important;
+        align-self:center !important;
     }
 
     .offer-line-total-input {
@@ -751,7 +760,7 @@
         }
 
         .offer-item-row > .premium-form-grid {
-            grid-template-columns: minmax(0, 1fr) 190px 230px 44px !important;
+            grid-template-columns: minmax(0, 1fr) 190px 280px !important;
         }
     }
 
@@ -766,6 +775,12 @@
 
         .offer-item-row > .premium-form-grid {
             grid-template-columns: 1fr !important;
+        }
+
+        .offer-line-total-control-row {
+            display:grid;
+            grid-template-columns:minmax(0, 1fr) 40px;
+            gap:8px;
         }
 
         .offer-form-actions {
