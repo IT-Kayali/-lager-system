@@ -71,7 +71,11 @@ function isQuantityField(input) {
 }
 
 function enhanceDecimalField(input) {
-    if (!(input instanceof HTMLInputElement) || input.dataset.germanNumberEnhanced === '1') {
+    if (
+        !(input instanceof HTMLInputElement)
+        || input.type === 'hidden'
+        || input.dataset.germanNumberEnhanced === '1'
+    ) {
         return;
     }
 
