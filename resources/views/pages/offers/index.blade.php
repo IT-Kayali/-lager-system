@@ -18,9 +18,24 @@
                         name="search"
                         value="{{ $search }}"
                         class="premium-input"
-                        placeholder="Angebotsnummer oder Kunde suchen..."
+                        placeholder="Angebot, Kunde, Kundennummer oder Produkt suchen..."
                     >
                 </div>
+
+                <div class="offers-search-filter">
+                    <select name="search_field" class="premium-input offers-search-select" aria-label="Suchfeld auswählen">
+                        <option value="all" @selected(($searchField ?? 'all') === 'all')>Alle</option>
+                        <option value="number" @selected(($searchField ?? 'all') === 'number')>Angebotsnummer</option>
+                        <option value="customer" @selected(($searchField ?? 'all') === 'customer')>Kunde</option>
+                        <option value="customer_number" @selected(($searchField ?? 'all') === 'customer_number')>Kundennummer</option>
+                        <option value="product" @selected(($searchField ?? 'all') === 'product')>Produkt</option>
+                    </select>
+                </div>
+
+                <label class="offers-exact-search">
+                    <input type="checkbox" name="exact" value="1" @checked($exact ?? false)>
+                    <span>Exakter Wert</span>
+                </label>
 
                 <select name="status" class="premium-select offers-status-select">
                     <option value="">Alle Status</option>
@@ -34,7 +49,7 @@
                     Suchen
                 </button>
 
-                @if ($search || $selectedStatus)
+                @if ($search || $selectedStatus || ($searchField ?? 'all') !== 'all' || ($exact ?? false))
                     <a href="{{ route('offers.index') }}" class="premium-btn">
                         <i class="bi bi-x-lg"></i>
                         Zurücksetzen
@@ -248,8 +263,41 @@
             background: #fffdf8 !important;
         }
 
+        .offers-search-filter {
+            min-width: 190px;
+        }
+
+        .offers-search-select {
+            width: 100%;
+            min-height: 48px;
+            background: #fffdf8 !important;
+            font-weight: 850;
+            color: #211d17;
+        }
+
+        .offers-exact-search {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 48px;
+            padding: 0 14px;
+            border: 1px solid #d8cbb7;
+            border-radius: 12px;
+            background: #fffdf8;
+            color: #211d17;
+            font-weight: 850;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .offers-exact-search input {
+            width: 18px;
+            height: 18px;
+            accent-color: #c9a227;
+        }
+
         .offers-status-select {
-            min-width: 210px;
+            min-width: 190px;
             min-height: 48px;
         }
 
