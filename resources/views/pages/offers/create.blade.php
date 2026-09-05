@@ -6,7 +6,7 @@
     @endif
 
     <section class="premium-card offer-editor-card">
-        <form class="offer-editor-form" method="POST" action="{{ route('offers.store') }}" id="offer-main-form">
+        <form class="offer-editor-form" method="POST" action="{{ route('offers.store') }}" id="offer-main-form" novalidate>
 
 {{-- OFFER_SHIPPING_HIDDEN_FIELDS_START --}}
 <input type="hidden" name="shipping_method" id="shipping_method_real" value="{{ old('shipping_method', $offer->shipping_method ?? '') }}">
@@ -569,5 +569,257 @@
     });
 </script>
 {{-- OFFER_SHIPPING_HIDDEN_SYNC_END --}}
+
+{{-- OFFER_REQUIRED_FIELDS_VALIDATION_START --}}
+<style>
+    #offer-main-form .offer-required-invalid,
+    #offer-shipping-card .offer-required-invalid {
+        border-color: #dc2626 !important;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, .10) !important;
+    }
+
+    #offer-main-form .ts-wrapper.offer-required-invalid .ts-control,
+    #offer-shipping-card .ts-wrapper.offer-required-invalid .ts-control {
+        border-color: #dc2626 !important;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, .10) !important;
+    }
+
+    .offer-required-message {
+        margin-top: 6px;
+        color: #b91c1c;
+        font-size: 12px;
+        font-weight: 850;
+        line-height: 1.35;
+    }
+
+    .offer-required-field-invalid > label,
+    .offer-required-field-invalid .offer-line-total-label-row label {
+        color: #b91c1c !important;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('offer-main-form');
+
+        if (!form) {
+            return;
+        }
+
+        const getFieldContainer = (field) => field?.closest('.premium-form-field') || field?.parentElement || null;
+
+        function getVisualField(field) {
+            if (!field) {
+                return null;
+            }
+
+            if (field.tomselect?.wrapper) {
+                return field.tomselect.wrapper;
+            }
+
+            const wrapper = field.closest('.ts-wrapper');
+            return wrapper || field;
+        }
+
+        function clearFieldError(field) {
+            if (!field) {
+                return;
+            }
+
+            const visual = getVisualField(field);
+            const container = getFieldContainer(field);
+
+            visual?.classList.remove('offer-required-invalid');
+            field.classList.remove('offer-required-invalid');
+            container?.classList.remove('offer-required-field-invalid');
+
+            const message = container?.querySelector('.offer-required-message[data-client-required="1"]');
+            message?.remove();
+        }
+
+        function setFieldError(field, message) {
+            if (!field) {
+                return;
+            }
+
+            clearFieldError(field);
+
+            const visual = getVisualField(field);
+            const container = getFieldContainer(field);
+
+            visual?.classList.add('offer-required-invalid');
+            field.classList.add('offer-required-invalid');
+            container?.classList.add('offer-required-field-invalid');
+
+            if (container && message) {
+                const error = document.createElement('div');
+                error.className = 'offer-required-message';
+                error.dataset.clientRequired = '1';
+                error.textContent = message;
+                container.appendChild(error);
+            }
+        }
+
+        function valuePresent(field) {
+            return Boolean(field && String(field.value ?? '').trim() !== '');
+        }
+
+        function positiveNumber(field) {
+            if (!valuePresent(field)) {
+                return false;
+            }
+
+            const parser = window.parseGermanNumber || ((value) => Number.parseFloat(String(value).replace(',', '.')));
+            const parsed = parser(field.value);
+
+            return Number.isFinite(parsed) && parsed > 0;
+        }
+
+        function clearAllClientErrors() {
+            document
+                .querySelectorAll('.offer-required-invalid')
+                .forEach((element) => element.classList.remove('offer-required-invalid'));
+
+            document
+                .querySelectorAll('.offer-required-field-invalid')
+                .forEach((element) => element.classList.remove('offer-required-field-invalid'));
+
+            document
+                .querySelectorAll('.offer-required-message[data-client-required="1"]')
+                .forEach((element) => element.remove());
+        }
+
+        function validateOfferForm() {
+            clearAllClientErrors();
+
+            const invalidFields = [];
+
+            const requireValue = (field, message) => {
+                if (!valuePresent(field)) {
+                    setFieldError(field, message);
+                    invalidFields.push(field);
+                    return false;
+                }
+
+                return true;
+            };
+
+            const customer = document.getElementById('customer_id');
+            const template = document.getElementById('template_type');
+            const shippingMethod = document.getElementById('shipping_method');
+
+            requireValue(customer, 'Bitte Kunde auswählen.');
+            requireValue(template, 'Bitte PDF-Vorlage auswählen.');
+            requireValue(shippingMethod, 'Bitte Versandart auswählen.');
+
+            if (shippingMethod?.value === 'Lieferung') {
+                const cartonCount = document.getElementById('carton_count');
+
+                if (!positiveNumber(cartonCount)) {
+                    setFieldError(cartonCount, 'Bitte Anzahl Kartons eingeben.');
+                    invalidFields.push(cartonCount);
+                }
+            }
+
+            const rows = Array.from(document.querySelectorAll('#offer-items .offer-item-row'));
+            let completePositions = 0;
+            const partialRows = [];
+
+            rows.forEach((row) => {
+                const product = row.querySelector('select[name*="[product_id]"], select[data-name="product_id"]');
+                const quantity = row.querySelector('input[name*="[quantity]"], input[data-name="quantity"]');
+
+                const hasProduct = valuePresent(product);
+                const hasQuantity = valuePresent(quantity);
+
+                if (!hasProduct && !hasQuantity) {
+                    return;
+                }
+
+                partialRows.push({ product, quantity, hasProduct, hasQuantity });
+
+                if (hasProduct && positiveNumber(quantity)) {
+                    completePositions += 1;
+                    return;
+                }
+
+                if (!hasProduct) {
+                    setFieldError(product, 'Bitte Produkt auswählen.');
+                    invalidFields.push(product);
+                }
+
+                if (!positiveNumber(quantity)) {
+                    setFieldError(quantity, 'Bitte Menge/Gewicht größer als 0 eingeben.');
+                    invalidFields.push(quantity);
+                }
+            });
+
+            if (completePositions === 0 && partialRows.length === 0) {
+                const firstRow = rows[0];
+                const firstProduct = firstRow?.querySelector('select[name*="[product_id]"], select[data-name="product_id"]');
+                const firstQuantity = firstRow?.querySelector('input[name*="[quantity]"], input[data-name="quantity"]');
+
+                setFieldError(firstProduct, 'Bitte mindestens ein Produkt auswählen.');
+                setFieldError(firstQuantity, 'Bitte Menge/Gewicht eingeben.');
+
+                if (firstProduct) invalidFields.push(firstProduct);
+                if (firstQuantity) invalidFields.push(firstQuantity);
+            }
+
+            return invalidFields;
+        }
+
+        form.addEventListener('submit', function (event) {
+            const invalidFields = validateOfferForm();
+
+            if (invalidFields.length === 0) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            const firstInvalid = invalidFields.find(Boolean);
+            const firstContainer = getFieldContainer(firstInvalid) || getVisualField(firstInvalid);
+
+            firstContainer?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+            });
+        }, true);
+
+        document.addEventListener('input', function (event) {
+            const field = event.target;
+
+            if (!(field instanceof HTMLInputElement) && !(field instanceof HTMLSelectElement)) {
+                return;
+            }
+
+            if (
+                field.id === 'customer_id'
+                || field.id === 'template_type'
+                || field.id === 'shipping_method'
+                || field.id === 'carton_count'
+                || field.name?.includes('[product_id]')
+                || field.name?.includes('[quantity]')
+                || field.dataset.name === 'product_id'
+                || field.dataset.name === 'quantity'
+            ) {
+                clearFieldError(field);
+            }
+        }, true);
+
+        document.addEventListener('change', function (event) {
+            const field = event.target;
+
+            if (!(field instanceof HTMLInputElement) && !(field instanceof HTMLSelectElement)) {
+                return;
+            }
+
+            clearFieldError(field);
+        }, true);
+    });
+</script>
+{{-- OFFER_REQUIRED_FIELDS_VALIDATION_END --}}
 
 </x-layouts.premium>
