@@ -128,7 +128,7 @@
 </div>
 
 <div class="offer-price-summary">
-    <span class="premium-muted">Produkt-Gesamtsumme</span>
+    <span class="premium-muted">Summe (netto)</span>
     <strong id="offer-products-total">0,00 €</strong>
 </div>
 
@@ -544,9 +544,31 @@
     }
 
     .offer-item-row > .premium-form-grid {
-        grid-template-columns: minmax(300px, 1.45fr) minmax(150px, .5fr) minmax(230px, .72fr) auto !important;
+        grid-template-columns: 560px 220px 250px 44px !important;
         gap: 14px !important;
-        align-items: end !important;
+        align-items: start !important;
+        justify-content: start !important;
+        width: 100% !important;
+    }
+
+    .offer-item-row > .premium-form-grid > .premium-form-field {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    .offer-item-row > .premium-form-grid > .premium-form-field:last-child {
+        width: 44px !important;
+        padding-top: 31px !important;
+        align-self: start !important;
+    }
+
+    .offer-item-row .premium-select,
+    .offer-item-row .premium-input,
+    .offer-item-row .ts-wrapper,
+    .offer-item-row .ts-control {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     .offer-category-filter-field {
@@ -608,7 +630,8 @@
         align-items:center;
         justify-content:space-between;
         gap:8px;
-        min-height:25px;
+        min-height:18px;
+        margin-bottom:9px;
     }
 
     .offer-line-total-label-row label {
@@ -635,7 +658,7 @@
 
     .offer-line-total-input-wrap {
         position:relative;
-        margin-top:7px;
+        margin-top:0;
     }
 
     .offer-line-total-input {
@@ -665,11 +688,18 @@
         display:flex;
         align-items:center;
         justify-content:flex-end;
-        gap:14px;
-        padding:16px 20px;
+        gap:16px;
+        min-height:62px;
+        padding:14px 20px;
         border:1px solid #d8cbb7;
         border-radius:16px;
         background:#fffdf8;
+    }
+
+    .offer-price-summary .premium-muted {
+        font-size:13px !important;
+        font-weight:850 !important;
+        color:#665f54 !important;
     }
 
     .offer-price-summary strong {
@@ -710,7 +740,7 @@
         font-weight: 700 !important;
     }
 
-    @media (max-width: 1150px) {
+    @media (max-width: 1250px) {
         .offer-editor-form > .premium-form-grid,
         #offer-shipping-card .premium-form-grid {
             grid-template-columns: 1fr;
@@ -721,7 +751,7 @@
         }
 
         .offer-item-row > .premium-form-grid {
-            grid-template-columns: 1fr 1fr !important;
+            grid-template-columns: minmax(0, 1fr) 190px 230px 44px !important;
         }
     }
 
