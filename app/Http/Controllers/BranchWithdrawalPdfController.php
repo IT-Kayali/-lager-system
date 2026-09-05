@@ -17,7 +17,7 @@ class BranchWithdrawalPdfController extends Controller
         abort_unless(auth()->user()?->canAccessMenu(['manager', 'warehouse']), 403);
 
         $branchWithdrawal->load(['items.product.categories']);
-        $branchWithdrawal->setRelation('items', app(DocumentItemSorter::class)->sort($branchWithdrawal->items));
+        $branchWithdrawal->setRelation('items', app(DocumentItemSorter::class)->sort($branchWithdrawal->items, true));
 
         $template = DocumentTemplate::byKey(DocumentTemplate::WITH_COMPANY);
 
@@ -34,39 +34,19 @@ class BranchWithdrawalPdfController extends Controller
             'logoDataUri' => $logoDataUri,
         ])->setPaper('a4');
 
-        return $pdf->stream(
-            'filial-lieferschein-' . $branchWithdrawal->withdrawal_number . '.pdf'
-        );
+        return $pdf->stream('filial-lieferschein-' . $branchWithdrawal->withdrawal_number . '.pdf');
     }
 
     private function publicStorageDataUri(?string $relativePath): ?string
     {
-        if (! $relativePath) {
-            return null;
-        }
-
-        $paths = [
-            storage_path('app/public/' . $relativePath),
-            public_path('storage/' . $relativePath),
-        ];
-
+        if (! $relativePath) return null;
+        $paths = [storage_path('app/public/' . $relativePath), public_path('storage/' . $relativePath)];
         foreach ($paths as $path) {
-            if (! is_file($path)) {
-                continue;
-            }
-
+            if (! is_file($path)) continue;
             $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-
-            $mime = match ($extension) {
-                'jpg', 'jpeg' => 'image/jpeg',
-                'png' => 'image/png',
-                'webp' => 'image/webp',
-                default => mime_content_type($path) ?: 'image/jpeg',
-            };
-
+            $mime = match ($extension) { 'jpg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp', default => mime_content_type($path) ?: 'image/jpeg' };
             return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
         }
-
         return null;
     }
 }
