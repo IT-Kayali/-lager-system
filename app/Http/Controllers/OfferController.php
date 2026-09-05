@@ -23,9 +23,67 @@ class OfferController extends Controller
     public function index(Request $request): View
     {
         app(\App\Services\ReservationReleaseService::class)->releaseExpired();
-        $search = trim((string) $request->query('search')); $status = trim((string) $request->query('status'));
-        $offers = Offer::query()->with(['customer.group', 'items'])->when($search !== '', function ($query) use ($search) { $query->where(function ($subQuery) use ($search) { $subQuery->where('offer_number', 'like', "%{$search}%")->orWhereHas('customer', function ($customerQuery) use ($search) { $customerQuery->where('customer_number', 'like', "%{$search}%")->orWhere('company_name', 'like', "%{$search}%"); }); }); })->when($status !== '', fn ($query) => $query->where('status', $status))->latest()->paginate(15)->withQueryString();
-        return view('pages.offers.index', ['offers' => $offers, 'search' => $search, 'selectedStatus' => $status, 'statuses' => $this->statuses()]);
+
+        $search = trim((string) $request->query('search'));
+        $status = trim((string) $request->query('status'));
+        $searchField = (string) $request->query('search_field', 'all');
+        $exact = $request->boolean('exact');
+
+        $allowedSearchFields = ['all', 'number', 'customer', 'customer_number', 'product'];
+        if (! in_array($searchField, $allowedSearchFields, true)) {
+            $searchField = 'all';
+        }
+
+        $offers = Offer::query()
+            ->with(['customer.group', 'items'])
+            ->when($search !== '', function ($query) use ($search, $searchField, $exact) {
+                $operator = $exact ? '=' : 'like';
+                $value = $exact ? $search : "%{$search}%";
+
+                $query->where(function ($subQuery) use ($searchField, $operator, $value) {
+                    switch ($searchField) {
+                        case 'number':
+                            $subQuery->where('offer_number', $operator, $value);
+                            break;
+
+                        case 'customer':
+                            $subQuery->whereHas('customer', fn ($customerQuery) => $customerQuery->where('company_name', $operator, $value));
+                            break;
+
+                        case 'customer_number':
+                            $subQuery->whereHas('customer', fn ($customerQuery) => $customerQuery->where('customer_number', $operator, $value));
+                            break;
+
+                        case 'product':
+                            $subQuery->whereHas('items', fn ($itemQuery) => $itemQuery->where('product_name', $operator, $value));
+                            break;
+
+                        default:
+                            $subQuery
+                                ->where('offer_number', $operator, $value)
+                                ->orWhereHas('customer', function ($customerQuery) use ($operator, $value) {
+                                    $customerQuery
+                                        ->where('customer_number', $operator, $value)
+                                        ->orWhere('company_name', $operator, $value);
+                                })
+                                ->orWhereHas('items', fn ($itemQuery) => $itemQuery->where('product_name', $operator, $value));
+                            break;
+                    }
+                });
+            })
+            ->when($status !== '', fn ($query) => $query->where('status', $status))
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('pages.offers.index', [
+            'offers' => $offers,
+            'search' => $search,
+            'searchField' => $searchField,
+            'exact' => $exact,
+            'selectedStatus' => $status,
+            'statuses' => $this->statuses(),
+        ]);
     }
 
     public function show(Offer $offer): View { $offer->load(['customer.group', 'items.product', 'internalNotes.user']); return view('pages.offers.show', compact('offer')); }
