@@ -41,18 +41,25 @@ class Offer extends Model
 
     public static function nextOfferNumber(): string
     {
-        $start = ApplicationSetting::offerNumberStart();
+        $parts = ApplicationSetting::offerNumberParts();
+        $prefix = $parts['prefix'];
+        $start = $parts['number'];
+        $digits = $parts['digits'];
+        $pattern = '/^' . preg_quote($prefix, '/') . '(\d+)$/i';
+
         $highestExisting = static::query()
             ->pluck('offer_number')
-            ->filter(fn ($number) => preg_match('/^\d+$/', (string) $number) === 1)
-            ->map(fn ($number) => (int) $number)
+            ->map(function ($number) use ($pattern) {
+                return preg_match($pattern, (string) $number, $matches) === 1
+                    ? (int) $matches[1]
+                    : null;
+            })
+            ->filter(fn ($number) => $number !== null)
             ->max();
 
-        $next = $highestExisting === null
-            ? $start
-            : max($start, $highestExisting + 1);
+        $next = $highestExisting === null ? $start : max($start, $highestExisting + 1);
 
-        return str_pad((string) $next, ApplicationSetting::offerNumberDigits(), '0', STR_PAD_LEFT);
+        return $prefix . str_pad((string) $next, $digits, '0', STR_PAD_LEFT);
     }
 
     public function customer(): BelongsTo { return $this->belongsTo(Customer::class); }
