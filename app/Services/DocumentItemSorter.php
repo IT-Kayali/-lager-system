@@ -6,17 +6,21 @@ use Illuminate\Support\Collection;
 
 class DocumentItemSorter
 {
-    public function sort(Collection $items): Collection
+    public function sort(Collection $items, bool $quantityAscending = false): Collection
     {
         return $items
-            ->sort(function ($left, $right): int {
+            ->sort(function ($left, $right) use ($quantityAscending): int {
                 $priorityComparison = $this->priority($left) <=> $this->priority($right);
 
                 if ($priorityComparison !== 0) {
                     return $priorityComparison;
                 }
 
-                $quantityComparison = (float) ($right->quantity ?? 0) <=> (float) ($left->quantity ?? 0);
+                $leftQuantity = (float) ($left->quantity ?? 0);
+                $rightQuantity = (float) ($right->quantity ?? 0);
+                $quantityComparison = $quantityAscending
+                    ? $leftQuantity <=> $rightQuantity
+                    : $rightQuantity <=> $leftQuantity;
 
                 if ($quantityComparison !== 0) {
                     return $quantityComparison;
