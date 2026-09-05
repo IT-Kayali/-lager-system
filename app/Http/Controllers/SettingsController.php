@@ -19,8 +19,8 @@ class SettingsController extends Controller
 
         return view('pages.settings.index', [
             'reservationHours' => ApplicationSetting::reservationHours(),
-            'offerNumberStart' => ApplicationSetting::offerNumberStart(),
-            'offerNumberPreview' => str_pad((string) ApplicationSetting::offerNumberStart(), ApplicationSetting::offerNumberDigits(), '0', STR_PAD_LEFT),
+            'offerNumberStart' => ApplicationSetting::offerNumberPattern(),
+            'offerNumberPreview' => ApplicationSetting::offerNumberPattern(),
             'lowStockWarningPercentage' => ApplicationSetting::lowStockWarningPercentage(),
             'defaultBatchExpiryMonths' => ApplicationSetting::defaultBatchExpiryMonths(),
             'buttonTheme' => ApplicationSetting::buttonTheme(),
@@ -48,19 +48,22 @@ class SettingsController extends Controller
     public function updateOfferNumber(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'offer_number_start' => ['required', 'regex:/^\d{1,9}$/'],
+            'offer_number_start' => ['required', 'string', 'max:30', 'regex:/^[A-Za-z0-9_-]*\d+$/'],
+        ], [
+            'offer_number_start.regex' => 'Die Angebotsnummer darf Buchstaben, Zahlen, Bindestrich und Unterstrich enthalten und muss mit einer Zahl enden.',
         ]);
+
+        $pattern = strtoupper(trim($data['offer_number_start']));
 
         ApplicationSetting::putValue(
             'offer_number_start',
-            (int) $data['offer_number_start'],
-            'integer',
-            'Startnummer für fortlaufende Angebotsnummern ohne Jahrespräfix'
+            $pattern,
+            'string',
+            'Startwert und optionales Präfix für fortlaufende Angebotsnummern'
         );
 
-        return redirect()
-            ->to(route('settings.index') . '#offer-numbering')
-            ->with('success', 'Startnummer für Angebote wurde gespeichert.');
+        return redirect()->to(route('settings.index') . '#offer-numbering')
+            ->with('success', 'Nummerierung für Angebote wurde gespeichert.');
     }
 
     public function updateLowStockWarning(Request $request): RedirectResponse
@@ -86,83 +89,39 @@ class SettingsController extends Controller
             'secondary_button_text' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'reset_button_appearance' => ['nullable', 'boolean'],
         ]);
-
         $theme = $request->boolean('reset_button_appearance') ? ApplicationSetting::buttonThemeDefaults() : [
-            'primary_button_background' => strtoupper($data['primary_button_background']),
-            'primary_button_text' => strtoupper($data['primary_button_text']),
-            'secondary_button_background' => strtoupper($data['secondary_button_background']),
-            'secondary_button_text' => strtoupper($data['secondary_button_text']),
+            'primary_button_background' => strtoupper($data['primary_button_background']), 'primary_button_text' => strtoupper($data['primary_button_text']),
+            'secondary_button_background' => strtoupper($data['secondary_button_background']), 'secondary_button_text' => strtoupper($data['secondary_button_text']),
         ];
-
-        $descriptions = [
-            'primary_button_background' => 'Hintergrundfarbe für primäre Standardbuttons',
-            'primary_button_text' => 'Schriftfarbe für primäre Standardbuttons',
-            'secondary_button_background' => 'Hintergrundfarbe für sekundäre Standardbuttons',
-            'secondary_button_text' => 'Schriftfarbe für sekundäre Standardbuttons',
-        ];
-
-        foreach ($theme as $key => $value) {
-            ApplicationSetting::putValue($key, $value, 'color', $descriptions[$key]);
-        }
-
+        $descriptions = ['primary_button_background' => 'Hintergrundfarbe für primäre Standardbuttons', 'primary_button_text' => 'Schriftfarbe für primäre Standardbuttons', 'secondary_button_background' => 'Hintergrundfarbe für sekundäre Standardbuttons', 'secondary_button_text' => 'Schriftfarbe für sekundäre Standardbuttons'];
+        foreach ($theme as $key => $value) ApplicationSetting::putValue($key, $value, 'color', $descriptions[$key]);
         return redirect()->to(route('settings.index') . '#button-appearance')->with('success', $request->boolean('reset_button_appearance') ? 'Die Standardfarben der Buttons wurden wiederhergestellt.' : 'Das Button-Design wurde gespeichert.');
     }
 
     public function updateLoginAppearance(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'site_name' => ['required', 'string', 'max:80'],
-            'login_eyebrow' => ['required', 'string', 'max:80'],
-            'login_title' => ['required', 'string', 'max:120'],
-            'login_subtitle' => ['required', 'string', 'max:240'],
-            'login_background' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
-            'login_logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-            'site_favicon' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:1024'],
-            'remove_login_background' => ['nullable', 'boolean'],
-            'remove_login_logo' => ['nullable', 'boolean'],
-            'remove_site_favicon' => ['nullable', 'boolean'],
+            'site_name' => ['required', 'string', 'max:80'], 'login_eyebrow' => ['required', 'string', 'max:80'], 'login_title' => ['required', 'string', 'max:120'], 'login_subtitle' => ['required', 'string', 'max:240'],
+            'login_background' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'], 'login_logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'], 'site_favicon' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:1024'],
+            'remove_login_background' => ['nullable', 'boolean'], 'remove_login_logo' => ['nullable', 'boolean'], 'remove_site_favicon' => ['nullable', 'boolean'],
         ]);
-
         ApplicationSetting::putValue('site_name', trim($data['site_name']), 'string', 'Name der Anwendung im Browser-Tab');
         ApplicationSetting::putValue('login_eyebrow', trim($data['login_eyebrow']), 'string', 'Kleine Überschrift der Anmeldeseite');
         ApplicationSetting::putValue('login_title', trim($data['login_title']), 'string', 'Hauptüberschrift der Anmeldeseite');
         ApplicationSetting::putValue('login_subtitle', trim($data['login_subtitle']), 'string', 'Beschreibungstext der Anmeldeseite');
-
         $this->updateStoredImage($request, 'login_background', 'remove_login_background', ApplicationSetting::loginBackgroundPath(), 'login-backgrounds', 'login_background_path', 'Hintergrundbild der Anmeldeseite');
         $this->updateStoredImage($request, 'login_logo', 'remove_login_logo', ApplicationSetting::loginLogoPath(), 'login-logos', 'login_logo_path', 'Logo der Anmeldeseite');
         $this->updateStoredImage($request, 'site_favicon', 'remove_site_favicon', ApplicationSetting::siteFaviconPath(), 'site-favicons', 'site_favicon_path', 'Favicon der Anwendung');
-
         return redirect()->to(route('settings.index') . '#login-appearance')->with('success', 'Login- und Browser-Einstellungen wurden gespeichert.');
     }
 
-    public function loginBackground()
-    {
-        $path = ApplicationSetting::loginBackgroundPath();
-        abort_unless($path && Storage::disk('public')->exists($path), 404);
-        return Storage::disk('public')->response($path);
-    }
-
-    public function loginLogo()
-    {
-        $path = ApplicationSetting::loginLogoPath();
-        abort_unless($path && Storage::disk('public')->exists($path), 404);
-        return Storage::disk('public')->response($path);
-    }
-
-    public function siteFavicon()
-    {
-        $path = ApplicationSetting::siteFaviconPath();
-        abort_unless($path && Storage::disk('public')->exists($path), 404);
-        return Storage::disk('public')->response($path);
-    }
+    public function loginBackground() { $path = ApplicationSetting::loginBackgroundPath(); abort_unless($path && Storage::disk('public')->exists($path), 404); return Storage::disk('public')->response($path); }
+    public function loginLogo() { $path = ApplicationSetting::loginLogoPath(); abort_unless($path && Storage::disk('public')->exists($path), 404); return Storage::disk('public')->response($path); }
+    public function siteFavicon() { $path = ApplicationSetting::siteFaviconPath(); abort_unless($path && Storage::disk('public')->exists($path), 404); return Storage::disk('public')->response($path); }
 
     private function updateStoredImage(Request $request, string $fileField, string $removeField, ?string $currentPath, string $directory, string $settingKey, string $description): void
     {
-        if ($request->boolean($removeField)) {
-            if ($currentPath) Storage::disk('public')->delete($currentPath);
-            ApplicationSetting::putValue($settingKey, '', 'string', $description);
-            return;
-        }
+        if ($request->boolean($removeField)) { if ($currentPath) Storage::disk('public')->delete($currentPath); ApplicationSetting::putValue($settingKey, '', 'string', $description); return; }
         if (! $request->hasFile($fileField)) return;
         $newPath = $request->file($fileField)->store($directory, 'public');
         if ($currentPath) Storage::disk('public')->delete($currentPath);
