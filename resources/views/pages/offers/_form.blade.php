@@ -544,7 +544,7 @@
     }
 
     .offer-item-row > .premium-form-grid {
-        grid-template-columns: minmax(170px, .58fr) minmax(260px, 1.28fr) minmax(135px, .48fr) minmax(210px, .72fr) auto !important;
+        grid-template-columns: minmax(300px, 1.45fr) minmax(150px, .5fr) minmax(230px, .72fr) auto !important;
         gap: 14px !important;
         align-items: end !important;
     }
