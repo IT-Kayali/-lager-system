@@ -34,12 +34,32 @@ class Offer extends Model
     {
         static::creating(function (Offer $offer): void {
             if (! $offer->offer_number) {
-                $year = now()->format('Y');
-                $lastNumber = Offer::query()->where('offer_number', 'like', 'ANG-' . $year . '-%')->orderByDesc('id')->value('offer_number');
-                $lastSequence = $lastNumber ? (int) substr($lastNumber, -3) : 0;
-                $offer->offer_number = 'ANG-' . $year . '-' . str_pad((string) ($lastSequence + 1), 3, '0', STR_PAD_LEFT);
+                $offer->offer_number = static::nextOfferNumber();
             }
         });
+    }
+
+    public static function nextOfferNumber(): string
+    {
+        $parts = ApplicationSetting::offerNumberParts();
+        $prefix = $parts['prefix'];
+        $start = $parts['number'];
+        $digits = $parts['digits'];
+        $pattern = '/^' . preg_quote($prefix, '/') . '(\d+)$/i';
+
+        $highestExisting = static::query()
+            ->pluck('offer_number')
+            ->map(function ($number) use ($pattern) {
+                return preg_match($pattern, (string) $number, $matches) === 1
+                    ? (int) $matches[1]
+                    : null;
+            })
+            ->filter(fn ($number) => $number !== null)
+            ->max();
+
+        $next = $highestExisting === null ? $start : max($start, $highestExisting + 1);
+
+        return $prefix . str_pad((string) $next, $digits, '0', STR_PAD_LEFT);
     }
 
     public function customer(): BelongsTo { return $this->belongsTo(Customer::class); }
