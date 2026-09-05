@@ -43,6 +43,11 @@ function isOfferProductSelect(select) {
     return isProductSelect(select) && Boolean(select.closest('#offer-main-form'));
 }
 
+function isOfferCustomerSelect(select) {
+    return select.getAttribute('name') === 'customer_id'
+        && Boolean(select.closest('#offer-main-form'));
+}
+
 function isBranchWithdrawalProductSelect(select) {
     return isProductSelect(select) && Boolean(select.closest('.branch-editor-form'));
 }
@@ -287,6 +292,7 @@ function initSearchableSelects() {
         const enableSearch = shouldUseSearch(select);
         const countrySelect = isCountrySelect(select);
         const offerProductSelect = isOfferProductSelect(select);
+        const offerCustomerSelect = isOfferCustomerSelect(select);
         const branchWithdrawalProductSelect = isBranchWithdrawalProductSelect(select);
 
         const firstOption = select.querySelector('option[value=""]');
@@ -298,7 +304,7 @@ function initSearchableSelects() {
 
         const instance = new TomSelect(select, {
             create: false,
-            allowEmptyOption: !offerProductSelect && !branchWithdrawalProductSelect,
+            allowEmptyOption: !offerProductSelect && !offerCustomerSelect && !branchWithdrawalProductSelect,
             maxOptions: 1000,
             placeholder: placeholder,
             searchField: enableSearch ? ['text', 'name', 'dial'] : [],
