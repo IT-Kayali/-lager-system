@@ -13,12 +13,7 @@ class ApplicationSetting extends Model
         'secondary_button_text' => '#FFFFFF',
     ];
 
-    protected $fillable = [
-        'key',
-        'value',
-        'type',
-        'description',
-    ];
+    protected $fillable = ['key', 'value', 'type', 'description'];
 
     public static function getValue(string $key, mixed $default = null): mixed
     {
@@ -38,14 +33,33 @@ class ApplicationSetting extends Model
         return max(1, min(720, (int) static::getValue('reservation_hours', 72)));
     }
 
+    public static function offerNumberPattern(): string
+    {
+        $pattern = strtoupper(trim((string) static::getValue('offer_number_start', '00111')));
+
+        return preg_match('/^[A-Z0-9_-]*\d+$/', $pattern) === 1 ? $pattern : '00111';
+    }
+
+    public static function offerNumberParts(): array
+    {
+        $pattern = static::offerNumberPattern();
+        preg_match('/^(.*?)(\d+)$/', $pattern, $matches);
+
+        return [
+            'prefix' => $matches[1] ?? '',
+            'number' => (int) ($matches[2] ?? 111),
+            'digits' => strlen($matches[2] ?? '00111'),
+        ];
+    }
+
     public static function offerNumberStart(): int
     {
-        return max(1, min(999999999, (int) static::getValue('offer_number_start', 111)));
+        return static::offerNumberParts()['number'];
     }
 
     public static function offerNumberDigits(): int
     {
-        return max(5, strlen((string) static::offerNumberStart()));
+        return static::offerNumberParts()['digits'];
     }
 
     public static function lowStockWarningPercentage(): float
@@ -58,10 +72,7 @@ class ApplicationSetting extends Model
         return max(1, min(240, (int) static::getValue('default_batch_expiry_months', 24)));
     }
 
-    public static function buttonThemeDefaults(): array
-    {
-        return self::DEFAULT_BUTTON_THEME;
-    }
+    public static function buttonThemeDefaults(): array { return self::DEFAULT_BUTTON_THEME; }
 
     public static function buttonTheme(): array
     {
@@ -79,38 +90,12 @@ class ApplicationSetting extends Model
         return trim((string) static::getValue('site_name', $fallback)) ?: $fallback;
     }
 
-    public static function siteFaviconPath(): ?string
-    {
-        $path = trim((string) static::getValue('site_favicon_path', ''));
-        return $path !== '' ? $path : null;
-    }
-
-    public static function loginBackgroundPath(): ?string
-    {
-        $path = trim((string) static::getValue('login_background_path', ''));
-        return $path !== '' ? $path : null;
-    }
-
-    public static function loginLogoPath(): ?string
-    {
-        $path = trim((string) static::getValue('login_logo_path', ''));
-        return $path !== '' ? $path : null;
-    }
-
-    public static function loginEyebrow(): string
-    {
-        return trim((string) static::getValue('login_eyebrow', 'Sicherer Zugriff')) ?: 'Sicherer Zugriff';
-    }
-
-    public static function loginTitle(): string
-    {
-        return trim((string) static::getValue('login_title', 'Alles im Lager sofort im Blick.')) ?: 'Alles im Lager sofort im Blick.';
-    }
-
-    public static function loginSubtitle(): string
-    {
-        return trim((string) static::getValue('login_subtitle', 'Modernes Dashboard für Bestände, Angebote, Rechnungen und Warnungen — schnell, klar und sicher.')) ?: 'Modernes Dashboard für Bestände, Angebote, Rechnungen und Warnungen — schnell, klar und sicher.';
-    }
+    public static function siteFaviconPath(): ?string { $path = trim((string) static::getValue('site_favicon_path', '')); return $path !== '' ? $path : null; }
+    public static function loginBackgroundPath(): ?string { $path = trim((string) static::getValue('login_background_path', '')); return $path !== '' ? $path : null; }
+    public static function loginLogoPath(): ?string { $path = trim((string) static::getValue('login_logo_path', '')); return $path !== '' ? $path : null; }
+    public static function loginEyebrow(): string { return trim((string) static::getValue('login_eyebrow', 'Sicherer Zugriff')) ?: 'Sicherer Zugriff'; }
+    public static function loginTitle(): string { return trim((string) static::getValue('login_title', 'Alles im Lager sofort im Blick.')) ?: 'Alles im Lager sofort im Blick.'; }
+    public static function loginSubtitle(): string { return trim((string) static::getValue('login_subtitle', 'Modernes Dashboard für Bestände, Angebote, Rechnungen und Warnungen — schnell, klar und sicher.')) ?: 'Modernes Dashboard für Bestände, Angebote, Rechnungen und Warnungen — schnell, klar und sicher.'; }
 
     private static function normalizeHexColor(mixed $value, string $default): string
     {
