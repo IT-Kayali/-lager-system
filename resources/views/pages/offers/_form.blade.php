@@ -96,17 +96,25 @@
                 </div>
 
                 <div class="premium-form-field offer-line-total-field">
-                    <label>Gesamtpreis</label>
-                    <input
-                        name="items[{{ $index }}][line_total]"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        class="premium-input offer-line-total-input"
-                        value="{{ $item['line_total'] ?? '' }}"
-                        placeholder="automatisch"
-                    >
-                    <div class="premium-muted offer-line-total-hint" style="margin-top:6px;">Automatisch berechnet, kann manuell angepasst werden.</div>
+                    <div class="offer-line-total-label-row">
+                        <label>Gesamtpreis</label>
+                        <span class="offer-auto-price-badge">
+                            Auto: <strong class="offer-auto-price-value">—</strong>
+                        </span>
+                    </div>
+                    <div class="offer-line-total-input-wrap">
+                        <input
+                            name="items[{{ $index }}][line_total]"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            class="premium-input offer-line-total-input"
+                            value="{{ $item['line_total'] ?? '' }}"
+                            placeholder="0,00"
+                        >
+                        <span class="offer-line-total-currency">€</span>
+                    </div>
+                    <div class="premium-muted offer-line-total-hint">Automatisch berechnet · manuell änderbar</div>
                 </div>
 
                 <div class="premium-form-field" style="display:flex; align-items:end;">
@@ -158,9 +166,17 @@
             </div>
 
             <div class="premium-form-field offer-line-total-field">
-                <label>Gesamtpreis</label>
-                <input data-name="line_total" type="number" step="0.01" min="0" class="premium-input offer-line-total-input" placeholder="automatisch">
-                <div class="premium-muted offer-line-total-hint" style="margin-top:6px;">Automatisch berechnet, kann manuell angepasst werden.</div>
+                <div class="offer-line-total-label-row">
+                    <label>Gesamtpreis</label>
+                    <span class="offer-auto-price-badge">
+                        Auto: <strong class="offer-auto-price-value">—</strong>
+                    </span>
+                </div>
+                <div class="offer-line-total-input-wrap">
+                    <input data-name="line_total" type="number" step="0.01" min="0" class="premium-input offer-line-total-input" placeholder="0,00">
+                    <span class="offer-line-total-currency">€</span>
+                </div>
+                <div class="premium-muted offer-line-total-hint">Automatisch berechnet · manuell änderbar</div>
             </div>
 
             <div class="premium-form-field" style="display:flex; align-items:end;">
@@ -189,6 +205,8 @@
                 product: row.querySelector('select[name*="[product_id]"], select[data-name="product_id"]'),
                 quantity: row.querySelector('input[name*="[quantity]"], input[data-name="quantity"]'),
                 total: row.querySelector('input[name*="[line_total]"], input[data-name="line_total"]'),
+                autoValue: row.querySelector('.offer-auto-price-value'),
+                badge: row.querySelector('.offer-auto-price-badge'),
                 hint: row.querySelector('.offer-line-total-hint'),
             };
         }
@@ -204,7 +222,10 @@
         }
 
         function formatMoney(value) {
-            return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(value || 0));
+            return new Intl.NumberFormat('de-DE', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            }).format(Number(value || 0)) + ' €';
         }
 
         function updateGrandTotal() {
@@ -214,9 +235,7 @@
                 return sum + (Number.isFinite(value) ? value : 0);
             }, 0);
 
-            if (totalOutput) {
-                totalOutput.textContent = formatMoney(total);
-            }
+            if (totalOutput) totalOutput.textContent = formatMoney(total);
         }
 
         function markInitialState(row) {
@@ -225,33 +244,38 @@
             row.dataset.priceStateInitialized = '1';
             row.dataset.initialProduct = product?.value || '';
             row.dataset.initialQuantity = quantity?.value || '';
-            row.dataset.preserveInitialTotal = total?.value !== '' ? '1' : '0';
-            if (total) total.dataset.manualOverride = total.value !== '' ? '1' : '0';
+            row.dataset.initialTotal = total?.value || '';
+            row.dataset.keepSavedTotal = total?.value !== '' ? '1' : '0';
+            if (total) total.dataset.manualOverride = '0';
         }
 
-        async function refreshAutomaticPrice(row, force = false) {
-            const { product, quantity, total, hint } = getRowFields(row);
+        function setWaitingState(row) {
+            const { autoValue, badge, hint } = getRowFields(row);
+            if (autoValue) autoValue.textContent = '—';
+
+            if (!customer?.value) {
+                if (badge) badge.classList.add('is-waiting');
+                if (hint) hint.textContent = 'Kunde auswählen, damit der automatische Preis berechnet wird.';
+            } else {
+                if (badge) badge.classList.remove('is-waiting');
+                if (hint) hint.textContent = 'Produkt und Menge auswählen · manuell änderbar';
+            }
+        }
+
+        async function refreshAutomaticPrice(row, forceOverwrite = false) {
+            const { product, quantity, total, autoValue, badge, hint } = getRowFields(row);
             if (!product || !quantity || !total) return;
 
             markInitialState(row);
 
-            if (!force && row.dataset.preserveInitialTotal === '1'
-                && product.value === row.dataset.initialProduct
-                && quantity.value === row.dataset.initialQuantity) {
-                updateGrandTotal();
-                return;
-            }
-
-            row.dataset.preserveInitialTotal = '0';
-
             if (!customer?.value || !product.value || !quantity.value || Number(quantity.value) <= 0) {
-                if (total.dataset.manualOverride !== '1') total.value = '';
-                if (hint) hint.textContent = 'Automatisch berechnet, kann manuell angepasst werden.';
+                if (total.dataset.manualOverride !== '1' && row.dataset.keepSavedTotal !== '1') total.value = '';
+                setWaitingState(row);
                 updateGrandTotal();
                 return;
             }
 
-            const requestId = String((Number(row.dataset.priceRequestId || 0) + 1));
+            const requestId = String(Number(row.dataset.priceRequestId || 0) + 1);
             row.dataset.priceRequestId = requestId;
 
             try {
@@ -261,19 +285,51 @@
                 url.searchParams.set('quantity', quantity.value);
 
                 const response = await fetch(url.toString(), {
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
                     credentials: 'same-origin',
                 });
 
                 if (!response.ok) throw new Error('Preis konnte nicht berechnet werden.');
+
                 const data = await response.json();
                 if (row.dataset.priceRequestId !== requestId) return;
 
-                total.value = Number(data.line_total || 0).toFixed(2);
-                total.dataset.manualOverride = '0';
-                if (hint) hint.textContent = `Automatisch: ${formatMoney(data.unit_price)} je Einheit · ${data.tier_label || 'Preisregel'}`;
+                const automaticTotal = Number(data.line_total || 0);
+                if (autoValue) autoValue.textContent = formatMoney(automaticTotal);
+                if (badge) badge.classList.remove('is-waiting');
+
+                const savedTotal = row.dataset.keepSavedTotal === '1' && row.dataset.initialTotal !== ''
+                    ? Number(row.dataset.initialTotal)
+                    : null;
+
+                const shouldKeepSavedTotal = savedTotal !== null
+                    && product.value === row.dataset.initialProduct
+                    && quantity.value === row.dataset.initialQuantity
+                    && !forceOverwrite;
+
+                if (shouldKeepSavedTotal) {
+                    total.value = Number(savedTotal).toFixed(2);
+                    const differs = Math.abs(Number(savedTotal) - automaticTotal) > 0.004;
+                    total.dataset.manualOverride = differs ? '1' : '0';
+                    if (hint) {
+                        hint.textContent = differs
+                            ? 'Manuell angepasst · Automatik bleibt rechts sichtbar'
+                            : `${formatMoney(data.unit_price)} je Einheit · ${data.tier_label || 'Preisregel'}`;
+                    }
+                } else if (total.dataset.manualOverride !== '1' || forceOverwrite) {
+                    total.value = automaticTotal.toFixed(2);
+                    total.dataset.manualOverride = '0';
+                    row.dataset.keepSavedTotal = '0';
+                    if (hint) hint.textContent = `${formatMoney(data.unit_price)} je Einheit · ${data.tier_label || 'Preisregel'}`;
+                }
+
                 updateGrandTotal();
             } catch (error) {
+                if (autoValue) autoValue.textContent = '—';
+                if (badge) badge.classList.add('is-waiting');
                 if (hint) hint.textContent = 'Automatischer Preis konnte nicht geladen werden. Gesamtpreis kann manuell eingetragen werden.';
             }
         }
@@ -288,8 +344,7 @@
         }
 
         function addEmptyRow() {
-            const clone = template.content.cloneNode(true);
-            wrapper.appendChild(clone);
+            wrapper.appendChild(template.content.cloneNode(true));
             reindexRows();
             bindRowEvents();
         }
@@ -311,7 +366,7 @@
         function bindRowEvents() {
             getRows().forEach((row) => {
                 markInitialState(row);
-                const { product, quantity, total } = getRowFields(row);
+                const { product, quantity, total, hint } = getRowFields(row);
                 const removeButton = row.querySelector('.remove-offer-item');
 
                 [product, quantity].forEach((field) => {
@@ -319,17 +374,11 @@
                     field.dataset.autoBound = '1';
 
                     const changed = function () {
-                        const sameAsInitial = product?.value === row.dataset.initialProduct
-                            && quantity?.value === row.dataset.initialQuantity
-                            && row.dataset.preserveInitialTotal === '1';
-
-                        if (!sameAsInitial && total) {
-                            total.dataset.manualOverride = '0';
-                        }
-
+                        row.dataset.keepSavedTotal = '0';
+                        if (total) total.dataset.manualOverride = '0';
                         ensureTrailingEmptyRow();
                         removeExtraEmptyRows();
-                        refreshAutomaticPrice(row);
+                        refreshAutomaticPrice(row, true);
                     };
 
                     field.addEventListener('change', changed);
@@ -340,9 +389,8 @@
                     total.dataset.totalBound = '1';
                     total.addEventListener('input', function () {
                         total.dataset.manualOverride = '1';
-                        row.dataset.preserveInitialTotal = '0';
-                        const hint = row.querySelector('.offer-line-total-hint');
-                        if (hint) hint.textContent = 'Manuell angepasster Gesamtpreis für dieses Angebot.';
+                        row.dataset.keepSavedTotal = '0';
+                        if (hint) hint.textContent = 'Manuell angepasst · Automatik bleibt rechts sichtbar';
                         updateGrandTotal();
                     });
                 }
@@ -359,6 +407,9 @@
                         }
                     });
                 }
+
+                setWaitingState(row);
+                if (rowIsComplete(row) && customer?.value) refreshAutomaticPrice(row, false);
             });
         }
 
@@ -366,7 +417,7 @@
             customer.dataset.priceBound = '1';
             customer.addEventListener('change', function () {
                 getRows().forEach((row) => {
-                    row.dataset.preserveInitialTotal = '0';
+                    row.dataset.keepSavedTotal = '0';
                     const total = getRowFields(row).total;
                     if (total) total.dataset.manualOverride = '0';
                     refreshAutomaticPrice(row, true);
@@ -493,7 +544,7 @@
     }
 
     .offer-item-row > .premium-form-grid {
-        grid-template-columns: minmax(180px, .65fr) minmax(280px, 1.35fr) minmax(140px, .5fr) minmax(170px, .55fr) auto !important;
+        grid-template-columns: minmax(170px, .58fr) minmax(260px, 1.28fr) minmax(135px, .48fr) minmax(210px, .72fr) auto !important;
         gap: 14px !important;
         align-items: end !important;
     }
@@ -546,6 +597,68 @@
 
     #offer-shipping-card .premium-form-field.full {
         grid-column: auto;
+    }
+
+    .offer-line-total-field {
+        min-width: 0;
+    }
+
+    .offer-line-total-label-row {
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:8px;
+        min-height:25px;
+    }
+
+    .offer-line-total-label-row label {
+        margin-bottom:0 !important;
+    }
+
+    .offer-auto-price-badge {
+        display:inline-flex;
+        align-items:center;
+        gap:4px;
+        padding:4px 8px;
+        border-radius:999px;
+        background:#f3e8be;
+        color:#66510c;
+        font-size:11px;
+        font-weight:850;
+        white-space:nowrap;
+    }
+
+    .offer-auto-price-badge.is-waiting {
+        background:#f2eee7;
+        color:#7a7368;
+    }
+
+    .offer-line-total-input-wrap {
+        position:relative;
+        margin-top:7px;
+    }
+
+    .offer-line-total-input {
+        padding-right:38px !important;
+        font-weight:900 !important;
+    }
+
+    .offer-line-total-currency {
+        position:absolute;
+        top:50%;
+        right:14px;
+        transform:translateY(-50%);
+        color:#665f54;
+        font-size:14px;
+        font-weight:900;
+        pointer-events:none;
+    }
+
+    .offer-line-total-hint {
+        min-height:18px;
+        margin-top:5px !important;
+        font-size:11px !important;
+        line-height:1.25 !important;
     }
 
     .offer-price-summary {
