@@ -66,8 +66,8 @@ class BatchController extends Controller
                     }
                 });
             })
-            ->orderBy('received_at')
-            ->orderBy('id')
+            ->orderBy('product_batches.received_at')
+            ->orderBy('product_batches.id')
             ->paginate(20)
             ->withQueryString();
 
