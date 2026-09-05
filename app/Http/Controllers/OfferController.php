@@ -10,6 +10,7 @@ use App\Models\ManualPriceRule;
 use App\Models\Offer;
 use App\Models\Product;
 use App\Models\ProductPriceTier;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -28,7 +29,28 @@ class OfferController extends Controller
     }
 
     public function show(Offer $offer): View { $offer->load(['customer.group', 'items.product', 'internalNotes.user']); return view('pages.offers.show', compact('offer')); }
-    public function create(): View { return view('pages.offers.create', ['offer' => new Offer(), 'customers' => $this->customers(), 'products' => $this->products(), 'templates' => $this->templates(), 'formItems' => collect([['product_id' => '', 'quantity' => '']])]); }
+    public function create(): View { return view('pages.offers.create', ['offer' => new Offer(), 'customers' => $this->customers(), 'products' => $this->products(), 'templates' => $this->templates(), 'formItems' => collect([['product_id' => '', 'quantity' => '', 'line_total' => '']])]); }
+
+    public function pricePreview(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'customer_id' => ['required', 'exists:customers,id'],
+            'product_id' => ['required', 'exists:products,id'],
+            'quantity' => ['required', 'numeric', 'gt:0', 'max:5000'],
+        ]);
+
+        $customer = Customer::with('group')->findOrFail($data['customer_id']);
+        $product = Product::query()->with(['categories', 'priceTiers', 'manualPriceRules'])->findOrFail($data['product_id']);
+        $quantity = (float) $data['quantity'];
+        $pricing = $this->resolvePrice($product, $customer, $quantity);
+        $lineTotal = round($quantity * (float) $pricing['price'], 2);
+
+        return response()->json([
+            'unit_price' => round((float) $pricing['price'], 2),
+            'line_total' => $lineTotal,
+            'tier_label' => $pricing['label'],
+        ]);
+    }
 
     public function store(Request $request): RedirectResponse
     {
@@ -39,7 +61,7 @@ class OfferController extends Controller
         return redirect()->route('offers.show', $offer)->with('success', 'Angebot ' . $offer->offer_number . ' wurde erstellt und Ware wurde reserviert.');
     }
 
-    public function edit(Offer $offer): View { if (! $this->canEdit($offer)) return redirect()->route('offers.show', $offer)->with('error', 'Erledigte, stornierte oder abgelaufene Angebote können nicht bearbeitet werden.'); $offer->load('items'); return view('pages.offers.edit', ['offer' => $offer, 'customers' => $this->customers(), 'products' => $this->products(), 'templates' => $this->templates(), 'formItems' => $offer->items->map(fn ($item) => ['product_id' => $item->product_id, 'quantity' => $item->quantity])->values()]); }
+    public function edit(Offer $offer): View { if (! $this->canEdit($offer)) return redirect()->route('offers.show', $offer)->with('error', 'Erledigte, stornierte oder abgelaufene Angebote können nicht bearbeitet werden.'); $offer->load('items'); return view('pages.offers.edit', ['offer' => $offer, 'customers' => $this->customers(), 'products' => $this->products(), 'templates' => $this->templates(), 'formItems' => $offer->items->map(fn ($item) => ['product_id' => $item->product_id, 'quantity' => $item->quantity, 'line_total' => $item->line_total])->values()]); }
 
     public function update(Request $request, Offer $offer): RedirectResponse
     {
@@ -62,7 +84,7 @@ class OfferController extends Controller
 
     private function validatedData(Request $request): array
     {
-        return $request->validate(['customer_id' => ['required', 'exists:customers,id'], 'template_type' => ['required', 'in:with_company,without_company'], 'shipping_method' => ['nullable', 'string', 'max:255'], 'shipping_price_gross' => ['nullable', 'numeric', 'min:0'], 'carton_count' => ['nullable', 'integer', 'min:0'], 'notes' => ['nullable', 'string'], 'items' => ['required', 'array'], 'items.*.product_id' => ['nullable', 'exists:products,id'], 'items.*.quantity' => ['nullable', 'numeric', 'min:0']]);
+        return $request->validate(['customer_id' => ['required', 'exists:customers,id'], 'template_type' => ['required', 'in:with_company,without_company'], 'shipping_method' => ['nullable', 'string', 'max:255'], 'shipping_price_gross' => ['nullable', 'numeric', 'min:0'], 'carton_count' => ['nullable', 'integer', 'min:0'], 'notes' => ['nullable', 'string'], 'items' => ['required', 'array'], 'items.*.product_id' => ['nullable', 'exists:products,id'], 'items.*.quantity' => ['nullable', 'numeric', 'min:0'], 'items.*.line_total' => ['nullable', 'numeric', 'min:0', 'max:999999999.99']]);
     }
 
     private function cleanItems(array $items): Collection { return collect($items)->filter(fn ($item) => ! empty($item['product_id']) && (float) ($item['quantity'] ?? 0) > 0)->values(); }
@@ -76,7 +98,12 @@ class OfferController extends Controller
             if ($quantity > $available) {
                 throw ValidationException::withMessages(['items' => "Für {$product->name} sind nur {$available} {$product->unitLabel('de')} verfügbar. Bitte Menge anpassen."]);
             }
-            $pricing = $this->resolvePrice($product, $customer, $quantity); $prepared[] = ['product_id' => $product->id, 'product_name' => $product->name, 'product_code' => $product->product_code, 'quantity' => $quantity, 'unit' => $product->unit, 'tier_key' => $pricing['key'], 'tier_label' => $pricing['label'], 'unit_price' => $pricing['price'], 'line_total' => round($quantity * $pricing['price'], 2)];
+            $pricing = $this->resolvePrice($product, $customer, $quantity);
+            $automaticTotal = round($quantity * (float) $pricing['price'], 2);
+            $hasManualTotal = array_key_exists('line_total', $item) && $item['line_total'] !== null && $item['line_total'] !== '';
+            $lineTotal = $hasManualTotal ? round((float) $item['line_total'], 2) : $automaticTotal;
+            $effectiveUnitPrice = $quantity > 0 ? round($lineTotal / $quantity, 4) : (float) $pricing['price'];
+            $prepared[] = ['product_id' => $product->id, 'product_name' => $product->name, 'product_code' => $product->product_code, 'quantity' => $quantity, 'unit' => $product->unit, 'tier_key' => $pricing['key'], 'tier_label' => $pricing['label'], 'unit_price' => $effectiveUnitPrice, 'line_total' => $lineTotal];
         } return $prepared;
     }
 
