@@ -15,6 +15,11 @@ beforeEach(function () {
         'role' => User::ROLE_WAREHOUSE,
         'is_active' => true,
     ]);
+
+    $this->sales = User::factory()->create([
+        'role' => User::ROLE_SALES,
+        'is_active' => true,
+    ]);
 });
 
 function branchProduct(string $name, float $quantity): array
@@ -65,7 +70,7 @@ it('deducts all products by fifo when warehouse changes the status to issued', f
     $this->actingAs($this->manager)
         ->post(route('branch-withdrawals.store'), [
             'branch_name' => BranchWithdrawal::BRANCH_DEZ,
-            'status' => BranchWithdrawal::STATUS_OPEN,
+            'status' => BranchWithdrawal::STATUS_IN_PROGRESS,
             'items' => [
                 ['product_id' => $product->id, 'quantity' => 4],
             ],
@@ -203,4 +208,89 @@ it('keeps every product unchanged when one issued position has insufficient stoc
     expect((float) $firstBatch->fresh()->quantity)->toBe(10.0)
         ->and((float) $secondBatch->fresh()->quantity)->toBe(2.0)
         ->and(BranchWithdrawal::query()->count())->toBe(0);
+});
+
+
+it('hides open branch withdrawals from warehouse until sales hands them off', function () {
+    [$product] = branchProduct('Übergabe Filialprodukt', 20);
+
+    $this->actingAs($this->sales)
+        ->post(route('sales.branch-withdrawals.store'), [
+            'branch_name' => BranchWithdrawal::BRANCH_MAIN,
+            'status' => BranchWithdrawal::STATUS_OPEN,
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 5],
+            ],
+        ])
+        ->assertRedirect(route('sales.branch-withdrawals.index'));
+
+    $withdrawal = BranchWithdrawal::query()->firstOrFail();
+
+    $this->actingAs($this->warehouse)
+        ->get(route('branch-withdrawals.index'))
+        ->assertOk()
+        ->assertDontSee($withdrawal->withdrawal_number);
+
+    $this->actingAs($this->sales)
+        ->put(route('sales.branch-withdrawals.update', $withdrawal), [
+            'branch_name' => BranchWithdrawal::BRANCH_MAIN,
+            'status' => BranchWithdrawal::STATUS_IN_PROGRESS,
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 5],
+            ],
+        ])
+        ->assertRedirect(route('sales.branch-withdrawals.index'));
+
+    expect($withdrawal->fresh()->status)->toBe(BranchWithdrawal::STATUS_IN_PROGRESS);
+
+    $this->actingAs($this->warehouse)
+        ->get(route('branch-withdrawals.index'))
+        ->assertOk()
+        ->assertSee($withdrawal->withdrawal_number);
+});
+
+it('prevents sales from editing a branch withdrawal after handoff to warehouse', function () {
+    [$product] = branchProduct('Gesperrtes Übergabeprodukt', 20);
+
+    $this->actingAs($this->sales)
+        ->post(route('sales.branch-withdrawals.store'), [
+            'branch_name' => BranchWithdrawal::BRANCH_DEZ,
+            'status' => BranchWithdrawal::STATUS_IN_PROGRESS,
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 4],
+            ],
+        ]);
+
+    $withdrawal = BranchWithdrawal::query()->firstOrFail();
+
+    $this->actingAs($this->sales)
+        ->get(route('sales.branch-withdrawals.edit', $withdrawal))
+        ->assertForbidden();
+});
+
+it('allows warehouse to return a branch withdrawal to sales', function () {
+    [$product] = branchProduct('Rückgabe Filialprodukt', 20);
+
+    $this->actingAs($this->manager)
+        ->post(route('branch-withdrawals.store'), [
+            'branch_name' => BranchWithdrawal::BRANCH_MAIN,
+            'status' => BranchWithdrawal::STATUS_IN_PROGRESS,
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 2],
+            ],
+        ]);
+
+    $withdrawal = BranchWithdrawal::query()->firstOrFail();
+
+    $this->actingAs($this->warehouse)
+        ->put(route('branch-withdrawals.update', $withdrawal), [
+            'status' => BranchWithdrawal::STATUS_OPEN,
+        ])
+        ->assertRedirect(route('branch-withdrawals.index'));
+
+    expect($withdrawal->fresh()->status)->toBe(BranchWithdrawal::STATUS_OPEN);
+
+    $this->actingAs($this->sales)
+        ->get(route('sales.branch-withdrawals.edit', $withdrawal))
+        ->assertOk();
 });
