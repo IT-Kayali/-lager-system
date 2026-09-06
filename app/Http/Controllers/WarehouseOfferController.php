@@ -7,6 +7,7 @@ use App\Models\ApplicationSetting;
 use App\Models\Offer;
 use App\Services\OfferFulfillmentService;
 use App\Services\ReservationReleaseService;
+use App\Services\WarehouseNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -88,7 +89,12 @@ class WarehouseOfferController extends Controller
         ]);
     }
 
-    public function updateStatus(Request $request, Offer $offer, OfferFulfillmentService $fulfillmentService): RedirectResponse
+    public function updateStatus(
+        Request $request,
+        Offer $offer,
+        OfferFulfillmentService $fulfillmentService,
+        WarehouseNotificationService $warehouseNotifications
+    ): RedirectResponse
     {
         $this->authorizeWarehouseOffer($offer);
         $data = $request->validate(['status' => ['required', 'string']]);
@@ -118,6 +124,7 @@ class WarehouseOfferController extends Controller
                 $offer->update([
                     'reserved_until' => now()->addHours(ApplicationSetting::reservationHours()),
                 ]);
+                $warehouseNotifications->dismissOffer($offer);
 
                 return redirect()
                     ->route('warehouse.offers.index')
