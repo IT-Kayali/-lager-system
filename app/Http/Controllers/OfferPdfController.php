@@ -73,7 +73,7 @@ class OfferPdfController extends Controller
         }
 
         $xpath = new \DOMXPath($dom);
-        $metaRows = $xpath->query('//div[contains(concat(" ", normalize-space(@class), " "), " meta ")]//table/tr');
+        $metaRows = $xpath->query('//div[contains(concat(" ", normalize-space(@class), " "), " meta ")]//table//tr');
 
         if ($metaRows === false || $metaRows->length === 0) {
             return $html;
