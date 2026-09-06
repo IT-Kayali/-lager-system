@@ -5,12 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use App\Models\Offer;
 use App\Services\OfferFulfillmentService;
+use App\Services\WarehouseNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class OfferStatusController extends Controller
 {
-    public function update(Request $request, Offer $offer, OfferFulfillmentService $fulfillmentService): RedirectResponse
+    public function update(
+        Request $request,
+        Offer $offer,
+        OfferFulfillmentService $fulfillmentService,
+        WarehouseNotificationService $warehouseNotifications
+    ): RedirectResponse
     {
         $data = $request->validate([
             'status' => ['required', 'string', 'in:' . implode(',', array_keys($this->statuses()))],
@@ -44,6 +50,7 @@ class OfferStatusController extends Controller
 
             if (in_array($newStatus, [Offer::STATUS_CANCELLED, Offer::STATUS_RESERVATION_EXPIRED], true)) {
                 $fulfillmentService->cancel($offer, $newStatus);
+                $warehouseNotifications->dismissOffer($offer);
 
                 return redirect()
                     ->route('offers.show', $offer)
@@ -59,6 +66,12 @@ class OfferStatusController extends Controller
                 'old_status' => $oldStatus,
                 'new_status' => $newStatus,
             ]);
+
+            if ($newStatus === Offer::STATUS_IN_PROGRESS && $oldStatus !== Offer::STATUS_IN_PROGRESS) {
+                $warehouseNotifications->notifyOfferHandoff($offer);
+            } elseif ($newStatus === Offer::STATUS_OFFER && $oldStatus === Offer::STATUS_IN_PROGRESS) {
+                $warehouseNotifications->dismissOffer($offer);
+            }
 
             return redirect()
                 ->route('offers.show', $offer)
