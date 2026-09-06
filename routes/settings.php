@@ -27,7 +27,8 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:' . User::ROLE_ADMIN);
 
     Route::post('offer-notes/{offer}', [OfferInternalNoteController::class, 'store'])
-        ->name('offer-notes.store');
+        ->name('offer-notes.store')
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES . ',' . User::ROLE_WAREHOUSE);
 
     Route::get('branch-withdrawals/{branchWithdrawal}/delivery-note', [BranchWithdrawalPdfController::class, 'stream'])
         ->name('branch-withdrawals.delivery-note')

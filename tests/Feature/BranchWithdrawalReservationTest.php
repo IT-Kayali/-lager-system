@@ -71,16 +71,12 @@ it('rejects an open branch withdrawal immediately when the requested quantity is
         ->and((float) $product->fresh()->available_stock)->toBe(5.0);
 });
 
-it('releases a branch reservation when an open withdrawal is cancelled', function () {
+it('releases a branch reservation when a manager cancels an open withdrawal', function () {
     $manager = User::factory()->create([
         'role' => User::ROLE_MANAGER,
         'is_active' => true,
     ]);
-    $warehouse = User::factory()->create([
-        'role' => User::ROLE_WAREHOUSE,
-        'is_active' => true,
-    ]);
-    $product = reservationProduct('Freizugebender Filialbestand', 10);
+     $product = reservationProduct('Freizugebender Filialbestand', 10);
 
     $this->actingAs($manager)->post(route('branch-withdrawals.store'), [
         'branch_name' => BranchWithdrawal::BRANCH_MAIN,
@@ -93,9 +89,13 @@ it('releases a branch reservation when an open withdrawal is cancelled', functio
     $withdrawal = BranchWithdrawal::query()->firstOrFail();
     expect((float) $product->fresh()->available_stock)->toBe(6.0);
 
-    $this->actingAs($warehouse)
+    $this->actingAs($manager)
         ->put(route('branch-withdrawals.update', $withdrawal), [
+            'branch_name' => BranchWithdrawal::BRANCH_MAIN,
             'status' => BranchWithdrawal::STATUS_CANCELLED,
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 4],
+            ],
         ])
         ->assertRedirect(route('branch-withdrawals.index'));
 

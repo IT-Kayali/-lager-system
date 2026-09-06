@@ -14,16 +14,34 @@ class SupplierController extends Controller
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('search'));
+        $searchField = (string) $request->query('search_field', 'all');
+        $exact = $request->boolean('exact');
+
+        $allowedSearchFields = ['all', 'number', 'name', 'contact', 'email', 'city'];
+        if (! in_array($searchField, $allowedSearchFields, true)) {
+            $searchField = 'all';
+        }
 
         $suppliers = Supplier::query()
             ->withCount('products')
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($subQuery) use ($search) {
-                    $subQuery
-                        ->where('supplier_number', 'like', "%{$search}%")
-                        ->orWhere('company_name', 'like', "%{$search}%")
-                        ->orWhere('contact_person', 'like', "%{$search}%")
-                        ->orWhere('city', 'like', "%{$search}%");
+            ->when($search !== '', function ($query) use ($search, $searchField, $exact) {
+                $operator = $exact ? '=' : 'like';
+                $value = $exact ? $search : "%{$search}%";
+
+                $query->where(function ($subQuery) use ($searchField, $operator, $value) {
+                    match ($searchField) {
+                        'number' => $subQuery->where('supplier_number', $operator, $value),
+                        'name' => $subQuery->where('company_name', $operator, $value),
+                        'contact' => $subQuery->where('contact_person', $operator, $value),
+                        'email' => $subQuery->where('email', $operator, $value),
+                        'city' => $subQuery->where('city', $operator, $value),
+                        default => $subQuery
+                            ->where('supplier_number', $operator, $value)
+                            ->orWhere('company_name', $operator, $value)
+                            ->orWhere('contact_person', $operator, $value)
+                            ->orWhere('email', $operator, $value)
+                            ->orWhere('city', $operator, $value),
+                    };
                 });
             })
             ->orderByRaw('LOWER(company_name) ASC')
@@ -31,7 +49,7 @@ class SupplierController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('pages.suppliers.index', compact('suppliers', 'search'));
+        return view('pages.suppliers.index', compact('suppliers', 'search', 'searchField', 'exact'));
     }
 
     public function create(): View

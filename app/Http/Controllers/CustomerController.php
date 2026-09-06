@@ -16,18 +16,41 @@ class CustomerController extends Controller
     {
         $search = trim((string) $request->query('search'));
         $group = trim((string) $request->query('group'));
+        $searchField = (string) $request->query('search_field', 'all');
+        $exact = $request->boolean('exact');
+
+        $allowedSearchFields = ['all', 'number', 'name', 'email', 'phone', 'city', 'vat'];
+        if (! in_array($searchField, $allowedSearchFields, true)) {
+            $searchField = 'all';
+        }
 
         $customers = Customer::query()
             ->with('group')
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($subQuery) use ($search) {
-                    $subQuery
-                        ->where('customer_number', 'like', "%{$search}%")
-                        ->orWhere('company_name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
-                        ->orWhere('phone', 'like', "%{$search}%")
-                        ->orWhere('city', 'like', "%{$search}%")
-                        ->orWhere('vat_number', 'like', "%{$search}%");
+            ->when($search !== '', function ($query) use ($search, $searchField, $exact) {
+                $operator = $exact ? '=' : 'like';
+                $value = $exact ? $search : "%{$search}%";
+
+                $query->where(function ($subQuery) use ($searchField, $operator, $value) {
+                    match ($searchField) {
+                        'number' => $subQuery->where('customer_number', $operator, $value),
+                        'name' => $subQuery->where('company_name', $operator, $value),
+                        'email' => $subQuery->where('email', $operator, $value),
+                        'phone' => $subQuery->where('phone', $operator, $value),
+                        'city' => $subQuery
+                            ->where('city', $operator, $value)
+                            ->orWhere('billing_city', $operator, $value)
+                            ->orWhere('delivery_city', $operator, $value),
+                        'vat' => $subQuery->where('vat_number', $operator, $value),
+                        default => $subQuery
+                            ->where('customer_number', $operator, $value)
+                            ->orWhere('company_name', $operator, $value)
+                            ->orWhere('email', $operator, $value)
+                            ->orWhere('phone', $operator, $value)
+                            ->orWhere('city', $operator, $value)
+                            ->orWhere('billing_city', $operator, $value)
+                            ->orWhere('delivery_city', $operator, $value)
+                            ->orWhere('vat_number', $operator, $value),
+                    };
                 });
             })
             ->when($group !== '', function ($query) use ($group) {
@@ -42,6 +65,8 @@ class CustomerController extends Controller
             'customers' => $customers,
             'groups' => $this->groups(),
             'search' => $search,
+            'searchField' => $searchField,
+            'exact' => $exact,
             'selectedGroup' => $group,
         ]);
     }

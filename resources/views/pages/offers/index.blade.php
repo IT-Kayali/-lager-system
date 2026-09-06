@@ -9,10 +9,10 @@
         </div>
     @endif
 
-    <section class="offers-page-actions">
-        <div class="offers-search-card">
-            <form method="GET" action="{{ route('offers.index') }}" class="offers-search-modern">
-                <div class="offers-search-field">
+    <section class="offers-page-actions erp-list-toolbar">
+        <div class="offers-search-card erp-list-filter-card">
+            <form method="GET" action="{{ route('offers.index') }}" class="offers-search-modern erp-list-filter-form">
+                <div class="offers-search-field erp-list-search">
                     <i class="bi bi-search"></i>
                     <input
                         name="search"
@@ -23,7 +23,7 @@
                 </div>
 
                 <div class="offers-search-filter">
-                    <select name="search_field" class="premium-input offers-search-select" aria-label="Suchfeld auswählen">
+                    <select name="search_field" class="premium-input offers-search-select erp-list-select" aria-label="Suchfeld auswählen">
                         <option value="all" @selected(($searchField ?? 'all') === 'all')>Alle</option>
                         <option value="number" @selected(($searchField ?? 'all') === 'number')>Angebotsnummer</option>
                         <option value="customer" @selected(($searchField ?? 'all') === 'customer')>Kunde</option>
@@ -32,12 +32,12 @@
                     </select>
                 </div>
 
-                <label class="offers-exact-search">
+                <label class="offers-exact-search erp-list-exact">
                     <input type="checkbox" name="exact" value="1" @checked($exact ?? false)>
                     <span>Exakter Wert</span>
                 </label>
 
-                <select name="status" class="premium-select offers-status-select">
+                <select name="status" class="premium-select offers-status-select erp-list-select">
                     <option value="">Alle Status</option>
                     @foreach ($statuses as $value => $label)
                         <option value="{{ $value }}" @selected($selectedStatus === $value)>{{ $label }}</option>
@@ -58,7 +58,7 @@
             </form>
         </div>
 
-        <div class="offers-action-buttons">
+        <div class="offers-action-buttons erp-list-actions">
             <a href="{{ route('offers.create') }}" class="premium-btn gold">
                 <i class="bi bi-plus-lg"></i>
                 Neues Angebot
@@ -66,8 +66,8 @@
         </div>
     </section>
 
-    <section class="offers-modern-card">
-        <div class="premium-table-wrap offers-table-shell">
+    <section class="offers-modern-card erp-list-card">
+        <div class="premium-table-wrap offers-table-shell erp-list-table-shell">
             <table class="premium-table offers-modern-table">
                 <thead>
                     <tr>
@@ -215,7 +215,7 @@
             </table>
         </div>
 
-        <div class="offers-pagination">
+        <div class="offers-pagination erp-list-pagination">
             {{ $offers->links() }}
         </div>
     </section>

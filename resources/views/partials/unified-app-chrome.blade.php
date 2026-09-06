@@ -235,6 +235,43 @@
         max-width: none !important;
     }
 
+    /*
+     * Neue gemeinsame Listenfilter: auf Desktop immer eine Zeile wie bei Produkte.
+     * Gilt unabhängig von Rolle und Seite, weil alle Listen dieselbe ERP-Klasse nutzen.
+     */
+    .erp-list-filter-form,
+    section.premium-card > form.premium-toolbar.erp-list-filter-form {
+        display: flex !important;
+        grid-template-columns: none !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        flex-wrap: nowrap !important;
+        gap: 10px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+    }
+
+    .erp-list-filter-form .erp-list-search {
+        flex: 1 1 320px !important;
+        min-width: 200px !important;
+        max-width: none !important;
+    }
+
+    .erp-list-filter-form .erp-list-select {
+        flex: 0 1 170px !important;
+        width: auto !important;
+        min-width: 125px !important;
+        max-width: 220px !important;
+    }
+
+    .erp-list-filter-form > .premium-btn,
+    .erp-list-filter-form > a.premium-btn,
+    .erp-list-filter-form > .erp-list-exact {
+        flex: 0 0 auto !important;
+        white-space: nowrap !important;
+    }
+
     /* Aktivitätsprotokoll bekommt dieselbe eigenständige Filterkarte. */
     section.premium-card > form.premium-search {
         padding: 14px !important;
@@ -318,6 +355,19 @@
         form.premium-search {
             display: grid !important;
             grid-template-columns: 1fr !important;
+        }
+
+        .erp-list-filter-form,
+        section.premium-card > form.premium-toolbar.erp-list-filter-form {
+            display: grid !important;
+            grid-template-columns: 1fr !important;
+        }
+
+        .erp-list-filter-form .erp-list-search,
+        .erp-list-filter-form .erp-list-select {
+            width: 100% !important;
+            min-width: 0 !important;
+            max-width: none !important;
         }
 
         .products-search-field,

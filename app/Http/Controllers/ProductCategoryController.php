@@ -17,16 +17,37 @@ class ProductCategoryController extends Controller
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('search'));
+        $searchField = (string) $request->query('search_field', 'all');
+        $exact = $request->boolean('exact');
+        $status = trim((string) $request->query('status'));
+
+        $allowedSearchFields = ['all', 'name', 'description'];
+        if (! in_array($searchField, $allowedSearchFields, true)) {
+            $searchField = 'all';
+        }
+
+        if (! in_array($status, ['', 'active', 'inactive'], true)) {
+            $status = '';
+        }
 
         $categories = ProductCategory::query()
             ->withCount('products')
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($subQuery) use ($search) {
-                    $subQuery
-                        ->where('name', 'like', "%{$search}%")
-                        ->orWhere('description', 'like', "%{$search}%");
+            ->when($search !== '', function ($query) use ($search, $searchField, $exact) {
+                $operator = $exact ? '=' : 'like';
+                $value = $exact ? $search : "%{$search}%";
+
+                $query->where(function ($subQuery) use ($searchField, $operator, $value) {
+                    match ($searchField) {
+                        'name' => $subQuery->where('name', $operator, $value),
+                        'description' => $subQuery->where('description', $operator, $value),
+                        default => $subQuery
+                            ->where('name', $operator, $value)
+                            ->orWhere('description', $operator, $value),
+                    };
                 });
             })
+            ->when($status === 'active', fn ($query) => $query->where('is_active', true))
+            ->when($status === 'inactive', fn ($query) => $query->where('is_active', false))
             ->orderByRaw('LOWER(name) ASC')
             ->orderBy('id')
             ->paginate(20)
@@ -35,6 +56,9 @@ class ProductCategoryController extends Controller
         return view('pages.product-categories.index', [
             'categories' => $categories,
             'search' => $search,
+            'searchField' => $searchField,
+            'exact' => $exact,
+            'selectedStatus' => $status,
         ]);
     }
 

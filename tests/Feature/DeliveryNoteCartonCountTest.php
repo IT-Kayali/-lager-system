@@ -78,12 +78,12 @@ it('keeps both delivery note templates at their existing absolute positions', fu
     $withoutLogo = file_get_contents(resource_path('views/pdf/delivery-note-ohne.blade.php'));
 
     expect($withLogo)
-        ->toContain('top: 92mm;')
-        ->toContain('top: 108mm;')
-        ->toContain('top: 132mm;');
+        ->toContain('top:92mm')
+        ->toContain('top:108mm')
+        ->toContain('top:132mm');
 
     expect($withoutLogo)
-        ->toContain('top: 62mm;')
-        ->toContain('top: 106mm;')
-        ->toContain('top: 132mm;');
+        ->toContain('top:62mm')
+        ->toContain('top:106mm')
+        ->toContain('top:132mm');
 });

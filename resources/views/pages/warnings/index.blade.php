@@ -1,4 +1,4 @@
-<x-layouts.premium title="Warnungen" subtitle="Nur Produkte mit niedrigem oder kritischem Bestand werden hier angezeigt.">
+<x-layouts.premium title="Warnungen" subtitle="Bestandswarnungen mit Suche, Statusfilter und Excel-Export.">
     <section class="premium-grid premium-grid-4" style="margin-bottom:22px;">
         <a href="{{ route('products.index') }}" class="premium-stat-card" style="text-decoration:none;color:inherit;">
             <div class="premium-stat-icon"><i class="bi bi-box-seam"></i></div>
@@ -25,38 +25,74 @@
         </a>
     </section>
 
-    <section class="premium-card warnings-card">
-        <div class="premium-toolbar warnings-toolbar">
-            <div>
-                <h2 style="font-size:20px; font-weight:900; margin:0;">Bestandswarnungen</h2>
-            </div>
+    @php
+        $hasWarningFilters = ! empty($search)
+            || ($searchField ?? 'all') !== 'all'
+            || ($exact ?? false)
+            || ($filter ?? 'warning') !== 'warning';
+    @endphp
 
-            <div class="warnings-toolbar-actions">
-                <a href="{{ route('warnings.index', ['filter' => 'warning']) }}" class="premium-btn warning-filter-total {{ $filter === 'warning' ? 'active-warning-filter' : '' }}">
-                    Warnungen
-                </a>
+    <section class="erp-list-toolbar">
+        <div class="erp-list-filter-card">
+            <form method="GET" action="{{ route('warnings.index') }}" class="erp-list-filter-form">
+                <div class="erp-list-search">
+                    <i class="bi bi-search"></i>
+                    <input name="search" value="{{ $search ?? '' }}" class="premium-input" placeholder="Produkt oder Lieferant suchen...">
+                </div>
 
-                <a href="{{ route('warnings.index', ['filter' => 'low']) }}" class="premium-btn warning-filter-low {{ $filter === 'low' ? 'active-warning-filter' : '' }}">
-                    Niedrig
-                </a>
+                <select name="search_field" class="premium-select erp-list-select" aria-label="Suchfeld auswählen">
+                    <option value="all" @selected(($searchField ?? 'all') === 'all')>Alle</option>
+                    <option value="name" @selected(($searchField ?? 'all') === 'name')>Produkt</option>
+                    <option value="manufacturer" @selected(($searchField ?? 'all') === 'manufacturer')>Fake Name</option>
+                    <option value="code" @selected(($searchField ?? 'all') === 'code')>Code-Nummer</option>
+                    <option value="supplier" @selected(($searchField ?? 'all') === 'supplier')>Lieferant</option>
+                </select>
 
-                <a href="{{ route('warnings.index', ['filter' => 'critical']) }}" class="premium-btn warning-filter-critical {{ $filter === 'critical' ? 'active-warning-filter' : '' }}">
-                    Kritisch
-                </a>
+                <select name="filter" class="premium-select erp-list-select" aria-label="Bestandsstatus filtern">
+                    <option value="warning" @selected(($filter ?? 'warning') === 'warning')>Alle Warnungen</option>
+                    <option value="low" @selected(($filter ?? 'warning') === 'low')>Niedrig</option>
+                    <option value="critical" @selected(($filter ?? 'warning') === 'critical')>Kritisch</option>
+                    <option value="all" @selected(($filter ?? 'warning') === 'all')>Alle Produkte</option>
+                </select>
 
-                <a href="{{ route('warnings.export', ['filter' => $filter]) }}" class="premium-btn gold">
-                    <i class="bi bi-file-earmark-excel"></i>
-                    Excel exportieren
-                </a>
-            </div>
+                <label class="erp-list-exact">
+                    <input type="checkbox" name="exact" value="1" @checked($exact ?? false)>
+                    <span>Exakter Wert</span>
+                </label>
+
+                <button class="premium-btn" type="submit"><i class="bi bi-search"></i> Suchen</button>
+
+                @if ($hasWarningFilters)
+                    <a href="{{ route('warnings.index') }}" class="premium-btn"><i class="bi bi-x-lg"></i> Zurücksetzen</a>
+                @endif
+            </form>
         </div>
 
+        <div class="erp-list-actions">
+            <a
+                href="{{ route('warnings.export', [
+                    'filter' => $filter,
+                    'search' => $search ?? '',
+                    'search_field' => $searchField ?? 'all',
+                    'exact' => ($exact ?? false) ? 1 : null,
+                ]) }}"
+                class="premium-btn gold"
+            >
+                <i class="bi bi-file-earmark-excel"></i>
+                Excel exportieren
+            </a>
+        </div>
+    </section>
+
+    <section class="erp-list-card">
         @if ($products->isEmpty())
-            <div class="premium-placeholder">
-                Keine Bestandswarnungen vorhanden. Alle Produkte sind aktuell im grünen Bereich.
+            <div class="erp-list-empty">
+                <i class="bi bi-shield-check"></i>
+                <strong>Keine passenden Bestandswarnungen.</strong>
+                <span>Passe die Filter an oder prüfe einen anderen Status.</span>
             </div>
         @else
-            <div class="premium-table-wrap warnings-table-wrap">
+            <div class="premium-table-wrap erp-list-table-shell warnings-table-wrap">
                 <table class="premium-table warnings-table">
                     <colgroup>
                         <col style="width:13%;">
@@ -75,7 +111,7 @@
                     <thead>
                         <tr>
                             <th>Produkt</th>
-                            <th>Bezeichnung durch Hersteller</th>
+                            <th>Fake Name</th>
                             <th>Code-Nummer</th>
                             <th>Einheit</th>
                             <th>Lieferant</th>
@@ -93,33 +129,21 @@
                             @php
                                 $product = $row['product'];
                                 $supplier = $product->supplierRecord;
-                                $labels = [
-                                    'ok' => 'OK',
-                                    'low' => 'Niedrig',
-                                    'critical' => 'Kritisch',
-                                ];
+                                $labels = ['ok' => 'OK', 'low' => 'Niedrig', 'critical' => 'Kritisch'];
                             @endphp
 
                             <tr class="warning-row-{{ $row['status'] }}">
-                                <td>
-                                    <a href="{{ route('products.show', $product) }}" class="warning-product-link">
-                                        {{ $product->name ?: '—' }}
-                                    </a>
-                                </td>
+                                <td><a href="{{ route('products.show', $product) }}" class="warning-product-link">{{ $product->name ?: '—' }}</a></td>
                                 <td>{{ $product->manufacturer_designation ?: '—' }}</td>
-                                <td>{{ $product->serial_number ?: '—' }}</td>
-                                <td>{{ $product->unit ?: '—' }}</td>
+                                <td>{{ $product->serial_number ?: ($product->product_code ?: '—') }}</td>
+                                <td>{{ $product->unitLabel('de') }}</td>
                                 <td>{{ $supplier?->company_name ?: ($product->supplier ?: '—') }}</td>
                                 <td>{{ \App\Support\GermanNumber::format($row['total_stock']) }}</td>
                                 <td>{{ \App\Support\GermanNumber::format($row['reserved_stock']) }}</td>
                                 <td>{{ \App\Support\GermanNumber::format($row['available_stock']) }}</td>
                                 <td>{{ \App\Support\GermanNumber::format($row['minimum_stock']) }}</td>
                                 <td>{{ \App\Support\GermanNumber::format($row['warning_threshold']) }}</td>
-                                <td>
-                                    <span class="premium-badge {{ $row['status'] }}">
-                                        {{ $labels[$row['status']] ?? $row['status'] }}
-                                    </span>
-                                </td>
+                                <td><span class="premium-badge {{ $row['status'] }}">{{ $labels[$row['status']] ?? $row['status'] }}</span></td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -129,77 +153,12 @@
     </section>
 
     <style>
-        .warnings-toolbar {
-            gap: 18px;
-            align-items: center;
-        }
-
-        .warnings-toolbar-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-        }
-
-        .warnings-table-wrap {
-            width: 100%;
-            overflow-x: auto;
-            border-radius: 18px;
-        }
-
-        .warnings-table {
-            width: 100%;
-            min-width: 1380px;
-            table-layout: fixed;
-        }
-
-        .warnings-table th,
-        .warnings-table td {
-            padding-left: 14px;
-            padding-right: 14px;
-            vertical-align: middle;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-align: left !important;
-        }
-
-        .warnings-table th {
-            white-space: normal;
-            line-height: 1.2;
-            word-break: normal;
-            overflow-wrap: normal;
-        }
-
-        .warnings-table td {
-            white-space: nowrap;
-        }
-
-        .warning-product-link {
-            display: inline-block;
-            max-width: 100%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            vertical-align: bottom;
-            font-weight: 900;
-            color: inherit;
-            text-decoration: underline;
-            text-underline-offset: 3px;
-        }
-
-        .warnings-table .premium-badge {
-            white-space: nowrap;
-        }
-
-        @media (max-width: 900px) {
-            .warnings-toolbar {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-
-            .warnings-toolbar-actions {
-                width: 100%;
-                justify-content: flex-start;
-            }
-        }
+        .warnings-table-wrap{width:100%;overflow-x:auto}
+        .warnings-table{width:100%;min-width:1380px;table-layout:fixed}
+        .warnings-table th,.warnings-table td{padding-left:14px!important;padding-right:14px!important;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;text-align:left!important}
+        .warnings-table th{white-space:normal!important;line-height:1.2}
+        .warnings-table td{white-space:nowrap}
+        .warning-product-link{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom;font-weight:900;color:inherit;text-decoration:underline;text-underline-offset:3px}
+        .warnings-table .premium-badge{white-space:nowrap}
     </style>
 </x-layouts.premium>

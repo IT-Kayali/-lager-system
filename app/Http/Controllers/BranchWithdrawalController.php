@@ -62,9 +62,28 @@ class BranchWithdrawalController extends Controller
             : 'branch-withdrawals.index';
     }
 
-    public function index(): View
+    public function index(Request $request): View
     {
         $this->authorizeAccess();
+
+        $search = trim((string) $request->query('search'));
+        $searchField = (string) $request->query('search_field', 'all');
+        $exact = $request->boolean('exact');
+        $status = trim((string) $request->query('status'));
+        $branch = trim((string) $request->query('branch'));
+
+        $allowedSearchFields = ['all', 'number', 'product', 'employee', 'note'];
+        if (! in_array($searchField, $allowedSearchFields, true)) {
+            $searchField = 'all';
+        }
+
+        if (! array_key_exists($status, BranchWithdrawal::statusLabels())) {
+            $status = '';
+        }
+
+        if (! array_key_exists($branch, BranchWithdrawal::branches())) {
+            $branch = '';
+        }
 
         $withdrawals = BranchWithdrawal::query()
             ->with(['items.product', 'user', 'processor'])
@@ -72,10 +91,38 @@ class BranchWithdrawalController extends Controller
                 auth()->user()?->isWarehouse(),
                 fn ($query) => $query->whereIn('status', self::WAREHOUSE_VISIBLE_STATUSES)
             )
-            ->latest()
-            ->paginate(20);
+            ->when($search !== '', function ($query) use ($search, $searchField, $exact) {
+                $operator = $exact ? '=' : 'like';
+                $value = $exact ? $search : "%{$search}%";
 
-        return view('pages.branch-withdrawals.index', compact('withdrawals'));
+                $query->where(function ($subQuery) use ($searchField, $operator, $value) {
+                    match ($searchField) {
+                        'number' => $subQuery->where('withdrawal_number', $operator, $value),
+                        'product' => $subQuery->whereHas('items.product', fn ($productQuery) => $productQuery->where('name', $operator, $value)),
+                        'employee' => $subQuery->whereHas('user', fn ($userQuery) => $userQuery->where('name', $operator, $value)),
+                        'note' => $subQuery->where('note', $operator, $value),
+                        default => $subQuery
+                            ->where('withdrawal_number', $operator, $value)
+                            ->orWhere('note', $operator, $value)
+                            ->orWhereHas('items.product', fn ($productQuery) => $productQuery->where('name', $operator, $value))
+                            ->orWhereHas('user', fn ($userQuery) => $userQuery->where('name', $operator, $value)),
+                    };
+                });
+            })
+            ->when($status !== '', fn ($query) => $query->where('status', $status))
+            ->when($branch !== '', fn ($query) => $query->where('branch_name', $branch))
+            ->latest()
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('pages.branch-withdrawals.index', [
+            'withdrawals' => $withdrawals,
+            'search' => $search,
+            'searchField' => $searchField,
+            'exact' => $exact,
+            'selectedStatus' => $status,
+            'selectedBranch' => $branch,
+        ]);
     }
 
     public function create(Request $request): View

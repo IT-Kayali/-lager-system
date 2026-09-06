@@ -50,7 +50,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/batches/fifo-out', [BatchController::class, 'fifoOutForm'])->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE)->name('batches.fifo-out.form');
     Route::post('/batches/fifo-out', [BatchController::class, 'fifoOut'])->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE)->name('batches.fifo-out.store');
     Route::resource('batches', BatchController::class)->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE);
-    Route::resource('branch-withdrawals', \App\Http\Controllers\BranchWithdrawalController::class)->only(['index', 'create', 'store'])->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE);
+    Route::get('/branch-withdrawals', [\App\Http\Controllers\BranchWithdrawalController::class, 'index'])
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE)
+        ->name('branch-withdrawals.index');
+    Route::get('/branch-withdrawals/create', [\App\Http\Controllers\BranchWithdrawalController::class, 'create'])
+        ->middleware('role:' . User::ROLE_MANAGER)
+        ->name('branch-withdrawals.create');
+    Route::post('/branch-withdrawals', [\App\Http\Controllers\BranchWithdrawalController::class, 'store'])
+        ->middleware('role:' . User::ROLE_MANAGER)
+        ->name('branch-withdrawals.store');
 
     Route::get('/offers', [OfferController::class, 'index'])->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES)->name('offers.index');
     Route::get('/offers/create', [OfferController::class, 'create'])->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES)->name('offers.create');

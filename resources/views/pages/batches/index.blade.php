@@ -9,16 +9,16 @@
         </div>
     @endif
 
-    <section class="batches-page-actions">
-        <div class="batches-search-card">
-            <form method="GET" action="{{ route('batches.index') }}" class="batches-search-modern">
-                <div class="batches-search-field">
+    <section class="batches-page-actions erp-list-toolbar">
+        <div class="batches-search-card erp-list-filter-card">
+            <form method="GET" action="{{ route('batches.index') }}" class="batches-search-modern erp-list-filter-form">
+                <div class="batches-search-field erp-list-search">
                     <i class="bi bi-search"></i>
                     <input name="search" value="{{ $search ?? '' }}" class="premium-input" placeholder="Charge, Produkt, Code oder Fake Name suchen...">
                 </div>
 
                 <div class="batches-search-filter">
-                    <select name="search_field" class="premium-input batches-search-select" aria-label="Suchfeld auswählen">
+                    <select name="search_field" class="premium-input batches-search-select erp-list-select" aria-label="Suchfeld auswählen">
                         <option value="all" @selected(($searchField ?? 'all') === 'all')>Alle</option>
                         <option value="batch" @selected(($searchField ?? 'all') === 'batch')>Batchnummer</option>
                         <option value="product" @selected(($searchField ?? 'all') === 'product')>Produkt</option>
@@ -27,7 +27,7 @@
                     </select>
                 </div>
 
-                <label class="batches-exact-search">
+                <label class="batches-exact-search erp-list-exact">
                     <input type="checkbox" name="exact" value="1" @checked($exact ?? false)>
                     <span>Exakter Wert</span>
                 </label>
@@ -39,11 +39,11 @@
                 @endif
             </form>
         </div>
-        <a href="{{ route('batches.create') }}" class="premium-btn gold batches-create-btn"><i class="bi bi-plus-lg"></i> Charge hinzufügen</a>
+        <a href="{{ route('batches.create') }}" class="premium-btn gold batches-create-btn erp-list-actions"><i class="bi bi-plus-lg"></i> Charge hinzufügen</a>
     </section>
 
-    <section class="batches-modern-card">
-        <div class="premium-table-wrap batches-table-shell">
+    <section class="batches-modern-card erp-list-card">
+        <div class="premium-table-wrap batches-table-shell erp-list-table-shell">
             <table class="premium-table batches-table">
                 <thead><tr><th>Batchnummer</th><th>Produkt</th><th>Menge</th><th>Ablaufdatum</th><th>Wareneingang</th><th>FIFO-Status</th><th>Aktionen</th></tr></thead>
                 <tbody>
@@ -77,7 +77,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="batches-pagination">{{ $batches->links() }}</div>
+        <div class="batches-pagination erp-list-pagination">{{ $batches->links() }}</div>
     </section>
 
     <style>
