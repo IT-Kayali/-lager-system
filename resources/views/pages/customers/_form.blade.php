@@ -193,6 +193,21 @@
 
 <div class="premium-form-grid" style="margin-top:22px;">
     <div class="premium-form-field full">
+        <label for="delivery_note_instruction">Dauerhafter Lieferschein-Hinweis</label>
+        <textarea
+            id="delivery_note_instruction"
+            name="delivery_note_instruction"
+            rows="3"
+            class="premium-textarea"
+            placeholder="z. B. Kunde braucht Karton ohne Logo"
+        >{{ old('delivery_note_instruction', $customer->delivery_note_instruction) }}</textarea>
+        <div class="premium-muted" style="margin-top:7px;">
+            Wird automatisch auf jedem Lieferschein dieses Kunden unter den Versandangaben angezeigt.
+        </div>
+        @error('delivery_note_instruction') <div class="premium-error">{{ $message }}</div> @enderror
+    </div>
+
+    <div class="premium-form-field full">
         <label for="notes">Notizen optional</label>
         <textarea id="notes" name="notes" rows="5" class="premium-textarea">{{ old('notes', $customer->notes) }}</textarea>
         @error('notes') <div class="premium-error">{{ $message }}</div> @enderror
