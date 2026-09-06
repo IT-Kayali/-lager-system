@@ -35,7 +35,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('branch-withdrawals/{branchWithdrawal}/edit', [BranchWithdrawalController::class, 'edit'])
         ->name('branch-withdrawals.edit')
-        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE);
+        ->middleware('role:' . User::ROLE_MANAGER);
 
     Route::put('branch-withdrawals/{branchWithdrawal}', [BranchWithdrawalController::class, 'update'])
         ->name('branch-withdrawals.update')
@@ -63,6 +63,14 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('verkauf/filialausgaenge', [BranchWithdrawalController::class, 'store'])
         ->name('sales.branch-withdrawals.store')
+        ->middleware('role:' . User::ROLE_SALES);
+
+    Route::get('verkauf/filialausgaenge/{branchWithdrawal}/bearbeiten', [BranchWithdrawalController::class, 'edit'])
+        ->name('sales.branch-withdrawals.edit')
+        ->middleware('role:' . User::ROLE_SALES);
+
+    Route::put('verkauf/filialausgaenge/{branchWithdrawal}', [BranchWithdrawalController::class, 'update'])
+        ->name('sales.branch-withdrawals.update')
         ->middleware('role:' . User::ROLE_SALES);
 
     Route::livewire('settings/profile', 'pages::settings.profile')->name('profile.edit');
