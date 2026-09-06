@@ -102,6 +102,23 @@ Das System verbindet Produkt- und Chargenverwaltung, FIFO-Lagerlogik, Kunden und
 - Rückgabe von **In Bearbeitung** auf **Angebot** übergibt den Vorgang wieder an Verkauf
 - **Erledigt** bleibt final, da die FIFO-Buchung bereits erfolgt ist
 
+### Lager-Benachrichtigungen
+
+Für die Rolle **Lager** gibt es persistente Benachrichtigungen für neu übergebene Aufträge:
+
+- neue Benachrichtigung bei **Angebot → In Bearbeitung**
+- neue Benachrichtigung bei **Filialausgang → In Bearbeitung**
+- Glocke mit rotem Ungelesen-Zähler im Lager-Benutzerbereich der Sidebar
+- Benachrichtigungen bleiben nach Neuladen, Abmelden und erneutem Anmelden erhalten
+- Öffnen der Benachrichtigungsliste markiert nichts als gelesen
+- erst der Klick auf eine konkrete Benachrichtigung markiert genau diese Meldung als gelesen
+- Angebotsmeldungen öffnen direkt den Lagerauftrag
+- Filialausgangsmeldungen öffnen die gefilterte Filialausgangsansicht
+- automatische Aktualisierung des Zählers im Browser
+- eigener Gelesen/Ungelesen-Stand pro Lager-Mitarbeiter
+- Rückgabe eines Auftrags an Verkauf entfernt nicht mehr gültige Lagerbenachrichtigungen
+- Benachrichtigungsrouten sind serverseitig ausschließlich für die Rolle **Lager** zugelassen
+
 ### Preislogik
 
 Das System unterstützt zwei Preisarten je Produkt/Kategorie:
