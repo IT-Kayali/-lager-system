@@ -72,3 +72,24 @@ it('contains responsive toolbar rules for smaller screens', function () {
         ->toContain('@media (max-width: 820px)')
         ->toContain('@media (max-width: 560px)');
 });
+
+
+it('keeps all ERP list filters in one desktop row and prices use the shared toolbar', function () {
+    $layout = file_get_contents(resource_path('views/components/layouts/premium.blade.php'));
+    $chrome = file_get_contents(resource_path('views/partials/unified-app-chrome.blade.php'));
+    $prices = file_get_contents(resource_path('views/pages/prices/index.blade.php'));
+
+    expect($layout)
+        ->toContain('flex-wrap:nowrap !important;')
+        ->toContain('flex:0 1 170px !important;');
+
+    expect($chrome)
+        ->toContain('.erp-list-filter-form,')
+        ->toContain('section.premium-card > form.premium-toolbar.erp-list-filter-form')
+        ->toContain('flex-wrap: nowrap !important;')
+        ->toContain('@media (max-width: 820px)');
+
+    expect($prices)
+        ->toContain('class="premium-toolbar erp-list-filter-form"')
+        ->not->toContain('<div class="premium-search">');
+});
