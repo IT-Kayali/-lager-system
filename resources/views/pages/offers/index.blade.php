@@ -170,7 +170,12 @@
                                         <i class="bi bi-eye"></i>
                                     </a>
 
-                                    @if (! in_array($offer->status, ['completed', 'cancelled', 'reservation_expired'], true))
+                                    @php
+                                        $canSalesEdit = auth()->user()?->isSales() && $offer->status === \App\Models\Offer::STATUS_OFFER;
+                                        $canManagerEdit = auth()->user()?->isManager() && ! in_array($offer->status, ['completed', 'cancelled', 'reservation_expired'], true);
+                                    @endphp
+
+                                    @if ($canSalesEdit || $canManagerEdit)
                                         <a class="premium-icon-btn" href="{{ route('offers.edit', $offer) }}" title="Bearbeiten">
                                             <i class="bi bi-pencil-square"></i>
                                         </a>

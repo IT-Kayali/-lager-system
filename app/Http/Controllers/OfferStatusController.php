@@ -19,6 +19,14 @@ class OfferStatusController extends Controller
         $newStatus = $data['status'];
         $oldStatus = $offer->status;
 
+        if (auth()->user()?->isSales()) {
+            if ($oldStatus !== Offer::STATUS_OFFER || $newStatus !== Offer::STATUS_IN_PROGRESS) {
+                return redirect()
+                    ->route('offers.show', $offer)
+                    ->with('error', 'Verkauf darf das Angebot nur von „Angebot“ auf „In Bearbeitung“ an das Lager übergeben.');
+            }
+        }
+
         if ($offer->isFinal()) {
             return redirect()
                 ->route('offers.show', $offer)

@@ -17,6 +17,11 @@ use Illuminate\View\View;
 
 class BranchWithdrawalController extends Controller
 {
+    private const WAREHOUSE_VISIBLE_STATUSES = [
+        BranchWithdrawal::STATUS_IN_PROGRESS,
+        BranchWithdrawal::STATUS_ISSUED,
+    ];
+
     private function authorizeAccess(): void
     {
         abort_unless(auth()->check(), 403);
@@ -27,6 +32,21 @@ class BranchWithdrawalController extends Controller
     {
         $this->authorizeAccess();
         abort_unless(auth()->user()?->isManager(), 403);
+    }
+
+    private function authorizeEditAction(BranchWithdrawal $withdrawal): void
+    {
+        $this->authorizeAccess();
+
+        if (auth()->user()?->isManager()) {
+            return;
+        }
+
+        abort_unless(
+            auth()->user()?->isSales() && $withdrawal->status === BranchWithdrawal::STATUS_OPEN,
+            403,
+            'Der Filialausgang wurde bereits an das Lager übergeben und kann vom Verkauf nicht mehr bearbeitet werden.'
+        );
     }
 
     private function authorizeCreateAction(): void
@@ -48,6 +68,10 @@ class BranchWithdrawalController extends Controller
 
         $withdrawals = BranchWithdrawal::query()
             ->with(['items.product', 'user', 'processor'])
+            ->when(
+                auth()->user()?->isWarehouse(),
+                fn ($query) => $query->whereIn('status', self::WAREHOUSE_VISIBLE_STATUSES)
+            )
             ->latest()
             ->paginate(20);
 
@@ -86,8 +110,13 @@ class BranchWithdrawalController extends Controller
         $this->authorizeCreateAction();
         $data = $this->validatedData($request);
 
-        if (auth()->user()?->isSales()) {
-            $data['status'] = BranchWithdrawal::STATUS_OPEN;
+        if (
+            auth()->user()?->isSales()
+            && ! in_array($data['status'], [BranchWithdrawal::STATUS_OPEN, BranchWithdrawal::STATUS_IN_PROGRESS], true)
+        ) {
+            return back()
+                ->withInput()
+                ->with('error', 'Verkauf darf einen Filialausgang nur als Offen speichern oder an Lager mit „In Bearbeitung“ übergeben.');
         }
 
         DB::transaction(function () use ($data): void {
@@ -126,7 +155,7 @@ class BranchWithdrawalController extends Controller
 
     public function edit(BranchWithdrawal $branchWithdrawal): View
     {
-        $this->authorizeManagerAction();
+        $this->authorizeEditAction($branchWithdrawal);
         $branchWithdrawal->load('items.product');
 
         return view('pages.branch-withdrawals.edit', [
@@ -143,7 +172,51 @@ class BranchWithdrawalController extends Controller
     {
         $this->authorizeAccess();
 
-        abort_if(auth()->user()?->isSales(), 403);
+        if (auth()->user()?->isSales()) {
+            $this->authorizeEditAction($branchWithdrawal);
+            $data = $this->validatedData($request);
+
+            if (! in_array($data['status'], [BranchWithdrawal::STATUS_OPEN, BranchWithdrawal::STATUS_IN_PROGRESS], true)) {
+                return back()
+                    ->withInput()
+                    ->with('error', 'Verkauf darf nur „Offen“ oder „In Bearbeitung“ setzen.');
+            }
+
+            DB::transaction(function () use ($branchWithdrawal, $data): void {
+                $withdrawal = BranchWithdrawal::query()
+                    ->lockForUpdate()
+                    ->findOrFail($branchWithdrawal->id);
+
+                abort_unless(
+                    $withdrawal->status === BranchWithdrawal::STATUS_OPEN,
+                    403,
+                    'Der Filialausgang wurde bereits an das Lager übergeben.'
+                );
+
+                $withdrawal->load('items');
+                $this->validateItemsAvailability($data['items'], $withdrawal->id);
+
+                $withdrawal->update([
+                    'branch_name' => $data['branch_name'],
+                    'status' => $data['status'],
+                    'note' => $data['note'] ?? '',
+                    'processed_by' => null,
+                    'processed_at' => null,
+                ]);
+
+                $this->replaceItems($withdrawal, $data['items']);
+                $this->syncLegacyFields($withdrawal);
+            });
+
+            return redirect()
+                ->route('sales.branch-withdrawals.index')
+                ->with(
+                    'success',
+                    $data['status'] === BranchWithdrawal::STATUS_IN_PROGRESS
+                        ? 'Filialausgang wurde an das Lager übergeben.'
+                        : 'Filialausgang wurde aktualisiert.'
+                );
+        }
 
         if (! auth()->user()?->isManager()) {
             return $this->updateWarehouseStatus($request, $branchWithdrawal);
@@ -192,6 +265,12 @@ class BranchWithdrawalController extends Controller
 
     private function updateWarehouseStatus(Request $request, BranchWithdrawal $branchWithdrawal): RedirectResponse
     {
+        abort_unless(
+            in_array($branchWithdrawal->status, self::WAREHOUSE_VISIBLE_STATUSES, true),
+            403,
+            'Dieser Filialausgang wurde noch nicht an das Lager übergeben.'
+        );
+
         $data = $request->validate([
             'status' => ['required', Rule::in(array_keys(BranchWithdrawal::statusLabels()))],
         ]);

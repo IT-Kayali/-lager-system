@@ -122,9 +122,11 @@
                                                 <button type="submit" class="premium-icon-btn premium-danger" title="Löschen" aria-label="Filialausgang löschen"><i class="bi bi-trash"></i></button>
                                             </form>
                                         @elseif($isWarehouse)
-                                            <span class="branch-role-note">Nur Statusänderung</span>
+                                            <span class="branch-role-note">Status vor/zurück</span>
+                                        @elseif($isSales && $withdrawal->status === \App\Models\BranchWithdrawal::STATUS_OPEN)
+                                            <a href="{{ route('sales.branch-withdrawals.edit', $withdrawal) }}" class="premium-icon-btn" title="Filialausgang bearbeiten" aria-label="Filialausgang bearbeiten"><i class="bi bi-pencil"></i></a>
                                         @else
-                                            <span class="branch-role-note">Nur Erstellen</span>
+                                            <span class="branch-role-note">An Lager übergeben</span>
                                         @endif
                                     </div>
                                 </td>
