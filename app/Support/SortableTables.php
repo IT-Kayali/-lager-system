@@ -29,7 +29,6 @@ class SortableTables
             }
 
             self::apply($builder, [
-                'name' => 'name',
                 'manufacturer' => 'manufacturer_designation',
                 'code' => 'product_code',
                 'supplier' => 'supplier',
@@ -69,7 +68,6 @@ class SortableTables
 
             self::apply($builder, [
                 'batch' => 'batch_number',
-                'product' => '__product_name__',
                 'received' => 'received_at',
                 'expires' => 'expires_at',
                 'quantity' => 'quantity',
@@ -131,85 +129,9 @@ class SortableTables
 
         $builder->reorder();
 
-        if ($sort === 'name' && $builder->getModel() instanceof Product) {
-            self::applyNaturalProductNameOrder($builder, $direction);
-            return;
-        }
-
-        if ($sort === 'product' && $builder->getModel() instanceof ProductBatch) {
-            self::applyNaturalBatchProductOrder($builder, $direction);
-            return;
-        }
-
         $builder
             ->orderBy($builder->getModel()->qualifyColumn($column), $direction)
             ->orderBy($builder->getModel()->qualifyColumn('id'), $direction);
-    }
-
-    private static function applyNaturalProductNameOrder(Builder $builder, string $direction): void
-    {
-        $driver = $builder->getConnection()->getDriverName();
-        $directionSql = $direction === 'desc' ? 'DESC' : 'ASC';
-        $numberGroupDirection = $direction === 'desc' ? 'DESC' : 'ASC';
-
-        if (in_array($driver, ['mysql', 'mariadb'], true)) {
-            $builder
-                ->orderByRaw("CASE WHEN name REGEXP '^[0-9]' THEN 0 ELSE 1 END {$numberGroupDirection}")
-                ->orderByRaw("CASE WHEN name REGEXP '^[0-9]' THEN CAST(name AS UNSIGNED) ELSE 0 END {$directionSql}")
-                ->orderByRaw("LOWER(name) {$directionSql}")
-                ->orderBy('id', $direction);
-            return;
-        }
-
-        if ($driver === 'pgsql') {
-            $builder
-                ->orderByRaw("CASE WHEN name ~ '^[0-9]' THEN 0 ELSE 1 END {$numberGroupDirection}")
-                ->orderByRaw("CASE WHEN name ~ '^[0-9]' THEN CAST(SUBSTRING(name FROM '^[0-9]+') AS BIGINT) ELSE 0 END {$directionSql}")
-                ->orderByRaw("LOWER(name) {$directionSql}")
-                ->orderBy('id', $direction);
-            return;
-        }
-
-        $builder
-            ->orderByRaw("CASE WHEN name GLOB '[0-9]*' THEN 0 ELSE 1 END {$numberGroupDirection}")
-            ->orderByRaw("CASE WHEN name GLOB '[0-9]*' THEN CAST(name AS INTEGER) ELSE 0 END {$directionSql}")
-            ->orderByRaw("LOWER(name) {$directionSql}")
-            ->orderBy('id', $direction);
-    }
-
-    private static function applyNaturalBatchProductOrder(Builder $builder, string $direction): void
-    {
-        $directionSql = $direction === 'desc' ? 'DESC' : 'ASC';
-        $driver = $builder->getConnection()->getDriverName();
-        $batchTable = $builder->getModel()->getTable();
-
-        $builder
-            ->leftJoin('products as table_sort_products', 'table_sort_products.id', '=', $batchTable . '.product_id')
-            ->select($batchTable . '.*');
-
-        if (in_array($driver, ['mysql', 'mariadb'], true)) {
-            $builder
-                ->orderByRaw("CASE WHEN table_sort_products.name REGEXP '^[0-9]' THEN 0 ELSE 1 END {$directionSql}")
-                ->orderByRaw("CASE WHEN table_sort_products.name REGEXP '^[0-9]' THEN CAST(table_sort_products.name AS UNSIGNED) ELSE 0 END {$directionSql}")
-                ->orderByRaw("LOWER(table_sort_products.name) {$directionSql}")
-                ->orderBy($batchTable . '.id', $direction);
-            return;
-        }
-
-        if ($driver === 'pgsql') {
-            $builder
-                ->orderByRaw("CASE WHEN table_sort_products.name ~ '^[0-9]' THEN 0 ELSE 1 END {$directionSql}")
-                ->orderByRaw("CASE WHEN table_sort_products.name ~ '^[0-9]' THEN CAST(SUBSTRING(table_sort_products.name FROM '^[0-9]+') AS BIGINT) ELSE 0 END {$directionSql}")
-                ->orderByRaw("LOWER(table_sort_products.name) {$directionSql}")
-                ->orderBy($batchTable . '.id', $direction);
-            return;
-        }
-
-        $builder
-            ->orderByRaw("CASE WHEN table_sort_products.name GLOB '[0-9]*' THEN 0 ELSE 1 END {$directionSql}")
-            ->orderByRaw("CASE WHEN table_sort_products.name GLOB '[0-9]*' THEN CAST(table_sort_products.name AS INTEGER) ELSE 0 END {$directionSql}")
-            ->orderByRaw("LOWER(table_sort_products.name) {$directionSql}")
-            ->orderBy($batchTable . '.id', $direction);
     }
 
     private static function matchesPath(array $patterns): bool

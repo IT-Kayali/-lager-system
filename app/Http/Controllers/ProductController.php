@@ -26,6 +26,9 @@ class ProductController extends Controller
         $search = trim((string) $request->query('search'));
         $searchField = (string) $request->query('search_field', 'all');
         $exact = $request->boolean('exact');
+        $sort = trim((string) $request->query('sort'));
+        $direction = strtolower(trim((string) $request->query('direction', 'asc')));
+        $direction = in_array($direction, ['asc', 'desc'], true) ? $direction : 'asc';
 
         $allowedSearchFields = ['all', 'name', 'manufacturer', 'code', 'supplier'];
         if (! in_array($searchField, $allowedSearchFields, true)) {
@@ -74,7 +77,11 @@ class ProductController extends Controller
                     }
                 });
             })
-            ->naturalNameOrder()
+            ->when(
+                $sort === 'name',
+                fn ($query) => $query->naturalNameOrder($direction),
+                fn ($query) => $query->naturalNameOrder()
+            )
             ->paginate(15)
             ->withQueryString();
 
