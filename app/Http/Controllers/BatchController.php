@@ -20,6 +20,9 @@ class BatchController extends Controller
         $search = trim((string) $request->query('search'));
         $searchField = (string) $request->query('search_field', 'all');
         $exact = $request->boolean('exact');
+        $sort = trim((string) $request->query('sort'));
+        $direction = strtolower(trim((string) $request->query('direction', 'asc')));
+        $direction = in_array($direction, ['asc', 'desc'], true) ? $direction : 'asc';
 
         $allowedSearchFields = ['all', 'batch', 'product', 'code', 'manufacturer'];
         if (! in_array($searchField, $allowedSearchFields, true)) {
@@ -66,8 +69,13 @@ class BatchController extends Controller
                     }
                 });
             })
-            ->orderBy('product_batches.received_at')
-            ->orderBy('product_batches.id')
+            ->when(
+                $sort === 'product',
+                fn ($query) => $this->orderBatchesByProductName($query, $direction),
+                fn ($query) => $query
+                    ->orderBy('product_batches.received_at')
+                    ->orderBy('product_batches.id')
+            )
             ->paginate(20)
             ->withQueryString();
 
@@ -271,6 +279,40 @@ class BatchController extends Controller
             ->toDateString();
 
         return $data;
+    }
+
+    private function orderBatchesByProductName($query, string $direction)
+    {
+        $direction = $direction === 'desc' ? 'desc' : 'asc';
+        $directionSql = strtoupper($direction);
+        $driver = $query->getConnection()->getDriverName();
+
+        $productNameSql = '(SELECT table_sort_product_name.name FROM products AS table_sort_product_name WHERE table_sort_product_name.id = product_batches.product_id LIMIT 1)';
+
+        if ($driver === 'mysql' || $driver === 'mariadb') {
+            return $query
+                ->reorder()
+                ->orderByRaw("CASE WHEN {$productNameSql} REGEXP '^[0-9]' THEN 0 ELSE 1 END {$directionSql}")
+                ->orderByRaw("CASE WHEN {$productNameSql} REGEXP '^[0-9]' THEN CAST({$productNameSql} AS UNSIGNED) ELSE 0 END {$directionSql}")
+                ->orderByRaw("LOWER({$productNameSql}) {$directionSql}")
+                ->orderBy('product_batches.id', $direction);
+        }
+
+        if ($driver === 'pgsql') {
+            return $query
+                ->reorder()
+                ->orderByRaw("CASE WHEN {$productNameSql} ~ '^[0-9]' THEN 0 ELSE 1 END {$directionSql}")
+                ->orderByRaw("CASE WHEN {$productNameSql} ~ '^[0-9]' THEN CAST(SUBSTRING({$productNameSql} FROM '^[0-9]+') AS BIGINT) ELSE 0 END {$directionSql}")
+                ->orderByRaw("LOWER({$productNameSql}) {$directionSql}")
+                ->orderBy('product_batches.id', $direction);
+        }
+
+        return $query
+            ->reorder()
+            ->orderByRaw("CASE WHEN {$productNameSql} GLOB '[0-9]*' THEN 0 ELSE 1 END {$directionSql}")
+            ->orderByRaw("CASE WHEN {$productNameSql} GLOB '[0-9]*' THEN CAST({$productNameSql} AS INTEGER) ELSE 0 END {$directionSql}")
+            ->orderByRaw("LOWER({$productNameSql}) {$directionSql}")
+            ->orderBy('product_batches.id', $direction);
     }
 
     private function products()
