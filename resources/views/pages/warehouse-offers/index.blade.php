@@ -14,40 +14,53 @@
         Hier werden nur Bestellungen ab „In Bearbeitung“ angezeigt. Du kannst die Bestellung ansehen, den Status im Lagerprozess weiterführen und den Lieferschein öffnen.
     </div>
 
-    <section class="premium-card">
-        <form method="GET" action="{{ route('warehouse.offers.index') }}" class="premium-toolbar" style="margin-bottom:18px;">
-            <div class="premium-search" style="flex:1;">
-                <input
-                    name="search"
-                    value="{{ $search }}"
-                    class="premium-input"
-                    style="min-width:280px; flex:1;"
-                    placeholder="Angebotsnummer oder Kunde suchen..."
-                >
+    @php
+        $hasWarehouseOfferFilters = ! empty($search)
+            || ($searchField ?? 'all') !== 'all'
+            || ($exact ?? false)
+            || ! empty($selectedStatus);
+    @endphp
 
-                <select name="status" class="premium-select" style="min-width:210px;">
+    <section class="erp-list-toolbar">
+        <div class="erp-list-filter-card">
+            <form method="GET" action="{{ route('warehouse.offers.index') }}" class="erp-list-filter-form">
+                <div class="erp-list-search">
+                    <i class="bi bi-search"></i>
+                    <input name="search" value="{{ $search ?? '' }}" class="premium-input" placeholder="Angebot, Kunde oder Produkt suchen...">
+                </div>
+
+                <select name="search_field" class="premium-select erp-list-select" aria-label="Suchfeld auswählen">
+                    <option value="all" @selected(($searchField ?? 'all') === 'all')>Alle</option>
+                    <option value="number" @selected(($searchField ?? 'all') === 'number')>Angebotsnummer</option>
+                    <option value="customer" @selected(($searchField ?? 'all') === 'customer')>Kunde</option>
+                    <option value="customer_number" @selected(($searchField ?? 'all') === 'customer_number')>Kundennummer</option>
+                    <option value="product" @selected(($searchField ?? 'all') === 'product')>Produkt</option>
+                </select>
+
+                <select name="status" class="premium-select erp-list-select" aria-label="Lagerstatus filtern">
                     <option value="">Alle Lagerstatus</option>
                     @foreach ($statuses as $value => $label)
-                        <option value="{{ $value }}" @selected($selectedStatus === $value)>{{ $label }}</option>
+                        <option value="{{ $value }}" @selected(($selectedStatus ?? '') === $value)>{{ $label }}</option>
                     @endforeach
                 </select>
 
-                <button class="premium-btn" type="submit">
-                    <i class="bi bi-search"></i>
-                    Suchen
-                </button>
+                <label class="erp-list-exact">
+                    <input type="checkbox" name="exact" value="1" @checked($exact ?? false)>
+                    <span>Exakter Wert</span>
+                </label>
 
-                @if ($search || $selectedStatus)
-                    <a href="{{ route('warehouse.offers.index') }}" class="premium-btn">
-                        <i class="bi bi-x-lg"></i>
-                        Zurücksetzen
-                    </a>
+                <button class="premium-btn" type="submit"><i class="bi bi-search"></i> Suchen</button>
+
+                @if ($hasWarehouseOfferFilters)
+                    <a href="{{ route('warehouse.offers.index') }}" class="premium-btn"><i class="bi bi-x-lg"></i> Zurücksetzen</a>
                 @endif
-            </div>
-        </form>
+            </form>
+        </div>
+    </section>
 
-        <div class="premium-table-wrap">
-            <table class="premium-table">
+    <section class="erp-list-card">
+        <div class="premium-table-wrap erp-list-table-shell">
+            <table class="premium-table warehouse-offers-table">
                 <thead>
                     <tr>
                         <th>Angebot</th>
@@ -70,7 +83,7 @@
                         @endphp
                         <tr>
                             <td>
-                                <a href="{{ route('warehouse.offers.show', $offer) }}" style="color:#111; font-weight:900; text-decoration:none;">
+                                <a href="{{ route('warehouse.offers.show', $offer) }}" class="warehouse-offer-link">
                                     <i class="bi bi-receipt-cutoff"></i>
                                     {{ $offer->offer_number }}
                                 </a>
@@ -87,38 +100,28 @@
                                 </div>
                             </td>
 
-                            <td>
-                                <span class="warehouse-status-badge {{ $statusClass }}">{{ $offer->statusLabel() }}</span>
-                            </td>
-
-                            <td>
-                                <span class="premium-code">{{ $offer->items->count() }}</span>
-                            </td>
-
+                            <td><span class="warehouse-status-badge {{ $statusClass }}">{{ $offer->statusLabel() }}</span></td>
+                            <td><span class="premium-code">{{ $offer->items->count() }}</span></td>
                             <td>
                                 <strong>{{ $offer->shipping_method ?: '—' }}</strong>
                                 @if ($offer->shipping_method === 'Lieferung' && $offer->carton_count)
                                     <div class="premium-muted">{{ $offer->carton_count }} Kartons</div>
                                 @endif
                             </td>
-
                             <td>
                                 <div class="premium-actions">
-                                    <a class="premium-icon-btn" href="{{ route('warehouse.offers.show', $offer) }}" title="Bestellung ansehen">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-
-                                    <a class="premium-icon-btn" href="{{ route('warehouse.offers.delivery-note', $offer) }}" target="_blank" title="Lieferschein öffnen">
-                                        <i class="bi bi-truck"></i>
-                                    </a>
+                                    <a class="premium-icon-btn" href="{{ route('warehouse.offers.show', $offer) }}" title="Bestellung ansehen"><i class="bi bi-eye"></i></a>
+                                    <a class="premium-icon-btn" href="{{ route('warehouse.offers.delivery-note', $offer) }}" target="_blank" title="Lieferschein öffnen"><i class="bi bi-truck"></i></a>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="6">
-                                <div class="premium-muted" style="padding:24px; text-align:center;">
-                                    Aktuell gibt es keine Bestellungen für die Lagervorbereitung.
+                                <div class="erp-list-empty">
+                                    <i class="bi bi-box-seam"></i>
+                                    <strong>Keine Lagerangebote gefunden.</strong>
+                                    <span>Passe die Filter an oder warte auf eine Übergabe aus dem Verkauf.</span>
                                 </div>
                             </td>
                         </tr>
@@ -127,16 +130,17 @@
             </table>
         </div>
 
-        <div style="margin-top:18px;">
-            {{ $offers->links() }}
-        </div>
+        <div class="erp-list-pagination">{{ $offers->links() }}</div>
     </section>
 
     <style>
-        .warehouse-status-badge { display:inline-flex; align-items:center; min-height:32px; padding:7px 11px; border-radius:999px; font-size:12px; font-weight:950; white-space:nowrap; }
-        .warehouse-status-badge.progress { background:#dbeafe; color:#1d4ed8; }
-        .warehouse-status-badge.ready { background:#fef3c7; color:#b45309; }
-        .warehouse-status-badge.completed { background:#dcfce7; color:#166534; }
-        .warehouse-status-badge.neutral { background:#f3f4f6; color:#374151; }
+        .warehouse-offers-table{min-width:980px}
+        .warehouse-offer-link{display:inline-flex;align-items:center;gap:7px;color:#111;font-weight:900;text-decoration:none}
+        .warehouse-offer-link:hover{color:#8a6a00;text-decoration:underline}
+        .warehouse-status-badge{display:inline-flex;align-items:center;min-height:32px;padding:7px 11px;border-radius:999px;font-size:12px;font-weight:950;white-space:nowrap}
+        .warehouse-status-badge.progress{background:#dbeafe;color:#1d4ed8}
+        .warehouse-status-badge.ready{background:#fef3c7;color:#b45309}
+        .warehouse-status-badge.completed{background:#dcfce7;color:#166534}
+        .warehouse-status-badge.neutral{background:#f3f4f6;color:#374151}
     </style>
 </x-layouts.premium>
