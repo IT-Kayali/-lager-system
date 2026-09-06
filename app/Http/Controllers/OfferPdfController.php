@@ -81,6 +81,7 @@ class OfferPdfController extends Controller
 
         $shippingLabel = $isNoLogoPdfTemplate ? 'Shipping Method:' : 'Versandart:';
         $cartonLabel = $isNoLogoPdfTemplate ? 'Number of Cartons:' : 'Anzahl Kartons:';
+        $noteLabel = $isNoLogoPdfTemplate ? 'Note:' : 'Hinweis:';
         $targetRow = null;
 
         foreach ($metaRows as $row) {
@@ -117,14 +118,14 @@ class OfferPdfController extends Controller
         $labelCell = $dom->createElement('td');
         $labelCell->setAttribute(
             'style',
-            'padding-top:3mm;padding-right:2mm;font-weight:700;color:#111;vertical-align:top;'
+            'padding-top:1.5mm;padding-right:2mm;font-weight:700;color:#111111;vertical-align:top;'
         );
-        $labelCell->appendChild($dom->createTextNode('Hinweis:'));
+        $labelCell->appendChild($dom->createTextNode($noteLabel));
 
         $textCell = $dom->createElement('td');
         $textCell->setAttribute(
             'style',
-            'padding-top:3mm;font-weight:700;color:#111;line-height:1.3;white-space:normal;overflow-wrap:break-word;word-wrap:break-word;vertical-align:top;'
+            'padding-top:1.5mm;font-weight:400;color:#111111;line-height:1.3;white-space:normal;overflow-wrap:break-word;word-wrap:break-word;vertical-align:top;'
         );
         $textCell->appendChild($dom->createTextNode($instruction));
 
@@ -141,7 +142,23 @@ class OfferPdfController extends Controller
             $recipient = $xpath->query('//div[contains(concat(" ", normalize-space(@class), " "), " recipient ")]')->item(0);
 
             if ($recipient instanceof \DOMElement) {
-                $recipient->setAttribute('style', trim($recipient->getAttribute('style') . ';top:76mm;'));
+                $recipient->setAttribute('style', trim($recipient->getAttribute('style') . ';top:72mm;'));
+            }
+        } else {
+            $title = $xpath->query('//div[contains(concat(" ", normalize-space(@class), " "), " title ")]')->item(0);
+            $intro = $xpath->query('//div[contains(concat(" ", normalize-space(@class), " "), " intro ")]')->item(0);
+            $firstItemsWrap = $xpath->query('//div[contains(concat(" ", normalize-space(@class), " "), " items-wrap ") and not(contains(concat(" ", normalize-space(@class), " "), " continuation "))]')->item(0);
+
+            if ($title instanceof \DOMElement) {
+                $title->setAttribute('style', trim($title->getAttribute('style') . ';top:96mm;'));
+            }
+
+            if ($intro instanceof \DOMElement) {
+                $intro->setAttribute('style', trim($intro->getAttribute('style') . ';top:113mm;'));
+            }
+
+            if ($firstItemsWrap instanceof \DOMElement) {
+                $firstItemsWrap->setAttribute('style', trim($firstItemsWrap->getAttribute('style') . ';top:137mm;'));
             }
         }
 
