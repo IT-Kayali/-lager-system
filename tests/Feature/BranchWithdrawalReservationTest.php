@@ -91,7 +91,11 @@ it('releases a branch reservation when a manager cancels an open withdrawal', fu
 
     $this->actingAs($manager)
         ->put(route('branch-withdrawals.update', $withdrawal), [
+            'branch_name' => BranchWithdrawal::BRANCH_MAIN,
             'status' => BranchWithdrawal::STATUS_CANCELLED,
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 4],
+            ],
         ])
         ->assertRedirect(route('branch-withdrawals.index'));
 
