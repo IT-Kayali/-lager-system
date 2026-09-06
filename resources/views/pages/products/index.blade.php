@@ -4,6 +4,7 @@
         $productIndexRoute = $isSales ? 'sales.products.index' : 'products.index';
         $productShowRoute = $isSales ? 'sales.products.show' : 'products.show';
         $branchCreateRoute = $isSales ? 'sales.branch-withdrawals.create' : 'branch-withdrawals.create';
+        $canCreateBranchWithdrawal = $isSales || (auth()->user()?->isManager() ?? false);
     @endphp
 
     <section class="products-page-actions erp-list-toolbar">
@@ -110,9 +111,11 @@
                                         <i class="bi bi-eye"></i>
                                     </a>
 
-                                    <a class="premium-icon-btn" href="{{ route($branchCreateRoute, ['product_id' => $product->id]) }}" title="Filialausgang erstellen">
-                                        <i class="bi bi-shop"></i>
-                                    </a>
+                                    @if ($canCreateBranchWithdrawal)
+                                        <a class="premium-icon-btn" href="{{ route($branchCreateRoute, ['product_id' => $product->id]) }}" title="Filialausgang erstellen">
+                                            <i class="bi bi-shop"></i>
+                                        </a>
+                                    @endif
 
                                     @unless($isSales)
                                         <a class="premium-icon-btn" href="{{ route('batches.create', ['product_id' => $product->id]) }}" title="Bestand buchen">
