@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Customer;
+use App\Models\CustomerGroup;
 use App\Models\Offer;
 use App\Models\User;
 
@@ -10,7 +11,14 @@ beforeEach(function () {
     $this->sales = User::factory()->create(['role' => User::ROLE_SALES, 'is_active' => true]);
     $this->crm = User::factory()->create(['role' => User::ROLE_CRM, 'is_active' => true]);
 
+    $group = CustomerGroup::query()->create([
+        'name' => 'Rechte Testgruppe',
+        'slug' => 'rechte-testgruppe',
+        'color' => '#D4AD16',
+    ]);
+
     $this->customer = Customer::query()->create([
+        'customer_group_id' => $group->id,
         'company_name' => 'Rechte Testkunde',
     ]);
 
