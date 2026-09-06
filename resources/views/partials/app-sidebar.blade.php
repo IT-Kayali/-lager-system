@@ -259,12 +259,20 @@
 
 @if ($user?->isWarehouse())
     <style>
+        .premium-sidebar-footer {
+            position: relative !important;
+            z-index: 120 !important;
+            overflow: visible !important;
+        }
+
         .premium-user-box {
             position: relative !important;
             display: grid !important;
             grid-template-columns: 40px minmax(0, 1fr) auto !important;
             align-items: center !important;
             gap: 10px 12px !important;
+            overflow: visible !important;
+            z-index: 130 !important;
         }
 
         .premium-user-box > form {
@@ -278,8 +286,8 @@
         }
 
         .warehouse-notification-wrap {
-            position: relative;
-            z-index: 50;
+            position: static;
+            z-index: auto;
         }
 
         .warehouse-notification-button {
@@ -333,11 +341,14 @@
 
         .warehouse-notification-panel {
             position: absolute;
+            left: 0;
             right: 0;
-            bottom: 48px;
-            width: 258px;
-            max-height: 380px;
+            bottom: calc(100% + 10px);
+            width: auto;
+            max-height: min(380px, calc(100vh - 220px));
             overflow: hidden;
+            z-index: 200;
+            box-sizing: border-box;
             border: 1px solid rgba(227, 202, 110, .38);
             border-radius: 16px;
             background: #24231f;
