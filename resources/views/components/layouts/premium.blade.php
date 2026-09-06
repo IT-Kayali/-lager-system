@@ -685,6 +685,146 @@
 </style>
 <!-- PREMIUM_LAYOUT_REFRESH_END -->
 
+<!-- ERP_UNIFIED_LIST_UI_START -->
+<style>
+    .erp-list-toolbar {
+        display:grid !important;
+        grid-template-columns:minmax(0,1fr) auto !important;
+        gap:16px !important;
+        align-items:center !important;
+        margin-bottom:22px !important;
+    }
+    .erp-list-filter-card {
+        min-width:0 !important;
+        padding:14px !important;
+        border:1px solid #d8cbb7 !important;
+        border-radius:18px !important;
+        background:rgba(255,255,255,.82) !important;
+        box-shadow:0 12px 28px rgba(42,36,25,.06) !important;
+    }
+    .erp-list-filter-form {
+        display:flex !important;
+        align-items:center !important;
+        flex-wrap:wrap !important;
+        gap:10px !important;
+        margin:0 !important;
+    }
+    .erp-list-search {
+        position:relative !important;
+        min-width:280px !important;
+        flex:1 1 320px !important;
+        max-width:none !important;
+    }
+    .erp-list-search > i {
+        position:absolute !important;
+        left:15px !important;
+        top:50% !important;
+        transform:translateY(-50%) !important;
+        color:#665f54 !important;
+        font-size:17px !important;
+        pointer-events:none !important;
+        z-index:2 !important;
+    }
+    .erp-list-search .premium-input {
+        width:100% !important;
+        min-height:48px !important;
+        padding-left:42px !important;
+        background:#fffdf8 !important;
+    }
+    .erp-list-select,
+    select.erp-list-select,
+    .erp-list-filter-form .premium-select.erp-list-select,
+    .erp-list-filter-form .premium-input.erp-list-select {
+        min-width:185px !important;
+        min-height:48px !important;
+        background:#fffdf8 !important;
+        font-weight:850 !important;
+        color:#211d17 !important;
+    }
+    .erp-list-exact {
+        display:inline-flex !important;
+        align-items:center !important;
+        gap:8px !important;
+        min-height:48px !important;
+        padding:0 14px !important;
+        border:1px solid #d8cbb7 !important;
+        border-radius:12px !important;
+        background:#fffdf8 !important;
+        color:#211d17 !important;
+        font-weight:850 !important;
+        white-space:nowrap !important;
+        cursor:pointer !important;
+    }
+    .erp-list-exact input {
+        width:18px !important;
+        height:18px !important;
+        accent-color:#c9a227 !important;
+        cursor:pointer !important;
+    }
+    .erp-list-actions {
+        display:flex !important;
+        align-items:center !important;
+        justify-content:flex-end !important;
+        gap:10px !important;
+        flex-wrap:wrap !important;
+    }
+    .erp-list-card {
+        border:1px solid #d8cbb7 !important;
+        border-radius:22px !important;
+        background:rgba(255,255,255,.86) !important;
+        box-shadow:0 18px 45px rgba(42,36,25,.08) !important;
+        overflow:hidden !important;
+        padding:0 !important;
+    }
+    .erp-list-card > .premium-table-wrap,
+    .erp-list-table-shell {
+        margin:0 !important;
+        border:0 !important;
+        border-radius:0 !important;
+        box-shadow:none !important;
+        background:transparent !important;
+    }
+    .erp-list-card table thead th {
+        padding:18px !important;
+        background:#eee7dc !important;
+        color:#3a332a !important;
+        border-bottom:2px solid #8d8069 !important;
+    }
+    .erp-list-card table tbody td {
+        padding:18px !important;
+        color:#111 !important;
+    }
+    .erp-list-pagination {
+        padding:16px 18px !important;
+        margin:0 !important;
+        border-top:1px solid #e7dece !important;
+        background:#f8f2e7 !important;
+    }
+    .erp-list-empty {
+        display:grid !important;
+        place-items:center !important;
+        gap:8px !important;
+        padding:52px 16px !important;
+        text-align:center !important;
+        color:#665f54 !important;
+    }
+    .erp-list-empty i {font-size:34px !important;color:#8a6a00 !important;}
+    .erp-list-empty strong {color:#111 !important;font-size:17px !important;}
+    @media(max-width:1100px){
+        .erp-list-toolbar{grid-template-columns:1fr !important;}
+        .erp-list-actions{justify-content:flex-start !important;}
+    }
+    @media(max-width:700px){
+        .erp-list-filter-form{display:grid !important;grid-template-columns:1fr !important;}
+        .erp-list-search{min-width:0 !important;width:100% !important;}
+        .erp-list-select{width:100% !important;min-width:0 !important;}
+        .erp-list-exact{justify-content:flex-start !important;}
+        .erp-list-actions{display:grid !important;grid-template-columns:1fr !important;}
+    }
+</style>
+<!-- ERP_UNIFIED_LIST_UI_END -->
+
+
 
 <!-- PREMIUM_SIDEBAR_POLISH_START -->
 <style>
@@ -900,15 +1040,20 @@
                     </p>
                 </div>
 
+                @php($premiumUser = auth()->user())
                 <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                    <a href="{{ route('offers.index') }}" class="premium-btn gold">
-                        <i class="bi bi-receipt"></i>
-                        Neues Angebot
-                    </a>
-                    <a href="{{ route('warnings.index') }}" class="premium-btn">
-                        <i class="bi bi-exclamation-lg"></i>
-                        Lager prüfen
-                    </a>
+                    @if ($premiumUser?->hasRole([\App\Models\User::ROLE_MANAGER, \App\Models\User::ROLE_SALES]))
+                        <a href="{{ route('offers.create') }}" class="premium-btn gold">
+                            <i class="bi bi-receipt"></i>
+                            Neues Angebot
+                        </a>
+                    @endif
+                    @if ($premiumUser?->hasRole([\App\Models\User::ROLE_MANAGER, \App\Models\User::ROLE_WAREHOUSE]))
+                        <a href="{{ route('warnings.index') }}" class="premium-btn">
+                            <i class="bi bi-exclamation-lg"></i>
+                            Lager prüfen
+                        </a>
+                    @endif
                 </div>
             </header>
 
