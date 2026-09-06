@@ -21,6 +21,7 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SystemUserController;
 use App\Http\Controllers\WarningController;
 use App\Http\Controllers\WarehouseOfferController;
+use App\Http\Controllers\WarehouseNotificationController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -72,6 +73,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/offers/{offer}/pdf/{type}', [OfferPdfController::class, 'stream'])->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES)->name('offers.pdf');
     Route::post('/offers/{offer}/cancel', [OfferController::class, 'cancel'])->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES)->name('offers.cancel');
     Route::delete('/offers/{offer}', [OfferController::class, 'destroy'])->middleware('role:' . User::ROLE_MANAGER)->name('offers.destroy');
+
+    Route::prefix('lager/benachrichtigungen')->name('warehouse.notifications.')->middleware('role:' . User::ROLE_WAREHOUSE)->group(function () {
+        Route::get('/', [WarehouseNotificationController::class, 'index'])->name('index');
+        Route::get('/{notification}/oeffnen', [WarehouseNotificationController::class, 'open'])->name('open');
+    });
 
     Route::prefix('lager/angebote')->name('warehouse.offers.')->middleware('role:' . User::ROLE_WAREHOUSE)->group(function () {
         Route::get('/', [WarehouseOfferController::class, 'index'])->name('index');

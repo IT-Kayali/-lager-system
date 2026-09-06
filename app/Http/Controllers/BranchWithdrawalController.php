@@ -7,6 +7,7 @@ use App\Models\BranchWithdrawalItem;
 use App\Models\Product;
 use App\Models\ProductBatch;
 use App\Models\StockMovement;
+use App\Services\WarehouseNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -152,7 +153,7 @@ class BranchWithdrawalController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, WarehouseNotificationService $warehouseNotifications): RedirectResponse
     {
         $this->authorizeCreateAction();
         $data = $this->validatedData($request);
@@ -166,7 +167,9 @@ class BranchWithdrawalController extends Controller
                 ->with('error', 'Verkauf darf einen Filialausgang nur als Offen speichern oder an Lager mit „In Bearbeitung“ übergeben.');
         }
 
-        DB::transaction(function () use ($data): void {
+        $createdWithdrawal = null;
+
+        DB::transaction(function () use ($data, &$createdWithdrawal): void {
             if ($data['status'] !== BranchWithdrawal::STATUS_CANCELLED) {
                 $this->validateItemsAvailability($data['items']);
             }
@@ -193,7 +196,12 @@ class BranchWithdrawalController extends Controller
             }
 
             $this->syncLegacyFields($withdrawal);
+            $createdWithdrawal = $withdrawal;
         });
+
+        if ($createdWithdrawal?->status === BranchWithdrawal::STATUS_IN_PROGRESS) {
+            $warehouseNotifications->notifyBranchWithdrawalHandoff($createdWithdrawal);
+        }
 
         return redirect()
             ->route($this->indexRouteName())
@@ -215,9 +223,14 @@ class BranchWithdrawalController extends Controller
         ]);
     }
 
-    public function update(Request $request, BranchWithdrawal $branchWithdrawal): RedirectResponse
+    public function update(
+        Request $request,
+        BranchWithdrawal $branchWithdrawal,
+        WarehouseNotificationService $warehouseNotifications
+    ): RedirectResponse
     {
         $this->authorizeAccess();
+        $originalStatus = $branchWithdrawal->status;
 
         if (auth()->user()?->isSales()) {
             $this->authorizeEditAction($branchWithdrawal);
@@ -255,6 +268,10 @@ class BranchWithdrawalController extends Controller
                 $this->syncLegacyFields($withdrawal);
             });
 
+            if ($data['status'] === BranchWithdrawal::STATUS_IN_PROGRESS && $originalStatus !== BranchWithdrawal::STATUS_IN_PROGRESS) {
+                $warehouseNotifications->notifyBranchWithdrawalHandoff($branchWithdrawal->fresh());
+            }
+
             return redirect()
                 ->route('sales.branch-withdrawals.index')
                 ->with(
@@ -266,7 +283,7 @@ class BranchWithdrawalController extends Controller
         }
 
         if (! auth()->user()?->isManager()) {
-            return $this->updateWarehouseStatus($request, $branchWithdrawal);
+            return $this->updateWarehouseStatus($request, $branchWithdrawal, $warehouseNotifications);
         }
 
         $data = $this->validatedData($request);
@@ -305,12 +322,22 @@ class BranchWithdrawalController extends Controller
             $this->syncLegacyFields($withdrawal);
         });
 
+        if ($data['status'] === BranchWithdrawal::STATUS_IN_PROGRESS && $originalStatus !== BranchWithdrawal::STATUS_IN_PROGRESS) {
+            $warehouseNotifications->notifyBranchWithdrawalHandoff($branchWithdrawal->fresh());
+        } elseif (in_array($data['status'], [BranchWithdrawal::STATUS_OPEN, BranchWithdrawal::STATUS_CANCELLED], true)) {
+            $warehouseNotifications->dismissBranchWithdrawal($branchWithdrawal);
+        }
+
         return redirect()
             ->route('branch-withdrawals.index')
             ->with('success', 'Filialausgang und Lagerbestand wurden aktualisiert.');
     }
 
-    private function updateWarehouseStatus(Request $request, BranchWithdrawal $branchWithdrawal): RedirectResponse
+    private function updateWarehouseStatus(
+        Request $request,
+        BranchWithdrawal $branchWithdrawal,
+        WarehouseNotificationService $warehouseNotifications
+    ): RedirectResponse
     {
         abort_unless(
             in_array($branchWithdrawal->status, self::WAREHOUSE_VISIBLE_STATUSES, true),
@@ -354,12 +381,19 @@ class BranchWithdrawalController extends Controller
             $this->syncLegacyFields($withdrawal);
         });
 
+        if (in_array($data['status'], [BranchWithdrawal::STATUS_OPEN, BranchWithdrawal::STATUS_CANCELLED], true)) {
+            $warehouseNotifications->dismissBranchWithdrawal($branchWithdrawal);
+        }
+
         return redirect()
             ->route('branch-withdrawals.index')
             ->with('success', 'Status des Filialausgangs wurde aktualisiert.');
     }
 
-    public function destroy(BranchWithdrawal $branchWithdrawal): RedirectResponse
+    public function destroy(
+        BranchWithdrawal $branchWithdrawal,
+        WarehouseNotificationService $warehouseNotifications
+    ): RedirectResponse
     {
         $this->authorizeManagerAction();
 
@@ -376,6 +410,8 @@ class BranchWithdrawalController extends Controller
 
             $withdrawal->delete();
         });
+
+        $warehouseNotifications->dismissBranchWithdrawal($branchWithdrawal);
 
         return redirect()
             ->route('branch-withdrawals.index')
