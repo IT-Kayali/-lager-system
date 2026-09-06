@@ -193,7 +193,7 @@ class OfferController extends Controller
 
     private function validatedData(Request $request): array
     {
-        return $request->validate(['customer_id' => ['required', 'exists:customers,id'], 'template_type' => ['required', 'in:with_company,without_company'], 'shipping_method' => ['nullable', 'string', 'max:255'], 'shipping_price_gross' => ['nullable', 'numeric', 'min:0'], 'carton_count' => ['nullable', 'integer', 'min:0'], 'notes' => ['nullable', 'string'], 'items' => ['required', 'array'], 'items.*.product_id' => ['nullable', 'exists:products,id'], 'items.*.quantity' => ['nullable', 'numeric', 'min:0'], 'items.*.line_total' => ['nullable', 'numeric', 'min:0', 'max:999999999.99']]);
+        return $request->validate(['customer_id' => ['required', 'exists:customers,id'], 'template_type' => ['required', 'in:with_company,without_company'], 'shipping_method' => ['nullable', 'string', 'max:255'], 'shipping_price_gross' => ['nullable', 'numeric', 'min:0'], 'carton_count' => ['nullable', 'required_if:shipping_method,Lieferung', 'integer', 'min:1', 'max:9999'], 'notes' => ['nullable', 'string'], 'items' => ['required', 'array'], 'items.*.product_id' => ['nullable', 'exists:products,id'], 'items.*.quantity' => ['nullable', 'numeric', 'min:0'], 'items.*.line_total' => ['nullable', 'numeric', 'min:0', 'max:999999999.99']]);
     }
 
     private function cleanItems(array $items): Collection { return collect($items)->filter(fn ($item) => ! empty($item['product_id']) && (float) ($item['quantity'] ?? 0) > 0)->values(); }
@@ -241,5 +241,18 @@ class OfferController extends Controller
     private function products(): Collection { return Product::query()->with(['categories', 'priceTiers', 'manualPriceRules'])->naturalNameOrder()->get(); }
     private function templates(): array { return ['with_company' => 'Mit Firmendaten & Logo', 'without_company' => 'Ohne Firmendaten & Logo']; }
     private function statuses(): array { return Offer::STATUS_LABELS; }
-    private function normalizeShippingData(array $data): array { $data['shipping_price_gross'] = isset($data['shipping_price_gross']) && $data['shipping_price_gross'] !== '' ? round((float) $data['shipping_price_gross'], 2) : null; return $data; }
+    private function normalizeShippingData(array $data): array
+    {
+        $data['shipping_price_gross'] = isset($data['shipping_price_gross']) && $data['shipping_price_gross'] !== ''
+            ? round((float) $data['shipping_price_gross'], 2)
+            : null;
+
+        if (($data['shipping_method'] ?? null) !== 'Lieferung') {
+            $data['carton_count'] = null;
+        } elseif (isset($data['carton_count'])) {
+            $data['carton_count'] = (int) $data['carton_count'];
+        }
+
+        return $data;
+    }
 }
