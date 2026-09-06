@@ -705,13 +705,15 @@
     .erp-list-filter-form {
         display:flex !important;
         align-items:center !important;
-        flex-wrap:wrap !important;
+        flex-wrap:nowrap !important;
         gap:10px !important;
+        width:100% !important;
+        min-width:0 !important;
         margin:0 !important;
     }
     .erp-list-search {
         position:relative !important;
-        min-width:280px !important;
+        min-width:200px !important;
         flex:1 1 320px !important;
         max-width:none !important;
     }
@@ -735,11 +737,19 @@
     select.erp-list-select,
     .erp-list-filter-form .premium-select.erp-list-select,
     .erp-list-filter-form .premium-input.erp-list-select {
-        min-width:185px !important;
+        flex:0 1 170px !important;
+        width:auto !important;
+        min-width:125px !important;
+        max-width:220px !important;
         min-height:48px !important;
         background:#fffdf8 !important;
         font-weight:850 !important;
         color:#211d17 !important;
+    }
+    .erp-list-filter-form > .premium-btn,
+    .erp-list-filter-form > a.premium-btn,
+    .erp-list-exact {
+        flex:0 0 auto !important;
     }
     .erp-list-exact {
         display:inline-flex !important;
@@ -810,14 +820,21 @@
     }
     .erp-list-empty i {font-size:34px !important;color:#8a6a00 !important;}
     .erp-list-empty strong {color:#111 !important;font-size:17px !important;}
-    @media(max-width:1100px){
+    @media(max-width:1240px){
         .erp-list-toolbar{grid-template-columns:1fr !important;}
         .erp-list-actions{justify-content:flex-start !important;}
     }
-    @media(max-width:700px){
+    @media(max-width:820px){
         .erp-list-filter-form{display:grid !important;grid-template-columns:1fr !important;}
         .erp-list-search{min-width:0 !important;width:100% !important;}
-        .erp-list-select{width:100% !important;min-width:0 !important;}
+        .erp-list-select,
+        select.erp-list-select,
+        .erp-list-filter-form .premium-select.erp-list-select,
+        .erp-list-filter-form .premium-input.erp-list-select{
+            width:100% !important;
+            min-width:0 !important;
+            max-width:none !important;
+        }
         .erp-list-exact{justify-content:flex-start !important;}
         .erp-list-actions{display:grid !important;grid-template-columns:1fr !important;}
     }
