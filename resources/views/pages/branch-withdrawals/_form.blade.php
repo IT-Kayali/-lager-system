@@ -52,8 +52,16 @@
 
                 <div class="premium-form-field">
                     <label for="status">Status *</label>
+                    @php
+                        $statusOptions = auth()->user()?->isSales()
+                            ? [
+                                \App\Models\BranchWithdrawal::STATUS_OPEN => 'Offen',
+                                \App\Models\BranchWithdrawal::STATUS_IN_PROGRESS => 'In Bearbeitung',
+                            ]
+                            : \App\Models\BranchWithdrawal::statusLabels();
+                    @endphp
                     <select id="status" name="status" class="premium-select" data-sort="false" required>
-                        @foreach (\App\Models\BranchWithdrawal::statusLabels() as $value => $label)
+                        @foreach ($statusOptions as $value => $label)
                             <option value="{{ $value }}" @selected($statusValue === $value)>{{ $label }}</option>
                         @endforeach
                     </select>
@@ -168,7 +176,7 @@
         {{ $submitLabel }}
     </button>
 
-    <a href="{{ route('branch-withdrawals.index') }}" class="premium-btn">
+    <a href="{{ route(auth()->user()?->isSales() ? 'sales.branch-withdrawals.index' : 'branch-withdrawals.index') }}" class="premium-btn">
         <i class="bi bi-arrow-left"></i>
         Zurück
     </a>
