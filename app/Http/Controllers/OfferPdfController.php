@@ -89,6 +89,7 @@ class OfferPdfController extends Controller
             }
 
             $cells = $xpath->query('./td', $row);
+
             if ($cells === false || $cells->length < 1) {
                 continue;
             }
@@ -113,19 +114,35 @@ class OfferPdfController extends Controller
         $noteRow = $dom->createElement('tr');
         $noteRow->setAttribute('class', 'customer-delivery-instruction');
 
-        $noteCell = $dom->createElement('td');
-        $noteCell->setAttribute('colspan', '2');
-        $noteCell->setAttribute(
+        $labelCell = $dom->createElement('td');
+        $labelCell->setAttribute(
             'style',
-            'padding-top:3mm;font-weight:700;line-height:1.35;white-space:normal;overflow-wrap:break-word;word-wrap:break-word;'
+            'padding-top:3mm;padding-right:2mm;font-weight:700;color:#111;vertical-align:top;'
         );
-        $noteCell->appendChild($dom->createTextNode($instruction));
-        $noteRow->appendChild($noteCell);
+        $labelCell->appendChild($dom->createTextNode('Hinweis:'));
+
+        $textCell = $dom->createElement('td');
+        $textCell->setAttribute(
+            'style',
+            'padding-top:3mm;font-weight:700;color:#111;line-height:1.3;white-space:normal;overflow-wrap:break-word;word-wrap:break-word;vertical-align:top;'
+        );
+        $textCell->appendChild($dom->createTextNode($instruction));
+
+        $noteRow->appendChild($labelCell);
+        $noteRow->appendChild($textCell);
 
         if ($targetRow->nextSibling) {
             $targetRow->parentNode->insertBefore($noteRow, $targetRow->nextSibling);
         } else {
             $targetRow->parentNode->appendChild($noteRow);
+        }
+
+        if ($isNoLogoPdfTemplate) {
+            $recipient = $xpath->query('//div[contains(concat(" ", normalize-space(@class), " "), " recipient ")]')->item(0);
+
+            if ($recipient instanceof \DOMElement) {
+                $recipient->setAttribute('style', trim($recipient->getAttribute('style') . ';top:76mm;'));
+            }
         }
 
         $rendered = $dom->saveHTML();
