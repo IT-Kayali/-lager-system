@@ -11,6 +11,16 @@ class OfferInternalNoteController extends Controller
 {
     public function store(Request $request, Offer $offer): RedirectResponse
     {
+        abort_unless(
+            auth()->user()?->hasRole([
+                \App\Models\User::ROLE_MANAGER,
+                \App\Models\User::ROLE_SALES,
+                \App\Models\User::ROLE_WAREHOUSE,
+            ]),
+            403,
+            'Keine Berechtigung für interne Angebotsnotizen.'
+        );
+
         $data = $request->validate([
             'note' => ['required', 'string', 'max:5000'],
         ]);
