@@ -1288,7 +1288,7 @@
         document.body.classList.add('premium-toasts-ready');
 
         const stack = document.getElementById('premium-toast-stack');
-        const serverToasts = @json($premiumToastMessages);
+        const serverToasts = @json($premiumToastMessages ?? []);
 
         if (!stack) {
             return;
