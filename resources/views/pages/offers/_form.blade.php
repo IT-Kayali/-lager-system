@@ -16,12 +16,24 @@
         <select id="customer_id" name="customer_id" class="premium-select" required>
             <option value="">Kunde auswählen</option>
             @foreach ($customers as $customer)
-                <option value="{{ $customer->id }}" @selected((string) old('customer_id', $offer->customer_id) === (string) $customer->id)>
+                <option
+                    value="{{ $customer->id }}"
+                    data-customer-note="{{ $customer->notes }}"
+                    @selected((string) old('customer_id', $offer->customer_id) === (string) $customer->id)
+                >
                     {{ $customer->customer_number }} — {{ $customer->company_name }} — {{ $customer->group?->name }}
                 </option>
             @endforeach
         </select>
         @error('customer_id') <div class="premium-error">{{ $message }}</div> @enderror
+
+        <div id="offer-customer-note" class="offer-customer-note" hidden>
+            <div class="offer-customer-note-title">
+                <i class="bi bi-exclamation-circle"></i>
+                Kundenhinweis
+            </div>
+            <div class="offer-customer-note-text"></div>
+        </div>
     </div>
 
     <div class="premium-form-field">
@@ -195,8 +207,20 @@
         const wrapper = document.getElementById('offer-items');
         const template = document.getElementById('offer-item-template');
         const customer = document.getElementById('customer_id');
+        const customerNoteBox = document.getElementById('offer-customer-note');
+        const customerNoteText = customerNoteBox?.querySelector('.offer-customer-note-text');
         const totalOutput = document.getElementById('offer-products-total');
         const pricePreviewUrl = @json(route('offers.price-preview'));
+
+        function refreshCustomerNote() {
+            if (!customer || !customerNoteBox || !customerNoteText) return;
+
+            const selectedOption = customer.querySelector(`option[value="${CSS.escape(customer.value || '')}"]`);
+            const note = (selectedOption?.dataset.customerNote || '').trim();
+
+            customerNoteText.textContent = note;
+            customerNoteBox.hidden = note === '';
+        }
 
         function getRows() {
             return Array.from(wrapper.querySelectorAll('.offer-item-row'));
@@ -418,6 +442,8 @@
         if (customer && customer.dataset.priceBound !== '1') {
             customer.dataset.priceBound = '1';
             customer.addEventListener('change', function () {
+                refreshCustomerNote();
+
                 getRows().forEach((row) => {
                     row.dataset.keepSavedTotal = '0';
                     const total = getRowFields(row).total;
@@ -427,6 +453,7 @@
             });
         }
 
+        refreshCustomerNote();
         bindRowEvents();
         reindexRows();
         ensureTrailingEmptyRow();
@@ -493,6 +520,34 @@
     .offer-editor-form .premium-textarea {
         min-height: 120px;
         resize: vertical;
+    }
+
+    .offer-customer-note {
+        margin-top: 10px;
+        padding: 12px 14px;
+        border: 1px solid #e8c861;
+        border-radius: 12px;
+        background: #fff8d8;
+        color: #5f4900;
+    }
+
+    .offer-customer-note-title {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 5px;
+        font-size: 12px;
+        font-weight: 950;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    .offer-customer-note-text {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1.45;
     }
 
     .offer-items-header {
