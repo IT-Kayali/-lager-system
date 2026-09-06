@@ -6,16 +6,16 @@
         $branchCreateRoute = $isSales ? 'sales.branch-withdrawals.create' : 'branch-withdrawals.create';
     @endphp
 
-    <section class="products-page-actions">
-        <div class="products-page-search-card">
-            <form method="GET" action="{{ route($productIndexRoute) }}" class="products-search-modern">
-                <div class="products-search-field">
+    <section class="products-page-actions erp-list-toolbar">
+        <div class="products-page-search-card erp-list-filter-card">
+            <form method="GET" action="{{ route($productIndexRoute) }}" class="products-search-modern erp-list-filter-form">
+                <div class="products-search-field erp-list-search">
                     <i class="bi bi-search"></i>
                     <input name="search" value="{{ $search ?? '' }}" class="premium-input" placeholder="Produkt suchen...">
                 </div>
 
                 <div class="products-search-filter">
-                    <select name="search_field" class="premium-input products-search-select" aria-label="Suchfeld auswählen">
+                    <select name="search_field" class="premium-input products-search-select erp-list-select" aria-label="Suchfeld auswählen">
                         <option value="all" @selected(($searchField ?? 'all') === 'all')>Alle</option>
                         <option value="name" @selected(($searchField ?? 'all') === 'name')>Produktbezeichnung</option>
                         <option value="manufacturer" @selected(($searchField ?? 'all') === 'manufacturer')>Fake Name</option>
@@ -24,7 +24,7 @@
                     </select>
                 </div>
 
-                <label class="products-exact-search">
+                <label class="products-exact-search erp-list-exact">
                     <input type="checkbox" name="exact" value="1" @checked($exact ?? false)>
                     <span>Exakter Wert</span>
                 </label>
@@ -44,7 +44,7 @@
         </div>
 
         @unless($isSales)
-            <div class="products-page-action-buttons">
+            <div class="products-page-action-buttons erp-list-actions">
                 <a href="{{ route('products.excel.export') }}" class="premium-btn">
                     <i class="bi bi-download"></i>
                     Excel exportieren
@@ -63,8 +63,8 @@
         @endunless
     </section>
 
-    <section class="products-modern-card">
-        <div class="products-table-shell modern-products-table-shell">
+    <section class="products-modern-card erp-list-card">
+        <div class="products-table-shell modern-products-table-shell erp-list-table-shell">
             <table class="products-clean-table modern-products-table">
                 <thead>
                     <tr>
@@ -149,7 +149,7 @@
             </table>
         </div>
 
-        <div class="products-pagination">{{ $products->links() }}</div>
+        <div class="products-pagination erp-list-pagination">{{ $products->links() }}</div>
     </section>
 
     <style>
