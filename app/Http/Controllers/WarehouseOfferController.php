@@ -26,6 +26,13 @@ class WarehouseOfferController extends Controller
 
         $search = trim((string) $request->query('search'));
         $status = trim((string) $request->query('status'));
+        $searchField = (string) $request->query('search_field', 'all');
+        $exact = $request->boolean('exact');
+
+        $allowedSearchFields = ['all', 'number', 'customer', 'customer_number', 'product'];
+        if (! in_array($searchField, $allowedSearchFields, true)) {
+            $searchField = 'all';
+        }
 
         if (! in_array($status, self::VISIBLE_STATUSES, true)) {
             $status = '';
@@ -34,15 +41,25 @@ class WarehouseOfferController extends Controller
         $offers = Offer::query()
             ->with(['customer.group', 'items'])
             ->whereIn('status', self::VISIBLE_STATUSES)
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($subQuery) use ($search) {
-                    $subQuery
-                        ->where('offer_number', 'like', "%{$search}%")
-                        ->orWhereHas('customer', function ($customerQuery) use ($search) {
-                            $customerQuery
-                                ->where('customer_number', 'like', "%{$search}%")
-                                ->orWhere('company_name', 'like', "%{$search}%");
-                        });
+            ->when($search !== '', function ($query) use ($search, $searchField, $exact) {
+                $operator = $exact ? '=' : 'like';
+                $value = $exact ? $search : "%{$search}%";
+
+                $query->where(function ($subQuery) use ($searchField, $operator, $value) {
+                    match ($searchField) {
+                        'number' => $subQuery->where('offer_number', $operator, $value),
+                        'customer' => $subQuery->whereHas('customer', fn ($customerQuery) => $customerQuery->where('company_name', $operator, $value)),
+                        'customer_number' => $subQuery->whereHas('customer', fn ($customerQuery) => $customerQuery->where('customer_number', $operator, $value)),
+                        'product' => $subQuery->whereHas('items', fn ($itemQuery) => $itemQuery->where('product_name', $operator, $value)),
+                        default => $subQuery
+                            ->where('offer_number', $operator, $value)
+                            ->orWhereHas('customer', function ($customerQuery) use ($operator, $value) {
+                                $customerQuery
+                                    ->where('customer_number', $operator, $value)
+                                    ->orWhere('company_name', $operator, $value);
+                            })
+                            ->orWhereHas('items', fn ($itemQuery) => $itemQuery->where('product_name', $operator, $value)),
+                    };
                 });
             })
             ->when($status !== '', fn ($query) => $query->where('status', $status))
@@ -53,6 +70,8 @@ class WarehouseOfferController extends Controller
         return view('pages.warehouse-offers.index', [
             'offers' => $offers,
             'search' => $search,
+            'searchField' => $searchField,
+            'exact' => $exact,
             'selectedStatus' => $status,
             'statuses' => $this->statusLabels(),
         ]);
