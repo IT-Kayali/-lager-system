@@ -30,10 +30,10 @@
 
                 @if ($nextStatuses)
                     <form method="POST" action="{{ route('warehouse.offers.status', $offer) }}" style="margin-top:18px;">@csrf @method('PUT')
-                        <div class="premium-form-grid"><div class="premium-form-field"><label for="status">Nächster Lagerstatus</label><select id="status" name="status" class="premium-select" required>@foreach ($nextStatuses as $value => $label)<option value="{{ $value }}">{{ $label }}</option>@endforeach</select></div><div class="premium-form-field" style="display:flex;align-items:end;"><button class="premium-btn gold" type="submit"><i class="bi bi-arrow-repeat"></i> Status speichern</button></div></div>
+                        <div class="premium-form-grid"><div class="premium-form-field"><label for="status">Lagerstatus</label><select id="status" name="status" class="premium-select" required>@foreach ($nextStatuses as $value => $label)<option value="{{ $value }}">{{ $label }}</option>@endforeach</select></div><div class="premium-form-field" style="display:flex;align-items:end;"><button class="premium-btn gold" type="submit"><i class="bi bi-arrow-repeat"></i> Status speichern</button></div></div>
                     </form>
                 @else
-                    <div class="premium-alert" style="margin-top:18px;">Diese Bestellung ist erledigt. Weitere Statusänderungen sind für Lager gesperrt.</div>
+                    <div class="premium-alert" style="margin-top:18px;">Diese Bestellung ist erledigt. Der Lagerbestand wurde bereits per FIFO gebucht; deshalb ist ein Rücksprung aus „Erledigt“ gesperrt.</div>
                 @endif
             </section>
 
