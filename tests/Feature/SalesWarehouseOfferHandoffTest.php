@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Customer;
+use App\Models\CustomerGroup;
 use App\Models\Offer;
 use App\Models\User;
 
@@ -20,7 +21,14 @@ beforeEach(function () {
         'is_active' => true,
     ]);
 
+    $group = CustomerGroup::query()->create([
+        'name' => 'Workflow Testgruppe',
+        'slug' => 'workflow-testgruppe',
+        'color' => '#D4AD16',
+    ]);
+
     $this->customer = Customer::query()->create([
+        'customer_group_id' => $group->id,
         'company_name' => 'Workflow Kunde',
     ]);
 });
