@@ -16,7 +16,20 @@ class WarningController extends Controller
     {
         app(\App\Services\ReservationReleaseService::class)->releaseExpired();
 
-        $filter = $request->query('filter', 'warning');
+        $filter = (string) $request->query('filter', 'warning');
+        $search = trim((string) $request->query('search'));
+        $searchField = (string) $request->query('search_field', 'all');
+        $exact = $request->boolean('exact');
+
+        if (! in_array($filter, ['warning', 'low', 'critical', 'all'], true)) {
+            $filter = 'warning';
+        }
+
+        $allowedSearchFields = ['all', 'name', 'manufacturer', 'code', 'supplier'];
+        if (! in_array($searchField, $allowedSearchFields, true)) {
+            $searchField = 'all';
+        }
+
         $allProducts = $this->productRows();
 
         $summary = [
@@ -26,10 +39,15 @@ class WarningController extends Controller
             'warning' => $allProducts->whereIn('status', ['low', 'critical'])->count(),
         ];
 
+        $searchedProducts = $this->searchRows($allProducts, $search, $searchField, $exact);
+
         return view('pages.warnings.index', [
-            'products' => $this->filteredRows($allProducts, $filter),
+            'products' => $this->filteredRows($searchedProducts, $filter),
             'filter' => $filter,
             'summary' => $summary,
+            'search' => $search,
+            'searchField' => $searchField,
+            'exact' => $exact,
         ]);
     }
 
@@ -37,8 +55,23 @@ class WarningController extends Controller
     {
         app(\App\Services\ReservationReleaseService::class)->releaseExpired();
 
-        $filter = $request->query('filter', 'warning');
-        $products = $this->filteredRows($this->productRows(), $filter);
+        $filter = (string) $request->query('filter', 'warning');
+        $search = trim((string) $request->query('search'));
+        $searchField = (string) $request->query('search_field', 'all');
+        $exact = $request->boolean('exact');
+
+        if (! in_array($filter, ['warning', 'low', 'critical', 'all'], true)) {
+            $filter = 'warning';
+        }
+
+        if (! in_array($searchField, ['all', 'name', 'manufacturer', 'code', 'supplier'], true)) {
+            $searchField = 'all';
+        }
+
+        $products = $this->filteredRows(
+            $this->searchRows($this->productRows(), $search, $searchField, $exact),
+            $filter
+        );
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -125,6 +158,51 @@ class WarningController extends Controller
                     'max_reservable' => $product->max_reservable,
                 ];
             });
+    }
+
+    private function searchRows(Collection $rows, string $search, string $searchField, bool $exact): Collection
+    {
+        if ($search === '') {
+            return $rows;
+        }
+
+        $needle = mb_strtolower($search);
+
+        return $rows
+            ->filter(function (array $row) use ($needle, $searchField, $exact): bool {
+                /** @var Product $product */
+                $product = $row['product'];
+                $supplier = $product->supplierRecord?->company_name ?: $product->supplier;
+
+                $values = match ($searchField) {
+                    'name' => [$product->name],
+                    'manufacturer' => [$product->manufacturer_designation],
+                    'code' => [$product->serial_number, $product->product_code],
+                    'supplier' => [$supplier],
+                    default => [
+                        $product->name,
+                        $product->manufacturer_designation,
+                        $product->serial_number,
+                        $product->product_code,
+                        $supplier,
+                    ],
+                };
+
+                foreach ($values as $value) {
+                    $candidate = mb_strtolower(trim((string) $value));
+
+                    if ($candidate === '') {
+                        continue;
+                    }
+
+                    if ($exact ? $candidate === $needle : str_contains($candidate, $needle)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            })
+            ->values();
     }
 
     private function filteredRows(Collection $rows, string $filter): Collection
