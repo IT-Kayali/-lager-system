@@ -54,31 +54,36 @@ class Product extends Model
         });
     }
 
-    public function scopeNaturalNameOrder($query)
+    public function scopeNaturalNameOrder($query, string $direction = 'asc')
     {
+        $direction = strtolower($direction) === 'desc' ? 'desc' : 'asc';
+        $directionSql = strtoupper($direction);
         $driver = $query->getConnection()->getDriverName();
+        $table = $query->getModel()->getTable();
+        $nameColumn = $table . '.name';
+        $idColumn = $table . '.id';
 
         if ($driver === 'mysql' || $driver === 'mariadb') {
             return $query
-                ->orderByRaw("CASE WHEN name REGEXP '^[0-9]' THEN 0 ELSE 1 END")
-                ->orderByRaw('CASE WHEN name REGEXP \'^[0-9]\' THEN CAST(name AS UNSIGNED) ELSE 0 END')
-                ->orderByRaw('LOWER(name) ASC')
-                ->orderBy('id');
+                ->orderByRaw("CASE WHEN {$nameColumn} REGEXP '^[0-9]' THEN 0 ELSE 1 END {$directionSql}")
+                ->orderByRaw("CASE WHEN {$nameColumn} REGEXP '^[0-9]' THEN CAST({$nameColumn} AS UNSIGNED) ELSE 0 END {$directionSql}")
+                ->orderByRaw("LOWER({$nameColumn}) {$directionSql}")
+                ->orderBy($idColumn, $direction);
         }
 
         if ($driver === 'pgsql') {
             return $query
-                ->orderByRaw("CASE WHEN name ~ '^[0-9]' THEN 0 ELSE 1 END")
-                ->orderByRaw("CASE WHEN name ~ '^[0-9]' THEN CAST(SUBSTRING(name FROM '^[0-9]+') AS BIGINT) ELSE 0 END")
-                ->orderByRaw('LOWER(name) ASC')
-                ->orderBy('id');
+                ->orderByRaw("CASE WHEN {$nameColumn} ~ '^[0-9]' THEN 0 ELSE 1 END {$directionSql}")
+                ->orderByRaw("CASE WHEN {$nameColumn} ~ '^[0-9]' THEN CAST(SUBSTRING({$nameColumn} FROM '^[0-9]+') AS BIGINT) ELSE 0 END {$directionSql}")
+                ->orderByRaw("LOWER({$nameColumn}) {$directionSql}")
+                ->orderBy($idColumn, $direction);
         }
 
         return $query
-            ->orderByRaw("CASE WHEN name GLOB '[0-9]*' THEN 0 ELSE 1 END")
-            ->orderByRaw("CASE WHEN name GLOB '[0-9]*' THEN CAST(name AS INTEGER) ELSE 0 END")
-            ->orderByRaw('LOWER(name) ASC')
-            ->orderBy('id');
+            ->orderByRaw("CASE WHEN {$nameColumn} GLOB '[0-9]*' THEN 0 ELSE 1 END {$directionSql}")
+            ->orderByRaw("CASE WHEN {$nameColumn} GLOB '[0-9]*' THEN CAST({$nameColumn} AS INTEGER) ELSE 0 END {$directionSql}")
+            ->orderByRaw("LOWER({$nameColumn}) {$directionSql}")
+            ->orderBy($idColumn, $direction);
     }
 
     public function resolveRouteBinding($value, $field = null)
