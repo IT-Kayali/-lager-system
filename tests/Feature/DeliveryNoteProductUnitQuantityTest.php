@@ -11,7 +11,7 @@ it('uses product quantity unit columns on branded delivery notes', function () {
         ->toContain('<td>{{ $item->quantity }}</td>')
         ->toContain('<td>{{ $item->unit }}</td>')
         ->toContain("'product' => \$product")
-        ->toContain("'unit' => \$unit !== '' ? \$unit : '—'")
+        ->toContain("'unit'=>\$unit!==''?(\$unitLabels[\$unit]??\$unit):'—'")
         ->toContain("'quantity' => \$quantity")
         ->not->toContain('<th>Bezeichnung</th>')
         ->not->toContain("trim(\$qty . ' ' . \$unit)");
@@ -33,7 +33,7 @@ it('uses product quantity unit columns on no-logo delivery notes', function () {
         ->toContain('<td>{{ $item->quantity }}</td>')
         ->toContain('<td>{{ $item->unit }}</td>')
         ->toContain("'product' => \$product")
-        ->toContain("'unit' => \$unit !== '' ? \$unit : '—'")
+        ->toContain("'unit'=>\$unit!==''?(\$unitLabels[\$unit]??\$unit):'—'")
         ->toContain("'quantity' => \$quantity")
         ->not->toContain("trim(\$qty . ' ' . \$unit)");
 
