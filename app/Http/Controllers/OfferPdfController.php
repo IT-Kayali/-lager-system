@@ -34,7 +34,10 @@ class OfferPdfController extends Controller
         ActivityLog::record($activityEvents[$type], $offer, ['offer_number' => $offer->offer_number, 'template' => $template->name]);
         $viewData = compact('offer', 'template', 'title', 'logoDataUri', 'backgroundDataUri') + ['documentType' => $type];
         if ($type === 'delivery-note') {
-            $html = view($pdfView, $viewData)->render(); $html = $this->injectCartonCountIntoDeliveryNote($html, $offer, $isNoLogoPdfTemplate); $pdf = Pdf::loadHTML($html)->setPaper('a4');
+            $html = view($pdfView, $viewData)->render();
+            $html = $this->injectCartonCountIntoDeliveryNote($html, $offer, $isNoLogoPdfTemplate);
+            $html = $this->injectCustomerDeliveryInstructionIntoDeliveryNote($html, $offer, $isNoLogoPdfTemplate);
+            $pdf = Pdf::loadHTML($html)->setPaper('a4');
         } else {
             $html = view($pdfView, $viewData)->render(); $html = $this->injectProductUnitColumnIntoOfferDocument($html, $offer, $isNoLogoPdfTemplate); $pdf = Pdf::loadHTML($html)->setPaper('a4');
         }
@@ -49,6 +52,125 @@ class OfferPdfController extends Controller
         $pattern = '/(<tr>\s*<td>' . preg_quote($shippingLabel, '/') . '<\/td>\s*<td>.*?<\/td>\s*<\/tr>)/s';
         $cartonRow = "\n                    <tr>\n                        <td>{$cartonLabel}</td>\n                        <td>{$offer->carton_count}</td>\n                    </tr>";
         $rendered = preg_replace($pattern, '$1' . $cartonRow, $html, 1); return is_string($rendered) ? $rendered : $html;
+    }
+
+    private function injectCustomerDeliveryInstructionIntoDeliveryNote(string $html, Offer $offer, bool $isNoLogoPdfTemplate): string
+    {
+        $instruction = trim((string) ($offer->customer?->delivery_note_instruction ?? ''));
+
+        if ($instruction === '') {
+            return $html;
+        }
+
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $previousLibxmlState = libxml_use_internal_errors(true);
+        $loaded = $dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previousLibxmlState);
+
+        if (! $loaded) {
+            return $html;
+        }
+
+        $xpath = new \DOMXPath($dom);
+        $metaRows = $xpath->query('//div[contains(concat(" ", normalize-space(@class), " "), " meta ")]//table//tr');
+
+        if ($metaRows === false || $metaRows->length === 0) {
+            return $html;
+        }
+
+        $shippingLabel = $isNoLogoPdfTemplate ? 'Shipping Method:' : 'Versandart:';
+        $cartonLabel = $isNoLogoPdfTemplate ? 'Number of Cartons:' : 'Anzahl Kartons:';
+        $noteLabel = $isNoLogoPdfTemplate ? 'Note:' : 'Hinweis:';
+        $targetRow = null;
+
+        foreach ($metaRows as $row) {
+            if (! $row instanceof \DOMElement) {
+                continue;
+            }
+
+            $cells = $xpath->query('./td', $row);
+
+            if ($cells === false || $cells->length < 1) {
+                continue;
+            }
+
+            $label = trim((string) $cells->item(0)?->textContent);
+
+            if ($label === $shippingLabel) {
+                $targetRow = $row;
+                continue;
+            }
+
+            if ($targetRow !== null && $label === $cartonLabel) {
+                $targetRow = $row;
+                break;
+            }
+        }
+
+        if (! $targetRow instanceof \DOMElement || ! $targetRow->parentNode) {
+            return $html;
+        }
+
+        $noteRow = $dom->createElement('tr');
+        $noteRow->setAttribute('class', 'customer-delivery-instruction');
+
+        $labelCell = $dom->createElement('td');
+        $labelCell->setAttribute(
+            'style',
+            $isNoLogoPdfTemplate
+                ? 'padding-top:1.5mm;padding-right:2mm;font-weight:700;color:#111111;vertical-align:top;'
+                : 'padding-top:1.1mm;padding-right:2mm;font-weight:700;color:#111111;vertical-align:top;position:relative;top:-0.7mm;'
+        );
+        $labelCell->appendChild($dom->createTextNode($noteLabel));
+
+        $textCell = $dom->createElement('td');
+        $textCell->setAttribute(
+            'style',
+            'padding-top:1.5mm;font-weight:400;color:#111111;line-height:1.3;white-space:normal;overflow-wrap:break-word;word-wrap:break-word;vertical-align:top;'
+        );
+        $textCell->appendChild($dom->createTextNode($instruction));
+
+        $noteRow->appendChild($labelCell);
+        $noteRow->appendChild($textCell);
+
+        if ($targetRow->nextSibling) {
+            $targetRow->parentNode->insertBefore($noteRow, $targetRow->nextSibling);
+        } else {
+            $targetRow->parentNode->appendChild($noteRow);
+        }
+
+        if ($isNoLogoPdfTemplate) {
+            $recipient = $xpath->query('//div[contains(concat(" ", normalize-space(@class), " "), " recipient ")]')->item(0);
+
+            if ($recipient instanceof \DOMElement) {
+                $recipient->setAttribute('style', trim($recipient->getAttribute('style') . ';top:72mm;'));
+            }
+        } else {
+            $title = $xpath->query('//div[contains(concat(" ", normalize-space(@class), " "), " title ")]')->item(0);
+            $intro = $xpath->query('//div[contains(concat(" ", normalize-space(@class), " "), " intro ")]')->item(0);
+            $firstItemsWrap = $xpath->query('//div[contains(concat(" ", normalize-space(@class), " "), " items-wrap ") and not(contains(concat(" ", normalize-space(@class), " "), " continuation "))]')->item(0);
+
+            if ($title instanceof \DOMElement) {
+                $title->setAttribute('style', trim($title->getAttribute('style') . ';top:96mm;'));
+            }
+
+            if ($intro instanceof \DOMElement) {
+                $intro->setAttribute('style', trim($intro->getAttribute('style') . ';top:113mm;'));
+            }
+
+            if ($firstItemsWrap instanceof \DOMElement) {
+                $firstItemsWrap->setAttribute('style', trim($firstItemsWrap->getAttribute('style') . ';top:137mm;'));
+            }
+        }
+
+        $rendered = $dom->saveHTML();
+
+        if (! is_string($rendered)) {
+            return $html;
+        }
+
+        return (string) preg_replace('/^<\?xml encoding="UTF-8"\?>\s*/i', '', $rendered);
     }
 
     private function injectProductUnitColumnIntoOfferDocument(string $html, Offer $offer, bool $isNoLogoPdfTemplate): string
