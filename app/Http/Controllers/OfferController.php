@@ -119,7 +119,7 @@ class OfferController extends Controller
         return redirect()->route('offers.show', $offer)->with('success', 'Angebot ' . $offer->offer_number . ' wurde erstellt und Ware wurde reserviert.');
     }
 
-    public function edit(Offer $offer): View
+    public function edit(Offer $offer): View|RedirectResponse
     {
         if (! $this->canEdit($offer)) {
             return redirect()
