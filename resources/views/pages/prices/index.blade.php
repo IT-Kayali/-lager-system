@@ -14,10 +14,11 @@
         </div>
     @endif
 
-    <section class="premium-card">
-        <form method="GET" action="{{ route('prices.index') }}" class="premium-toolbar">
+    <section class="premium-card erp-list-card">
+        <div class="erp-list-filter-card" style="margin:18px;">
+        <form method="GET" action="{{ route('prices.index') }}" class="premium-toolbar erp-list-filter-form">
             <div class="premium-search">
-                <select name="product_id" class="premium-select" style="min-width:280px;" onchange="this.form.submit()">
+                <select name="product_id" class="premium-select erp-list-select" style="min-width:280px;" onchange="this.form.submit()">
                     @forelse ($products as $product)
                         <option value="{{ $product->id }}" @selected($selectedProduct?->id === $product->id)>
                             {{ $product->name }}
@@ -27,7 +28,7 @@
                     @endforelse
                 </select>
 
-                <select name="customer_group_id" class="premium-select" style="min-width:190px;" onchange="this.form.submit()">
+                <select name="customer_group_id" class="premium-select erp-list-select" style="min-width:190px;" onchange="this.form.submit()">
                     @foreach ($groups as $group)
                         <option value="{{ $group->id }}" @selected($selectedGroup?->id === $group->id)>
                             {{ $group->name }}
@@ -41,6 +42,7 @@
                 </button>
             </div>
         </form>
+        </div>
 
         @if (! $selectedProduct)
             <div class="premium-placeholder">Bitte zuerst ein Produkt anlegen.</div>
