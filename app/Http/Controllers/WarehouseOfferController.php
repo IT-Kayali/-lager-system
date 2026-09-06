@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
+use App\Models\ApplicationSetting;
 use App\Models\Offer;
 use App\Services\OfferFulfillmentService;
 use App\Services\ReservationReleaseService;
@@ -94,6 +95,16 @@ class WarehouseOfferController extends Controller
                 ]);
             }
 
+            if ($newStatus === Offer::STATUS_OFFER) {
+                $offer->update([
+                    'reserved_until' => now()->addHours(ApplicationSetting::reservationHours()),
+                ]);
+
+                return redirect()
+                    ->route('warehouse.offers.index')
+                    ->with('success', 'Angebot wurde zurück an den Verkauf gegeben.');
+            }
+
             return redirect()->route('warehouse.offers.show', $offer)->with('success', 'Status wurde geändert.');
         } catch (\Throwable $exception) {
             return redirect()->route('warehouse.offers.show', $offer)->with('error', $exception->getMessage());
@@ -114,8 +125,14 @@ class WarehouseOfferController extends Controller
     private function nextStatuses(Offer $offer): array
     {
         return match ($offer->status) {
-            Offer::STATUS_IN_PROGRESS => [Offer::STATUS_READY => Offer::STATUS_LABELS[Offer::STATUS_READY]],
-            Offer::STATUS_READY => [Offer::STATUS_COMPLETED => Offer::STATUS_LABELS[Offer::STATUS_COMPLETED]],
+            Offer::STATUS_IN_PROGRESS => [
+                Offer::STATUS_OFFER => Offer::STATUS_LABELS[Offer::STATUS_OFFER],
+                Offer::STATUS_READY => Offer::STATUS_LABELS[Offer::STATUS_READY],
+            ],
+            Offer::STATUS_READY => [
+                Offer::STATUS_IN_PROGRESS => Offer::STATUS_LABELS[Offer::STATUS_IN_PROGRESS],
+                Offer::STATUS_COMPLETED => Offer::STATUS_LABELS[Offer::STATUS_COMPLETED],
+            ],
             default => [],
         };
     }
