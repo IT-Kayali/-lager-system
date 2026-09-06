@@ -118,7 +118,9 @@ class OfferPdfController extends Controller
         $labelCell = $dom->createElement('td');
         $labelCell->setAttribute(
             'style',
-            'padding-top:1.5mm;padding-right:2mm;font-weight:700;color:#111111;vertical-align:top;'
+            $isNoLogoPdfTemplate
+                ? 'padding-top:1.5mm;padding-right:2mm;font-weight:700;color:#111111;vertical-align:top;'
+                : 'padding-top:1.1mm;padding-right:2mm;font-weight:700;color:#111111;vertical-align:top;position:relative;top:-0.7mm;'
         );
         $labelCell->appendChild($dom->createTextNode($noteLabel));
 
