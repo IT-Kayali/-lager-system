@@ -3,6 +3,7 @@
         $isSales = auth()->user()?->isSales();
         $productIndexRoute = $isSales ? 'sales.products.index' : 'products.index';
         $branchCreateRoute = $isSales ? 'sales.branch-withdrawals.create' : 'branch-withdrawals.create';
+        $canCreateBranchWithdrawal = $isSales || (auth()->user()?->isManager() ?? false);
         $statusLabels = ['ok' => 'OK', 'low' => 'Niedrig', 'critical' => 'Kritisch'];
         $unitLabel = $product->unitLabel('de');
         $supplierName = $product->supplierRecord?->company_name ?: $product->supplier ?: '—';
@@ -32,10 +33,12 @@
             </a>
         @endunless
 
-        <a class="premium-btn" href="{{ route($branchCreateRoute, ['product_id' => $product->id]) }}">
-            <i class="bi bi-shop"></i>
-            Filialausgang
-        </a>
+        @if ($canCreateBranchWithdrawal)
+            <a class="premium-btn" href="{{ route($branchCreateRoute, ['product_id' => $product->id]) }}">
+                <i class="bi bi-shop"></i>
+                Filialausgang
+            </a>
+        @endif
 
         @unless($isSales)
             <a class="premium-btn" href="{{ route('products.edit', $product) }}">
