@@ -119,11 +119,46 @@ class OfferController extends Controller
         return redirect()->route('offers.show', $offer)->with('success', 'Angebot ' . $offer->offer_number . ' wurde erstellt und Ware wurde reserviert.');
     }
 
-    public function edit(Offer $offer): View { if (! $this->canEdit($offer)) return redirect()->route('offers.show', $offer)->with('error', 'Erledigte, stornierte oder abgelaufene Angebote können nicht bearbeitet werden.'); $offer->load('items'); return view('pages.offers.edit', ['offer' => $offer, 'customers' => $this->customers(), 'products' => $this->products(), 'templates' => $this->templates(), 'formItems' => $offer->items->map(fn ($item) => ['product_id' => $item->product_id, 'quantity' => $item->quantity, 'line_total' => $item->line_total])->values()]); }
+    public function edit(Offer $offer): View
+    {
+        if (! $this->canEdit($offer)) {
+            return redirect()
+                ->route('offers.show', $offer)
+                ->with(
+                    'error',
+                    auth()->user()?->isSales() && $offer->status !== Offer::STATUS_OFFER
+                        ? 'Das Angebot wurde bereits an das Lager übergeben und kann vom Verkauf nicht mehr bearbeitet werden.'
+                        : 'Erledigte, stornierte oder abgelaufene Angebote können nicht bearbeitet werden.'
+                );
+        }
+
+        $offer->load('items');
+
+        return view('pages.offers.edit', [
+            'offer' => $offer,
+            'customers' => $this->customers(),
+            'products' => $this->products(),
+            'templates' => $this->templates(),
+            'formItems' => $offer->items->map(fn ($item) => [
+                'product_id' => $item->product_id,
+                'quantity' => $item->quantity,
+                'line_total' => $item->line_total,
+            ])->values(),
+        ]);
+    }
 
     public function update(Request $request, Offer $offer): RedirectResponse
     {
-        if (! $this->canEdit($offer)) return redirect()->route('offers.show', $offer)->with('error', 'Dieses Angebot kann nicht mehr bearbeitet werden.');
+        if (! $this->canEdit($offer)) {
+            return redirect()
+                ->route('offers.show', $offer)
+                ->with(
+                    'error',
+                    auth()->user()?->isSales() && $offer->status !== Offer::STATUS_OFFER
+                        ? 'Das Angebot wurde bereits an das Lager übergeben und kann vom Verkauf nicht mehr bearbeitet werden.'
+                        : 'Dieses Angebot kann nicht mehr bearbeitet werden.'
+                );
+        }
         $data = $this->normalizeShippingData($this->validatedData($request)); $customer = Customer::with('group')->findOrFail($data['customer_id']); $cleanItems = $this->cleanItems($data['items']);
         if ($cleanItems->isEmpty()) return back()->withInput()->with('error', 'Bitte mindestens eine Produktposition mit einer Menge größer als 0 hinzufügen.');
         $prepared = $this->prepareItems($customer, $cleanItems, $offer); $total = collect($prepared)->sum('line_total');
@@ -132,7 +167,23 @@ class OfferController extends Controller
     }
 
     public function updateStatus(Request $request, Offer $offer): RedirectResponse { $data = $request->validate(['status' => ['required', 'string', 'in:' . implode(',', array_keys($this->statuses()))]]); $oldStatus = $offer->status; $offer->update(['status' => $data['status']]); ActivityLog::record('offer.status.updated', $offer, ['offer_number' => $offer->offer_number, 'old_status' => $oldStatus, 'new_status' => $offer->status]); return redirect()->route('offers.show', $offer)->with('success', 'Status wurde geändert.'); }
-    public function cancel(Offer $offer): RedirectResponse { if (! $offer->isReservationActive()) return redirect()->route('offers.index')->with('error', 'Dieses Angebot kann nicht storniert werden.'); $offer->update(['status' => Offer::STATUS_CANCELLED]); ActivityLog::record('offer.cancelled', $offer, ['offer_number' => $offer->offer_number]); return redirect()->route('offers.index')->with('success', 'Angebot wurde storniert. Die Reservierung wurde freigegeben.'); }
+    public function cancel(Offer $offer): RedirectResponse
+    {
+        if (auth()->user()?->isSales() && $offer->status !== Offer::STATUS_OFFER) {
+            return redirect()
+                ->route('offers.index')
+                ->with('error', 'Das Angebot wurde bereits an das Lager übergeben und kann vom Verkauf nicht mehr storniert werden.');
+        }
+
+        if (! $offer->isReservationActive()) {
+            return redirect()->route('offers.index')->with('error', 'Dieses Angebot kann nicht storniert werden.');
+        }
+
+        $offer->update(['status' => Offer::STATUS_CANCELLED]);
+        ActivityLog::record('offer.cancelled', $offer, ['offer_number' => $offer->offer_number]);
+
+        return redirect()->route('offers.index')->with('success', 'Angebot wurde storniert. Die Reservierung wurde freigegeben.');
+    }
 
     public function destroy(Offer $offer): RedirectResponse
     {
@@ -174,7 +225,18 @@ class OfferController extends Controller
 
     private function syncOfferItems(Offer $offer, array $prepared): void { foreach ($prepared as $item) $offer->items()->create($item); }
     private function reservedQuantityForProduct(int $productId, ?int $excludeOfferId = null): float { $offerReserved = (float) \App\Models\OfferItem::query()->where('product_id', $productId)->whereHas('offer', fn ($q) => $q->whereIn('status', Offer::RESERVING_STATUSES)->when($excludeOfferId, fn ($q2) => $q2->where('id', '!=', $excludeOfferId)))->sum('quantity'); $branchReserved = (float) \App\Models\BranchWithdrawalItem::query()->where('product_id', $productId)->whereHas('withdrawal', fn ($q) => $q->whereIn('status', BranchWithdrawal::RESERVING_STATUSES))->sum('quantity'); return $offerReserved + $branchReserved; }
-    private function canEdit(Offer $offer): bool { return ! $offer->isFinal(); }
+    private function canEdit(Offer $offer): bool
+    {
+        if ($offer->isFinal()) {
+            return false;
+        }
+
+        if (auth()->user()?->isSales()) {
+            return $offer->status === Offer::STATUS_OFFER;
+        }
+
+        return auth()->user()?->isManager() ?? false;
+    }
     private function customers(): Collection { return Customer::query()->with('group')->orderByRaw('LOWER(company_name) ASC')->get(); }
     private function products(): Collection { return Product::query()->with(['categories', 'priceTiers', 'manualPriceRules'])->naturalNameOrder()->get(); }
     private function templates(): array { return ['with_company' => 'Mit Firmendaten & Logo', 'without_company' => 'Ohne Firmendaten & Logo']; }
