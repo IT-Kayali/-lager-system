@@ -141,7 +141,7 @@ it('warehouse offer view contains only operational information and delivery note
         ->get(route('warehouse.offers.show', $offer))
         ->assertOk()
         ->assertSee('Lieferschein PDF')
-        ->assertSee('Nächster Lagerstatus')
+        ->assertSee('Lagerstatus')
         ->assertSee('Positionen vorbereiten')
         ->assertDontSee('Angebot PDF')
         ->assertDontSee('Rechnung PDF')
