@@ -31,6 +31,7 @@ class Customer extends Model
         'billing_address',
 
         'vat_number',
+        'delivery_note_instruction',
         'notes',
     ];
 
