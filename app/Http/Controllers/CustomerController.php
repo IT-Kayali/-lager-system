@@ -221,6 +221,7 @@ class CustomerController extends Controller
             'delivery_country' => ['nullable', 'string', 'max:255'],
             'delivery_address' => ['nullable', 'string', 'max:3000'],
             'vat_number' => ['nullable', 'string', 'max:255'],
+            'delivery_note_instruction' => ['nullable', 'string', 'max:1000'],
             'notes' => ['nullable', 'string', 'max:5000'],
         ]);
 
