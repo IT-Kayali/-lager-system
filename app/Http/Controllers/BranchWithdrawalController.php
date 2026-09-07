@@ -53,7 +53,12 @@ class BranchWithdrawalController extends Controller
     private function authorizeCreateAction(): void
     {
         $this->authorizeAccess();
-        abort_unless(auth()->user()?->isManager() || auth()->user()?->isSales(), 403);
+        abort_unless(
+            auth()->user()?->isManager()
+            || auth()->user()?->isSales()
+            || auth()->user()?->isWarehouse(),
+            403
+        );
     }
 
     private function indexRouteName(): string
@@ -136,7 +141,9 @@ class BranchWithdrawalController extends Controller
 
         $withdrawal = new BranchWithdrawal([
             'branch_name' => null,
-            'status' => BranchWithdrawal::STATUS_OPEN,
+            'status' => auth()->user()?->isWarehouse()
+                ? BranchWithdrawal::STATUS_IN_PROGRESS
+                : BranchWithdrawal::STATUS_OPEN,
         ]);
 
         $formItems = collect([
@@ -165,6 +172,15 @@ class BranchWithdrawalController extends Controller
             return back()
                 ->withInput()
                 ->with('error', 'Verkauf darf einen Filialausgang nur als Offen speichern oder an Lager mit „In Bearbeitung“ übergeben.');
+        }
+
+        if (
+            auth()->user()?->isWarehouse()
+            && ! in_array($data['status'], [BranchWithdrawal::STATUS_IN_PROGRESS, BranchWithdrawal::STATUS_ISSUED], true)
+        ) {
+            return back()
+                ->withInput()
+                ->with('error', 'Lager darf einen neuen Filialausgang nur als „In Bearbeitung“ oder „Ausgegeben“ anlegen.');
         }
 
         $createdWithdrawal = null;
