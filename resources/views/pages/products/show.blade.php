@@ -3,7 +3,9 @@
         $isSales = auth()->user()?->isSales();
         $productIndexRoute = $isSales ? 'sales.products.index' : 'products.index';
         $branchCreateRoute = $isSales ? 'sales.branch-withdrawals.create' : 'branch-withdrawals.create';
-        $canCreateBranchWithdrawal = $isSales || (auth()->user()?->isManager() ?? false);
+        $canCreateBranchWithdrawal = $isSales
+            || (auth()->user()?->isManager() ?? false)
+            || (auth()->user()?->isWarehouse() ?? false);
         $statusLabels = ['ok' => 'OK', 'low' => 'Niedrig', 'critical' => 'Kritisch'];
         $unitLabel = $product->unitLabel('de');
         $supplierName = $product->supplierRecord?->company_name ?: $product->supplier ?: '—';

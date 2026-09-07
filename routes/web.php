@@ -55,10 +55,10 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE)
         ->name('branch-withdrawals.index');
     Route::get('/branch-withdrawals/create', [\App\Http\Controllers\BranchWithdrawalController::class, 'create'])
-        ->middleware('role:' . User::ROLE_MANAGER)
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE)
         ->name('branch-withdrawals.create');
     Route::post('/branch-withdrawals', [\App\Http\Controllers\BranchWithdrawalController::class, 'store'])
-        ->middleware('role:' . User::ROLE_MANAGER)
+        ->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_WAREHOUSE)
         ->name('branch-withdrawals.store');
 
     Route::get('/offers', [OfferController::class, 'index'])->middleware('role:' . User::ROLE_MANAGER . ',' . User::ROLE_SALES)->name('offers.index');

@@ -58,7 +58,12 @@
                                 \App\Models\BranchWithdrawal::STATUS_OPEN => 'Offen',
                                 \App\Models\BranchWithdrawal::STATUS_IN_PROGRESS => 'In Bearbeitung',
                             ]
-                            : \App\Models\BranchWithdrawal::statusLabels();
+                            : (auth()->user()?->isWarehouse()
+                                ? [
+                                    \App\Models\BranchWithdrawal::STATUS_IN_PROGRESS => 'In Bearbeitung',
+                                    \App\Models\BranchWithdrawal::STATUS_ISSUED => 'Ausgegeben',
+                                ]
+                                : \App\Models\BranchWithdrawal::statusLabels());
                     @endphp
                     <select id="status" name="status" class="premium-select" data-sort="false" required>
                         @foreach ($statusOptions as $value => $label)

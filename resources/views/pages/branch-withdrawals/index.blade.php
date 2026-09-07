@@ -13,7 +13,7 @@
         $isManager = auth()->user()?->isManager();
         $isSales = auth()->user()?->isSales();
         $isWarehouse = auth()->user()?->isWarehouse();
-        $canCreate = $isManager || $isSales;
+        $canCreate = $isManager || $isSales || $isWarehouse;
         $createRoute = $isSales ? 'sales.branch-withdrawals.create' : 'branch-withdrawals.create';
         $indexRoute = $isSales ? 'sales.branch-withdrawals.index' : 'branch-withdrawals.index';
         $allStatusOptions = \App\Models\BranchWithdrawal::statusLabels();

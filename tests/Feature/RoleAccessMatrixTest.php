@@ -72,10 +72,11 @@ it('limits crm to customer care without customer detail or delete access', funct
         ->assertForbidden();
 });
 
-it('does not allow warehouse to open the branch withdrawal create route', function () {
+it('allows warehouse to open the branch withdrawal create route', function () {
     $this->actingAs($this->warehouse)
         ->get(route('branch-withdrawals.create'))
-        ->assertForbidden();
+        ->assertOk()
+        ->assertSee('Filialausgang erstellen');
 });
 
 it('restricts internal offer notes to manager sales and warehouse', function () {
