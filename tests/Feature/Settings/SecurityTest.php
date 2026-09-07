@@ -46,9 +46,13 @@ test('password can be updated', function () {
         ->set('password_confirmation', 'new-password')
         ->call('updatePassword');
 
-    $response->assertHasNoErrors();
+    $response
+        ->assertHasNoErrors()
+        ->assertRedirect(route('login'));
 
     expect(Hash::check('new-password', $user->refresh()->password))->toBeTrue();
+
+    $this->assertGuest();
 });
 
 test('correct password must be provided to update password', function () {

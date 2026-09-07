@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
 use App\Models\User;
+use App\Services\UserSessionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -55,7 +56,11 @@ class SystemUserController extends Controller
         ]);
     }
 
-    public function update(Request $request, User $user): RedirectResponse
+    public function update(
+        Request $request,
+        User $user,
+        UserSessionService $userSessions
+    ): RedirectResponse
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -86,7 +91,17 @@ class SystemUserController extends Controller
         $oldRole = $user->role;
         $oldActive = $user->is_active;
 
+        $passwordChanged = array_key_exists('password', $data);
+        $roleChanged = $oldRole !== $data['role'];
+        $activeChanged = (bool) $oldActive !== (bool) $data['is_active'];
+
         $user->update($data);
+
+        $sessionsRevoked = $passwordChanged || $roleChanged || $activeChanged;
+
+        if ($sessionsRevoked) {
+            $userSessions->revoke($user);
+        }
 
         ActivityLog::record('user.updated', $user, [
             'email' => $user->email,
@@ -94,6 +109,7 @@ class SystemUserController extends Controller
             'new_role' => $user->role,
             'old_active' => $oldActive,
             'new_active' => $user->is_active,
+            'sessions_revoked' => $sessionsRevoked,
         ]);
 
         return redirect()
@@ -101,7 +117,10 @@ class SystemUserController extends Controller
             ->with('success', 'Benutzer wurde aktualisiert.');
     }
 
-    public function destroy(User $user): RedirectResponse
+    public function destroy(
+        User $user,
+        UserSessionService $userSessions
+    ): RedirectResponse
     {
         if ($user->id === auth()->id()) {
             return redirect()
@@ -117,6 +136,8 @@ class SystemUserController extends Controller
 
         $email = $user->email;
         $role = $user->role;
+
+        $userSessions->revoke($user);
 
         ActivityLog::record('user.deleted', $user, [
             'email' => $email,
