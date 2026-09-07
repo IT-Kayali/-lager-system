@@ -298,6 +298,153 @@ Die Produkt- und Chargensortierung unterstützt auch numerisch benannte Produkte
 - Aktivitätsprotokoll für wichtige Vorgänge
 - Passwörter werden über Laravel gehasht
 - sensible Umgebungsdaten liegen außerhalb des Repositories
+- starke Passwortregeln für administrativ vergebene Passwörter in Produktion
+- deaktivierte Benutzer können sich nicht anmelden
+- bestehende Sitzungen werden bei Deaktivierung, Rollenwechsel und Passwortänderung widerrufen
+- Remember-Tokens werden bei sicherheitsrelevanten Benutzeränderungen ungültig gemacht
+- eigene Passwortänderung beendet die aktuelle Sitzung und führt zurück zum Login
+- eigener Benutzer kann nicht über die Benutzerverwaltung deaktiviert oder gelöscht werden
+- HTTPS ist für die Produktions-IP aktiv
+- normale HTTP-Anfragen werden dauerhaft auf HTTPS umgeleitet
+- Session-Cookies werden in Produktion mit dem Secure-Flag ausgeliefert
+- automatische Zertifikatserneuerung ist eingerichtet und getestet
+
+## Security-Hardening-Status
+
+Stand: **07.09.2026**
+
+Die Security-Arbeiten werden bewusst in getrennten Phasen mit Sicherungen, isolierten Tests und Rückfallpunkten durchgeführt. Ziel ist, Sicherheitsverbesserungen ohne unnötige Unterbrechung des Produktionssystems einzuführen.
+
+### Phase 1 – Security Baseline ✅ abgeschlossen
+
+Umgesetzt und über Pull Request **#86** ausgerollt:
+
+- starke Passwortanforderungen für administrativ vergebene Passwörter in Produktion
+- Selbstlöschung des aktuell angemeldeten Benutzers aus UI und Backend entfernt
+- technische Exception-Details in ausgewählten Benutzerpfaden durch generische Fehlermeldungen ersetzt
+- tatsächliche Exceptions werden weiterhin intern gemeldet
+- zusätzliche Tests für die geänderten Sicherheitsregeln
+- Linter und Test-Suite erfolgreich
+
+### Phase 2 – Session- und Benutzer-Härtung ✅ abgeschlossen
+
+Umgesetzt und über Pull Request **#87** ausgerollt:
+
+- deaktivierte Benutzer werden bereits beim Login abgewiesen
+- bereits angemeldete, später deaktivierte Benutzer verlieren ihre Sitzung
+- Rollenänderung widerruft bestehende Sitzungen des betroffenen Benutzers
+- Passwortänderung durch Admin widerruft bestehende Sitzungen
+- Deaktivierung widerruft bestehende Sitzungen
+- Benutzerlöschung widerruft Sitzungen vor der Löschung
+- Remember-Token wird bei Session-Widerruf invalidiert
+- eigene Passwortänderung meldet den Benutzer anschließend ab
+- Benutzerformular zeigt einen eindeutigen Status **Aktiv / Deaktiviert**
+- eigener Benutzer kann nicht deaktiviert werden
+- Tests für Login-Sperre, Session-Widerruf und Security-UI ergänzt
+- Linter und Test-Suite erfolgreich
+
+### Phase 3 – HTTPS / TLS ✅ abgeschlossen
+
+Die HTTPS-Umstellung wurde absichtlich mehrstufig durchgeführt, damit HTTP während der Vorbereitung weiter funktionierte und jederzeit ein Rückfall möglich blieb.
+
+Umgesetzter Produktionsstand:
+
+- vollständige Nginx- und Laravel-Sicherungen vor den einzelnen Umschaltpunkten
+- Let’s-Encrypt-Zertifikat direkt für die öffentliche IP **217.154.248.134**
+- Certbot **5.8.0**
+- ACME-Verfahren über **webroot**
+- zuerst erfolgreicher Let’s-Encrypt-Staging-Test
+- danach echtes öffentlich vertrauenswürdiges Zertifikat
+- HTTPS zunächst parallel zu HTTP auf Port 443 aktiviert und separat getestet
+- Laravel anschließend auf `APP_URL=https://217.154.248.134` umgestellt
+- `SESSION_SECURE_COOKIE=true`
+- HTTP wird dauerhaft mit **308** auf HTTPS umgeleitet
+- ACME-Challenges unter `/.well-known/acme-challenge/` bleiben direkt über HTTP erreichbar
+- TLS-Zertifikatsprüfung erfolgreich (`ssl_verify_result = 0`)
+- Certbot-Snap-Renewal-Timer ist aktiviert
+- Deploy-Hook prüft vor dem Reload zuerst `nginx -t` und lädt Nginx anschließend graceful neu
+- `certbot renew --dry-run --run-deploy-hooks` erfolgreich getestet
+- Nginx und PHP-FPM blieben während der Umstellung aktiv
+
+Wichtig: Das eingesetzte IP-Zertifikat verwendet das Let’s-Encrypt-Profil **shortlived**. Die automatische Erneuerung ist deshalb Bestandteil des Betriebs und darf nicht entfernt werden.
+
+### Phase 4 – Security Header / CSP 🔄 als Nächstes
+
+Bestandsaufnahme am 07.09.2026:
+
+- HTTPS funktioniert
+- Session-Cookies besitzen das Secure-Flag
+- aktuell werden noch keine zusätzlichen Security-Header wie HSTS, CSP, X-Content-Type-Options, X-Frame-Options, Referrer-Policy oder Permissions-Policy ausgeliefert
+- Nginx gibt aktuell seine Server-Version über den `Server`-Header preis
+- Statistik lädt Chart.js aktuell über `https://cdn.jsdelivr.net/npm/chart.js`
+- im Projekt existieren Inline-/Data-SVG-Ressourcen
+- deshalb darf eine Content-Security-Policy nicht blind scharf aktiviert werden
+
+Geplanter Ablauf:
+
+1. Sicherung des aktuellen Nginx-/Laravel-Zustands
+2. risikoarme Header einzeln hinzufügen und testen
+3. unnötige Server-Versionsinformationen reduzieren
+4. HSTS zunächst konservativ ohne `includeSubDomains` und ohne `preload` bewerten
+5. CSP zuerst als **Content-Security-Policy-Report-Only** vorbereiten
+6. Livewire, Vite, Formulare, Dropdowns, Statistik, PDFs und Downloads prüfen
+7. erst nach erfolgreicher Prüfung CSP schrittweise erzwingen
+8. nach jeder Änderung `nginx -t`, graceful reload und Funktionsprüfung
+
+### Phase 5 – Anwendungssicherheit / Authentifizierung ⏳ geplant
+
+Vorgesehene Prüfpunkte:
+
+- Änderung der eigenen E-Mail-Adresse zusätzlich absichern
+- bestehende 2FA-Oberfläche mit der tatsächlich aktivierten Fortify-Konfiguration abgleichen
+- Rollen und Berechtigungen erneut nach Least-Privilege-Prinzip prüfen
+- sensible Aktionen auf zusätzliche Rate-Limits prüfen
+- sicherheitsrelevante Benutzeraktionen und Session-Ereignisse im Aktivitätsprotokoll bewerten
+- Regressionstests für direkte URLs und Rollenwechsel erweitern
+
+### Phase 6 – Uploads, Excel, Export und PDF ⏳ geplant
+
+Vorgesehene Prüfpunkte:
+
+- Größenlimits und Ressourcenschutz für Excel-Importe
+- Dateityp- und Inhaltsvalidierung für Uploads
+- Schutz vor CSV-/Excel-Formula-Injection bei Exporten
+- Rate-Limits für ressourcenintensive PDF-/Export-Funktionen
+- Fehlerbehandlung bei großen oder ungültigen Importdateien
+- Upload-Verzeichnisse und öffentliche Dateiberechtigungen prüfen
+
+### Phase 7 – Betrieb, Backup und Wiederherstellung ⏳ geplant
+
+Vorgesehene Prüfpunkte:
+
+- automatisierte Datenbank- und Dateisicherungen
+- zusätzliche/offsite Sicherung prüfen
+- Wiederherstellung aus einem Backup praktisch testen
+- Nginx-/TLS-Betriebskonfiguration dokumentieren
+- nicht benötigte historische Backup-Dateien im Repository bereinigen
+- Dependency-/Security-Scanning für Composer und npm bewerten
+- regelmäßige Prüfung der Zertifikatserneuerung und des Deploy-Hooks
+
+### Bekannter technischer Punkt für neue Installationen
+
+Die bestehende Produktionsdatenbank ist davon nicht betroffen. Bei einer komplett neuen Datenbank wurde jedoch eine historische Migrationsreihenfolge erkannt, bei der einzelne Fremdschlüssel auf Tabellen verweisen, deren Migration zeitlich später eingeordnet ist. Bis dies separat bereinigt ist, muss ein frischer Deployment-Test besonders kontrolliert durchgeführt werden.
+
+## Sicherheitsprinzip für Produktionsänderungen
+
+Für sicherheitsrelevante Produktionsänderungen gilt:
+
+```text
+Ist-Zustand prüfen
+  → Sicherung / Rückfallpunkt
+  → Änderung möglichst isoliert vorbereiten
+  → Syntax-/Konfigurationsprüfung
+  → graceful reload statt unnötigem Neustart
+  → technischer Test
+  → manueller Funktionstest
+  → erst danach dauerhafte Aktivierung
+```
+
+Produktionsstabilität und Wiederherstellbarkeit haben während der Security-Härtung die gleiche Priorität wie die eigentliche Sicherheitsmaßnahme.
 
 ## Tech Stack
 
