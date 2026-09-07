@@ -4,6 +4,7 @@ use App\Concerns\PasswordValidationRules;
 use App\Services\UserSessionService;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
 use Laravel\Fortify\Features;
@@ -102,8 +103,8 @@ new #[Title('Security settings')] class extends Component {
 
         Auth::guard('web')->logout();
 
-        request()->session()->invalidate();
-        request()->session()->regenerateToken();
+        Session::invalidate();
+        Session::regenerateToken();
 
         $this->reset('current_password', 'password', 'password_confirmation');
 
