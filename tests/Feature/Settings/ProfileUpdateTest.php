@@ -43,7 +43,16 @@ test('email verification status is unchanged when email address is unchanged', f
     expect($user->refresh()->email_verified_at)->not->toBeNull();
 });
 
-test('user can delete their account', function () {
+test('profile does not expose account self deletion', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->get(route('profile.edit'))
+        ->assertOk()
+        ->assertDontSee(__('Delete account'));
+});
+
+test('self deletion component does not delete the user', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user);
@@ -52,24 +61,8 @@ test('user can delete their account', function () {
         ->set('password', 'password')
         ->call('deleteUser');
 
-    $response
-        ->assertHasNoErrors()
-        ->assertRedirect('/');
-
-    expect($user->fresh())->toBeNull();
-    expect(auth()->check())->toBeFalse();
-});
-
-test('correct password must be provided to delete account', function () {
-    $user = User::factory()->create();
-
-    $this->actingAs($user);
-
-    $response = Livewire::test('pages::settings.delete-user-modal')
-        ->set('password', 'wrong-password')
-        ->call('deleteUser');
-
     $response->assertHasErrors(['password']);
 
     expect($user->fresh())->not->toBeNull();
+    expect(auth()->check())->toBeTrue();
 });

@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 class SystemUserController extends Controller
@@ -29,7 +30,7 @@ class SystemUserController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'role' => ['required', Rule::in(array_keys($this->roles()))],
             'is_active' => ['nullable', 'boolean'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', Password::default(), 'confirmed'],
         ]);
 
         $data['is_active'] = $request->boolean('is_active');
@@ -61,7 +62,7 @@ class SystemUserController extends Controller
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'role' => ['required', Rule::in(array_keys($this->roles()))],
             'is_active' => ['nullable', 'boolean'],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'password' => ['nullable', 'string', Password::default(), 'confirmed'],
         ]);
 
         $data['is_active'] = $request->boolean('is_active');
