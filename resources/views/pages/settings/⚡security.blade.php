@@ -1,8 +1,10 @@
 <?php
 
 use App\Concerns\PasswordValidationRules;
+use App\Services\UserSessionService;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
 use Laravel\Fortify\Features;
@@ -78,7 +80,7 @@ new #[Title('Security settings')] class extends Component {
     /**
      * Update the password for the currently authenticated user.
      */
-    public function updatePassword(): void
+    public function updatePassword(UserSessionService $userSessions): void
     {
         try {
             $validated = $this->validate([
@@ -91,13 +93,22 @@ new #[Title('Security settings')] class extends Component {
             throw $e;
         }
 
-        Auth::user()->update([
+        $user = Auth::user();
+
+        $user->update([
             'password' => $validated['password'],
         ]);
 
+        $userSessions->revoke($user);
+
+        Auth::guard('web')->logout();
+
+        Session::invalidate();
+        Session::regenerateToken();
+
         $this->reset('current_password', 'password', 'password_confirmation');
 
-        Flux::toast(variant: 'success', text: __('Password updated.'));
+        $this->redirect(route('login'), navigate: true);
     }
 
     /* @chisel-passkeys */
