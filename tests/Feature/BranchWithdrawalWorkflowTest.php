@@ -64,6 +64,49 @@ it('creates an open branch withdrawal with multiple products and an optional not
         ->and((float) $secondBatch->fresh()->quantity)->toBe(20.0);
 });
 
+it('allows warehouse to create a branch withdrawal in progress', function () {
+    [$product, $batch] = branchProduct('Lager Filialprodukt', 12);
+
+    $this->actingAs($this->warehouse)
+        ->post(route('branch-withdrawals.store'), [
+            'branch_name' => BranchWithdrawal::BRANCH_MAIN,
+            'status' => BranchWithdrawal::STATUS_IN_PROGRESS,
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 4],
+            ],
+        ])
+        ->assertRedirect(route('branch-withdrawals.index'));
+
+    $withdrawal = BranchWithdrawal::query()->firstOrFail();
+
+    expect($withdrawal->status)->toBe(BranchWithdrawal::STATUS_IN_PROGRESS)
+        ->and($withdrawal->user_id)->toBe($this->warehouse->id)
+        ->and((float) $batch->fresh()->quantity)->toBe(12.0);
+
+    $this->actingAs($this->warehouse)
+        ->get(route('branch-withdrawals.index'))
+        ->assertOk()
+        ->assertSee($withdrawal->withdrawal_number);
+});
+
+it('prevents warehouse from creating an open branch withdrawal', function () {
+    [$product] = branchProduct('Lager Statusschutz Produkt', 12);
+
+    $this->actingAs($this->warehouse)
+        ->from(route('branch-withdrawals.create'))
+        ->post(route('branch-withdrawals.store'), [
+            'branch_name' => BranchWithdrawal::BRANCH_MAIN,
+            'status' => BranchWithdrawal::STATUS_OPEN,
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 4],
+            ],
+        ])
+        ->assertRedirect(route('branch-withdrawals.create'))
+        ->assertSessionHas('error');
+
+    expect(BranchWithdrawal::query()->count())->toBe(0);
+});
+
 it('deducts all products by fifo when warehouse changes the status to issued', function () {
     [$product, $batch] = branchProduct('FIFO Filialprodukt', 10);
 
