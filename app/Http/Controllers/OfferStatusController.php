@@ -77,9 +77,11 @@ class OfferStatusController extends Controller
                 ->route('offers.show', $offer)
                 ->with('success', 'Status wurde geändert.');
         } catch (\Throwable $exception) {
+            report($exception);
+
             return redirect()
                 ->route('offers.show', $offer)
-                ->with('error', $exception->getMessage());
+                ->with('error', 'Der Vorgang konnte nicht abgeschlossen werden. Bitte erneut versuchen oder einen Administrator kontaktieren.');
         }
     }
 

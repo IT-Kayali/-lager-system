@@ -133,7 +133,11 @@ class WarehouseOfferController extends Controller
 
             return redirect()->route('warehouse.offers.show', $offer)->with('success', 'Status wurde geändert.');
         } catch (\Throwable $exception) {
-            return redirect()->route('warehouse.offers.show', $offer)->with('error', $exception->getMessage());
+            report($exception);
+
+            return redirect()
+                ->route('warehouse.offers.show', $offer)
+                ->with('error', 'Der Vorgang konnte nicht abgeschlossen werden. Bitte erneut versuchen oder einen Administrator kontaktieren.');
         }
     }
 

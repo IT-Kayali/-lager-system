@@ -296,7 +296,7 @@ class ProductExcelController extends Controller
 
             return back()
                 ->withInput()
-                ->with('error', 'Import fehlgeschlagen: ' . $exception->getMessage());
+                ->with('error', 'Der Excel-Import konnte nicht abgeschlossen werden. Bitte die Datei prüfen oder einen Administrator kontaktieren.');
         }
 
         return redirect()
