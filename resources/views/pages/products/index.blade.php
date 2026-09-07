@@ -4,7 +4,9 @@
         $productIndexRoute = $isSales ? 'sales.products.index' : 'products.index';
         $productShowRoute = $isSales ? 'sales.products.show' : 'products.show';
         $branchCreateRoute = $isSales ? 'sales.branch-withdrawals.create' : 'branch-withdrawals.create';
-        $canCreateBranchWithdrawal = $isSales || (auth()->user()?->isManager() ?? false);
+        $canCreateBranchWithdrawal = $isSales
+            || (auth()->user()?->isManager() ?? false)
+            || (auth()->user()?->isWarehouse() ?? false);
     @endphp
 
     <section class="products-page-actions erp-list-toolbar">
