@@ -102,3 +102,16 @@ it('contains the active filter dimensions in the simplified statistics view', fu
         ->toContain('name="date_from"')
         ->toContain('name="date_to"');
 });
+
+
+it('loads chart js from the local vite bundle instead of a public cdn', function () {
+    $view = file_get_contents(resource_path('views/pages/statistics/index.blade.php'));
+    $app = file_get_contents(resource_path('js/app.js'));
+
+    expect($view)
+        ->not->toContain('cdn.jsdelivr.net/npm/chart.js');
+
+    expect($app)
+        ->toContain("import Chart from 'chart.js/auto';")
+        ->toContain('window.Chart = Chart;');
+});
