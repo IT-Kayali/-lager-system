@@ -495,6 +495,21 @@ Am 08.09.2026 produktiv aktiviert und anschließend manuell bestätigt:
 - nach dem Pilot wurden keine echten neuen CSP-Verstöße der Anwendung protokolliert; der neue `blocked.invalid/phase4e.js`-Eintrag war ein absichtlicher Test
 - Login, Formulare und die zentralen Lager-Funktionen wurden anschließend manuell produktiv geprüft und als funktionierend bestätigt
 
+#### Phase 4E.2 – `connect-src 'self'` im Enforcement ✅ abgeschlossen
+
+Am 08.09.2026 produktiv aktiviert und manuell bestätigt:
+
+- die bestehende scharfe CSP wurde um `connect-src 'self'` erweitert
+- damit dürfen Browser-Verbindungen wie `fetch`, Livewire-/AJAX-Aufrufe und vergleichbare Verbindungen nur noch zum eigenen Origin aufgebaut werden
+- die vollständige Ressourcen-Policy bleibt parallel weiterhin als `Content-Security-Policy-Report-Only` aktiv
+- Script-, Style-, Bild-, Font-, Frame-, Media-, Worker- und Manifest-Regeln bleiben weiterhin Report-Only
+- vor der Aktivierung wurde erneut ein eigener Rollback-Punkt der Phase 4 angelegt
+- Nginx wurde ausschließlich per graceful Reload neu geladen
+- HTTPS/TLS, HTTP-zu-HTTPS-Weiterleitung, ACME und CSP-Report-Endpunkt blieben funktionsfähig
+- nach dem manuellen Live-Test wurde kein echter neuer `connect-src`-Verstoß der Anwendung protokolliert
+- der Eintrag `https://blocked.invalid/phase4e2-connect` war ein absichtlicher Test des Report-Endpunkts
+- zentrale JavaScript-/AJAX-Funktionen und die Lageroberfläche wurden anschließend produktiv als funktionierend bestätigt
+
 Weiterer geplanter Ablauf:
 
 1. die kombinierte Enforcement-/Report-Only-Konfiguration unter normaler Nutzung weiter beobachten
