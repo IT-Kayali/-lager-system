@@ -311,10 +311,14 @@ Die Produkt- und Chargensortierung unterstützt auch numerisch benannte Produkte
 - Nginx-Produktversionsnummer wird im HTTP-Header nicht mehr offengelegt
 - `X-Content-Type-Options: nosniff` ist aktiv
 - `Referrer-Policy: strict-origin-when-cross-origin` ist aktiv
+- `X-Frame-Options: SAMEORIGIN` ist aktiv
+- konservative `Permissions-Policy` für Kamera, Mikrofon, Geolocation, Payment und USB ist aktiv
+- persönliche Seite **Mein Konto & Sicherheit** nutzt das Premium-Layout
+- Benutzer-Bearbeitung nutzt das Premium-Layout mit deutlich sichtbarem Aktiv/Deaktiviert-Status
 
 ## Security-Hardening-Status
 
-Stand: **07.09.2026**
+Stand: **08.09.2026**
 
 Die Security-Arbeiten werden bewusst in getrennten Phasen mit Sicherungen, isolierten Tests und Rückfallpunkten durchgeführt. Ziel ist, Sicherheitsverbesserungen ohne unnötige Unterbrechung des Produktionssystems einzuführen.
 
@@ -397,21 +401,48 @@ Am 08.09.2026 produktiv aktiviert und manuell geprüft:
 - nur graceful Nginx-Reload, kein unnötiger Dienst- oder Serverneustart
 - Login, Dashboard, Statistik, Angebote, Filialausgänge, Benutzerverwaltung und PDF-Funktionen manuell geprüft
 
+#### Phase 4B – Frame-Schutz & Permissions-Policy ✅ abgeschlossen
+
+Am 08.09.2026 produktiv aktiviert und manuell geprüft:
+
+- `X-Frame-Options: SAMEORIGIN` aktiviert
+- konservative `Permissions-Policy` aktiviert:
+  - `camera=()`
+  - `microphone=()`
+  - `geolocation=()`
+  - `payment=()`
+  - `usb=()`
+- Clipboard wurde bewusst nicht gesperrt
+- HTTPS, TLS, HTTP→HTTPS-Redirect und ACME-Challenge nach der Änderung technisch geprüft
+- Nginx-Konfiguration vor Reload mit `nginx -t` validiert
+- nur graceful Nginx-Reload, kein unnötiger Dienst- oder Serverneustart
+- Browser-Funktionstest erfolgreich
+
+Zusätzlich wurde die Sicherheitsoberfläche konsolidiert:
+
+- persönliche Seite **Mein Konto & Sicherheit** in das Alowidat-Premium-Layout integriert
+- alte Laravel-Starter-Kit-Navigation auf der Sicherheitsseite entfernt
+- direkter Sidebar-Link **Mein Konto** ergänzt
+- Benutzer-Bearbeitung komplett in das helle Premium-Layout überführt
+- Aktiv/Deaktiviert-Status bleibt ausdrücklich sichtbar und bearbeitbar
+- optionaler Passwortwechsel bleibt erhalten
+- bestehender Session-Widerruf bei Status-, Rollen- und Passwortänderungen bleibt unverändert
+- globales Login-CSS wurde auf die echte Login-Seite begrenzt, damit Sicherheitsformulare nicht mehr fälschlich im dunklen Login-Stil dargestellt werden
+- Linter und Test-Suite erfolgreich
+- Live-Funktionstest erfolgreich
+
 Noch **nicht** aktiviert:
 
 - HSTS
 - Content-Security-Policy
-- X-Frame-Options / Frame-Schutz
-- Permissions-Policy
 
 Weiterer geplanter Ablauf:
 
-1. Frame-Schutz und konservative Permissions-Policy separat mit eigenem Rückfallpunkt einführen
-2. HSTS anschließend separat und zunächst ohne `includeSubDomains` / `preload` bewerten
-3. CSP zuerst als **Content-Security-Policy-Report-Only** vorbereiten
-4. Livewire, Vite, Formulare, Dropdowns, Statistik, PDFs und Downloads unter CSP beobachten
-5. erst nach erfolgreicher Prüfung CSP schrittweise erzwingen
-6. nach jeder Änderung `nginx -t`, graceful reload und Funktionsprüfung
+1. HSTS separat und zunächst konservativ ohne `includeSubDomains` / `preload` bewerten
+2. CSP zuerst als **Content-Security-Policy-Report-Only** vorbereiten
+3. Livewire, Vite, Formulare, Dropdowns, Statistik, PDFs und Downloads unter CSP beobachten
+4. erst nach erfolgreicher Prüfung CSP schrittweise erzwingen
+5. nach jeder Änderung `nginx -t`, graceful reload und Funktionsprüfung
 
 ### Phase 5 – Anwendungssicherheit / Authentifizierung ⏳ geplant
 
