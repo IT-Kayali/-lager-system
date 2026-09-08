@@ -308,6 +308,9 @@ Die Produkt- und Chargensortierung unterstützt auch numerisch benannte Produkte
 - normale HTTP-Anfragen werden dauerhaft auf HTTPS umgeleitet
 - Session-Cookies werden in Produktion mit dem Secure-Flag ausgeliefert
 - automatische Zertifikatserneuerung ist eingerichtet und getestet
+- Nginx-Produktversionsnummer wird im HTTP-Header nicht mehr offengelegt
+- `X-Content-Type-Options: nosniff` ist aktiv
+- `Referrer-Policy: strict-origin-when-cross-origin` ist aktiv
 
 ## Security-Hardening-Status
 
@@ -368,28 +371,47 @@ Umgesetzter Produktionsstand:
 
 Wichtig: Das eingesetzte IP-Zertifikat verwendet das Let’s-Encrypt-Profil **shortlived**. Die automatische Erneuerung ist deshalb Bestandteil des Betriebs und darf nicht entfernt werden.
 
-### Phase 4 – Security Header / CSP 🔄 als Nächstes
+### Phase 4 – Security Header / CSP 🔄 in Arbeit
 
 Bestandsaufnahme am 07.09.2026:
 
 - HTTPS funktioniert
 - Session-Cookies besitzen das Secure-Flag
-- aktuell werden noch keine zusätzlichen Security-Header wie HSTS, CSP, X-Content-Type-Options, X-Frame-Options, Referrer-Policy oder Permissions-Policy ausgeliefert
-- Nginx gibt aktuell seine Server-Version über den `Server`-Header preis
+- zu Beginn wurden noch keine zusätzlichen Security-Header wie HSTS, CSP, X-Content-Type-Options, X-Frame-Options, Referrer-Policy oder Permissions-Policy ausgeliefert
+- Nginx gab zu Beginn seine konkrete Server-Version über den `Server`-Header preis
 - Statistik lädt Chart.js aktuell über `https://cdn.jsdelivr.net/npm/chart.js`
 - im Projekt existieren Inline-/Data-SVG-Ressourcen
 - deshalb darf eine Content-Security-Policy nicht blind scharf aktiviert werden
 
-Geplanter Ablauf:
+#### Phase 4A – risikoarme Basis-Header ✅ abgeschlossen
 
-1. Sicherung des aktuellen Nginx-/Laravel-Zustands
-2. risikoarme Header einzeln hinzufügen und testen
-3. unnötige Server-Versionsinformationen reduzieren
-4. HSTS zunächst konservativ ohne `includeSubDomains` und ohne `preload` bewerten
-5. CSP zuerst als **Content-Security-Policy-Report-Only** vorbereiten
-6. Livewire, Vite, Formulare, Dropdowns, Statistik, PDFs und Downloads prüfen
-7. erst nach erfolgreicher Prüfung CSP schrittweise erzwingen
-8. nach jeder Änderung `nginx -t`, graceful reload und Funktionsprüfung
+Am 08.09.2026 produktiv aktiviert und manuell geprüft:
+
+- vor der Änderung vollständige Nginx-/Laravel-Sicherung als Rückfallpunkt erstellt
+- `server_tokens off` aktiviert
+- der `Server`-Header enthält keine konkrete Nginx-Version mehr
+- `X-Content-Type-Options: nosniff` aktiviert
+- `Referrer-Policy: strict-origin-when-cross-origin` aktiviert
+- HTTPS, TLS, HTTP→HTTPS-Redirect und ACME-Challenge nach der Änderung technisch geprüft
+- Nginx-Konfiguration vor Reload mit `nginx -t` validiert
+- nur graceful Nginx-Reload, kein unnötiger Dienst- oder Serverneustart
+- Login, Dashboard, Statistik, Angebote, Filialausgänge, Benutzerverwaltung und PDF-Funktionen manuell geprüft
+
+Noch **nicht** aktiviert:
+
+- HSTS
+- Content-Security-Policy
+- X-Frame-Options / Frame-Schutz
+- Permissions-Policy
+
+Weiterer geplanter Ablauf:
+
+1. Frame-Schutz und konservative Permissions-Policy separat mit eigenem Rückfallpunkt einführen
+2. HSTS anschließend separat und zunächst ohne `includeSubDomains` / `preload` bewerten
+3. CSP zuerst als **Content-Security-Policy-Report-Only** vorbereiten
+4. Livewire, Vite, Formulare, Dropdowns, Statistik, PDFs und Downloads unter CSP beobachten
+5. erst nach erfolgreicher Prüfung CSP schrittweise erzwingen
+6. nach jeder Änderung `nginx -t`, graceful reload und Funktionsprüfung
 
 ### Phase 5 – Anwendungssicherheit / Authentifizierung ⏳ geplant
 
