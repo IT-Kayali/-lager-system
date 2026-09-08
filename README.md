@@ -450,16 +450,23 @@ Am 08.09.2026 produktiv aktiviert und technisch sowie im Browser geprüft:
 
 HSTS wird vorerst zurückgestellt, solange die Anwendung ausschließlich über die IP-Adresse betrieben wird. Eine spätere Domain-Einführung ist der passende Zeitpunkt für eine erneute HSTS-Bewertung.
 
-#### Phase 4D – externe Frontend-Abhängigkeiten reduzieren 🔄 in Arbeit
+#### Phase 4D – externe Frontend-Abhängigkeiten reduzieren ✅ abgeschlossen
 
-Nächster CSP-Härtungsschritt:
+Am 08.09.2026 produktiv umgesetzt und geprüft:
 
-- Chart.js ist bereits als npm-Abhängigkeit vorhanden und wird in `resources/js/app.js` über Vite gebündelt
-- der zusätzliche Chart.js-Aufruf über `cdn.jsdelivr.net` wird entfernt
-- Statistik verwendet danach ausschließlich das lokale Vite-Bundle
-- danach wird die Report-Only-Policy ohne externe Chart.js-Freigabe erneut geprüft
-- eine scharfe CSP wird erst nach erneutem Browser- und Funktionscheck vorbereitet
-- `unsafe-inline` bleibt vorerst erhalten, weil noch zahlreiche Inline-Scripts/-Styles im Projekt existieren
+- Chart.js wird ausschließlich aus dem lokalen Vite-Bundle geladen
+- der zusätzliche externe Aufruf über `https://cdn.jsdelivr.net/npm/chart.js` wurde entfernt
+- Statistik und Diagramm **Umsatzentwicklung** funktionieren weiterhin
+- Browser-Netzwerkanalyse mit Filter `jsdelivr` blieb leer
+- die externe Freigabe `https://cdn.jsdelivr.net` wurde anschließend aus `script-src` der CSP-Report-Only-Policy entfernt
+- die CSP bleibt weiterhin **Report-Only** und blockiert noch keine Ressourcen
+- CSP-Reporting blieb funktionsfähig
+- nach der Änderung wurden keine neuen echten Anwendungs-Verstöße gemeldet
+- der einzige neue Eintrag war der absichtlich erzeugte Test-Report `https://blocked.invalid/phase4d1.js`
+- Nginx-Konfiguration wurde vor Aktivierung mit `nginx -t` geprüft
+- nur graceful Nginx-Reload, kein unnötiger Neustart
+- Preview-Worktree und temporärer Read-only-Datenbankbenutzer wurden nach erfolgreicher Live-Prüfung vollständig entfernt
+- `unsafe-inline` bleibt vorerst erhalten, weil im Projekt noch zahlreiche Inline-Scripts und Inline-Styles existieren
 
 Noch **nicht** aktiviert:
 
@@ -468,11 +475,11 @@ Noch **nicht** aktiviert:
 
 Weiterer geplanter Ablauf:
 
-1. Chart.js vollständig lokal ausliefern und Statistik prüfen
-2. externe Script-Freigaben in der CSP reduzieren
-3. CSP weiterhin unter normaler Nutzung beobachten
-4. anschließend einen kontrollierten Enforcement-Pilot mit eigenem Backup und sofortigem Rollback vorbereiten
-5. langfristig Inline-Scripts/-Styles in Vite-Dateien auslagern bzw. Nonces/Hashes bewerten
+1. CSP Report-Only unter normaler Nutzung weiter beobachten
+2. kontrollierten Enforcement-Pilot mit eigenem Backup und sofortigem Rollback vorbereiten
+3. zuerst nur Regeln erzwingen, die im aktuellen Betrieb bereits nachweislich sauber sind
+4. `unsafe-inline` später schrittweise durch ausgelagerte Vite-Dateien, Nonces oder Hashes reduzieren
+5. HSTS erst bei späterer Domain-Nutzung erneut bewerten
 
 ### Phase 5 – Anwendungssicherheit / Authentifizierung ⏳ geplant
 
