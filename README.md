@@ -510,6 +510,22 @@ Am 08.09.2026 produktiv aktiviert und manuell bestätigt:
 - der Eintrag `https://blocked.invalid/phase4e2-connect` war ein absichtlicher Test des Report-Endpunkts
 - zentrale JavaScript-/AJAX-Funktionen und die Lageroberfläche wurden anschließend produktiv als funktionierend bestätigt
 
+#### Phase 4E.3 – `frame-src 'self'` im Enforcement ✅ abgeschlossen
+
+Am 08.09.2026 produktiv aktiviert und manuell bestätigt:
+
+- die bestehende scharfe CSP wurde um `frame-src 'self'` erweitert
+- eingebettete Frames dürfen damit nur noch vom eigenen Origin geladen werden
+- im aktuellen Projekt wurden vor der Aktivierung keine eingebetteten `iframe`-Abhängigkeiten gefunden
+- die vollständige Ressourcen-Policy bleibt parallel weiterhin als `Content-Security-Policy-Report-Only` aktiv
+- Script-, Style-, Bild-, Font-, Media-, Worker- und Manifest-Regeln bleiben weiterhin Report-Only
+- vor der Aktivierung wurde erneut ein eigener Rollback-Punkt der Phase 4 angelegt
+- Nginx wurde ausschließlich per graceful Reload neu geladen
+- HTTPS/TLS, HTTP-zu-HTTPS-Weiterleitung, ACME und CSP-Report-Endpunkt blieben funktionsfähig
+- nach dem manuellen Live-Test wurde kein echter neuer `frame-src`-Verstoß der Anwendung protokolliert
+- der Eintrag `https://blocked.invalid/phase4e3-frame` war ein absichtlicher Test des Report-Endpunkts
+- Dashboard, Angebote, Filialausgang, Einstellungen, Rechte & Sicherheit, Statistik sowie PDF-/Lieferschein-Funktionen wurden anschließend produktiv als funktionierend bestätigt
+
 Weiterer geplanter Ablauf:
 
 1. die kombinierte Enforcement-/Report-Only-Konfiguration unter normaler Nutzung weiter beobachten
