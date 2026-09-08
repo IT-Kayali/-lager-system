@@ -142,7 +142,7 @@
             'section' => 'main',
         ],
         [
-            'label' => 'Mein Konto & Sicherheit',
+            'label' => 'Mein Konto',
             'route' => 'security.edit',
             'active' => ['security.edit'],
             'icon' => 'bi-person-lock',
