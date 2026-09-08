@@ -13,7 +13,13 @@ test('security settings page can be rendered', function () {
     $response = $this->actingAs($user)
         ->get(route('security.edit'));
 
-    $response->assertOk();
+    $response
+        ->assertOk()
+        ->assertSee('Mein Konto & Sicherheit')
+        ->assertSee('Passwort ändern')
+        ->assertSee('Aktuelles Passwort')
+        ->assertSee('premium-shell', false)
+        ->assertDontSee('Laravel Starter Kit');
 });
 
 test('security settings page renders without two factor when feature is disabled', function () {
@@ -24,10 +30,10 @@ test('security settings page renders without two factor when feature is disabled
     $this->actingAs($user)
         ->get(route('security.edit'))
         ->assertOk()
-        ->assertSee('Update password')
-        ->assertDontSee('Manage your passkeys for passwordless sign-in')
-        ->assertDontSee('Add a passkey to sign in without a password')
-        ->assertDontSee('Two-factor authentication');
+        ->assertSee('Passwort ändern')
+        ->assertSee('Sicherheitsstatus')
+        ->assertDontSee('Passkey entfernen')
+        ->assertDontSee('2FA aktivieren');
 });
 
 test('two factor authentication disabled when confirmation abandoned between requests', function () {
