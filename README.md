@@ -543,6 +543,24 @@ Am 08.09.2026 produktiv aktiviert und manuell bestätigt:
 - der Eintrag `https://blocked.invalid/phase4e4-image.png` war ein absichtlicher Test des Report-Endpunkts
 - Logos, Hintergründe, Favicons, Dokumentvorlagen-Vorschauen sowie die zentralen Lagerfunktionen wurden anschließend produktiv als funktionierend bestätigt
 
+#### Phase 4E.5 – `font-src 'self' data:` im Enforcement ✅ abgeschlossen
+
+Am 08.09.2026 produktiv aktiviert und manuell bestätigt:
+
+- die bestehende scharfe CSP wurde um `font-src 'self' data:` erweitert
+- Browser-Schriften dürfen damit nur noch vom eigenen Origin oder als `data:`-Ressource geladen werden
+- Bootstrap Icons und die per Vite gebündelten Frontend-Schriften funktionieren weiterhin
+- vor der Aktivierung wurden keine externen Google-/Bunny-Font-Aufrufe in den Browser-Ressourcen gefunden
+- PDF-Schriften werden serverseitig aus lokalen Dateien geladen und sind von der Browser-CSP nicht betroffen
+- die vollständige Ressourcen-Policy bleibt parallel weiterhin als `Content-Security-Policy-Report-Only` aktiv
+- Script-, Style-, Media-, Worker- und Manifest-Regeln bleiben weiterhin Report-Only
+- vor der Aktivierung wurde erneut ein eigener Rollback-Punkt der Phase 4 angelegt
+- Nginx wurde ausschließlich per graceful Reload neu geladen
+- HTTPS/TLS, HTTP-zu-HTTPS-Weiterleitung, ACME und CSP-Report-Endpunkt blieben funktionsfähig
+- nach dem manuellen Live-Test wurde kein echter neuer `font-src`-Verstoß der Anwendung protokolliert
+- der Eintrag `https://blocked.invalid/phase4e5-font.woff2` war ein absichtlicher Test des Report-Endpunkts
+- Schriften, Icons, Layout und die zentralen Lagerfunktionen wurden anschließend produktiv als funktionierend bestätigt
+
 Weiterer geplanter Ablauf:
 
 1. die kombinierte Enforcement-/Report-Only-Konfiguration unter normaler Nutzung weiter beobachten
