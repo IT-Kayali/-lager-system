@@ -199,7 +199,7 @@ Die bestehende Dokumentstruktur wird möglichst unverändert gelassen; zusätzli
 
 - Dashboard mit Lager- und Geschäftskennzahlen
 - Statistikbereich für Manager
-- Diagramme mit Chart.js
+- Diagramme mit Chart.js aus dem lokalen Vite-Bundle (kein externer Chart.js-CDN-Aufruf)
 - Bestandswarnungen
 - Warnungssuche nach Produkt, Fake Name, Code-Nummer und Lieferant
 - Filter nach Warnstatus und „Exakter Wert“
@@ -307,7 +307,7 @@ Die Produkt- und Chargensortierung unterstützt auch numerisch benannte Produkte
 - HTTPS ist für die Produktions-IP aktiv
 - normale HTTP-Anfragen werden dauerhaft auf HTTPS umgeleitet
 - Session-Cookies werden in Produktion mit dem Secure-Flag ausgeliefert
-- automatische Zertifikatserneuerung ist eingerichtet und getestet
+- automatische Zertifikatserneuerung ist eingerichtet und getestet; im Normalbetrieb ist keine manuelle Erneuerung notwendig
 - Nginx-Produktversionsnummer wird im HTTP-Header nicht mehr offengelegt
 - `X-Content-Type-Options: nosniff` ist aktiv
 - `Referrer-Policy: strict-origin-when-cross-origin` ist aktiv
@@ -431,18 +431,48 @@ Zusätzlich wurde die Sicherheitsoberfläche konsolidiert:
 - Linter und Test-Suite erfolgreich
 - Live-Funktionstest erfolgreich
 
+#### Phase 4C – CSP Report-Only & Browser-Reporting ✅ abgeschlossen
+
+Am 08.09.2026 produktiv aktiviert und technisch sowie im Browser geprüft:
+
+- `Content-Security-Policy-Report-Only` aktiviert; die Policy blockiert noch keine Anwendungsausführung
+- Reporting-Ziel über `Reporting-Endpoints` eingerichtet
+- zusätzlich `report-uri /api/csp-report` und `report-to csp-endpoint` für Browser-Kompatibilität gesetzt
+- eigener stateless Laravel-Endpunkt `POST /api/csp-report`
+- Endpoint ist rate-limitiert und akzeptiert nur begrenzte Report-Größen
+- CSP-Reports werden in einer eigenen Logdatei mit kurzer Aufbewahrung gespeichert
+- Querystrings und URL-Fragmente werden vor dem Logging entfernt
+- Legacy-`report-uri`-Payloads und moderne Reporting-API-Payloads werden unterstützt
+- echter Firefox-Report erfolgreich getestet
+- bei normaler Nutzung von Dashboard, Produkten, Chargen, Filialausgängen, Angeboten, Kunden, Lieferanten sowie Sicherheitsseiten wurden keine echten CSP-Verstöße der Anwendung beobachtet
+- HTTPS, TLS, HTTP→HTTPS, ACME, Nginx und PHP-FPM blieben funktionsfähig
+- CSP bleibt bewusst **Report-Only**; noch keine scharfe Enforcement-Policy
+
+HSTS wird vorerst zurückgestellt, solange die Anwendung ausschließlich über die IP-Adresse betrieben wird. Eine spätere Domain-Einführung ist der passende Zeitpunkt für eine erneute HSTS-Bewertung.
+
+#### Phase 4D – externe Frontend-Abhängigkeiten reduzieren 🔄 in Arbeit
+
+Nächster CSP-Härtungsschritt:
+
+- Chart.js ist bereits als npm-Abhängigkeit vorhanden und wird in `resources/js/app.js` über Vite gebündelt
+- der zusätzliche Chart.js-Aufruf über `cdn.jsdelivr.net` wird entfernt
+- Statistik verwendet danach ausschließlich das lokale Vite-Bundle
+- danach wird die Report-Only-Policy ohne externe Chart.js-Freigabe erneut geprüft
+- eine scharfe CSP wird erst nach erneutem Browser- und Funktionscheck vorbereitet
+- `unsafe-inline` bleibt vorerst erhalten, weil noch zahlreiche Inline-Scripts/-Styles im Projekt existieren
+
 Noch **nicht** aktiviert:
 
 - HSTS
-- Content-Security-Policy
+- scharfe `Content-Security-Policy`
 
 Weiterer geplanter Ablauf:
 
-1. HSTS separat und zunächst konservativ ohne `includeSubDomains` / `preload` bewerten
-2. CSP zuerst als **Content-Security-Policy-Report-Only** vorbereiten
-3. Livewire, Vite, Formulare, Dropdowns, Statistik, PDFs und Downloads unter CSP beobachten
-4. erst nach erfolgreicher Prüfung CSP schrittweise erzwingen
-5. nach jeder Änderung `nginx -t`, graceful reload und Funktionsprüfung
+1. Chart.js vollständig lokal ausliefern und Statistik prüfen
+2. externe Script-Freigaben in der CSP reduzieren
+3. CSP weiterhin unter normaler Nutzung beobachten
+4. anschließend einen kontrollierten Enforcement-Pilot mit eigenem Backup und sofortigem Rollback vorbereiten
+5. langfristig Inline-Scripts/-Styles in Vite-Dateien auslagern bzw. Nonces/Hashes bewerten
 
 ### Phase 5 – Anwendungssicherheit / Authentifizierung ⏳ geplant
 
