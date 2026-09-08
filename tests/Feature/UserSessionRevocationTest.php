@@ -156,7 +156,7 @@ test('user edit form exposes explicit account status and password reset controls
         ->assertSee('Deaktiviert')
         ->assertSee('Passwort zurücksetzen')
         ->assertSee('Neues Passwort')
-        ->assertSee('Neues Passwort bestätigen')
+        ->assertSee('Passwort bestätigen')
         ->assertSee('Sitzungsschutz aktiv');
 });
 
