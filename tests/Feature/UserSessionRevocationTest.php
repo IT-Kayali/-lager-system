@@ -150,11 +150,13 @@ test('user edit form exposes explicit account status and password reset controls
 
     $response
         ->assertOk()
-        ->assertSee('Status')
+        ->assertSee('Benutzerkonto')
+        ->assertSee('Kontostatus')
         ->assertSee('Aktiv')
         ->assertSee('Deaktiviert')
         ->assertSee('Neues Passwort vergeben')
-        ->assertSee('Neues Passwort bestätigen');
+        ->assertSee('Neues Passwort bestätigen')
+        ->assertSee('Sitzungsschutz aktiv');
 });
 
 test('administrator cannot deactivate own account from the edit form', function () {
@@ -169,4 +171,20 @@ test('administrator cannot deactivate own account from the edit form', function 
     $response
         ->assertOk()
         ->assertSee('Der eigene Benutzer kann nicht deaktiviert werden.');
+});
+
+
+test('personal account security link is visible in premium sidebar', function () {
+    $admin = User::factory()->create([
+        'role' => User::ROLE_ADMIN,
+        'is_active' => true,
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->get(route('security.index'));
+
+    $response
+        ->assertOk()
+        ->assertSee('Mein Konto & Sicherheit')
+        ->assertSee(route('security.edit'), false);
 });
