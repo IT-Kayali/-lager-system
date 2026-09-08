@@ -1011,8 +1011,8 @@ body:has(.itk-login-wrap) {
 }
 
 /* Safe Premium Login Fix - no Volt changes */
-body:has(form[action*="login"]),
-body:has(input[name="email"]):has(input[name="password"]) {
+body:has(form.login-card[action$="/login"]),
+body:has(form.login-card[action$="/login"]) {
     min-height: 100vh !important;
     background:
         radial-gradient(circle at 18% 18%, rgba(227, 202, 110, 0.22), transparent 32%),
@@ -1022,14 +1022,14 @@ body:has(input[name="email"]):has(input[name="password"]) {
 }
 
 /* Make default auth content visible */
-body:has(input[name="email"]):has(input[name="password"]) main,
-body:has(input[name="email"]):has(input[name="password"]) [class*="auth"],
-body:has(input[name="email"]):has(input[name="password"]) form {
+body:has(form.login-card[action$="/login"]) main,
+body:has(form.login-card[action$="/login"]) [class*="auth"],
+body:has(form.login-card[action$="/login"]) form {
     color: #ffffff !important;
 }
 
 /* Center/login card */
-body:has(input[name="email"]):has(input[name="password"]) form {
+body:has(form.login-card[action$="/login"]) form {
     background: #212121 !important;
     border: 1px solid rgba(227, 202, 110, 0.45) !important;
     border-radius: 30px !important;
@@ -1038,22 +1038,22 @@ body:has(input[name="email"]):has(input[name="password"]) form {
 }
 
 /* Login headings/text */
-body:has(input[name="email"]):has(input[name="password"]) h1,
-body:has(input[name="email"]):has(input[name="password"]) h2,
-body:has(input[name="email"]):has(input[name="password"]) h3 {
+body:has(form.login-card[action$="/login"]) h1,
+body:has(form.login-card[action$="/login"]) h2,
+body:has(form.login-card[action$="/login"]) h3 {
     color: #ffffff !important;
     font-weight: 950 !important;
 }
 
-body:has(input[name="email"]):has(input[name="password"]) p,
-body:has(input[name="email"]):has(input[name="password"]) label,
-body:has(input[name="email"]):has(input[name="password"]) span {
+body:has(form.login-card[action$="/login"]) p,
+body:has(form.login-card[action$="/login"]) label,
+body:has(form.login-card[action$="/login"]) span {
     color: rgba(255, 255, 255, 0.82) !important;
 }
 
 /* Inputs */
-body:has(input[name="email"]):has(input[name="password"]) input[type="email"],
-body:has(input[name="email"]):has(input[name="password"]) input[type="password"] {
+body:has(form.login-card[action$="/login"]) input[type="email"],
+body:has(form.login-card[action$="/login"]) input[type="password"] {
     background: #fffaf1 !important;
     color: #212121 !important;
     border: 1px solid rgba(227, 202, 110, 0.42) !important;
@@ -1061,12 +1061,12 @@ body:has(input[name="email"]):has(input[name="password"]) input[type="password"]
     min-height: 50px !important;
 }
 
-body:has(input[name="email"]):has(input[name="password"]) input::placeholder {
+body:has(form.login-card[action$="/login"]) input::placeholder {
     color: rgba(33, 33, 33, 0.45) !important;
 }
 
 /* Button */
-body:has(input[name="email"]):has(input[name="password"]) button[type="submit"] {
+body:has(form.login-card[action$="/login"]) button[type="submit"] {
     background: #e3ca6e !important;
     color: #212121 !important;
     border: 0 !important;
@@ -1076,13 +1076,13 @@ body:has(input[name="email"]):has(input[name="password"]) button[type="submit"] 
 }
 
 /* Links orange */
-body:has(input[name="email"]):has(input[name="password"]) a {
+body:has(form.login-card[action$="/login"]) a {
     color: #f97316 !important;
     font-weight: 900 !important;
 }
 
 /* Add footer via CSS visually */
-body:has(input[name="email"]):has(input[name="password"])::after {
+body:has(form.login-card[action$="/login"])::after {
     content: "Erstellt von IT-Kayali";
     position: fixed;
     left: 0;
@@ -1096,7 +1096,7 @@ body:has(input[name="email"]):has(input[name="password"])::after {
 
 /* Responsive login */
 @media (max-width: 560px) {
-    body:has(input[name="email"]):has(input[name="password"]) form {
+    body:has(form.login-card[action$="/login"]) form {
         padding: 24px !important;
         border-radius: 24px !important;
     }
@@ -1124,7 +1124,7 @@ body:has(input[name="email"]):has(input[name="password"])::after {
 }
 
 /* Final Login Polish */
-body:has(input[name="email"]):has(input[name="password"]) {
+body:has(form.login-card[action$="/login"]) {
     background:
         radial-gradient(circle at 50% 18%, rgba(227, 202, 110, 0.24), transparent 26%),
         radial-gradient(circle at 88% 30%, rgba(249, 115, 22, 0.10), transparent 25%),
@@ -1132,25 +1132,25 @@ body:has(input[name="email"]):has(input[name="password"]) {
 }
 
 /* Titelbereich sichtbar machen */
-body:has(input[name="email"]):has(input[name="password"]) h1,
-body:has(input[name="email"]):has(input[name="password"]) h2,
-body:has(input[name="email"]):has(input[name="password"]) h3 {
+body:has(form.login-card[action$="/login"]) h1,
+body:has(form.login-card[action$="/login"]) h2,
+body:has(form.login-card[action$="/login"]) h3 {
     color: #212121 !important;
     text-shadow: none !important;
 }
 
-body:has(input[name="email"]):has(input[name="password"]) p {
+body:has(form.login-card[action$="/login"]) p {
     color: rgba(33, 33, 33, 0.68) !important;
 }
 
 /* Icon oben sichtbar */
-body:has(input[name="email"]):has(input[name="password"]) svg {
+body:has(form.login-card[action$="/login"]) svg {
     color: #e3ca6e !important;
     stroke: #e3ca6e !important;
 }
 
 /* Form-Karte premium */
-body:has(input[name="email"]):has(input[name="password"]) form {
+body:has(form.login-card[action$="/login"]) form {
     width: min(100%, 420px) !important;
     background:
         linear-gradient(180deg, rgba(33,33,33,0.98), rgba(24,24,24,0.98)) !important;
@@ -1163,23 +1163,23 @@ body:has(input[name="email"]):has(input[name="password"]) form {
 }
 
 /* Text innerhalb der Karte weiß */
-body:has(input[name="email"]):has(input[name="password"]) form label,
-body:has(input[name="email"]):has(input[name="password"]) form span,
-body:has(input[name="email"]):has(input[name="password"]) form p,
-body:has(input[name="email"]):has(input[name="password"]) form div {
+body:has(form.login-card[action$="/login"]) form label,
+body:has(form.login-card[action$="/login"]) form span,
+body:has(form.login-card[action$="/login"]) form p,
+body:has(form.login-card[action$="/login"]) form div {
     color: rgba(255, 255, 255, 0.86) !important;
 }
 
 /* Passwort vergessen komplett ausblenden */
-body:has(input[name="email"]):has(input[name="password"]) a[href*="forgot"],
-body:has(input[name="email"]):has(input[name="password"]) a[href*="password"],
-body:has(input[name="email"]):has(input[name="password"]) a:has(+ input[name="password"]) {
+body:has(form.login-card[action$="/login"]) a[href*="forgot"],
+body:has(form.login-card[action$="/login"]) a[href*="password"],
+body:has(form.login-card[action$="/login"]) a:has(+ input[name="password"]) {
     display: none !important;
 }
 
 /* Inputs schöner */
-body:has(input[name="email"]):has(input[name="password"]) input[type="email"],
-body:has(input[name="email"]):has(input[name="password"]) input[type="password"] {
+body:has(form.login-card[action$="/login"]) input[type="email"],
+body:has(form.login-card[action$="/login"]) input[type="password"] {
     background: #fffaf1 !important;
     color: #212121 !important;
     border: 1px solid rgba(227, 202, 110, 0.55) !important;
@@ -1188,19 +1188,19 @@ body:has(input[name="email"]):has(input[name="password"]) input[type="password"]
     font-weight: 700 !important;
 }
 
-body:has(input[name="email"]):has(input[name="password"]) input[type="email"]:focus,
-body:has(input[name="email"]):has(input[name="password"]) input[type="password"]:focus {
+body:has(form.login-card[action$="/login"]) input[type="email"]:focus,
+body:has(form.login-card[action$="/login"]) input[type="password"]:focus {
     border-color: #e3ca6e !important;
     box-shadow: 0 0 0 4px rgba(227, 202, 110, 0.22) !important;
 }
 
 /* Checkbox */
-body:has(input[name="email"]):has(input[name="password"]) input[type="checkbox"] {
+body:has(form.login-card[action$="/login"]) input[type="checkbox"] {
     accent-color: #e3ca6e !important;
 }
 
 /* Button */
-body:has(input[name="email"]):has(input[name="password"]) button[type="submit"] {
+body:has(form.login-card[action$="/login"]) button[type="submit"] {
     background: #e3ca6e !important;
     color: #212121 !important;
     border-radius: 17px !important;
@@ -1209,7 +1209,7 @@ body:has(input[name="email"]):has(input[name="password"]) button[type="submit"] 
     box-shadow: 0 18px 34px rgba(227, 202, 110, 0.22) !important;
 }
 
-body:has(input[name="email"]):has(input[name="password"]) button[type="submit"]:hover {
+body:has(form.login-card[action$="/login"]) button[type="submit"]:hover {
     filter: brightness(1.04);
     transform: translateY(-1px);
 }
@@ -1220,7 +1220,7 @@ body:has(input[name="email"]):has(input[name="password"]) button[type="submit"]:
 }
 
 .itkayali-auth-footer,
-body:has(input[name="email"]):has(input[name="password"])::after {
+body:has(form.login-card[action$="/login"])::after {
     color: rgba(33, 33, 33, 0.62) !important;
 }
 
@@ -1230,7 +1230,7 @@ body:has(input[name="email"]):has(input[name="password"])::after {
 
 /* Handy */
 @media (max-width: 560px) {
-    body:has(input[name="email"]):has(input[name="password"]) form {
+    body:has(form.login-card[action$="/login"]) form {
         width: 100% !important;
         padding: 26px !important;
         border-radius: 24px !important;
@@ -1238,7 +1238,7 @@ body:has(input[name="email"]):has(input[name="password"])::after {
 }
 
 /* Phase 9 Login Fine Polish */
-body:has(input[name="email"]):has(input[name="password"]) {
+body:has(form.login-card[action$="/login"]) {
     background:
         radial-gradient(circle at 50% 14%, rgba(227, 202, 110, 0.26), transparent 24%),
         radial-gradient(circle at 86% 28%, rgba(249, 115, 22, 0.08), transparent 24%),
@@ -1246,9 +1246,9 @@ body:has(input[name="email"]):has(input[name="password"]) {
 }
 
 /* Oberer Bereich */
-body:has(input[name="email"]):has(input[name="password"]) h1,
-body:has(input[name="email"]):has(input[name="password"]) h2,
-body:has(input[name="email"]):has(input[name="password"]) h3 {
+body:has(form.login-card[action$="/login"]) h1,
+body:has(form.login-card[action$="/login"]) h2,
+body:has(form.login-card[action$="/login"]) h3 {
     color: #e3ca6e !important;
     font-size: 40px !important;
     font-weight: 950 !important;
@@ -1257,7 +1257,7 @@ body:has(input[name="email"]):has(input[name="password"]) h3 {
     margin-bottom: 10px !important;
 }
 
-body:has(input[name="email"]):has(input[name="password"]) p {
+body:has(form.login-card[action$="/login"]) p {
     color: rgba(33, 33, 33, 0.72) !important;
     text-align: center !important;
     font-size: 16px !important;
@@ -1267,7 +1267,7 @@ body:has(input[name="email"]):has(input[name="password"]) p {
 }
 
 /* Oberes Icon größer */
-body:has(input[name="email"]):has(input[name="password"]) svg {
+body:has(form.login-card[action$="/login"]) svg {
     width: 48px !important;
     height: 48px !important;
     color: #e3ca6e !important;
@@ -1277,7 +1277,7 @@ body:has(input[name="email"]):has(input[name="password"]) svg {
 }
 
 /* Login-Karte */
-body:has(input[name="email"]):has(input[name="password"]) form {
+body:has(form.login-card[action$="/login"]) form {
     width: min(100%, 440px) !important;
     background: linear-gradient(180deg, rgba(33,33,33,.98), rgba(24,24,24,.98)) !important;
     border: 1px solid rgba(227, 202, 110, 0.52) !important;
@@ -1289,16 +1289,16 @@ body:has(input[name="email"]):has(input[name="password"]) form {
 }
 
 /* Inhalte in der Karte */
-body:has(input[name="email"]):has(input[name="password"]) form label,
-body:has(input[name="email"]):has(input[name="password"]) form span,
-body:has(input[name="email"]):has(input[name="password"]) form div {
+body:has(form.login-card[action$="/login"]) form label,
+body:has(form.login-card[action$="/login"]) form span,
+body:has(form.login-card[action$="/login"]) form div {
     color: rgba(255,255,255,.88) !important;
     font-weight: 800 !important;
 }
 
 /* Inputs */
-body:has(input[name="email"]):has(input[name="password"]) input[type="email"],
-body:has(input[name="email"]):has(input[name="password"]) input[type="password"] {
+body:has(form.login-card[action$="/login"]) input[type="email"],
+body:has(form.login-card[action$="/login"]) input[type="password"] {
     background: #fffaf1 !important;
     color: #212121 !important;
     border: 1px solid rgba(227,202,110,.55) !important;
@@ -1309,29 +1309,29 @@ body:has(input[name="email"]):has(input[name="password"]) input[type="password"]
     font-size: 15px !important;
 }
 
-body:has(input[name="email"]):has(input[name="password"]) input::placeholder {
+body:has(form.login-card[action$="/login"]) input::placeholder {
     color: rgba(33,33,33,.52) !important;
     font-weight: 600 !important;
 }
 
-body:has(input[name="email"]):has(input[name="password"]) input:focus {
+body:has(form.login-card[action$="/login"]) input:focus {
     border-color: #e3ca6e !important;
     box-shadow: 0 0 0 4px rgba(227,202,110,.22) !important;
 }
 
 /* Passwort vergessen sicher verstecken */
-body:has(input[name="email"]):has(input[name="password"]) a[href*="password"],
-body:has(input[name="email"]):has(input[name="password"]) a[href*="forgot"] {
+body:has(form.login-card[action$="/login"]) a[href*="password"],
+body:has(form.login-card[action$="/login"]) a[href*="forgot"] {
     display: none !important;
 }
 
 /* Checkbox */
-body:has(input[name="email"]):has(input[name="password"]) input[type="checkbox"] {
+body:has(form.login-card[action$="/login"]) input[type="checkbox"] {
     accent-color: #e3ca6e !important;
 }
 
 /* Button */
-body:has(input[name="email"]):has(input[name="password"]) button[type="submit"] {
+body:has(form.login-card[action$="/login"]) button[type="submit"] {
     background: #e3ca6e !important;
     color: #212121 !important;
     border: 0 !important;
@@ -1342,13 +1342,13 @@ body:has(input[name="email"]):has(input[name="password"]) button[type="submit"] 
     box-shadow: 0 18px 36px rgba(227, 202, 110, 0.22) !important;
 }
 
-body:has(input[name="email"]):has(input[name="password"]) button[type="submit"]:hover {
+body:has(form.login-card[action$="/login"]) button[type="submit"]:hover {
     filter: brightness(1.04);
     transform: translateY(-1px);
 }
 
 /* Footer-Link */
-body:has(input[name="email"]):has(input[name="password"])::after {
+body:has(form.login-card[action$="/login"])::after {
     display: none !important;
     content: none !important;
 }
@@ -1375,19 +1375,19 @@ body:has(input[name="email"]):has(input[name="password"])::after {
 }
 
 @media (max-width: 560px) {
-    body:has(input[name="email"]):has(input[name="password"]) h1,
-    body:has(input[name="email"]):has(input[name="password"]) h2,
-    body:has(input[name="email"]):has(input[name="password"]) h3 {
+    body:has(form.login-card[action$="/login"]) h1,
+    body:has(form.login-card[action$="/login"]) h2,
+    body:has(form.login-card[action$="/login"]) h3 {
         font-size: 28px !important;
     }
 
-    body:has(input[name="email"]):has(input[name="password"]) form {
+    body:has(form.login-card[action$="/login"]) form {
         width: 100% !important;
         padding: 26px !important;
         border-radius: 24px !important;
     }
 
-    body:has(input[name="email"]):has(input[name="password"]) p {
+    body:has(form.login-card[action$="/login"]) p {
         font-size: 14px !important;
         padding: 0 12px;
     }
@@ -1396,21 +1396,21 @@ body:has(input[name="email"]):has(input[name="password"])::after {
 /* FINAL Login Override Fix */
 
 /* Titel oben sichtbar: Gold */
-body:has(input[name="email"]):has(input[name="password"]) h1,
-body:has(input[name="email"]):has(input[name="password"]) h2,
-body:has(input[name="email"]):has(input[name="password"]) h3 {
+body:has(form.login-card[action$="/login"]) h1,
+body:has(form.login-card[action$="/login"]) h2,
+body:has(form.login-card[action$="/login"]) h3 {
     color: #e3ca6e !important;
     text-shadow: none !important;
 }
 
 /* Untertitel oben dunkel statt weiß */
-body:has(input[name="email"]):has(input[name="password"]) > div p,
-body:has(input[name="email"]):has(input[name="password"]) main p {
+body:has(form.login-card[action$="/login"]) > div p,
+body:has(form.login-card[action$="/login"]) main p {
     color: rgba(33, 33, 33, 0.72) !important;
 }
 
 /* Wichtig: SVGs im Formular wieder normal klein machen */
-body:has(input[name="email"]):has(input[name="password"]) form svg {
+body:has(form.login-card[action$="/login"]) form svg {
     width: 18px !important;
     height: 18px !important;
     margin: 0 !important;
@@ -1419,8 +1419,8 @@ body:has(input[name="email"]):has(input[name="password"]) form svg {
 }
 
 /* Nur oberes Laravel/Icon größer lassen */
-body:has(input[name="email"]):has(input[name="password"]) main > div > svg,
-body:has(input[name="email"]):has(input[name="password"]) main svg:first-of-type {
+body:has(form.login-card[action$="/login"]) main > div > svg,
+body:has(form.login-card[action$="/login"]) main svg:first-of-type {
     width: 54px !important;
     height: 54px !important;
     color: #e3ca6e !important;
@@ -1429,7 +1429,7 @@ body:has(input[name="email"]):has(input[name="password"]) main svg:first-of-type
 }
 
 /* Passwort-Auge sauber positionieren, nicht riesig */
-body:has(input[name="email"]):has(input[name="password"]) form button[type="button"] {
+body:has(form.login-card[action$="/login"]) form button[type="button"] {
     width: 34px !important;
     height: 34px !important;
     min-height: 34px !important;
@@ -1441,7 +1441,7 @@ body:has(input[name="email"]):has(input[name="password"]) form button[type="butt
 }
 
 /* Checkbox normalisieren */
-body:has(input[name="email"]):has(input[name="password"]) input[type="checkbox"] {
+body:has(form.login-card[action$="/login"]) input[type="checkbox"] {
     width: 18px !important;
     height: 18px !important;
     min-height: 18px !important;
@@ -1450,14 +1450,14 @@ body:has(input[name="email"]):has(input[name="password"]) input[type="checkbox"]
 }
 
 /* Kein riesiger Haken neben Checkbox */
-body:has(input[name="email"]):has(input[name="password"]) form label svg,
-body:has(input[name="email"]):has(input[name="password"]) form [role="checkbox"] svg {
+body:has(form.login-card[action$="/login"]) form label svg,
+body:has(form.login-card[action$="/login"]) form [role="checkbox"] svg {
     width: 16px !important;
     height: 16px !important;
 }
 
 /* Login-Karte etwas harmonischer */
-body:has(input[name="email"]):has(input[name="password"]) form {
+body:has(form.login-card[action$="/login"]) form {
     margin-top: 26px !important;
 }
 
