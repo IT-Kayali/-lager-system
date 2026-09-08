@@ -142,6 +142,20 @@
             'section' => 'main',
         ],
         [
+            'label' => 'Mein Konto & Sicherheit',
+            'route' => 'security.edit',
+            'active' => ['security.edit'],
+            'icon' => 'bi-person-lock',
+            'roles' => [
+                \App\Models\User::ROLE_ADMIN,
+                \App\Models\User::ROLE_MANAGER,
+                \App\Models\User::ROLE_WAREHOUSE,
+                \App\Models\User::ROLE_SALES,
+                \App\Models\User::ROLE_CRM,
+            ],
+            'section' => 'footer',
+        ],
+        [
             'label' => 'Einstellungen',
             'route' => 'settings.index',
             'active' => 'settings.*',
@@ -152,7 +166,7 @@
         [
             'label' => 'Rechte & Sicherheit',
             'route' => 'security.index',
-            'active' => 'security.*',
+            'active' => ['security.index', 'security.users.*'],
             'icon' => 'bi-shield-lock',
             'roles' => [\App\Models\User::ROLE_ADMIN],
             'section' => 'footer',
@@ -181,7 +195,7 @@
                 @if ($user?->canAccessMenu($item['roles']))
                     <a
                         href="{{ route($item['route']) }}"
-                        class="premium-sidebar-link {{ request()->routeIs($item['active']) ? 'active' : '' }}"
+                        class="premium-sidebar-link {{ request()->routeIs(...(array) $item['active']) ? 'active' : '' }}"
                     >
                         <i class="bi {{ $item['icon'] }}"></i>
                         <span>{{ $item['label'] }}</span>
