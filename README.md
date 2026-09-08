@@ -468,16 +468,38 @@ Am 08.09.2026 produktiv umgesetzt und geprüft:
 - Preview-Worktree und temporärer Read-only-Datenbankbenutzer wurden nach erfolgreicher Live-Prüfung vollständig entfernt
 - `unsafe-inline` bleibt vorerst erhalten, weil im Projekt noch zahlreiche Inline-Scripts und Inline-Styles existieren
 
-Noch **nicht** aktiviert:
+Noch **nicht vollständig** aktiviert:
 
 - HSTS
-- scharfe `Content-Security-Policy`
+- vollständige scharfe CSP für Script-, Style-, Bild-, Font-, Connect- und weitere Ressourcen-Direktiven
+
+#### Phase 4E.1 – konservativer CSP-Enforcement-Pilot ✅ abgeschlossen
+
+Am 08.09.2026 produktiv aktiviert und anschließend manuell bestätigt:
+
+- zusätzlich zur bestehenden vollständigen `Content-Security-Policy-Report-Only` wird erstmals eine echte `Content-Security-Policy` ausgeliefert
+- scharf erzwungen werden ausschließlich die risikoarmen Direktiven:
+  - `base-uri 'self'`
+  - `object-src 'none'`
+  - `frame-ancestors 'self'`
+  - `form-action 'self'`
+- Script-, Style-, Bild-, Font-, Connect-, Frame-, Media-, Worker- und Manifest-Regeln bleiben weiterhin vollständig im Report-Only-Modus
+- `unsafe-inline` wird deshalb weiterhin nicht scharf erzwungen bzw. entfernt
+- vor der Aktivierung wurde der Rollback-Punkt `/var/backups/lager-phase4-M-20260908-203006` erstellt
+- Nginx-Konfiguration wurde vor und nach der Änderung erfolgreich mit `nginx -t` geprüft
+- Aktivierung erfolgte nur per graceful Nginx-Reload
+- HTTPS blieb mit gültiger TLS-Verifizierung erreichbar
+- HTTP-zu-HTTPS-Weiterleitung blieb bei `308`
+- ACME-Challenge und automatischer Zertifikatsbetrieb blieben funktionsfähig
+- CSP-Report-Endpunkt blieb mit HTTP `204` funktionsfähig
+- nach dem Pilot wurden keine echten neuen CSP-Verstöße der Anwendung protokolliert; der neue `blocked.invalid/phase4e.js`-Eintrag war ein absichtlicher Test
+- Login, Formulare und die zentralen Lager-Funktionen wurden anschließend manuell produktiv geprüft und als funktionierend bestätigt
 
 Weiterer geplanter Ablauf:
 
-1. CSP Report-Only unter normaler Nutzung weiter beobachten
-2. kontrollierten Enforcement-Pilot mit eigenem Backup und sofortigem Rollback vorbereiten
-3. zuerst nur Regeln erzwingen, die im aktuellen Betrieb bereits nachweislich sauber sind
+1. die kombinierte Enforcement-/Report-Only-Konfiguration unter normaler Nutzung weiter beobachten
+2. vor jeder zusätzlichen Enforcement-Direktive vorhandene Ressourcen und echte CSP-Reports prüfen
+3. weitere Direktiven nur einzeln bzw. in kleinen risikoarmen Gruppen scharf schalten
 4. `unsafe-inline` später schrittweise durch ausgelagerte Vite-Dateien, Nonces oder Hashes reduzieren
 5. HSTS erst bei späterer Domain-Nutzung erneut bewerten
 
