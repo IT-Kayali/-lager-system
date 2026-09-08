@@ -127,7 +127,6 @@
         </section>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded',()=>{
             const period=document.getElementById('statistics-period');const dates=document.getElementById('statistics-custom-dates');
