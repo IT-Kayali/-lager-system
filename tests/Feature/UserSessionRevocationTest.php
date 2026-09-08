@@ -154,7 +154,8 @@ test('user edit form exposes explicit account status and password reset controls
         ->assertSee('Kontostatus')
         ->assertSee('Aktiv')
         ->assertSee('Deaktiviert')
-        ->assertSee('Neues Passwort vergeben')
+        ->assertSee('Passwort zurücksetzen')
+        ->assertSee('Neues Passwort')
         ->assertSee('Neues Passwort bestätigen')
         ->assertSee('Sitzungsschutz aktiv');
 });
@@ -185,6 +186,14 @@ test('personal account security link is visible in premium sidebar', function ()
 
     $response
         ->assertOk()
-        ->assertSee('Mein Konto & Sicherheit')
+        ->assertSee('Mein Konto')
         ->assertSee(route('security.edit'), false);
+});
+
+test('login styling is scoped to the login form', function () {
+    $css = file_get_contents(resource_path('css/app.css'));
+
+    expect($css)
+        ->toContain('body:has(form.login-card[action$="/login"])')
+        ->not->toContain('body:has(input[name="email"]):has(input[name="password"])');
 });
