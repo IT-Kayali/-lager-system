@@ -10,25 +10,10 @@
         : null;
 @endphp
 
-<script>
-    (() => {
-        document.title = @json($runtimeDocumentTitle);
-
-        const faviconUrl = @json($runtimeFaviconUrl);
-
-        if (!faviconUrl) {
-            return;
-        }
-
-        let favicon = document.head.querySelector('link[data-configurable-site-favicon]');
-
-        if (!favicon) {
-            favicon = document.createElement('link');
-            favicon.rel = 'icon';
-            favicon.setAttribute('data-configurable-site-favicon', '1');
-            document.head.appendChild(favicon);
-        }
-
-        favicon.href = faviconUrl;
-    })();
-</script>
+<div
+    id="browser-branding-runtime"
+    data-document-title="{{ $runtimeDocumentTitle }}"
+    data-favicon-url="{{ $runtimeFaviconUrl ?? '' }}"
+    hidden
+></div>
+<script src="{{ asset('js/csp-shared-runtime.js') }}" defer></script>
