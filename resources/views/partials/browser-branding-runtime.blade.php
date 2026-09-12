@@ -8,6 +8,7 @@
     $runtimeFaviconUrl = $runtimeFaviconPath
         ? route('site.favicon', [], false) . '?v=' . md5($runtimeFaviconPath)
         : null;
+    $runtimeScriptVersion = @filemtime(public_path('js/csp-shared-runtime.js')) ?: null;
 @endphp
 
 <div
@@ -16,4 +17,7 @@
     data-favicon-url="{{ $runtimeFaviconUrl ?? '' }}"
     hidden
 ></div>
-<script src="{{ asset('js/csp-shared-runtime.js') }}" defer></script>
+<script
+    src="{{ asset('js/csp-shared-runtime.js') }}{{ $runtimeScriptVersion ? '?v='.$runtimeScriptVersion : '' }}"
+    defer
+></script>
