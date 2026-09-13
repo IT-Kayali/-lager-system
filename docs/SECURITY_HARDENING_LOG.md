@@ -243,3 +243,88 @@ Weiterhin Report-Only:
 - `style-src 'self' 'unsafe-inline'`
 
 Als nächstes folgt Phase 4F.3C: die verbleibenden Inline-Submit-Bestätigungen in der Angebotsliste und in den Kundengruppen werden auf die bestehende `data-confirm`-Runtime umgestellt. Danach wird erneut inventarisiert, welche `script-src-attr`-Quellen in den produktiven Views noch übrig sind.
+
+## Phase 4F.3C – verbleibende Submit-Bestätigungen externalisiert ✅ abgeschlossen
+
+Am 13.09.2026 wurde der letzte bekannte produktive `onsubmit="return confirm(...)"`-Block aus dem bisherigen Inventar abgeschlossen.
+
+- PR #109 (`Security: finish inline form confirmation cleanup`) wurde nach erfolgreichem CI und manuellem Live-Preview gemergt.
+- Merge-Commit: `4598633c3711a67c310f883c15afb63444dd0cb4`.
+- Die Angebotsliste verwendet jetzt `data-confirm` für Stornieren und Löschen.
+- Die Kundengruppen-Einstellungen verwenden ebenfalls `data-confirm` statt Inline-`onsubmit`.
+- Die bestehende delegierte Submit-Runtime aus `public/js/csp-shared-runtime.js` wird unverändert wiederverwendet.
+- Der finale Produktionszustand wurde auf Commit `4598633` verifiziert; das Worktree war sauber.
+- Recovery-/Final-Backup: `/var/backups/lager-phase4-AC-recovery-20260913-151121`.
+- HTTPS lieferte HTTP 200, HTTP leitete mit 308 auf HTTPS um und TLS-Verifikation blieb erfolgreich.
+- Nginx und PHP-FPM waren aktiv.
+- CSP-Enforcement und Report-Only-Policy blieben unverändert.
+
+## Phase 4F.4A – einfache Seiten-Skripte externalisiert ✅ abgeschlossen
+
+Am 13.09.2026 wurden drei weitere echte Inline-`<script>`-Quellen in die gemeinsame externe CSP-Runtime verschoben.
+
+- PR #110 (`Security: externalize simple page scripts`) wurde nach erfolgreichem CI und manuellem Live-Preview gemergt.
+- Merge-Commit: `de15de2c75ff3a09fd85d81ca3932b0965280339`.
+- `resources/views/pages/products/create.blade.php` und `edit.blade.php` enthalten ihre einfache Produkt-Editor-Logik nicht mehr inline.
+- Die Bezeichnung „Fake Name“ sowie die automatische Kategorien-Vorauswahl beim Anlegen eines Produkts werden jetzt durch `initProductEditorRuntime` bereitgestellt.
+- Die rollenabhängige Logik von `resources/views/pages/branch-withdrawals/create.blade.php` wurde in `initSalesBranchCreateRuntime` verschoben.
+- Der Live-Preview wurde bytegenau gegen den PR-Stand geprüft und manuell als funktionierend bestätigt.
+- Preview-Backup: `/var/backups/lager-phase4-AD-20260913-152132`.
+- Der finale Deploy erfolgte auf Commit `de15de2`; das Worktree war danach sauber.
+- CSP-Enforcement, Report-Only-Policy, Nginx, Composer, npm und Datenbank wurden nicht verändert.
+
+## Phase 4F.4B – Kunden- und Chargenformular-Skripte externalisiert ✅ abgeschlossen
+
+Am 13.09.2026 wurde das nächste kleine Inline-Script-Paket produktiv abgeschlossen.
+
+- PR #111 (`Security: externalize customer and batch form scripts`) wurde nach erfolgreichem CI und manuellem Live-Preview gemergt.
+- Merge-Commit: `1bf2f5796c2877abf32304418aa40e863201eb0a`.
+- Das Kundenformular enthält keinen eigenen Inline-`<script>`-Block mehr.
+- Lieferadressen-Sichtbarkeit und Kundengruppen-Vorschau werden durch `initCustomerFormRuntime` in `public/js/csp-shared-runtime.js` gesteuert.
+- Das Chargenformular enthält ebenfalls keinen eigenen Inline-`<script>`-Block mehr.
+- Die automatische Ablaufdatumsberechnung inklusive No-Overflow-Monatslogik wurde nach `initBatchExpiryRuntime` verschoben.
+- Manuell geänderte Ablaufdaten bleiben vor weiterer automatischer Überschreibung geschützt.
+- Preview-Backup: `/var/backups/lager-phase4-AF-20260913-155358`.
+- Final-Deploy-Backup: `/var/backups/lager-phase4-AG-20260913-160312`.
+- Der finale Deploy auf Commit `1bf2f57` wurde mit sauberem Worktree, HTTPS 200, HTTP 308, TLS-Verifikation 0 sowie aktiven Nginx-/PHP-FPM-Diensten abgeschlossen.
+- CSP-Enforcement und Report-Only-Policy blieben unverändert.
+
+## Phase 4F.4C – Produktkategorie-Suche externalisiert ✅ abgeschlossen
+
+Am 13.09.2026 wurde eine weitere isolierte `script-src-elem`-Quelle entfernt.
+
+- PR #112 (`Security: externalize category product search script`) wurde nach erfolgreichem CI und manuellem Live-Preview gemergt.
+- Merge-Commit: `6f879d82a9bbe5df9ad3e15400dcecfd1e1fdd82`.
+- Die Produktkategorie-Vorschau enthält keinen Inline-`<script>`-Block für die Produktsuche mehr.
+- Suche, Leeren-Button und „Kein passendes Produkt gefunden“-Anzeige werden jetzt durch `initCategoryProductSearchRuntime` in `public/js/csp-shared-runtime.js` gesteuert.
+- Die View verwendet dafür den deklarativen Marker `data-category-product-search-runtime`.
+- Preview-Backup: `/var/backups/lager-phase4-AH-20260913-161239`.
+- Final-Deploy-Backup: `/var/backups/lager-phase4-AI-20260913-161621`.
+- Der finale Deploy auf Commit `6f879d8` wurde mit sauberem Worktree abgeschlossen.
+- Die externe Runtime lieferte HTTP 200; HTTPS/TLS/HTTP-Redirect sowie Nginx und PHP-FPM blieben gesund.
+- CSP-Enforcement und Report-Only-Policy wurden nicht verändert.
+
+### CSP-Stand nach Phase 4F.4C
+
+Das Enforcement bleibt weiterhin:
+
+```text
+base-uri 'self'
+object-src 'none'
+frame-ancestors 'self'
+form-action 'self'
+connect-src 'self'
+frame-src 'self'
+img-src 'self' data:
+font-src 'self' data:
+media-src 'self'
+worker-src 'self' blob:
+manifest-src 'self'
+```
+
+Weiterhin Report-Only:
+
+- `script-src 'self' 'unsafe-inline'`
+- `style-src 'self' 'unsafe-inline'`
+
+Die bekannten einfachen Inline-Event-Handler und mehrere isolierte Inline-`<script>`-Blöcke sind damit entfernt. Es bestehen weiterhin größere Inline-Script-Blöcke, unter anderem in Preise, Statistik, Angebote, Sidebar, Produktformular, Filialausgangsformular und Einstellungen. Diese werden weiterhin in kleinen funktionalen Paketen externalisiert. Erst nach erneuter strenger Report-Only-Inventur ohne echte produktive Script-Blocker wird `script-src` für Enforcement bewertet.
