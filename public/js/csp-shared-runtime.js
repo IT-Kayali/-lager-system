@@ -164,10 +164,73 @@
         });
     }
 
+    function initProductEditorRuntime() {
+        const form = document.querySelector('[data-product-editor-runtime]');
+
+        if (!form) {
+            return;
+        }
+
+        const label = form.querySelector('label[for="manufacturer_designation"]')
+            || document.querySelector('label[for="manufacturer_designation"]');
+
+        if (label) {
+            label.textContent = 'Fake Name';
+        }
+
+        if (!form.hasAttribute('data-product-create-runtime')) {
+            return;
+        }
+
+        const categoryId = new URLSearchParams(window.location.search).get('category_id');
+
+        if (!categoryId) {
+            return;
+        }
+
+        const categoryCheckbox = form.querySelector(`input[name="category_ids[]"][value="${CSS.escape(categoryId)}"]`);
+
+        if (categoryCheckbox) {
+            categoryCheckbox.checked = true;
+            categoryCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    }
+
+    function initSalesBranchCreateRuntime() {
+        const form = document.querySelector('[data-sales-branch-create]');
+
+        if (!form) {
+            return;
+        }
+
+        const statusSelect = form.querySelector('select[name="status"]');
+        const openStatus = form.dataset.openStatus || '';
+
+        if (statusSelect && openStatus) {
+            statusSelect.value = openStatus;
+            statusSelect.disabled = true;
+        }
+
+        const defaultIndexUrl = form.dataset.defaultIndexUrl || '';
+        const salesIndexUrl = form.dataset.salesIndexUrl || '';
+
+        if (!defaultIndexUrl || !salesIndexUrl) {
+            return;
+        }
+
+        form.querySelectorAll('a[href]').forEach((link) => {
+            if (link.href === defaultIndexUrl || link.getAttribute('href') === defaultIndexUrl) {
+                link.href = salesIndexUrl;
+            }
+        });
+    }
+
     function init() {
         initBrowserBranding();
         initUnifiedStatusColors();
         initCspEventHandlers();
+        initProductEditorRuntime();
+        initSalesBranchCreateRuntime();
     }
 
     if (document.readyState === 'loading') {
