@@ -90,3 +90,63 @@ Noch Report-Only:
 - `style-src 'self' 'unsafe-inline'`
 
 Die risikoarmen Ressourcen-Direktiven sind damit schrittweise in das Enforcement übernommen. Als nächstes folgt keine blinde Aktivierung von Script oder Style. Zuerst werden vorhandene Inline-Skripte, Inline-Styles, Blade-Komponenten und dynamische JavaScript-/CSS-Abhängigkeiten inventarisiert. Danach werden sichere Migrationsschritte über Vite, Nonces oder Hashes vorbereitet und jeweils separat getestet.
+
+## Phase 4F.1 – Script-CSP-Inventur im Report-Only-Modus ✅ abgeschlossen
+
+Am 12.09.2026 wurde `script-src` ausschließlich im Report-Only-Header testweise von `script-src 'self' 'unsafe-inline'` auf `script-src 'self'` verschärft. Das echte Enforcement blieb unverändert.
+
+- Rollback-Punkt vor der Diagnose: `/var/backups/lager-phase4-U-20260912-154506`.
+- HTTPS blieb bei HTTP 200, TLS-Verifikation bei 0 und HTTP-zu-HTTPS bei 308.
+- CSP-Report-Endpunkt blieb mit HTTP 204 funktionsfähig; ACME blieb erreichbar.
+- Browsertests erzeugten erwartete `script-src-elem`- und `script-src-attr`-Reports auf Dashboard, Kunden, Filialausgang, Angebote, Angebotsbearbeitung sowie Chargen.
+- Die Reports bestätigten, dass sowohl Inline-`<script>`-Blöcke als auch HTML-Event-Handler weiterhin produktiv genutzt werden.
+- Besonders wiederkehrende `script-src-elem`-Meldungen auf mehreren Seiten deuteten auf gemeinsame Partials hin.
+- Damit wurde ausdrücklich entschieden, `script-src` noch nicht in das Enforcement zu übernehmen.
+- Nach der Inventur wurde der Report-Only-Header wieder auf `script-src 'self' 'unsafe-inline'` zurückgesetzt.
+- Closeout-Backup: `/var/backups/lager-phase4-U-close-20260912-172321`.
+- Nginx-Konfiguration, HTTPS, TLS und Dienste waren nach dem Closeout weiterhin gesund.
+
+## Phase 4F.2 – gemeinsame Inline-Skripte externalisiert ✅ abgeschlossen
+
+Am 13.09.2026 wurde der erste kontrollierte Script-CSP-Umbau produktiv abgeschlossen.
+
+- PR #104 (`Security: externalize shared inline CSP runtime`) wurde nach erfolgreichem Tests- und Linter-Workflow gemergt.
+- Merge-Commit: `53b6364243e34c540df7b4e2367c49d2b01e1c07`.
+- Die gemeinsame Browser-Branding-Logik wurde aus `resources/views/partials/browser-branding-runtime.blade.php` in die selbst gehostete Datei `public/js/csp-shared-runtime.js` verschoben.
+- Die gemeinsame Statusfarben-Logik wurde aus `resources/views/partials/unified-status-colors.blade.php` in dieselbe Runtime verschoben.
+- Dynamische Titel- und Favicon-Werte werden nur noch als escaped `data-*`-Attribute an die externe Runtime übergeben.
+- Die Runtime ist cache-versioniert und wird vom eigenen Origin geladen.
+- Das CSP-Enforcement und der Report-Only-Header wurden in diesem Schritt nicht verändert.
+- Preview-Backup: `/var/backups/lager-phase4-V-20260912-173016`.
+- Final-Deploy-Backup: `/var/backups/lager-phase4-W-20260913-134322`.
+- Vor dem Merge wurde der Preview auf Produktion bytegenau gegen den PR-Stand geprüft.
+- Tab-Titel, Favicon, Statusfarben, Dashboard, Angebote, Filialausgang, Kunden, Navigation und Logout wurden manuell als funktionierend bestätigt.
+- Nach dem finalen Deploy entspricht Produktion exakt `origin/main` auf Commit `53b6364`.
+- Die drei produktiven Runtime-Dateien stimmen bytegenau mit dem gemergten `main` überein.
+- Das Produktions-Worktree ist sauber; es bestehen keine verbliebenen Stashes.
+- Nginx und PHP-FPM sind aktiv; HTTPS liefert HTTP 200 und die TLS-Verifikation bleibt erfolgreich.
+
+### CSP-Stand nach Phase 4F.2
+
+Das Enforcement bleibt unverändert:
+
+```text
+base-uri 'self'
+object-src 'none'
+frame-ancestors 'self'
+form-action 'self'
+connect-src 'self'
+frame-src 'self'
+img-src 'self' data:
+font-src 'self' data:
+media-src 'self'
+worker-src 'self' blob:
+manifest-src 'self'
+```
+
+Weiterhin Report-Only:
+
+- `script-src 'self' 'unsafe-inline'`
+- `style-src 'self' 'unsafe-inline'`
+
+Als nächster Schritt werden die verbleibenden Inline-Skripte und `script-src-attr`-Quellen in kleinen, funktional zusammenhängenden Paketen externalisiert bzw. durch Event-Listener ersetzt. `script-src` wird erst dann scharf geschaltet, wenn eine erneute Report-Only-Inventur keine echten produktiven Blocker mehr zeigt.
