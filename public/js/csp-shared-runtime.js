@@ -90,9 +90,69 @@
         }).observe(document.body, { childList: true, subtree: true });
     }
 
+    function initCspEventHandlers() {
+        document.addEventListener('click', (event) => {
+            const openTrigger = event.target.closest?.('[data-dialog-open]');
+
+            if (openTrigger) {
+                const dialog = document.getElementById(openTrigger.dataset.dialogOpen || '');
+
+                if (dialog?.showModal) {
+                    event.preventDefault();
+                    dialog.showModal();
+                }
+
+                return;
+            }
+
+            const closeTrigger = event.target.closest?.('[data-dialog-close]');
+
+            if (closeTrigger) {
+                const dialog = document.getElementById(closeTrigger.dataset.dialogClose || '');
+
+                if (dialog?.close) {
+                    event.preventDefault();
+                    dialog.close();
+                }
+
+                return;
+            }
+
+            const confirmTrigger = event.target.closest?.('[data-confirm]');
+
+            if (!confirmTrigger) {
+                return;
+            }
+
+            const message = confirmTrigger.dataset.confirm || 'Aktion wirklich ausführen?';
+
+            if (!window.confirm(message)) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            }
+        });
+
+        document.addEventListener('change', (event) => {
+            const control = event.target.closest?.('[data-auto-submit]');
+            const form = control?.form;
+
+            if (!control || !form) {
+                return;
+            }
+
+            if (typeof form.requestSubmit === 'function') {
+                form.requestSubmit();
+                return;
+            }
+
+            form.submit();
+        });
+    }
+
     function init() {
         initBrowserBranding();
         initUnifiedStatusColors();
+        initCspEventHandlers();
     }
 
     if (document.readyState === 'loading') {

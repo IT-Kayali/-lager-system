@@ -26,7 +26,7 @@
                     name="revenue_year"
                     class="premium-select"
                     data-search="false"
-                    onchange="this.form.submit()"
+                    data-auto-submit
                 >
                     <option value="all" @selected($selectedRevenueYear === 'all')>Gesamter Zeitraum</option>
                     @foreach ($revenueYears as $year)
