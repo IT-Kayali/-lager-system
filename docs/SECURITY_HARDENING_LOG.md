@@ -150,3 +150,51 @@ Weiterhin Report-Only:
 - `style-src 'self' 'unsafe-inline'`
 
 Als nächster Schritt werden die verbleibenden Inline-Skripte und `script-src-attr`-Quellen in kleinen, funktional zusammenhängenden Paketen externalisiert bzw. durch Event-Listener ersetzt. `script-src` wird erst dann scharf geschaltet, wenn eine erneute Report-Only-Inventur keine echten produktiven Blocker mehr zeigt.
+
+## Phase 4F.3A – einfache Inline-Event-Handler entfernt ✅ abgeschlossen
+
+Am 13.09.2026 wurde das erste gezielte `script-src-attr`-Paket produktiv abgeschlossen.
+
+- PR #106 (`Security: replace simple inline event handlers`) wurde nach erfolgreichem Tests- und Linter-Workflow gemergt.
+- Merge-Commit: `79dcebf806a4799f36d149e4443f0dc033dda4f8`.
+- Der Dashboard-Aktivitäten-Dialog verwendet jetzt `data-dialog-open` und `data-dialog-close` mit delegierten Listenern aus `public/js/csp-shared-runtime.js` statt Inline-`onclick`.
+- Die Preisfilter für Produkt und Kundengruppe verwenden jetzt `data-auto-submit` statt Inline-`onchange`.
+- Der Kundenumsatz-Jahresfilter verwendet ebenfalls `data-auto-submit` statt Inline-`onchange`.
+- Die Bestätigung zum Zurücksetzen des Button-Designs verwendet jetzt `data-confirm` statt Inline-`onclick`.
+- Die gemeinsame CSP-Runtime wurde um `initCspEventHandlers` und delegierte Handler für Dialoge, Auto-Submit und Bestätigungen erweitert.
+- Größere Inline-`<script>`-Blöcke und Inline-Styles wurden in diesem Schritt bewusst nicht verändert.
+- Nginx-Konfiguration, CSP-Enforcement und Report-Only-Policy blieben unverändert.
+- Preview-Backup: `/var/backups/lager-phase4-X-20260913-141050`.
+- Final-Deploy-Backup: `/var/backups/lager-phase4-Y-20260913-141720`.
+- Vor dem Merge stimmten alle fünf produktiven Preview-Dateien bytegenau mit dem PR-Stand überein.
+- Dashboard-Dialog, Preisfilter, Kundenumsatzfilter und Reset-Bestätigung wurden manuell als funktionierend bestätigt.
+- Der finale Deploy erfolgte per `git pull --ff-only` auf Commit `79dcebf`.
+- Der temporäre Preview-Stash wurde nach erfolgreicher Prüfung entfernt.
+- Das Produktions-Worktree ist sauber.
+- HTTPS liefert HTTP 200, HTTP wird mit 308 auf HTTPS umgeleitet und die TLS-Verifikation bleibt erfolgreich.
+- Nginx und PHP-FPM sind aktiv.
+
+### CSP-Stand nach Phase 4F.3A
+
+Das Enforcement bleibt weiterhin unverändert:
+
+```text
+base-uri 'self'
+object-src 'none'
+frame-ancestors 'self'
+form-action 'self'
+connect-src 'self'
+frame-src 'self'
+img-src 'self' data:
+font-src 'self' data:
+media-src 'self'
+worker-src 'self' blob:
+manifest-src 'self'
+```
+
+Weiterhin Report-Only:
+
+- `script-src 'self' 'unsafe-inline'`
+- `style-src 'self' 'unsafe-inline'`
+
+Als nächstes folgt Phase 4F.3B: die verbliebenen einfachen `onsubmit="return confirm(...)"`-Handler werden in ein separates, kontrolliertes Paket überführt. `script-src` bleibt weiterhin Report-Only, bis auch die verbleibenden Inline-`<script>`-Blöcke ausreichend reduziert und erneut inventarisiert wurden.
