@@ -140,3 +140,21 @@ test('customer and batch form scripts use the shared CSP runtime', function () {
         ->toContain('data-batch-expiry-runtime')
         ->toContain('addMonthsNoOverflow');
 });
+
+test('category product search uses the shared CSP runtime', function () {
+    $categoryShow = file_get_contents(resource_path('views/pages/product-categories/show.blade.php'));
+    $runtime = file_get_contents(public_path('js/csp-shared-runtime.js'));
+
+    expect($categoryShow)
+        ->not->toContain('<script')
+        ->toContain('data-category-product-search-runtime')
+        ->toContain('data-category-product-row')
+        ->toContain('category-product-search-clear')
+        ->toContain('category-product-search-empty');
+
+    expect($runtime)
+        ->toContain('initCategoryProductSearchRuntime')
+        ->toContain('data-category-product-search-runtime')
+        ->toContain('data-category-product-row')
+        ->toContain('category-product-search-empty');
+});

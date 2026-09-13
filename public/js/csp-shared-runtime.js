@@ -340,6 +340,51 @@
         updateAutomaticExpiry();
     }
 
+    function initCategoryProductSearchRuntime() {
+        const input = document.querySelector('[data-category-product-search-runtime]');
+
+        if (!input) {
+            return;
+        }
+
+        const clear = document.getElementById('category-product-search-clear');
+        const rows = Array.from(document.querySelectorAll('[data-category-product-row]'));
+        const empty = document.getElementById('category-product-search-empty');
+
+        if (!rows.length) {
+            return;
+        }
+
+        function filterRows() {
+            const term = input.value.trim().toLocaleLowerCase('de-DE');
+            let visible = 0;
+
+            rows.forEach((row) => {
+                const productName = row.querySelector('.product-link')?.textContent.trim().toLocaleLowerCase('de-DE') ?? '';
+                const matches = term === '' || productName.includes(term);
+
+                row.hidden = !matches;
+
+                if (matches) {
+                    visible += 1;
+                }
+            });
+
+            if (empty) {
+                empty.hidden = visible !== 0;
+            }
+
+            clear?.classList.toggle('visible', term !== '');
+        }
+
+        input.addEventListener('input', filterRows);
+        clear?.addEventListener('click', () => {
+            input.value = '';
+            filterRows();
+            input.focus();
+        });
+    }
+
     function init() {
         initBrowserBranding();
         initUnifiedStatusColors();
@@ -348,6 +393,7 @@
         initSalesBranchCreateRuntime();
         initCustomerFormRuntime();
         initBatchExpiryRuntime();
+        initCategoryProductSearchRuntime();
     }
 
     if (document.readyState === 'loading') {
