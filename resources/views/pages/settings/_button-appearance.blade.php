@@ -134,7 +134,7 @@
                     type="submit"
                     name="reset_button_appearance"
                     value="1"
-                    onclick="return confirm('Standardfarben der Buttons wiederherstellen?');"
+                    data-confirm="Standardfarben der Buttons wiederherstellen?"
                 >
                     <i class="bi bi-arrow-counterclockwise"></i>
                     Standard wiederherstellen
