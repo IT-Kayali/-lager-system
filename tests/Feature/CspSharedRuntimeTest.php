@@ -115,3 +115,28 @@ test('simple product and sales branch page scripts use the shared CSP runtime', 
         ->toContain('initSalesBranchCreateRuntime')
         ->toContain('data-sales-branch-create');
 });
+
+test('customer and batch form scripts use the shared CSP runtime', function () {
+    $customerForm = file_get_contents(resource_path('views/pages/customers/_form.blade.php'));
+    $batchForm = file_get_contents(resource_path('views/pages/batches/_form.blade.php'));
+    $runtime = file_get_contents(public_path('js/csp-shared-runtime.js'));
+
+    expect($customerForm)
+        ->not->toContain('<script')
+        ->toContain('data-customer-form-runtime')
+        ->toContain('delivery-address-card')
+        ->toContain('customer-group-preview');
+
+    expect($batchForm)
+        ->not->toContain('<script')
+        ->toContain('data-batch-expiry-runtime')
+        ->toContain('data-default-months=')
+        ->toContain('data-auto-expiry=');
+
+    expect($runtime)
+        ->toContain('initCustomerFormRuntime')
+        ->toContain('data-customer-form-runtime')
+        ->toContain('initBatchExpiryRuntime')
+        ->toContain('data-batch-expiry-runtime')
+        ->toContain('addMonthsNoOverflow');
+});

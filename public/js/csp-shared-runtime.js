@@ -225,12 +225,129 @@
         });
     }
 
+    function initCustomerFormRuntime() {
+        const checkbox = document.querySelector('[data-customer-form-runtime]');
+
+        if (!checkbox) {
+            return;
+        }
+
+        const card = document.getElementById('delivery-address-card');
+        const deliveryFields = card ? Array.from(card.querySelectorAll('input, textarea, select')) : [];
+        const groupSelect = document.getElementById('customer_group_id');
+        const groupPreviewWrap = document.getElementById('customer-group-preview-wrap');
+        const groupPreview = document.getElementById('customer-group-preview');
+
+        function updateDeliveryAddressVisibility() {
+            if (!card) {
+                return;
+            }
+
+            const isDifferent = checkbox.checked;
+            card.hidden = !isDifferent;
+
+            deliveryFields.forEach((field) => {
+                field.disabled = !isDifferent;
+            });
+        }
+
+        function updateCustomerGroupPreview() {
+            if (!groupSelect || !groupPreviewWrap || !groupPreview) {
+                return;
+            }
+
+            const option = groupSelect.selectedOptions[0];
+
+            if (!option || !option.value) {
+                groupPreviewWrap.hidden = true;
+                groupPreview.textContent = '';
+                return;
+            }
+
+            const color = option.dataset.color || '#475569';
+            const textColor = option.dataset.textColor || '#FFFFFF';
+
+            groupPreview.textContent = option.textContent.trim();
+            groupPreview.style.backgroundColor = color;
+            groupPreview.style.borderColor = color;
+            groupPreview.style.color = textColor;
+            groupPreviewWrap.hidden = false;
+        }
+
+        checkbox.addEventListener('change', updateDeliveryAddressVisibility);
+        groupSelect?.addEventListener('change', updateCustomerGroupPreview);
+        updateDeliveryAddressVisibility();
+        updateCustomerGroupPreview();
+    }
+
+    function initBatchExpiryRuntime() {
+        const expires = document.querySelector('[data-batch-expiry-runtime]');
+        const received = document.getElementById('received_at');
+
+        if (!received || !expires || expires.dataset.expiryBound === '1') {
+            return;
+        }
+
+        expires.dataset.expiryBound = '1';
+        let autoExpiry = expires.dataset.autoExpiry === '1';
+        const defaultMonths = Number.parseInt(expires.dataset.defaultMonths || '24', 10);
+
+        function toIsoDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+
+            return `${year}-${month}-${day}`;
+        }
+
+        function addMonthsNoOverflow(isoDate, months) {
+            if (!isoDate) {
+                return '';
+            }
+
+            const [year, month, day] = isoDate.split('-').map(Number);
+
+            if (!year || !month || !day) {
+                return '';
+            }
+
+            const targetMonthIndex = (month - 1) + months;
+            const targetYear = year + Math.floor(targetMonthIndex / 12);
+            const targetMonth = ((targetMonthIndex % 12) + 12) % 12;
+            const lastDay = new Date(targetYear, targetMonth + 1, 0).getDate();
+            const safeDay = Math.min(day, lastDay);
+
+            return toIsoDate(new Date(targetYear, targetMonth, safeDay));
+        }
+
+        function updateAutomaticExpiry() {
+            if (!autoExpiry) {
+                return;
+            }
+
+            expires.value = addMonthsNoOverflow(received.value, defaultMonths);
+        }
+
+        function disableAutomaticExpiry() {
+            autoExpiry = false;
+            expires.dataset.autoExpiry = '0';
+        }
+
+        received.addEventListener('change', updateAutomaticExpiry);
+        received.addEventListener('input', updateAutomaticExpiry);
+        expires.addEventListener('input', disableAutomaticExpiry);
+        expires.addEventListener('change', disableAutomaticExpiry);
+        updateAutomaticExpiry();
+    }
+
     function init() {
         initBrowserBranding();
         initUnifiedStatusColors();
         initCspEventHandlers();
         initProductEditorRuntime();
         initSalesBranchCreateRuntime();
+        initCustomerFormRuntime();
+        initBatchExpiryRuntime();
     }
 
     if (document.readyState === 'loading') {
