@@ -198,3 +198,48 @@ Weiterhin Report-Only:
 - `style-src 'self' 'unsafe-inline'`
 
 Als nächstes folgt Phase 4F.3B: die verbliebenen einfachen `onsubmit="return confirm(...)"`-Handler werden in ein separates, kontrolliertes Paket überführt. `script-src` bleibt weiterhin Report-Only, bis auch die verbleibenden Inline-`<script>`-Blöcke ausreichend reduziert und erneut inventarisiert wurden.
+
+## Phase 4F.3B – destruktive Formular-Bestätigungen externalisiert ✅ abgeschlossen
+
+Am 13.09.2026 wurde das nächste kontrollierte `script-src-attr`-Paket produktiv abgeschlossen.
+
+- PR #108 (`Security: replace destructive form submit handlers`) wurde nach erfolgreichem Tests- und Linter-Workflow sowie manuellem Live-Preview gemergt.
+- Merge-Commit: `2f2306f400c92673445c4f312f4df804cf58a200`.
+- Acht produktive destruktive Formulare verwenden jetzt `data-confirm` statt `onsubmit="return confirm(...)"`.
+- Betroffen sind Angebotsvorschau, Benutzerverwaltung, Kunden, Lieferanten, Chargen, Produkte, Produktkategorien und Filialausgänge.
+- `public/js/csp-shared-runtime.js` enthält dafür einen delegierten `submit`-Listener für `form[data-confirm]`.
+- Der bestehende Click-Handler ignoriert Formulare, damit bei Submit-Aktionen kein doppelter Bestätigungsdialog entsteht.
+- Der Live-Preview wurde vor dem Merge manuell geprüft; die Bestätigungsdialoge erschienen genau einmal und Abbrechen verhinderte die destruktive Aktion.
+- Final-Deploy-Backup: `/var/backups/lager-phase4-AA-20260913-144324`.
+- Vor dem finalen Deploy stimmten alle produktiven Preview-Dateien bytegenau mit dem gemergten `main` überein.
+- Der finale Deploy erfolgte per `git pull --ff-only` auf Commit `2f2306f`.
+- Der temporäre Preview-Stash wurde anschließend kontrolliert entfernt.
+- Das Produktions-Worktree ist sauber.
+- HTTPS liefert HTTP 200, HTTP wird mit 308 auf HTTPS umgeleitet und die TLS-Verifikation bleibt erfolgreich.
+- Nginx und PHP-FPM sind aktiv.
+- Nginx-Konfiguration, CSP-Enforcement und Report-Only-Policy wurden in diesem Schritt nicht verändert.
+
+### CSP-Stand nach Phase 4F.3B
+
+Das Enforcement bleibt weiterhin unverändert:
+
+```text
+base-uri 'self'
+object-src 'none'
+frame-ancestors 'self'
+form-action 'self'
+connect-src 'self'
+frame-src 'self'
+img-src 'self' data:
+font-src 'self' data:
+media-src 'self'
+worker-src 'self' blob:
+manifest-src 'self'
+```
+
+Weiterhin Report-Only:
+
+- `script-src 'self' 'unsafe-inline'`
+- `style-src 'self' 'unsafe-inline'`
+
+Als nächstes folgt Phase 4F.3C: die verbleibenden Inline-Submit-Bestätigungen in der Angebotsliste und in den Kundengruppen werden auf die bestehende `data-confirm`-Runtime umgestellt. Danach wird erneut inventarisiert, welche `script-src-attr`-Quellen in den produktiven Views noch übrig sind.

@@ -65,6 +65,8 @@ test('destructive form confirmations use CSP safe data attributes', function () 
         resource_path('views/pages/products/index.blade.php'),
         resource_path('views/pages/product-categories/index.blade.php'),
         resource_path('views/pages/branch-withdrawals/index.blade.php'),
+        resource_path('views/pages/offers/index.blade.php'),
+        resource_path('views/pages/settings/_customer-groups.blade.php'),
     ];
 
     foreach ($views as $view) {

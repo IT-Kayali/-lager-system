@@ -180,7 +180,7 @@
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
 
-                                        <form method="POST" action="{{ route('offers.cancel', $offer) }}" onsubmit="return confirm('Angebot stornieren und Reservierung freigeben?');">
+                                        <form method="POST" action="{{ route('offers.cancel', $offer) }}" data-confirm="Angebot stornieren und Reservierung freigeben?">
                                             @csrf
                                             <button class="premium-icon-btn premium-danger" type="submit" title="Stornieren">
                                                 <i class="bi bi-x-circle"></i>
@@ -189,7 +189,7 @@
                                     @endif
 
                                     @if (auth()->user()?->isManager())
-                                        <form method="POST" action="{{ route('offers.destroy', $offer) }}" onsubmit="return confirm('Angebot wirklich löschen? Offene Reservierungen werden dadurch freigegeben. Erledigte Angebote mit FIFO-Abbuchung bleiben geschützt.');">
+                                        <form method="POST" action="{{ route('offers.destroy', $offer) }}" data-confirm="Angebot wirklich löschen? Offene Reservierungen werden dadurch freigegeben. Erledigte Angebote mit FIFO-Abbuchung bleiben geschützt.">
                                             @csrf
                                             @method('DELETE')
                                             <button class="premium-icon-btn premium-danger" type="submit" title="Löschen">

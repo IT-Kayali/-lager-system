@@ -293,7 +293,7 @@
                         <form
                             method="POST"
                             action="{{ route('customer-groups.destroy', $group) }}"
-                            onsubmit="return confirm('Kundengruppe wirklich löschen?');"
+                            data-confirm="Kundengruppe wirklich löschen?"
                         >
                             @csrf
                             @method('DELETE')
