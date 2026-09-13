@@ -6,7 +6,17 @@
 @endphp
 
 <x-layouts.premium title="Filialausgang erstellen" subtitle="Mehrere Produkte für eine Filiale vorbereiten und den Ausgabestatus verwalten.">
-    <form class="branch-editor-form branch-editor-form-create" method="POST" action="{{ route($storeRoute) }}">
+    <form
+        class="branch-editor-form branch-editor-form-create"
+        method="POST"
+        action="{{ route($storeRoute) }}"
+        @if ($isSales)
+            data-sales-branch-create
+            data-open-status="{{ \App\Models\BranchWithdrawal::STATUS_OPEN }}"
+            data-default-index-url="{{ route('branch-withdrawals.index') }}"
+            data-sales-index-url="{{ route('sales.branch-withdrawals.index') }}"
+        @endif
+    >
         @if ($isSales)
             <input type="hidden" name="status" value="{{ \App\Models\BranchWithdrawal::STATUS_OPEN }}">
         @endif
@@ -19,20 +29,4 @@
             display: none !important;
         }
     </style>
-
-    @if ($isSales)
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const statusSelect = document.querySelector('.branch-editor-form select[name="status"]');
-                if (statusSelect) {
-                    statusSelect.value = @json(\App\Models\BranchWithdrawal::STATUS_OPEN);
-                    statusSelect.disabled = true;
-                }
-
-                document.querySelectorAll('.branch-editor-form a[href="{{ route('branch-withdrawals.index') }}"]').forEach((link) => {
-                    link.href = @json(route('sales.branch-withdrawals.index'));
-                });
-            });
-        </script>
-    @endif
 </x-layouts.premium>
