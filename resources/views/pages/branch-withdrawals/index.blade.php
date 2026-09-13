@@ -154,7 +154,7 @@
                                 <div class="premium-actions branch-actions">
                                     @if ($isManager)
                                         <a href="{{ route('branch-withdrawals.edit', $withdrawal) }}" class="premium-icon-btn" title="Bearbeiten" aria-label="Filialausgang bearbeiten"><i class="bi bi-pencil"></i></a>
-                                        <form method="POST" action="{{ route('branch-withdrawals.destroy', $withdrawal) }}" onsubmit="return confirm('Filialausgang wirklich löschen? Bereits ausgegebene Mengen werden automatisch zurückgebucht.');">
+                                        <form method="POST" action="{{ route('branch-withdrawals.destroy', $withdrawal) }}" data-confirm="Filialausgang wirklich löschen? Bereits ausgegebene Mengen werden automatisch zurückgebucht.">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="premium-icon-btn premium-danger" title="Löschen" aria-label="Filialausgang löschen"><i class="bi bi-trash"></i></button>
