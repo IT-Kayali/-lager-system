@@ -144,6 +144,7 @@
             name="delivery_address_different"
             type="checkbox"
             value="1"
+            data-customer-form-runtime
             @checked($hasDifferentDeliveryAddress)
             style="width:18px; height:18px; accent-color:#e3ca6e;"
         >
@@ -225,55 +226,3 @@
         Zurück
     </a>
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const checkbox = document.getElementById('delivery_address_different');
-        const card = document.getElementById('delivery-address-card');
-        const deliveryFields = card ? Array.from(card.querySelectorAll('input, textarea, select')) : [];
-        const groupSelect = document.getElementById('customer_group_id');
-        const groupPreviewWrap = document.getElementById('customer-group-preview-wrap');
-        const groupPreview = document.getElementById('customer-group-preview');
-
-        function updateDeliveryAddressVisibility() {
-            if (!checkbox || !card) {
-                return;
-            }
-
-            const isDifferent = checkbox.checked;
-            card.hidden = !isDifferent;
-
-            deliveryFields.forEach((field) => {
-                field.disabled = !isDifferent;
-            });
-        }
-
-        function updateCustomerGroupPreview() {
-            if (!groupSelect || !groupPreviewWrap || !groupPreview) {
-                return;
-            }
-
-            const option = groupSelect.selectedOptions[0];
-
-            if (!option || !option.value) {
-                groupPreviewWrap.hidden = true;
-                groupPreview.textContent = '';
-                return;
-            }
-
-            const color = option.dataset.color || '#475569';
-            const textColor = option.dataset.textColor || '#FFFFFF';
-
-            groupPreview.textContent = option.textContent.trim();
-            groupPreview.style.backgroundColor = color;
-            groupPreview.style.borderColor = color;
-            groupPreview.style.color = textColor;
-            groupPreviewWrap.hidden = false;
-        }
-
-        checkbox?.addEventListener('change', updateDeliveryAddressVisibility);
-        groupSelect?.addEventListener('change', updateCustomerGroupPreview);
-        updateDeliveryAddressVisibility();
-        updateCustomerGroupPreview();
-    });
-</script>
