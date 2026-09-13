@@ -86,7 +86,7 @@
                                 <div class="premium-actions suppliers-actions">
                                     <a class="premium-icon-btn" href="{{ route('suppliers.show', ['supplier' => $supplierUrl]) }}" title="Vorschau"><i class="bi bi-eye"></i></a>
                                     <a class="premium-icon-btn" href="{{ route('suppliers.edit', $supplier) }}" title="Bearbeiten"><i class="bi bi-pencil"></i></a>
-                                    <form method="POST" action="{{ route('suppliers.destroy', $supplier) }}" onsubmit="return confirm('Lieferant wirklich löschen?');">
+                                    <form method="POST" action="{{ route('suppliers.destroy', $supplier) }}" data-confirm="Lieferant wirklich löschen?">
                                         @csrf
                                         @method('DELETE')
                                         <button class="premium-icon-btn premium-danger" type="submit" title="Löschen"><i class="bi bi-trash"></i></button>

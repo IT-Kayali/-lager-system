@@ -108,7 +108,7 @@
                                     <a class="premium-icon-btn" href="{{ route('customers.edit', $customer) }}" title="Bearbeiten"><i class="bi bi-pencil"></i></a>
 
                                     @unless ($crmCustomerCare)
-                                        <form method="POST" action="{{ route('customers.destroy', $customer) }}" onsubmit="return confirm('Kunde wirklich löschen?');">
+                                        <form method="POST" action="{{ route('customers.destroy', $customer) }}" data-confirm="Kunde wirklich löschen?">
                                             @csrf
                                             @method('DELETE')
                                             <button class="premium-icon-btn premium-danger" type="submit" title="Löschen"><i class="bi bi-trash"></i></button>

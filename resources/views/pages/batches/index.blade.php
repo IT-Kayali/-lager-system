@@ -69,7 +69,7 @@
                             </td>
                             <td><span class="batch-date">{{ $batch->received_at?->format('d.m.Y') ?: '—' }}</span></td>
                             <td><span class="fifo-status-pill"><i class="bi bi-layers"></i>Ältere zuerst</span></td>
-                            <td><div class="premium-actions batches-actions"><a class="premium-icon-btn" href="{{ route('batches.edit', $batch) }}" title="Bearbeiten"><i class="bi bi-pencil-square"></i></a><form method="POST" action="{{ route('batches.destroy', $batch) }}" onsubmit="return confirm('Charge wirklich löschen?');">@csrf @method('DELETE')<button class="premium-icon-btn premium-danger" type="submit" title="Löschen"><i class="bi bi-trash"></i></button></form></div></td>
+                            <td><div class="premium-actions batches-actions"><a class="premium-icon-btn" href="{{ route('batches.edit', $batch) }}" title="Bearbeiten"><i class="bi bi-pencil-square"></i></a><form method="POST" action="{{ route('batches.destroy', $batch) }}" data-confirm="Charge wirklich löschen?">@csrf @method('DELETE')<button class="premium-icon-btn premium-danger" type="submit" title="Löschen"><i class="bi bi-trash"></i></button></form></div></td>
                         </tr>
                     @empty
                         <tr><td colspan="7"><div class="batches-empty-state"><i class="bi bi-layers"></i><strong>Noch keine Chargen vorhanden.</strong><span>Lege eine neue Charge an, um FIFO-Bestand aufzubauen.</span></div></td></tr>

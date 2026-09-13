@@ -54,3 +54,31 @@ test('simple browser actions no longer use inline event handler attributes', fun
         ->toContain('[data-auto-submit]')
         ->toContain('[data-confirm]');
 });
+
+test('destructive form confirmations use CSP safe data attributes', function () {
+    $views = [
+        resource_path('views/pages/offers/show.blade.php'),
+        resource_path('views/pages/security/index.blade.php'),
+        resource_path('views/pages/customers/index.blade.php'),
+        resource_path('views/pages/suppliers/index.blade.php'),
+        resource_path('views/pages/batches/index.blade.php'),
+        resource_path('views/pages/products/index.blade.php'),
+        resource_path('views/pages/product-categories/index.blade.php'),
+        resource_path('views/pages/branch-withdrawals/index.blade.php'),
+    ];
+
+    foreach ($views as $view) {
+        $content = file_get_contents($view);
+
+        expect($content)
+            ->not->toContain('onsubmit=')
+            ->toContain('data-confirm=');
+    }
+
+    $runtime = file_get_contents(public_path('js/csp-shared-runtime.js'));
+
+    expect($runtime)
+        ->toContain("document.addEventListener('submit'")
+        ->toContain("form[data-confirm]")
+        ->toContain("confirmTrigger.matches('form')");
+});

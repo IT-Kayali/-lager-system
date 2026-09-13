@@ -120,11 +120,26 @@
 
             const confirmTrigger = event.target.closest?.('[data-confirm]');
 
-            if (!confirmTrigger) {
+            if (!confirmTrigger || confirmTrigger.matches('form')) {
                 return;
             }
 
             const message = confirmTrigger.dataset.confirm || 'Aktion wirklich ausführen?';
+
+            if (!window.confirm(message)) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            }
+        });
+
+        document.addEventListener('submit', (event) => {
+            const form = event.target.closest?.('form[data-confirm]');
+
+            if (!form) {
+                return;
+            }
+
+            const message = form.dataset.confirm || 'Aktion wirklich ausführen?';
 
             if (!window.confirm(message)) {
                 event.preventDefault();

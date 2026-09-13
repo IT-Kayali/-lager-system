@@ -128,7 +128,7 @@
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
 
-                                        <form method="POST" action="{{ route('products.destroy', $product) }}" onsubmit="return confirm('Produkt wirklich löschen?');">
+                                        <form method="POST" action="{{ route('products.destroy', $product) }}" data-confirm="Produkt wirklich löschen?">
                                             @csrf
                                             @method('DELETE')
                                             <button class="premium-icon-btn premium-danger" type="submit" title="Löschen">
