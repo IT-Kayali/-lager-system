@@ -100,7 +100,7 @@
                                 <div class="premium-actions category-actions">
                                     <a class="premium-icon-btn" href="{{ route('product-categories.show', ['product_category' => $categoryUrlName]) }}" title="Vorschau"><i class="bi bi-eye"></i></a>
                                     <a class="premium-icon-btn" href="{{ route('product-categories.edit', $category) }}" title="Bearbeiten"><i class="bi bi-pencil-square"></i></a>
-                                    <form method="POST" action="{{ route('product-categories.destroy', $category) }}" onsubmit="return confirm('Kategorie wirklich löschen?');">
+                                    <form method="POST" action="{{ route('product-categories.destroy', $category) }}" data-confirm="Kategorie wirklich löschen?">
                                         @csrf
                                         @method('DELETE')
                                         <button class="premium-icon-btn premium-danger" type="submit" title="Löschen"><i class="bi bi-trash"></i></button>
