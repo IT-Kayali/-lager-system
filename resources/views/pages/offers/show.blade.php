@@ -15,7 +15,7 @@
                             && (auth()->user()?->isManager() || (auth()->user()?->isSales() && $offer->status === \App\Models\Offer::STATUS_OFFER));
                     @endphp
                     @if ($canEditOffer) <a href="{{ route('offers.edit', $offer) }}" class="premium-btn"><i class="bi bi-pencil"></i> Bearbeiten</a> @endif
-                    @if (auth()->user()?->isManager()) <form method="POST" action="{{ route('offers.destroy', $offer) }}" onsubmit="return confirm('Angebot wirklich löschen?');">@csrf @method('DELETE')<button class="premium-btn" type="submit" style="background:#991b1b;"><i class="bi bi-trash"></i> Löschen</button></form> @endif
+                    @if (auth()->user()?->isManager()) <form method="POST" action="{{ route('offers.destroy', $offer) }}" data-confirm="Angebot wirklich löschen?">@csrf @method('DELETE')<button class="premium-btn" type="submit" style="background:#991b1b;"><i class="bi bi-trash"></i> Löschen</button></form> @endif
                 </div>
             </div>
 
