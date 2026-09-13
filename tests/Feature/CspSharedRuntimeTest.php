@@ -84,3 +84,34 @@ test('destructive form confirmations use CSP safe data attributes', function () 
         ->toContain("form[data-confirm]")
         ->toContain("confirmTrigger.matches('form')");
 });
+
+test('simple product and sales branch page scripts use the shared CSP runtime', function () {
+    $productCreate = file_get_contents(resource_path('views/pages/products/create.blade.php'));
+    $productEdit = file_get_contents(resource_path('views/pages/products/edit.blade.php'));
+    $branchCreate = file_get_contents(resource_path('views/pages/branch-withdrawals/create.blade.php'));
+    $runtime = file_get_contents(public_path('js/csp-shared-runtime.js'));
+
+    expect($productCreate)
+        ->not->toContain('<script')
+        ->toContain('data-product-editor-runtime')
+        ->toContain('data-product-create-runtime');
+
+    expect($productEdit)
+        ->not->toContain('<script')
+        ->toContain('data-product-editor-runtime')
+        ->not->toContain('data-product-create-runtime');
+
+    expect($branchCreate)
+        ->not->toContain('<script')
+        ->toContain('data-sales-branch-create')
+        ->toContain('data-open-status=')
+        ->toContain('data-default-index-url=')
+        ->toContain('data-sales-index-url=');
+
+    expect($runtime)
+        ->toContain('initProductEditorRuntime')
+        ->toContain('data-product-editor-runtime')
+        ->toContain('data-product-create-runtime')
+        ->toContain('initSalesBranchCreateRuntime')
+        ->toContain('data-sales-branch-create');
+});
