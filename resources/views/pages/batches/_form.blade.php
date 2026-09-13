@@ -112,6 +112,7 @@
                         type="date"
                         class="premium-input"
                         value="{{ $expiresValue }}"
+                        data-batch-expiry-runtime
                         data-default-months="{{ $defaultBatchExpiryMonths ?? 24 }}"
                         data-auto-expiry="{{ $batch->exists ? '0' : '1' }}"
                     >
@@ -175,63 +176,6 @@
         Zurück
     </a>
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const received = document.getElementById('received_at');
-        const expires = document.getElementById('expires_at');
-
-        if (!received || !expires || expires.dataset.expiryBound === '1') {
-            return;
-        }
-
-        expires.dataset.expiryBound = '1';
-        let autoExpiry = expires.dataset.autoExpiry === '1';
-        const defaultMonths = Number.parseInt(expires.dataset.defaultMonths || '24', 10);
-
-        function toIsoDate(date) {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-
-        function addMonthsNoOverflow(isoDate, months) {
-            if (!isoDate) return '';
-
-            const [year, month, day] = isoDate.split('-').map(Number);
-            if (!year || !month || !day) return '';
-
-            const targetMonthIndex = (month - 1) + months;
-            const targetYear = year + Math.floor(targetMonthIndex / 12);
-            const targetMonth = ((targetMonthIndex % 12) + 12) % 12;
-            const lastDay = new Date(targetYear, targetMonth + 1, 0).getDate();
-            const safeDay = Math.min(day, lastDay);
-
-            return toIsoDate(new Date(targetYear, targetMonth, safeDay));
-        }
-
-        function updateAutomaticExpiry() {
-            if (!autoExpiry) return;
-            expires.value = addMonthsNoOverflow(received.value, defaultMonths);
-        }
-
-        received.addEventListener('change', updateAutomaticExpiry);
-        received.addEventListener('input', updateAutomaticExpiry);
-
-        expires.addEventListener('input', function () {
-            autoExpiry = false;
-            expires.dataset.autoExpiry = '0';
-        });
-
-        expires.addEventListener('change', function () {
-            autoExpiry = false;
-            expires.dataset.autoExpiry = '0';
-        });
-
-        updateAutomaticExpiry();
-    });
-</script>
 
 <style>
     .batch-editor-card {
