@@ -15,8 +15,8 @@ test('manual price rules load their CSP safe runtime externally', function () {
     expect($runtime)
         ->toContain('initManualPriceRulesRuntime')
         ->toContain('[data-manual-price-rules-runtime]')
-        ->toContain("[data-price-rule]")
+        ->toContain('[data-price-rule]')
         ->toContain('.remove-price-rule')
-        ->toContain("template.content.cloneNode(true)")
-        ->toContain("input.name = `rules[${index}][${field}]`");
+        ->toContain('template.content.cloneNode(true)')
+        ->toContain('input.name = `rules[${index}][${field}]`');
 });
