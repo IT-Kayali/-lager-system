@@ -158,3 +158,21 @@ test('category product search uses the shared CSP runtime', function () {
         ->toContain('data-category-product-row')
         ->toContain('category-product-search-empty');
 });
+
+test('button appearance preview uses the shared CSP runtime', function () {
+    $buttonAppearance = file_get_contents(resource_path('views/pages/settings/_button-appearance.blade.php'));
+    $runtime = file_get_contents(public_path('js/csp-shared-runtime.js'));
+
+    expect($buttonAppearance)
+        ->not->toContain('<script')
+        ->toContain('data-button-appearance-runtime')
+        ->toContain('primary_button_background')
+        ->toContain('secondary_button_background')
+        ->toContain('data-confirm="Standardfarben der Buttons wiederherstellen?"');
+
+    expect($runtime)
+        ->toContain('initButtonAppearanceRuntime')
+        ->toContain('data-button-appearance-runtime')
+        ->toContain('--premium-primary-button-bg')
+        ->toContain('--premium-secondary-button-bg');
+});
