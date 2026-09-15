@@ -29,6 +29,7 @@
             method="POST"
             action="{{ route('settings.button-appearance.update') }}"
             style="display:grid;gap:18px;margin-top:20px;padding-top:20px;border-top:1px solid #e7dece;"
+            data-button-appearance-runtime
         >
             @csrf
             @method('PUT')
@@ -143,51 +144,6 @@
         </form>
     </details>
 </section>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const form = document.getElementById('button-appearance-form');
-
-        if (!form || form.dataset.previewBound === '1') {
-            return;
-        }
-
-        form.dataset.previewBound = '1';
-
-        const fields = {
-            primaryBackground: document.getElementById('primary_button_background'),
-            primaryText: document.getElementById('primary_button_text'),
-            secondaryBackground: document.getElementById('secondary_button_background'),
-            secondaryText: document.getElementById('secondary_button_text'),
-        };
-
-        function updateButtonPreview() {
-            document.documentElement.style.setProperty(
-                '--premium-primary-button-bg',
-                fields.primaryBackground.value
-            );
-            document.documentElement.style.setProperty(
-                '--premium-primary-button-text',
-                fields.primaryText.value
-            );
-            document.documentElement.style.setProperty(
-                '--premium-secondary-button-bg',
-                fields.secondaryBackground.value
-            );
-            document.documentElement.style.setProperty(
-                '--premium-secondary-button-text',
-                fields.secondaryText.value
-            );
-        }
-
-        Object.values(fields).forEach(function (field) {
-            field.addEventListener('input', updateButtonPreview);
-            field.addEventListener('change', updateButtonPreview);
-        });
-
-        updateButtonPreview();
-    });
-</script>
 
 <style>
     #button-appearance details > summary::-webkit-details-marker {
