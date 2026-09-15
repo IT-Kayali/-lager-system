@@ -169,177 +169,18 @@ class SortableTables
                 return;
             }
 
-            $response->setContent(str_replace('</body>', self::headerScript() . "\n</body>", $html));
+            $response->setContent(str_replace('</body>', self::headerAssets() . "\n</body>", $html));
         });
     }
 
-    private static function headerScript(): string
+    private static function headerAssets(): string
     {
-        return <<<'HTML'
-<script data-sortable-table-enhancer>
-(() => {
-    const normalize = (value) => (value || '').replace(/\s+/g, ' ').trim().toLocaleLowerCase('de-DE');
-    const path = window.location.pathname.toLocaleLowerCase('de-DE');
+        $styleUrl = e(asset('css/sortable-tables.css'));
+        $scriptUrl = e(asset('js/sortable-tables.js'));
 
-    const configurations = [
-        {
-            matches: ['/products', '/verkauf/produkte'],
-            columns: {
-                'produktbezeichnung': ['name', 'asc'],
-                'produkt': ['name', 'asc'],
-                'hersteller': ['manufacturer', 'asc'],
-                'code-nummer': ['code', 'asc'],
-                'produktcode': ['code', 'asc'],
-                'lieferant': ['supplier', 'asc'],
-            },
-        },
-        {
-            matches: ['/offers', '/angebote', '/lager/angebote'],
-            columns: {
-                'angebot': ['number', 'desc'],
-                'angebotsnummer': ['number', 'desc'],
-                'nummer': ['number', 'desc'],
-                'datum': ['date', 'desc'],
-                'erstellt': ['date', 'desc'],
-                'status': ['status', 'asc'],
-                'gesamt': ['total', 'desc'],
-                'gesamtbetrag': ['total', 'desc'],
-            },
-        },
-        {
-            matches: ['/branch-withdrawals', '/filialausgaenge', '/verkauf/filialausgaenge'],
-            columns: {
-                'filialausgang': ['number', 'desc'],
-                'nummer': ['number', 'desc'],
-                'datum': ['date', 'desc'],
-                'filiale': ['branch', 'asc'],
-                'status': ['status', 'asc'],
-            },
-        },
-        {
-            matches: ['/batches', '/chargen'],
-            columns: {
-                'charge': ['batch', 'asc'],
-                'chargennummer': ['batch', 'asc'],
-                'batchnummer': ['batch', 'asc'],
-                'produkt': ['product', 'asc'],
-                'wareneingang': ['received', 'asc'],
-                'lieferdatum': ['received', 'asc'],
-                'ablaufdatum': ['expires', 'asc'],
-                'menge': ['quantity', 'asc'],
-            },
-        },
-        {
-            matches: ['/customers', '/kunden', '/crm/kunden'],
-            columns: {
-                'kunde': ['name', 'asc'],
-                'name': ['name', 'asc'],
-                'firma': ['name', 'asc'],
-                'kundennummer': ['number', 'asc'],
-                'gruppe': ['group', 'asc'],
-                'kundengruppe': ['group', 'asc'],
-                'ort': ['city', 'asc'],
-                'stadt': ['city', 'asc'],
-            },
-        },
-        {
-            matches: ['/product-categories', '/kategorien'],
-            columns: {
-                'kategorie': ['name', 'asc'],
-                'name': ['name', 'asc'],
-                'priorität': ['priority', 'asc'],
-            },
-        },
-        {
-            matches: ['/suppliers', '/lieferanten'],
-            columns: {
-                'lieferant': ['name', 'asc'],
-                'firma': ['name', 'asc'],
-                'lieferantennummer': ['number', 'asc'],
-                'nummer': ['number', 'asc'],
-                'ansprechpartner': ['contact', 'asc'],
-                'ort': ['city', 'asc'],
-                'stadt': ['city', 'asc'],
-            },
-        },
-    ];
-
-    const config = configurations.find((entry) => entry.matches.some((match) => path === match || path.startsWith(match + '/')));
-    if (!config) return;
-
-    const currentUrl = new URL(window.location.href);
-    const currentSort = currentUrl.searchParams.get('sort') || '';
-    const currentDirection = currentUrl.searchParams.get('direction') || '';
-
-    document.querySelectorAll('table thead th').forEach((th) => {
-        if (th.querySelector('[data-table-sort-link]')) return;
-
-        const label = normalize(th.textContent);
-        const definition = config.columns[label];
-        if (!definition) return;
-
-        const [sortKey, defaultDirection] = definition;
-        const active = currentSort === sortKey;
-        const nextDirection = active
-            ? (currentDirection === 'asc' ? 'desc' : 'asc')
-            : defaultDirection;
-
-        const target = new URL(window.location.href);
-        target.searchParams.set('sort', sortKey);
-        target.searchParams.set('direction', nextDirection);
-        target.searchParams.delete('page');
-
-        const link = document.createElement('a');
-        link.href = target.toString();
-        link.dataset.tableSortLink = '1';
-        link.className = 'table-sort-link' + (active ? ' active' : '');
-        link.setAttribute('aria-label', `${th.textContent.trim()} sortieren`);
-
-        const text = document.createElement('span');
-        text.textContent = th.textContent.trim();
-
-        const arrow = document.createElement('span');
-        arrow.className = 'table-sort-arrow';
-        arrow.textContent = active ? (currentDirection === 'desc' ? '↓' : '↑') : '↕';
-        arrow.setAttribute('aria-hidden', 'true');
-
-        link.append(text, arrow);
-        th.replaceChildren(link);
-    });
-
-    if (!document.getElementById('table-sort-link-styles')) {
-        const style = document.createElement('style');
-        style.id = 'table-sort-link-styles';
-        style.textContent = `
-            .table-sort-link {
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                color: inherit !important;
-                text-decoration: none !important;
-                font: inherit;
-                letter-spacing: inherit;
-                text-transform: inherit;
-                cursor: pointer;
-            }
-            .table-sort-link:hover,
-            .table-sort-link.active {
-                color: #8a6a00 !important;
-            }
-            .table-sort-arrow {
-                font-size: 12px;
-                line-height: 1;
-                opacity: .65;
-            }
-            .table-sort-link.active .table-sort-arrow {
-                opacity: 1;
-                font-weight: 950;
-            }
-        `;
-        document.head.appendChild(style);
-    }
-})();
-</script>
+        return <<<HTML
+<link rel="stylesheet" href="{$styleUrl}" data-sortable-table-styles>
+<script src="{$scriptUrl}" data-sortable-table-enhancer defer></script>
 HTML;
     }
 }
