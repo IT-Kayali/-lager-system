@@ -14,7 +14,7 @@ test('sortable table enhancer uses external CSP safe assets', function () {
         ->toContain('data-sortable-table-styles');
 
     expect($runtime)
-        ->toContain('dataTableSortLink')
+        ->toContain('dataset.tableSortLink')
         ->toContain("target.searchParams.set('sort', sortKey)")
         ->toContain("target.searchParams.set('direction', nextDirection)")
         ->not->toContain('document.createElement(\'style\')');
