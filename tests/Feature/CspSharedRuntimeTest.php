@@ -176,3 +176,24 @@ test('button appearance preview uses the shared CSP runtime', function () {
         ->toContain('--premium-primary-button-bg')
         ->toContain('--premium-secondary-button-bg');
 });
+
+test('price tier settings load their CSP safe runtime externally', function () {
+    $priceTiers = file_get_contents(resource_path('views/pages/settings/_price-tiers.blade.php'));
+    $runtime = file_get_contents(public_path('js/price-tiers-runtime.js'));
+
+    expect($priceTiers)
+        ->not->toContain('<script>')
+        ->toContain("asset('js/price-tiers-runtime.js')")
+        ->toContain('data-price-tiers-runtime')
+        ->toContain('data-next-index=')
+        ->toContain('data-price-tier-row')
+        ->toContain('data-remove-price-tier');
+
+    expect($runtime)
+        ->toContain('initPriceTiersRuntime')
+        ->toContain('[data-price-tiers-runtime]')
+        ->toContain('[data-price-tier-row]')
+        ->toContain('[data-remove-price-tier]')
+        ->toContain('Mindestens eine Preisstufe muss bestehen bleiben.')
+        ->toContain('Preisstufe wirklich entfernen?');
+});
