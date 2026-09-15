@@ -385,6 +385,53 @@
         });
     }
 
+    function initButtonAppearanceRuntime() {
+        const form = document.querySelector('[data-button-appearance-runtime]');
+
+        if (!form || form.dataset.previewBound === '1') {
+            return;
+        }
+
+        const fields = {
+            primaryBackground: form.querySelector('#primary_button_background'),
+            primaryText: form.querySelector('#primary_button_text'),
+            secondaryBackground: form.querySelector('#secondary_button_background'),
+            secondaryText: form.querySelector('#secondary_button_text'),
+        };
+
+        if (Object.values(fields).some((field) => !field)) {
+            return;
+        }
+
+        form.dataset.previewBound = '1';
+
+        function updateButtonPreview() {
+            document.documentElement.style.setProperty(
+                '--premium-primary-button-bg',
+                fields.primaryBackground.value
+            );
+            document.documentElement.style.setProperty(
+                '--premium-primary-button-text',
+                fields.primaryText.value
+            );
+            document.documentElement.style.setProperty(
+                '--premium-secondary-button-bg',
+                fields.secondaryBackground.value
+            );
+            document.documentElement.style.setProperty(
+                '--premium-secondary-button-text',
+                fields.secondaryText.value
+            );
+        }
+
+        Object.values(fields).forEach((field) => {
+            field.addEventListener('input', updateButtonPreview);
+            field.addEventListener('change', updateButtonPreview);
+        });
+
+        updateButtonPreview();
+    }
+
     function init() {
         initBrowserBranding();
         initUnifiedStatusColors();
@@ -394,6 +441,7 @@
         initCustomerFormRuntime();
         initBatchExpiryRuntime();
         initCategoryProductSearchRuntime();
+        initButtonAppearanceRuntime();
     }
 
     if (document.readyState === 'loading') {
