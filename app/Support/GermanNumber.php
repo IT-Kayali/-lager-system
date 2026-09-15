@@ -13,6 +13,22 @@ final class GermanNumber
         return number_format((float) $value, $decimals, ',', '.');
     }
 
+    public static function input(int|float|string|null $value, int $decimals = 3): string
+    {
+        if ($value === null || $value === '') {
+            return '';
+        }
+
+        $formatted = rtrim(
+            rtrim(number_format((float) $value, $decimals, '.', ''), '0'),
+            '.'
+        );
+
+        return $formatted === '' || $formatted === '-0'
+            ? '0'
+            : $formatted;
+    }
+
     public static function parse(mixed $value): mixed
     {
         if (! is_string($value)) {
