@@ -1,0 +1,27 @@
+.table-sort-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: inherit !important;
+    text-decoration: none !important;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+}
+
+.table-sort-link:hover,
+.table-sort-link.active {
+    color: #8a6a00 !important;
+}
+
+.table-sort-arrow {
+    font-size: 12px;
+    line-height: 1;
+    opacity: .65;
+}
+
+.table-sort-link.active .table-sort-arrow {
+    opacity: 1;
+    font-weight: 950;
+}
