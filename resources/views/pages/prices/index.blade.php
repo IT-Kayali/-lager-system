@@ -133,7 +133,7 @@
                         }
                     @endphp
 
-                    <div class="manual-rule-head">
+                    <div class="manual-rule-head" data-manual-price-rules-runtime>
                         <div>
                             <h3>Manuelle Mengenregeln</h3>
                             <p>Beispiel: 1–5 Stück = 3,00 € pro Stück, 6–10 Stück = 2,70 €. Leeres „Bis“ bedeutet unbegrenzt.</p>
@@ -198,55 +198,7 @@
     </section>
 
     @if ($selectedProduct && $selectedGroup && ! $usesPriceTiers)
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const body = document.getElementById('manual-price-rules');
-                const template = document.getElementById('manual-price-rule-template');
-                const addButton = document.getElementById('add-price-rule');
-
-                if (!body || !template || !addButton) return;
-
-                const rows = () => Array.from(body.querySelectorAll('[data-price-rule]'));
-
-                const reindex = () => {
-                    rows().forEach((row, index) => {
-                        ['min_quantity', 'max_quantity', 'price', 'label'].forEach((field) => {
-                            const input = row.querySelector(`[name*="[${field}]"]`) || row.querySelector(`[data-name="${field}"]`);
-                            if (input) input.name = `rules[${index}][${field}]`;
-                        });
-                    });
-                };
-
-                const bindRemove = () => {
-                    body.querySelectorAll('.remove-price-rule').forEach((button) => {
-                        if (button.dataset.bound === '1') return;
-                        button.dataset.bound = '1';
-                        button.addEventListener('click', () => {
-                            const row = button.closest('[data-price-rule]');
-                            if (!row) return;
-
-                            if (rows().length === 1) {
-                                row.querySelectorAll('input').forEach((input) => input.value = '');
-                                return;
-                            }
-
-                            row.remove();
-                            reindex();
-                        });
-                    });
-                };
-
-                addButton.addEventListener('click', () => {
-                    body.appendChild(template.content.cloneNode(true));
-                    reindex();
-                    bindRemove();
-                    rows().at(-1)?.querySelector('input')?.focus();
-                });
-
-                reindex();
-                bindRemove();
-            });
-        </script>
+        <script src="{{ asset('js/manual-price-rules-runtime.js') }}" defer></script>
     @endif
 
     <style>
