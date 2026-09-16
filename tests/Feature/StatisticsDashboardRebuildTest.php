@@ -62,7 +62,7 @@ test('statistics service reports missing revenue coverage', function () {
         ->toContain("'orders_without_amount'")
         ->toContain("'has_missing_amounts'")
         ->toContain("'all_amounts_missing'")
-        ->toContain("'revenue_coverage' => $revenueCoverage")
+        ->toContain("'revenue_coverage' => \$revenueCoverage")
         ->toContain("->orderByDesc('sold_quantity')")
         ->toContain("->orderByDesc('orders_count')");
 });
