@@ -432,6 +432,60 @@
         updateButtonPreview();
     }
 
+    function initCustomerGroupEditorRuntime() {
+        const forms = document.querySelectorAll('[data-customer-group-editor]');
+
+        if (!forms.length) {
+            return;
+        }
+
+        function automaticTextColor(hex) {
+            const value = hex.replace('#', '');
+            const red = Number.parseInt(value.substring(0, 2), 16);
+            const green = Number.parseInt(value.substring(2, 4), 16);
+            const blue = Number.parseInt(value.substring(4, 6), 16);
+            const luminance = ((red * 299) + (green * 587) + (blue * 114)) / 1000;
+
+            return luminance >= 150 ? '#111827' : '#FFFFFF';
+        }
+
+        forms.forEach((form) => {
+            const backgroundInput = form.querySelector('[data-background-color]');
+            const textInput = form.querySelector('[data-text-color]');
+            const automaticInput = form.querySelector('[data-auto-text]');
+            const nameInput = form.querySelector('[data-group-name]');
+            const container = form.closest('details') || form;
+            const preview = container.querySelector('[data-group-preview]')
+                || form.querySelector('[data-group-preview]');
+
+            function updatePreview() {
+                if (!backgroundInput || !textInput || !automaticInput || !preview) {
+                    return;
+                }
+
+                const backgroundColor = backgroundInput.value;
+                const textColor = automaticInput.checked
+                    ? automaticTextColor(backgroundColor)
+                    : textInput.value;
+
+                preview.style.backgroundColor = backgroundColor;
+                preview.style.borderColor = backgroundColor;
+                preview.style.color = textColor;
+                textInput.disabled = automaticInput.checked;
+
+                if (nameInput && nameInput.value.trim() !== '') {
+                    preview.textContent = nameInput.value.trim();
+                }
+            }
+
+            backgroundInput?.addEventListener('input', updatePreview);
+            textInput?.addEventListener('input', updatePreview);
+            automaticInput?.addEventListener('change', updatePreview);
+            nameInput?.addEventListener('input', updatePreview);
+            updatePreview();
+        });
+    }
+
     function init() {
         initBrowserBranding();
         initUnifiedStatusColors();
@@ -442,6 +496,7 @@
         initBatchExpiryRuntime();
         initCategoryProductSearchRuntime();
         initButtonAppearanceRuntime();
+        initCustomerGroupEditorRuntime();
     }
 
     if (document.readyState === 'loading') {

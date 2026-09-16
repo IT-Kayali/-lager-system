@@ -197,3 +197,24 @@ test('price tier settings load their CSP safe runtime externally', function () {
         ->toContain('Mindestens eine Preisstufe muss bestehen bleiben.')
         ->toContain('Preisstufe wirklich entfernen?');
 });
+
+test('customer group preview uses the shared CSP runtime', function () {
+    $customerGroups = file_get_contents(
+        resource_path('views/pages/settings/_customer-groups.blade.php')
+    );
+    $runtime = file_get_contents(public_path('js/csp-shared-runtime.js'));
+
+    expect($customerGroups)
+        ->not->toContain('<script')
+        ->toContain('data-customer-group-editor')
+        ->toContain('data-background-color')
+        ->toContain('data-text-color')
+        ->toContain('data-auto-text')
+        ->toContain('data-group-preview');
+
+    expect($runtime)
+        ->toContain('initCustomerGroupEditorRuntime')
+        ->toContain('[data-customer-group-editor]')
+        ->toContain('automaticTextColor')
+        ->toContain('[data-group-preview]');
+});
