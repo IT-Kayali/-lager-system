@@ -12,7 +12,7 @@
         .stats-shell{display:grid;gap:18px}.stats-filter{padding:18px}.stats-filter-grid{display:grid;grid-template-columns:1.1fr 1fr 1fr 1fr auto;gap:12px;align-items:end}.stats-dates{display:grid;grid-template-columns:1fr 1fr;gap:10px;grid-column:1/-1}.stats-actions{display:flex;gap:8px;flex-wrap:wrap}.stats-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.stats-kpi{padding:18px;border:1px solid rgba(127,127,127,.18);border-radius:16px;background:var(--premium-card-bg,#fff)}.stats-kpi span{display:block;color:#777;font-size:12px;font-weight:800}.stats-kpi strong{display:block;margin-top:8px;font-size:26px;font-weight:950}.stats-grid{display:grid;grid-template-columns:1.45fr 1fr;gap:16px}.stats-card{padding:18px}.stats-title{margin:0 0 4px;font-size:18px;font-weight:950}.stats-sub{margin:0 0 16px;color:#777;font-size:12px}.stats-chart{height:290px;position:relative}.stats-mini-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stats-mini{padding:13px;border:1px solid rgba(127,127,127,.16);border-radius:12px}.stats-mini span{display:block;color:#777;font-size:11px;font-weight:800}.stats-mini strong{display:block;margin-top:5px;font-size:19px}.stats-table{width:100%;border-collapse:collapse}.stats-table th,.stats-table td{text-align:left;padding:10px 8px;border-bottom:1px solid rgba(127,127,127,.15);font-size:12px}.stats-table th{color:#777;font-weight:900}.stats-table tr:last-child td{border-bottom:0}.stats-status-list{display:grid;gap:9px}.stats-status-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid rgba(127,127,127,.15);border-radius:11px}.stats-empty{padding:24px 8px;text-align:center;color:#777;font-size:13px}.stats-note{padding:12px 14px;border-radius:12px;background:rgba(227,202,110,.1);border:1px solid rgba(227,202,110,.3);font-size:12px;color:#666}.stats-link{color:inherit;text-decoration:none;font-weight:900}.stats-link:hover{text-decoration:underline}@media(max-width:1150px){.stats-filter-grid{grid-template-columns:repeat(2,1fr)}.stats-kpis{grid-template-columns:repeat(2,1fr)}.stats-grid{grid-template-columns:1fr}}@media(max-width:650px){.stats-filter-grid,.stats-kpis,.stats-mini-grid{grid-template-columns:1fr}.stats-dates{grid-template-columns:1fr}.stats-table{min-width:620px}.stats-scroll{overflow-x:auto}}
     </style>
 
-    <div class="stats-shell">
+    <div class="stats-shell" data-statistics-runtime>
         <section class="premium-card stats-filter">
             <form method="GET" action="{{ route('statistics.index') }}">
                 <div class="stats-filter-grid">
@@ -75,7 +75,13 @@
         <section class="stats-grid">
             <div class="premium-card stats-card">
                 <h3 class="stats-title">Umsatzentwicklung</h3><p class="stats-sub">Abgeschlossene Verkäufe im gewählten Zeitraum</p>
-                <div class="stats-chart"><canvas id="salesTrendChart"></canvas></div>
+                <div class="stats-chart">
+                    <canvas
+                        id="salesTrendChart"
+                        data-sales-trend-chart
+                        data-sales-trend="{{ json_encode($charts['salesTrend'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) }}"
+                    ></canvas>
+                </div>
             </div>
             <div class="premium-card stats-card">
                 <h3 class="stats-title">Angebotsstatus</h3><p class="stats-sub">Verteilung der Angebote im aktuellen Filter</p>
@@ -127,12 +133,5 @@
         </section>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded',()=>{
-            const period=document.getElementById('statistics-period');const dates=document.getElementById('statistics-custom-dates');
-            if(period&&dates){period.addEventListener('change',()=>{dates.style.display=period.value==='custom'?'grid':'none';});}
-            const chartData=@json($charts['salesTrend']);const canvas=document.getElementById('salesTrendChart');
-            if(canvas){new Chart(canvas,{type:'line',data:{labels:chartData.labels||[],datasets:[{label:'Umsatz €',data:chartData.data||[],tension:.3,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});}
-        });
-    </script>
+    <script src="{{ asset('js/statistics-runtime.js') }}" defer></script>
 </x-layouts.premium>
