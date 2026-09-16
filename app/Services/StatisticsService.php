@@ -276,7 +276,10 @@ class StatisticsService
 
         $completedOrders = $this->completedOrderCount($filters);
         $completedRevenue = $this->completedRevenue($filters);
-        $averageOrderValue = $completedOrders > 0 ? $completedRevenue / $completedOrders : 0.0;
+        $revenueCoverage = $this->revenueCoverage($filters);
+        $averageOrderValue = $revenueCoverage['orders_with_amount'] > 0
+            ? $completedRevenue / $revenueCoverage['orders_with_amount']
+            : null;
 
         $reservedValue = (float) (clone $offerQuery)
             ->whereIn('status', Offer::RESERVING_STATUSES)
@@ -297,6 +300,7 @@ class StatisticsService
             'completed_revenue' => $completedRevenue,
             'completed_orders' => $completedOrders,
             'average_order_value' => $averageOrderValue,
+            'revenue_coverage' => $revenueCoverage,
             'offers_count' => $offersCount,
             'offers_value' => $offersValue,
             'reserved_value' => $reservedValue,
@@ -369,6 +373,7 @@ class StatisticsService
             ])
             ->groupBy('product_id', 'product_code', 'product_name', 'unit')
             ->orderByDesc('revenue')
+            ->orderByDesc('sold_quantity')
             ->get();
 
         $top = $items->take(10)->values();
@@ -945,6 +950,7 @@ class StatisticsService
             ->select('customer_id', DB::raw('COUNT(*) as orders_count'), DB::raw('SUM(total) as revenue'))
             ->groupBy('customer_id')
             ->orderByDesc('revenue')
+            ->orderByDesc('orders_count')
             ->limit(10)
             ->get();
 
@@ -963,6 +969,41 @@ class StatisticsService
                 'revenue' => (float) $row->revenue,
             ];
         })->values();
+    }
+
+    private function revenueCoverage(array $filters): array
+    {
+        if ($this->hasProductScope($filters)) {
+            $amounts = $this->completedItemQuery($filters)
+                ->select('offer_id', DB::raw('SUM(line_total) as revenue'))
+                ->groupBy('offer_id')
+                ->get()
+                ->map(fn ($row) => (float) $row->revenue);
+        } else {
+            $amounts = $this->completedOfferQuery($filters)
+                ->pluck('total')
+                ->map(fn ($value) => (float) $value);
+        }
+
+        $ordersTotal = $amounts->count();
+        $ordersWithAmount = $amounts
+            ->filter(fn (float $amount) => $amount > 0.004)
+            ->count();
+
+        $ordersWithoutAmount = max(
+            0,
+            $ordersTotal - $ordersWithAmount
+        );
+
+        return [
+            'orders_total' => $ordersTotal,
+            'orders_with_amount' => $ordersWithAmount,
+            'orders_without_amount' => $ordersWithoutAmount,
+            'has_missing_amounts' => $ordersWithoutAmount > 0,
+            'all_amounts_missing' => $ordersTotal > 0
+                && $ordersWithAmount === 0,
+            'is_complete' => $ordersWithoutAmount === 0,
+        ];
     }
 
     private function completedRevenue(array $filters, ?array $rangeOverride = null): float
