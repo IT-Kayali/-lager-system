@@ -1043,6 +1043,8 @@
 </style>
 <!-- PREMIUM_LOGO_PLACEHOLDER_END -->
 
+
+    {{ $head ?? '' }}
 </head>
 <body>
     <div class="premium-shell">
