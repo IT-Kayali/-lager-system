@@ -313,14 +313,70 @@ Die Produkt- und Chargensortierung unterstützt auch numerisch benannte Produkte
 - `Referrer-Policy: strict-origin-when-cross-origin` ist aktiv
 - `X-Frame-Options: SAMEORIGIN` ist aktiv
 - konservative `Permissions-Policy` für Kamera, Mikrofon, Geolocation, Payment und USB ist aktiv
+- CSP erzwingt für JavaScript bereits `script-src 'self'`; `unsafe-inline` ist für Scripts nicht mehr erforderlich
+- Style-CSP befindet sich noch in Phase 4G; `style-src 'self' 'unsafe-inline'` bleibt derzeit nur im Report-Only-Header aktiv
 - persönliche Seite **Mein Konto & Sicherheit** nutzt das Premium-Layout
 - Benutzer-Bearbeitung nutzt das Premium-Layout mit deutlich sichtbarem Aktiv/Deaktiviert-Status
 
 ## Security-Hardening-Status
 
-Stand: **08.09.2026**
+Stand: **18.09.2026**
 
 Die Security-Arbeiten werden bewusst in getrennten Phasen mit Sicherungen, isolierten Tests und Rückfallpunkten durchgeführt. Ziel ist, Sicherheitsverbesserungen ohne unnötige Unterbrechung des Produktionssystems einzuführen.
+
+
+### Aktueller Produktions- und CSP-Stand
+
+Maßgeblich ist der produktive Stand vom **18.09.2026** bis einschließlich Pull Request **#126**. Die weiter unten aufgeführten Unterphasen dokumentieren teilweise bewusst den jeweiligen historischen Zwischenstand zum damaligen Datum.
+
+Aktuell produktiv bestätigt:
+
+- HTTPS ist aktiv; HTTP wird mit **308** auf HTTPS umgeleitet
+- Session-Cookies werden in Produktion mit dem Secure-Flag ausgeliefert
+- Nginx, PHP-FPM, TLS und automatische Zertifikatserneuerung sind funktionsfähig
+- die risikoarmen Security-Header sind aktiv
+- CSP-Reporting an `/api/csp-report` ist aktiv
+- JavaScript-CSP ist vollständig verschärft: `script-src 'self'` wird im echten Enforcement erzwungen
+- in den getrackten produktiven Browser-Views wurden echte Inline-Scripts, Inline-Event-Handler und `javascript:`-URLs auf **0** reduziert
+- Style-CSP ist noch in Arbeit; `style-src` wird noch **nicht** scharf erzwungen
+
+Aktueller Enforcement-Header:
+
+```text
+base-uri 'self';
+object-src 'none';
+frame-ancestors 'self';
+form-action 'self';
+script-src 'self';
+connect-src 'self';
+frame-src 'self';
+img-src 'self' data:;
+font-src 'self' data:;
+media-src 'self';
+worker-src 'self' blob:;
+manifest-src 'self';
+```
+
+Der parallele Report-Only-Header bleibt für Styles bewusst toleranter:
+
+```text
+default-src 'self';
+base-uri 'self';
+object-src 'none';
+frame-ancestors 'self';
+form-action 'self';
+img-src 'self' data:;
+font-src 'self' data:;
+style-src 'self' 'unsafe-inline';
+script-src 'self';
+connect-src 'self';
+frame-src 'self';
+media-src 'self';
+worker-src 'self' blob:;
+manifest-src 'self';
+```
+
+`style-src 'self' 'unsafe-inline'` bleibt ausschließlich so lange bestehen, bis Phase 4G die noch vorhandenen Inline-Styles und dynamischen Style-Mutationen kontrolliert bereinigt und im Browser validiert hat.
 
 ### Phase 1 – Security Baseline ✅ abgeschlossen
 
@@ -376,6 +432,8 @@ Umgesetzter Produktionsstand:
 Wichtig: Das eingesetzte IP-Zertifikat verwendet das Let’s-Encrypt-Profil **shortlived**. Die automatische Erneuerung ist deshalb Bestandteil des Betriebs und darf nicht entfernt werden.
 
 ### Phase 4 – Security Header / CSP 🔄 in Arbeit
+
+> Hinweis: Die Unterphasen 4A bis 4E beschreiben den jeweiligen damaligen Zwischenstand. Der aktuelle maßgebliche CSP-Stand steht im Abschnitt **Aktueller Produktions- und CSP-Stand**.
 
 Bestandsaufnahme am 07.09.2026:
 
@@ -577,47 +635,80 @@ Am 08.09.2026 produktiv aktiviert und manuell bestätigt:
 - der Eintrag `https://blocked.invalid/phase4e6-media.mp3` war ein absichtlicher Test des Report-Endpunkts
 - Dashboard, Angebote, Filialausgang, Einstellungen, Statistik sowie PDF-/Lieferschein-Funktionen wurden anschließend produktiv als funktionierend bestätigt
 
-Weiterer geplanter Ablauf:
+#### Phase 4F – JavaScript-CSP ✅ abgeschlossen
 
-1. die kombinierte Enforcement-/Report-Only-Konfiguration unter normaler Nutzung weiter beobachten
-2. vor jeder zusätzlichen Enforcement-Direktive vorhandene Ressourcen und echte CSP-Reports prüfen
-3. weitere Direktiven nur einzeln bzw. in kleinen risikoarmen Gruppen scharf schalten
-4. `unsafe-inline` später schrittweise durch ausgelagerte Vite-Dateien, Nonces oder Hashes reduzieren
-5. HSTS erst bei späterer Domain-Nutzung erneut bewerten
+Bis zum 18.09.2026 wurde der JavaScript-Anteil der CSP vollständig bereinigt und anschließend scharf aktiviert.
 
-### Phase 5 – Anwendungssicherheit / Authentifizierung ⏳ geplant
+Wesentliche Schritte:
 
-Vorgesehene Prüfpunkte:
+- Inline-Scripts aus den produktiven Browser-Views in externe, selbst gehostete Runtime-Dateien verschoben
+- Angebotseditor-Runtime über Pull Request **#122** externalisiert
+- Produkt- und Filialausgang-Runtimes über Pull Request **#123** externalisiert
+- letzte Inline-Runtimes aus Premium-Layout und Sidebar über Pull Request **#124** externalisiert
+- getrackte produktive Blade-Views anschließend erneut auf echte Inline-Scripts, Inline-Event-Handler und `javascript:`-URLs geprüft
+- Ergebnis der finalen JavaScript-Inventur: **0** echte Inline-Scripts, **0** Inline-Event-Handler, **0** `javascript:`-URLs
+- `script-src 'self'` zuerst im Report-Only-Modus unter realer Browser-Nutzung geprüft
+- nach sauberer Report-Auswertung anschließend `script-src 'self'` in das echte CSP-Enforcement übernommen
+- Style-CSP wurde dabei ausdrücklich nicht gleichzeitig verschärft
 
-- Änderung der eigenen E-Mail-Adresse zusätzlich absichern
-- bestehende 2FA-Oberfläche mit der tatsächlich aktivierten Fortify-Konfiguration abgleichen
-- Rollen und Berechtigungen erneut nach Least-Privilege-Prinzip prüfen
-- sensible Aktionen auf zusätzliche Rate-Limits prüfen
-- sicherheitsrelevante Benutzeraktionen und Session-Ereignisse im Aktivitätsprotokoll bewerten
-- Regressionstests für direkte URLs und Rollenwechsel erweitern
+Damit ist **JavaScript-CSP abgeschlossen**. Ein späterer Style-CSP-Schritt darf deshalb nicht mit der bereits abgeschlossenen Script-Härtung vermischt werden.
 
-### Phase 6 – Uploads, Excel, Export und PDF ⏳ geplant
+#### Phase 4G – Style-CSP 🔄 in Arbeit
 
-Vorgesehene Prüfpunkte:
+Die Style-Bereinigung wird getrennt und in kleinen, browsergetesteten Paketen durchgeführt.
 
-- Größenlimits und Ressourcenschutz für Excel-Importe
-- Dateityp- und Inhaltsvalidierung für Uploads
-- Schutz vor CSV-/Excel-Formula-Injection bei Exporten
-- Rate-Limits für ressourcenintensive PDF-/Export-Funktionen
-- Fehlerbehandlung bei großen oder ungültigen Importdateien
-- Upload-Verzeichnisse und öffentliche Dateiberechtigungen prüfen
+Ausgangsinventur 4G.1:
 
-### Phase 7 – Betrieb, Backup und Wiederherstellung ⏳ geplant
+- **99** getrackte Blade-Dateien
+- davon **94** Browser-Views und **5** PDF-Views
+- ursprünglich **53** `<style>`-Blöcke in Browser-Views
+- **301** `style=""`-Attribute
+- davon **14** dynamische Style-Attribute
+- **29** JavaScript-Style-Mutationen
+- PDF-Views werden separat bewertet, weil serverseitig erzeugte PDFs nicht automatisch Browser-CSP-Blocker sind
 
-Vorgesehene Prüfpunkte:
+Bereits abgeschlossen:
 
-- automatisierte Datenbank- und Dateisicherungen
-- zusätzliche/offsite Sicherung prüfen
-- Wiederherstellung aus einem Backup praktisch testen
-- Nginx-/TLS-Betriebskonfiguration dokumentieren
-- nicht benötigte historische Backup-Dateien im Repository bereinigen
-- Dependency-/Security-Scanning für Composer und npm bewerten
-- regelmäßige Prüfung der Zertifikatserneuerung und des Deploy-Hooks
+- **4G.2A / PR #125:** Dashboard-CSS aus `resources/views/dashboard.blade.php` nach `public/css/dashboard.css` ausgelagert
+- Dashboard-Stylesheet wird über einen optionalen Premium-Head-Slot vor dem Body geladen
+- ein im ersten Preview entdeckter FOUC wurde dadurch behoben und anschließend im Browser bestätigt
+- **4G.2B / PR #126:** Login-/Browser-Branding-CSS aus `resources/views/partials/browser-branding.blade.php` nach `public/css/browser-branding.css` ausgelagert
+- Login-Branding, Hintergrund, Logo, Favicon und weiße Hilfstexte anschließend im Browser geprüft
+
+Nach 4G.2A und 4G.2B verbleiben aus der ursprünglichen Inventur noch **51 `<style>`-Blöcke**. Die `style=""`-Attribute, dynamischen Styles und JavaScript-CSSOM-Mutationen werden danach separat abgearbeitet.
+
+Wichtig: `style-src 'self'` wird erst dann scharf aktiviert, wenn die produktiven Browser-Views bereinigt sind, ein strenger Report-Only-Test keine relevanten Verstöße zeigt und die zentralen Workflows manuell regressionsgetestet wurden.
+
+### Was noch fehlt – Pflichtreihenfolge
+
+Die folgenden Punkte gelten als **Pflichtprogramm** und werden vor optionalen Zusatzhärtungen abgearbeitet:
+
+1. **Phase 4G vollständig abschließen:** verbleibende `<style>`-Blöcke, statische und dynamische `style=""`-Attribute sowie JavaScript-Style-Mutationen bereinigen; anschließend `style-src 'self'` erst Report-Only testen und bei sauberem Ergebnis in das Enforcement übernehmen.
+2. **CSP final konsolidieren:** Enforcement und Report-Only auf Konsistenz prüfen, reale CSP-Reports auswerten und die zugehörigen Regressionstests vervollständigen.
+3. **Login / Session / CSRF / 2FA / Rollen prüfen:** Fortify-/2FA-Konfiguration, CSRF-Schutz, Session-Verhalten, Least-Privilege und negative Zugriffstests für direkte URLs und sensible Aktionen.
+4. **Produktionskonfiguration prüfen:** insbesondere `APP_DEBUG=false`, Secure Cookies, produktive Cache-/Environment-Konfiguration und fehlende Debug-Ausgaben.
+5. **Dateisystem und `.env` prüfen:** Owner, Rechte, Webroot, `storage`, `bootstrap/cache` und Schutz sensibler Konfigurationsdateien.
+6. **Upload-Sicherheit prüfen:** Logos, Hintergründe und weitere Uploads auf Dateityp, MIME, Größe, Ablageort und öffentliche Erreichbarkeit prüfen.
+7. **Dependency-Sicherheit prüfen:** `composer audit` und `npm audit`; Updates nur kontrolliert und mit Regressionstests übernehmen.
+8. **Backup und echten Restore testen:** nicht nur Sicherungen erzeugen, sondern Datenbank- und Dateiwiederherstellung praktisch verifizieren.
+9. **Logs und Datenschutz prüfen:** Logs auf Secrets, Tokens, personenbezogene oder unnötig sensible Daten untersuchen und Aufbewahrung bewerten.
+10. **Security-Header final prüfen:** aktive Header, CSP und TLS-Konfiguration noch einmal als Gesamtpaket validieren.
+11. **Vollständigen Regressionstest durchführen:** Produkte, Chargen/FIFO, Kunden, Lieferanten, Angebote, PDFs, Filialausgänge, Rollen, Statistik, Warnungen, Einstellungen und Benachrichtigungen.
+12. **Security-Dokumentation finalisieren:** diese README sowie `docs/SECURITY_HARDENING_LOG.md` nach Abschluss der technischen Arbeiten auf den endgültigen Stand bringen.
+13. **Finalen Produktions-Closeout durchführen:** Git/`main`, Dienste, HTTPS, CSP, Backups, Health und Wiederherstellbarkeit abschließend bestätigen.
+
+### Optional / später
+
+Diese Punkte sind bewusst **nicht** Teil des aktuellen Pflichtprogramms und werden erst danach bewertet:
+
+- HSTS bei späterer Nutzung einer eigenen Domain
+- zusätzliche `default-src 'self'`-Konsolidierung im Enforcement, falls danach noch sinnvoll
+- spätere Reduzierung oder Entfernung des Report-Only-Headers
+- COOP / COEP / CORP
+- Subresource Integrity (SRI)
+- automatisierte Security-Monitoring-/Alerting-Lösungen
+- externer Pentest bzw. zusätzlicher Security-Scan
+- automatisierte Dependency-Updates
 
 ### Bekannter technischer Punkt für neue Installationen
 
