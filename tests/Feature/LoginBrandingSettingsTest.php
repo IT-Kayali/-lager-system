@@ -33,7 +33,7 @@ it('stores the login texts and site name from settings', function () {
         ->assertSee('Sicher anmelden')
         ->assertSee('Willkommen im Lager')
         ->assertSee('Alle Bestände und Bestellungen sicher im Blick.')
-        ->assertSee('color: #ffffff !important;', false);
+        ->assertSee(asset('css/browser-branding.css'), false);
 });
 
 it('uploads logo background and favicon and serves the favicon publicly', function () {
@@ -124,4 +124,18 @@ it('removes uploaded login branding files without losing the texts', function ()
         ->and(ApplicationSetting::siteFaviconPath())->toBeNull()
         ->and(ApplicationSetting::siteName())->toBe('Alowidat Neu')
         ->and(ApplicationSetting::loginTitle())->toBe('Neue Hauptüberschrift');
+});
+
+it('loads login branding styles from an external CSP safe stylesheet', function () {
+    $partial = file_get_contents(resource_path('views/partials/browser-branding.blade.php'));
+    $styles = file_get_contents(public_path('css/browser-branding.css'));
+
+    expect($partial)
+        ->not->toContain('<style>')
+        ->toContain("asset('css/browser-branding.css')");
+
+    expect($styles)
+        ->toContain('html body:has(input[name="email"])')
+        ->toContain('form.login-card p')
+        ->toContain('color: #ffffff !important;');
 });
