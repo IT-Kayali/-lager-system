@@ -869,14 +869,34 @@ Die Datei `.env.example` darf und soll als Vorlage im Repository bleiben.
 
 Änderungen werden über eigene Branches und Pull Requests durchgeführt.
 
+### Verbindliche README-Pflege
+
+Die `README.md` ist Bestandteil jeder erfolgreich abgeschlossenen Änderung und muss den tatsächlichen Stand von `main` widerspiegeln.
+
+Ab sofort gilt verbindlich:
+
+- nach **jeder erfolgreich getesteten Änderung** wird geprüft, ob Funktionsumfang, Security-Status, Deployment, offene Punkte oder Betriebsabläufe in der README angepasst werden müssen
+- wenn die Änderung dokumentationsrelevant ist, wird die README **noch im selben Arbeitsablauf auf GitHub aktualisiert**
+- bevorzugt wird die README im **gleichen Feature-/Fix-Branch und Pull Request** aktualisiert, sobald die Änderung erfolgreich validiert wurde
+- falls eine Änderung erst nach Merge bzw. direkt in der Produktionskonfiguration final bestätigt werden kann, folgt unmittelbar ein eigener Dokumentations-Commit bzw. Dokumentations-PR
+- ein Arbeitspaket gilt erst als vollständig abgeschlossen, wenn Code/Produktionsänderung **und** der dazugehörige README-Stand auf GitHub aktuell sind
+- bei Security-Hardening werden zusätzlich erledigte Phasen, aktuelle Enforcement-/Report-Only-Regeln und die verbleibenden Pflichtpunkte fortgeschrieben
+- reine interne Refactorings ohne Auswirkungen auf Verhalten, Betrieb, Security oder Projektstatus benötigen keine künstliche Inhaltsänderung; die README-Prüfung findet trotzdem statt
+
+Für die weitere Arbeit mit ChatGPT an diesem Projekt bedeutet das: Nach jeder erfolgreich bestätigten Änderung wird die README-Pflege automatisch als fester Closeout-Schritt mitgeführt und nicht mehr separat vergessen.
+
 Empfohlener Ablauf:
 
 ```text
 main
   └── feature/... oder fix/...
-        └── Pull Request
-              └── Test
-                    └── Merge nach Freigabe
+        └── Änderung vorbereiten
+              └── technische Tests / Browser-Test
+                    └── README auf aktuellen Stand bringen
+                          └── Pull Request / CI
+                                └── Merge nach Freigabe
+                                      └── Produktions-Deploy / Health-Check
+                                            └── README-Stand auf GitHub final bestätigen
 ```
 
-Dadurch bleibt `main` möglichst stabil und getestete Änderungen können kontrolliert übernommen werden.
+Dadurch bleibt `main` möglichst stabil, getestete Änderungen können kontrolliert übernommen werden und die Projektdokumentation bleibt synchron mit dem tatsächlichen Produktionsstand.
