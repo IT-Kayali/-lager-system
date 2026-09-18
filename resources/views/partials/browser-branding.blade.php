@@ -18,10 +18,5 @@
 @endif
 
 @if ($browserPageTitle === 'Login')
-    <style>
-        html body:has(input[name="email"]):has(input[name="password"]) main .login-info p,
-        html body:has(input[name="email"]):has(input[name="password"]) form.login-card p {
-            color: #ffffff !important;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/browser-branding.css') }}">
 @endif
