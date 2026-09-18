@@ -1,5 +1,7 @@
 <x-layouts.premium title="Dashboard" subtitle="Übersicht über Lager, Reservierungen, Angebote und Verkauf.">
-<link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+<x-slot name="head">
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+</x-slot>
 <section class="dashboard-kpi-grid">
 @foreach ([['products.index','bi-box-seam','Inventar',$stats['products'],'Produkte'],['offers.index','bi-calendar-check','Reserviert',$stats['reservations'],'Aktive Reservierungen'],['offers.index','bi-receipt-cutoff','Vertrieb',$stats['offers'],'Angebote gesamt']] as $kpi)
 <a href="{{ route($kpi[0]) }}" class="dashboard-kpi-card"><div class="dashboard-kpi-top"><span class="dashboard-kpi-icon"><i class="bi {{ $kpi[1] }}"></i></span><span class="dashboard-kpi-pill">{{ $kpi[2] }}</span></div><div class="dashboard-kpi-value">{{ $kpi[3] }}</div><div class="dashboard-kpi-label">{{ $kpi[4] }}</div></a>
