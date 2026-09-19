@@ -116,6 +116,21 @@ class SettingsController extends Controller
         return redirect()->to(route('settings.index') . '#login-appearance')->with('success', 'Login- und Browser-Einstellungen wurden gespeichert.');
     }
 
+    public function loginStyles(): Response
+    {
+        $loginBackgroundPath = ApplicationSetting::loginBackgroundPath();
+        $loginBackgroundUrl = $loginBackgroundPath
+            ? route('login.background', [], false)
+            : null;
+
+        return response()->view('styles.login', [
+            'loginBackgroundUrl' => $loginBackgroundUrl,
+        ], 200, [
+            'Content-Type' => 'text/css; charset=UTF-8',
+            'Cache-Control' => 'no-store, private',
+        ]);
+    }
+
     public function applicationThemeStyles(): Response
     {
         $theme = ApplicationSetting::buttonTheme();
