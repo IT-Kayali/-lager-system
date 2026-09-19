@@ -14,6 +14,62 @@
     <link rel="stylesheet" href="{{ asset('css/csp/unified-app-chrome.css') }}">
     <link rel="stylesheet" href="{{ asset('css/csp/app-sidebar.css') }}">
 
+    @if (request()->routeIs('offers.*'))
+        <link rel="stylesheet" href="{{ asset('css/csp/offers.css') }}">
+    @endif
+
+    @if (request()->routeIs('products.*', 'sales.products.*'))
+        <link rel="stylesheet" href="{{ asset('css/csp/products.css') }}">
+    @endif
+
+    @if (request()->routeIs('suppliers.*'))
+        <link rel="stylesheet" href="{{ asset('css/csp/suppliers.css') }}">
+    @endif
+
+    @if (request()->routeIs('batches.*'))
+        <link rel="stylesheet" href="{{ asset('css/csp/batches.css') }}">
+    @endif
+
+    @if (request()->routeIs('branch-withdrawals.*', 'sales.branch-withdrawals.*'))
+        <link rel="stylesheet" href="{{ asset('css/csp/branch-withdrawals.css') }}">
+    @endif
+
+    @if (request()->routeIs('warehouse.offers.*'))
+        <link rel="stylesheet" href="{{ asset('css/csp/warehouse-offers.css') }}">
+    @endif
+
+    @if (request()->routeIs('product-categories.*'))
+        <link rel="stylesheet" href="{{ asset('css/csp/product-categories.css') }}">
+    @endif
+
+    @if (request()->routeIs('settings.index'))
+        <link rel="stylesheet" href="{{ asset('css/csp/settings-admin.css') }}">
+    @endif
+
+    @if (request()->routeIs('security.users.*'))
+        <link rel="stylesheet" href="{{ asset('css/csp/security-users.css') }}">
+    @endif
+
+    @if (request()->routeIs('security.edit'))
+        <link rel="stylesheet" href="{{ asset('css/csp/account-security.css') }}">
+    @endif
+
+    @if (request()->routeIs('document-templates.*'))
+        <link rel="stylesheet" href="{{ asset('css/csp/document-templates.css') }}">
+    @endif
+
+    @if (request()->routeIs('customers.index'))
+        <link rel="stylesheet" href="{{ asset('css/csp/customers.css') }}">
+    @endif
+
+    @if (request()->routeIs('warnings.index'))
+        <link rel="stylesheet" href="{{ asset('css/csp/warnings.css') }}">
+    @endif
+
+    @if (request()->routeIs('prices.index'))
+        <link rel="stylesheet" href="{{ asset('css/csp/prices.css') }}">
+    @endif
+
 <!-- PREMIUM_SELECT_STYLE_START -->
 
 <!-- PREMIUM_SELECT_STYLE_END -->
