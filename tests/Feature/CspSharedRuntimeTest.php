@@ -1,8 +1,10 @@
 <?php
 
-test('shared browser runtime no longer depends on inline scripts', function () {
+test('shared browser runtime and status colors no longer depend on inline assets', function () {
     $branding = file_get_contents(resource_path('views/partials/browser-branding-runtime.blade.php'));
-    $statuses = file_get_contents(resource_path('views/partials/unified-status-colors.blade.php'));
+    $statuses = file_get_contents(public_path('css/unified-status-colors.css'));
+    $layout = file_get_contents(resource_path('views/components/layouts/premium.blade.php'));
+    $sidebar = file_get_contents(resource_path('views/partials/app-sidebar.blade.php'));
     $runtime = file_get_contents(public_path('js/csp-shared-runtime.js'));
 
     expect($branding)
@@ -12,9 +14,17 @@ test('shared browser runtime no longer depends on inline scripts', function () {
         ->toContain('data-favicon-url=');
 
     expect($statuses)
-        ->not->toContain('<script')
         ->toContain('.status-unified-open')
         ->toContain('.status-unified-expired');
+
+    expect($layout)
+        ->toContain("asset('css/unified-status-colors.css')");
+
+    expect($sidebar)
+        ->not->toContain("partials.unified-status-colors");
+
+    expect(file_exists(resource_path('views/partials/unified-status-colors.blade.php')))
+        ->toBeFalse();
 
     expect($runtime)
         ->toContain('initBrowserBranding')
