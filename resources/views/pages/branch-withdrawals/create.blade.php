@@ -24,9 +24,5 @@
         @include('pages.branch-withdrawals._form', ['submitLabel' => 'Filialausgang speichern'])
     </form>
 
-    <style>
-        .branch-editor-form-create > .premium-alert {
-            display: none !important;
-        }
-    </style>
+    
 </x-layouts.premium>
