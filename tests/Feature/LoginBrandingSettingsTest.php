@@ -77,6 +77,12 @@ it('uploads logo background and favicon and serves the favicon publicly', functi
         ->assertOk()
         ->assertSee(route('site.favicon', [], false), false)
         ->assertSee(route('login.logo', [], false), false)
+        ->assertSee(route('login.theme.css'), false)
+        ->assertSee(asset('css/login-page.css'), false);
+
+    $this->get(route('login.theme.css'))
+        ->assertOk()
+        ->assertHeader('Content-Type', 'text/css; charset=UTF-8')
         ->assertSee(route('login.background', [], false), false);
 });
 
@@ -138,4 +144,23 @@ it('loads login branding styles from an external CSP safe stylesheet', function 
         ->toContain('html body:has(input[name="email"])')
         ->toContain('form.login-card p')
         ->toContain('color: #ffffff !important;');
+});
+
+it('serves a CSP safe fallback login theme stylesheet without an uploaded background', function () {
+    ApplicationSetting::putValue('login_background_path', '', 'string');
+
+    $this->get(route('login.theme.css'))
+        ->assertOk()
+        ->assertHeader('Content-Type', 'text/css; charset=UTF-8')
+        ->assertSee('.login-page {', false)
+        ->assertSee('radial-gradient(circle at 50% 20%', false);
+});
+
+it('contains no inline style block in the login view', function () {
+    $view = file_get_contents(resource_path('views/pages/auth/login.blade.php'));
+
+    expect($view)
+        ->not->toContain('<style')
+        ->toContain("asset('css/login-page.css')")
+        ->toContain("route('login.theme.css')");
 });
