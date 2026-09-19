@@ -112,19 +112,5 @@
         <div class="erp-list-pagination">{{ $suppliers->links() }}</div>
     </section>
 
-    <style>
-        .suppliers-table{min-width:980px}
-        .supplier-name-link,.supplier-number-link{color:#111!important;text-decoration:none!important;font-weight:950!important}
-        .supplier-name-link{display:inline-block;font-size:16px}
-        .supplier-name-link:hover,.supplier-number-link:hover{color:#a9871f!important;text-decoration:underline!important}
-        .supplier-contact-person{margin-top:4px}
-        .supplier-contact-stack{display:grid;gap:5px}
-        .supplier-contact-stack a{color:#211d17;font-weight:800;text-decoration:none}
-        .supplier-contact-stack a:hover{color:#9a7300}
-        .supplier-contact-stack i{margin-right:6px;color:#7b5c00}
-        .supplier-products-pill{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-width:58px;min-height:32px;padding:6px 12px;border-radius:999px;background:#f4efe5;border:1px solid #d7c7ab;color:#211d17;font-weight:950}
-        .suppliers-table th:nth-child(5),.suppliers-table td:nth-child(5){text-align:center!important}
-        .suppliers-actions{justify-content:flex-end!important;flex-wrap:nowrap!important;gap:8px!important}
-        .suppliers-actions form{margin:0!important}
-    </style>
+    {{-- CSP static styles moved to public/css/csp-static-bulk.css: resources/views/pages/suppliers/index.blade.php --}}
 </x-layouts.premium>
