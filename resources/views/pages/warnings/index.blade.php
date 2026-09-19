@@ -152,13 +152,5 @@
         @endif
     </section>
 
-    <style>
-        .warnings-table-wrap{width:100%;overflow-x:auto}
-        .warnings-table{width:100%;min-width:1380px;table-layout:fixed}
-        .warnings-table th,.warnings-table td{padding-left:14px!important;padding-right:14px!important;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;text-align:left!important}
-        .warnings-table th{white-space:normal!important;line-height:1.2}
-        .warnings-table td{white-space:nowrap}
-        .warning-product-link{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom;font-weight:900;color:inherit;text-decoration:underline;text-underline-offset:3px}
-        .warnings-table .premium-badge{white-space:nowrap}
-    </style>
+    {{-- CSP static styles moved to public/css/csp-static-bulk.css: resources/views/pages/warnings/index.blade.php --}}
 </x-layouts.premium>
