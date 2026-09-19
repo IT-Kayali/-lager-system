@@ -140,14 +140,5 @@
         <div class="erp-list-pagination">{{ $offers->links() }}</div>
     </section>
 
-    <style>
-        .warehouse-offers-table{min-width:980px}
-        .warehouse-offer-link{display:inline-flex;align-items:center;gap:7px;color:#111;font-weight:900;text-decoration:none}
-        .warehouse-offer-link:hover{color:#8a6a00;text-decoration:underline}
-        .warehouse-status-badge{display:inline-flex;align-items:center;min-height:32px;padding:7px 11px;border-radius:999px;font-size:12px;font-weight:950;white-space:nowrap}
-        .warehouse-status-badge.progress{background:#dbeafe;color:#1d4ed8}
-        .warehouse-status-badge.ready{background:#fef3c7;color:#b45309}
-        .warehouse-status-badge.completed{background:#dcfce7;color:#166534}
-        .warehouse-status-badge.neutral{background:#f3f4f6;color:#374151}
-    </style>
+    
 </x-layouts.premium>
