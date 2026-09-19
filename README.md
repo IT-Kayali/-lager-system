@@ -327,7 +327,7 @@ Die Security-Arbeiten werden bewusst in getrennten Phasen mit Sicherungen, isoli
 
 ### Aktueller Produktions- und CSP-Stand
 
-Maßgeblich ist der produktive Stand vom **19.09.2026** einschließlich des erfolgreich browsergetesteten Phase-4G.2C-Feature-Standes; der zugehörige Pull Request wird unmittelbar nach diesem README-Update erstellt. Die weiter unten aufgeführten Unterphasen dokumentieren teilweise bewusst den jeweiligen historischen Zwischenstand zum damaligen Datum.
+Maßgeblich ist der produktive Stand vom **19.09.2026** einschließlich des erfolgreich browsergetesteten Phase-4G.2C-Standes in Pull Request **#129**. Die weiter unten aufgeführten Unterphasen dokumentieren teilweise bewusst den jeweiligen historischen Zwischenstand zum damaligen Datum.
 
 Aktuell produktiv bestätigt:
 
@@ -674,7 +674,7 @@ Bereits abgeschlossen:
 - ein im ersten Preview entdeckter FOUC wurde dadurch behoben und anschließend im Browser bestätigt
 - **4G.2B / PR #126:** Login-/Browser-Branding-CSS aus `resources/views/partials/browser-branding.blade.php` nach `public/css/browser-branding.css` ausgelagert
 - Login-Branding, Hintergrund, Logo, Favicon und weiße Hilfstexte anschließend im Browser geprüft
-- **4G.2C:** gemeinsame Statusfarben aus `resources/views/partials/unified-status-colors.blade.php` nach `public/css/unified-status-colors.css` ausgelagert und den alten Inline-Partial entfernt
+- **4G.2C / PR #129:** gemeinsame Statusfarben aus `resources/views/partials/unified-status-colors.blade.php` nach `public/css/unified-status-colors.css` ausgelagert und den alten Inline-Partial entfernt
 - die Status-CSS wird jetzt direkt im `<head>` des Premium-Layouts geladen
 - ein im ersten Preview sichtbarer Farbwechsel beim Laden der Angebotsseite wurde behoben: die finalen `status-unified-*`-Klassen werden für Angebote, Lager-Angebote und Filialausgänge bereits serverseitig im ersten HTML ausgegeben
 - `csp-shared-runtime.js` bleibt nur noch als Absicherung für später dynamisch eingefügte Status-Badges zuständig
