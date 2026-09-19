@@ -135,10 +135,5 @@
         <div class="erp-list-pagination">{{ $customers->links() }}</div>
     </section>
 
-    <style>
-        .customer-contact-stack{display:grid;gap:5px}
-        .customer-contact-stack>a{color:#211d17;font-weight:800;text-decoration:none}
-        .customer-contact-stack>a:hover{color:#9a7300}
-        .customer-contact-stack>a i{margin-right:6px;color:#7b5c00}
-    </style>
+    {{-- CSP static styles moved to public/css/csp-static-bulk.css: resources/views/pages/customers/index.blade.php --}}
 </x-layouts.premium>
