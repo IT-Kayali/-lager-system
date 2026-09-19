@@ -1,0 +1,436 @@
+/* resources/views/pages/security/users/edit.blade.php block 1 */
+.security-user-edit-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.45fr) minmax(320px, .75fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .security-user-edit-main,
+        .security-user-edit-status {
+            padding: 26px;
+        }
+
+        .security-user-edit-head {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            padding-bottom: 22px;
+            margin-bottom: 22px;
+            border-bottom: 1px solid #e7dece;
+        }
+
+        .security-user-edit-icon {
+            width: 48px;
+            height: 48px;
+            flex: 0 0 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: #f3e8be;
+            color: #8a6a00;
+            border: 1px solid #dfc96f;
+            font-size: 21px;
+        }
+
+        .security-user-edit-kicker {
+            margin: 0 0 5px;
+            color: #8a6a00;
+            font-size: 11px;
+            font-weight: 950;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .security-user-edit-head h2,
+        .security-user-status-head h2 {
+            margin: 0;
+            color: #111;
+            font-size: 22px;
+            font-weight: 950;
+        }
+
+        .security-user-edit-head p:not(.security-user-edit-kicker),
+        .security-user-status-head p {
+            margin: 6px 0 0;
+            color: #665f54;
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.55;
+        }
+
+        .security-user-edit-main .premium-form-grid {
+            width: 100% !important;
+            max-width: none !important;
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 16px !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+
+        .security-user-edit-main .premium-form-field {
+            min-width: 0;
+            display: grid !important;
+            gap: 8px !important;
+        }
+
+        .security-user-edit-main .premium-form-field label {
+            color: #211d17 !important;
+            font-size: 13px !important;
+            font-weight: 950 !important;
+        }
+
+        .security-user-edit-main .premium-input,
+        .security-user-edit-main .premium-select {
+            width: 100% !important;
+            min-height: 48px !important;
+            background-color: #fffdf8 !important;
+            color: #111 !important;
+            font-weight: 750 !important;
+        }
+
+        .security-user-edit-main .premium-alert {
+            margin-top: 18px !important;
+            border-radius: 14px !important;
+            box-shadow: none !important;
+        }
+
+        .security-user-edit-main form > div:last-child {
+            margin-top: 22px !important;
+        }
+
+        .security-user-edit-status {
+            position: sticky;
+            top: 24px;
+        }
+
+        .security-user-status-head {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #e7dece;
+        }
+
+        .security-user-status-head > span {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 13px;
+            background: #171716;
+            color: #ffe690;
+            font-size: 18px;
+        }
+
+        .security-user-status-list {
+            display: grid;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .security-user-status-row {
+            display: grid;
+            grid-template-columns: 38px minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+            padding: 14px;
+            border: 1px solid #e7dece;
+            border-radius: 14px;
+            background: #fffdf8;
+        }
+
+        .security-user-status-icon {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border-radius: 11px;
+        }
+
+        .security-user-status-icon.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .security-user-status-icon.danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .security-user-status-icon.neutral {
+            background: #f3e8be;
+            color: #8a6a00;
+        }
+
+        .security-user-status-row strong {
+            display: block;
+            color: #111;
+            font-size: 13px;
+            font-weight: 950;
+        }
+
+        .security-user-status-row small {
+            display: block;
+            margin-top: 4px;
+            color: #665f54;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1.45;
+        }
+
+        @media (max-width: 1050px) {
+            .security-user-edit-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .security-user-edit-status {
+                position: static;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .security-user-edit-main,
+            .security-user-edit-status {
+                padding: 18px;
+            }
+
+            .security-user-edit-main .premium-form-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            .security-user-edit-head {
+                display: grid;
+            }
+        }
+
+/* resources/views/pages/security/users/_form.blade.php block 1 */
+.system-user-form {
+        display: grid;
+        gap: 18px;
+        color: #211d17;
+    }
+
+    .system-user-form-alert {
+        margin: 0;
+    }
+
+    .system-user-form-alert.is-error {
+        border-color: rgba(239, 68, 68, .25);
+        background: rgba(239, 68, 68, .10);
+        color: #991b1b;
+    }
+
+    .system-user-form-section {
+        padding: 20px;
+        border: 1px solid #e3d6c2;
+        border-radius: 18px;
+        background: #fffdf8;
+    }
+
+    .system-user-password-section {
+        background: linear-gradient(180deg, #fffdf8 0%, #fffaf0 100%);
+    }
+
+    .system-user-form-section-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding-bottom: 16px;
+        margin-bottom: 16px;
+        border-bottom: 1px solid #eadfce;
+    }
+
+    .system-user-form-kicker {
+        margin: 0 0 4px;
+        color: #8a6a00;
+        font-size: 10px;
+        font-weight: 950;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .system-user-form-section-head h3 {
+        margin: 0;
+        color: #111;
+        font-size: 18px;
+        font-weight: 950;
+    }
+
+    .system-user-form-section-copy {
+        max-width: 700px;
+        margin: 6px 0 0;
+        color: #665f54;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.5;
+    }
+
+    .system-user-form-section-icon {
+        width: 40px;
+        height: 40px;
+        flex: 0 0 40px;
+        display: grid;
+        place-items: center;
+        border-radius: 12px;
+        background: #f3e8be;
+        color: #8a6a00;
+        border: 1px solid #dfc96f;
+        font-size: 18px;
+    }
+
+    .system-user-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .system-user-form .premium-form-field {
+        display: grid;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .system-user-form .premium-form-field label {
+        margin: 0;
+        color: #211d17 !important;
+        font-size: 12px;
+        font-weight: 950;
+    }
+
+    .system-user-form .premium-form-field label > span:not(.optional) {
+        color: #b91c1c !important;
+    }
+
+    .system-user-form .premium-form-field label .optional {
+        color: #766d60 !important;
+        font-weight: 750;
+    }
+
+    .system-user-form .premium-input,
+    .system-user-form .premium-select {
+        width: 100% !important;
+        min-height: 48px !important;
+        height: 48px !important;
+        border: 1px solid #d9c9ae !important;
+        border-radius: 13px !important;
+        background: #fffdf8 !important;
+        color: #111 !important;
+        box-shadow: none !important;
+        font-weight: 750 !important;
+    }
+
+    .system-user-form .premium-input:focus,
+    .system-user-form .premium-select:focus {
+        border-color: #d4ad16 !important;
+        box-shadow: 0 0 0 4px rgba(212, 173, 22, .14) !important;
+    }
+
+    .system-user-password-control {
+        position: relative;
+    }
+
+    .system-user-password-control .premium-input {
+        padding-right: 44px !important;
+    }
+
+    .system-user-password-control > i {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #8a806f;
+        pointer-events: none;
+    }
+
+    .system-user-form-help {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #665f54 !important;
+        font-size: 11px;
+        font-weight: 750;
+        line-height: 1.4;
+    }
+
+    .system-user-form-error {
+        color: #b91c1c;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .system-user-form-security-note {
+        display: grid;
+        grid-template-columns: 38px minmax(0, 1fr);
+        gap: 12px;
+        align-items: center;
+        padding: 14px;
+        border: 1px solid #ead89e;
+        border-radius: 14px;
+        background: #fff9e8;
+    }
+
+    .system-user-form-security-note > i {
+        width: 38px;
+        height: 38px;
+        display: grid;
+        place-items: center;
+        border-radius: 11px;
+        background: #f3e8be;
+        color: #8a6a00;
+    }
+
+    .system-user-form-security-note strong,
+    .system-user-form-security-note span {
+        display: block;
+        color: #211d17 !important;
+    }
+
+    .system-user-form-security-note strong {
+        font-size: 12px;
+        font-weight: 950;
+    }
+
+    .system-user-form-security-note span {
+        margin-top: 3px;
+        color: #665f54 !important;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.45;
+    }
+
+    .system-user-form-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .system-user-form-actions .premium-btn {
+        min-height: 46px;
+        padding: 0 18px;
+    }
+
+    @media (max-width: 720px) {
+        .system-user-form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .system-user-form-section {
+            padding: 16px;
+        }
+
+        .system-user-form-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+        }
+
+        .system-user-form-actions .premium-btn {
+            width: 100%;
+        }
+    }
