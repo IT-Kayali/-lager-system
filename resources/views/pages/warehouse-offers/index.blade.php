@@ -80,6 +80,13 @@
                                 \App\Models\Offer::STATUS_COMPLETED => 'completed',
                                 default => 'neutral',
                             };
+
+                            $unifiedStatusClass = match ($offer->status) {
+                                \App\Models\Offer::STATUS_IN_PROGRESS => 'status-unified-progress',
+                                \App\Models\Offer::STATUS_READY => 'status-unified-ready',
+                                \App\Models\Offer::STATUS_COMPLETED => 'status-unified-completed',
+                                default => '',
+                            };
                         @endphp
                         <tr>
                             <td>
@@ -100,7 +107,7 @@
                                 </div>
                             </td>
 
-                            <td><span class="warehouse-status-badge {{ $statusClass }}">{{ $offer->statusLabel() }}</span></td>
+                            <td><span class="warehouse-status-badge {{ $statusClass }} {{ $unifiedStatusClass }}">{{ $offer->statusLabel() }}</span></td>
                             <td><span class="premium-code">{{ $offer->items->count() }}</span></td>
                             <td>
                                 <strong>{{ $offer->shipping_method ?: '—' }}</strong>
