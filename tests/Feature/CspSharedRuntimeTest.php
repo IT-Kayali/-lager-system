@@ -26,6 +26,35 @@ test('shared browser runtime and status colors no longer depend on inline assets
     expect(file_exists(resource_path('views/partials/unified-status-colors.blade.php')))
         ->toBeFalse();
 
+    $offerIndex = file_get_contents(resource_path('views/pages/offers/index.blade.php'));
+    $warehouseIndex = file_get_contents(resource_path('views/pages/warehouse-offers/index.blade.php'));
+    $warehouseShow = file_get_contents(resource_path('views/pages/warehouse-offers/show.blade.php'));
+    $branchIndex = file_get_contents(resource_path('views/pages/branch-withdrawals/index.blade.php'));
+
+    expect($offerIndex)
+        ->toContain('status-unified-offer')
+        ->toContain('status-unified-progress')
+        ->toContain('status-unified-ready')
+        ->toContain('status-unified-completed')
+        ->toContain('status-unified-cancelled')
+        ->toContain('status-unified-expired');
+
+    expect($warehouseIndex)
+        ->toContain('status-unified-progress')
+        ->toContain('status-unified-ready')
+        ->toContain('status-unified-completed');
+
+    expect($warehouseShow)
+        ->toContain('status-unified-progress')
+        ->toContain('status-unified-ready')
+        ->toContain('status-unified-completed');
+
+    expect($branchIndex)
+        ->toContain('status-unified-open')
+        ->toContain('status-unified-progress')
+        ->toContain('status-unified-issued')
+        ->toContain('status-unified-cancelled');
+
     expect($runtime)
         ->toContain('initBrowserBranding')
         ->toContain('initUnifiedStatusColors')
