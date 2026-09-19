@@ -145,31 +145,3 @@
     </details>
 </section>
 
-<style>
-    #button-appearance details > summary::-webkit-details-marker {
-        display: none;
-    }
-
-    #button-appearance details[open] > summary .bi-chevron-down {
-        transform: rotate(180deg);
-    }
-
-    #button-appearance summary .bi-chevron-down {
-        display: inline-block;
-        transition: transform .18s ease;
-    }
-
-    @media (max-width: 820px) {
-        #button-appearance .premium-form-grid {
-            grid-template-columns: 1fr !important;
-        }
-
-        #button-appearance summary {
-            align-items: flex-start !important;
-        }
-
-        #button-appearance summary > .premium-muted {
-            display: none;
-        }
-    }
-</style>
