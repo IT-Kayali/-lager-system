@@ -24,9 +24,5 @@
         @include('pages.branch-withdrawals._form', ['submitLabel' => 'Filialausgang speichern'])
     </form>
 
-    <style>
-        .branch-editor-form-create > .premium-alert {
-            display: none !important;
-        }
-    </style>
+    {{-- CSP static styles moved to public/css/csp-static-bulk.css: resources/views/pages/branch-withdrawals/create.blade.php --}}
 </x-layouts.premium>
