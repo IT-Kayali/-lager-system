@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Route;
 Route::redirect('/', '/dashboard');
 Route::redirect('/home', '/dashboard')->name('home');
 Route::get('/application-theme.css', [SettingsController::class, 'applicationThemeStyles'])->name('application.theme.css');
+Route::get('/login-styles.css', [SettingsController::class, 'loginStyles'])->name('login.styles');
 Route::get('/login-background', [SettingsController::class, 'loginBackground'])->name('login.background');
 Route::get('/login-logo', [SettingsController::class, 'loginLogo'])->name('login.logo');
 Route::get('/site-favicon', [SettingsController::class, 'siteFavicon'])->name('site.favicon');
