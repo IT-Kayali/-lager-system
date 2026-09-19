@@ -115,3 +115,18 @@ it('blocks managers and sales from changing global button colors', function () {
             ->assertForbidden();
     }
 });
+
+it('serves current button colors through the external application theme stylesheet', function () {
+    ApplicationSetting::putValue('primary_button_background', '#123456', 'color');
+    ApplicationSetting::putValue('primary_button_text', '#FEDCBA', 'color');
+    ApplicationSetting::putValue('secondary_button_background', '#334455', 'color');
+    ApplicationSetting::putValue('secondary_button_text', '#FFFFFF', 'color');
+
+    $this->get(route('application.theme.css'))
+        ->assertOk()
+        ->assertHeader('Content-Type', 'text/css; charset=UTF-8')
+        ->assertSee('--premium-primary-button-bg: #123456;', false)
+        ->assertSee('--premium-primary-button-text: #FEDCBA;', false)
+        ->assertSee('--premium-secondary-button-bg: #334455;', false)
+        ->assertSee('--premium-secondary-button-text: #FFFFFF;', false);
+});
