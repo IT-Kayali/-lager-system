@@ -126,18 +126,5 @@
         <div class="erp-list-pagination">{{ $categories->links() }}</div>
     </section>
 
-    <style>
-        .modern-category-table{min-width:980px}
-        .category-name-link{display:inline-flex;align-items:center;gap:10px;color:#111;text-decoration:none;font-weight:950}
-        .category-name-link:hover{color:#8a6a00;text-decoration:underline}
-        .category-color-dot{width:12px;height:12px;border-radius:999px;box-shadow:0 0 0 3px rgba(0,0,0,.05);flex:0 0 12px}
-        .category-name-copy{display:grid;gap:2px}
-        .category-name-copy small{color:#665f54;font-size:11px;font-weight:800}
-        .category-priority-pill,.category-product-count{display:inline-flex;align-items:center;justify-content:center;min-width:38px;min-height:32px;padding:6px 10px;border-radius:999px;background:#f3e8be;color:#111;font-weight:950}
-        .category-description{display:inline-block;max-width:360px;overflow:hidden;text-overflow:ellipsis;color:#3a332a}
-        .category-status-pill{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:7px 11px;border-radius:999px;font-size:13px;font-weight:950;white-space:nowrap}
-        .category-status-pill.active{background:#dcfce7;color:#166534}
-        .category-status-pill.inactive{background:#f3f4f6;color:#4b5563}
-        .category-actions{justify-content:flex-end!important}
-    </style>
+    {{-- CSP static styles moved to public/css/csp-static-bulk.css: resources/views/pages/product-categories/index.blade.php --}}
 </x-layouts.premium>
