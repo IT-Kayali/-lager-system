@@ -30,6 +30,8 @@ Route::redirect('/home', '/dashboard')->name('home');
 Route::get('/login-background', [SettingsController::class, 'loginBackground'])->name('login.background');
 Route::get('/login-logo', [SettingsController::class, 'loginLogo'])->name('login.logo');
 Route::get('/site-favicon', [SettingsController::class, 'siteFavicon'])->name('site.favicon');
+Route::get('/application-theme.css', [SettingsController::class, 'applicationThemeCss'])->name('application.theme.css');
+Route::get('/login-theme.css', [SettingsController::class, 'loginThemeCss'])->name('login.theme.css');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index')->middleware('role:' . User::ROLE_ADMIN);
