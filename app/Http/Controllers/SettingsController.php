@@ -6,6 +6,7 @@ use App\Models\ApplicationSetting;
 use App\Models\CustomerGroup;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -113,6 +114,43 @@ class SettingsController extends Controller
         $this->updateStoredImage($request, 'login_logo', 'remove_login_logo', ApplicationSetting::loginLogoPath(), 'login-logos', 'login_logo_path', 'Logo der Anmeldeseite');
         $this->updateStoredImage($request, 'site_favicon', 'remove_site_favicon', ApplicationSetting::siteFaviconPath(), 'site-favicons', 'site_favicon_path', 'Favicon der Anwendung');
         return redirect()->to(route('settings.index') . '#login-appearance')->with('success', 'Login- und Browser-Einstellungen wurden gespeichert.');
+    }
+
+    public function applicationThemeCss(): Response
+    {
+        $theme = ApplicationSetting::buttonTheme();
+
+        $css = sprintf(
+            ":root {\n    --premium-primary-button-bg: %s;\n    --premium-primary-button-text: %s;\n    --premium-secondary-button-bg: %s;\n    --premium-secondary-button-text: %s;\n}\n",
+            $theme['primary_button_background'],
+            $theme['primary_button_text'],
+            $theme['secondary_button_background'],
+            $theme['secondary_button_text'],
+        );
+
+        return response($css, 200, [
+            'Content-Type' => 'text/css; charset=UTF-8',
+            'Cache-Control' => 'private, no-store',
+        ]);
+    }
+
+    public function loginThemeCss(): Response
+    {
+        $background = ApplicationSetting::loginBackgroundPath()
+            ? sprintf(
+                "linear-gradient(135deg, rgba(16, 14, 10, .78), rgba(16, 14, 10, .30) 42%%, rgba(255, 244, 221, .68)), url('%s')",
+                route('login.background', [], false),
+            )
+            : "linear-gradient(135deg, rgba(16, 14, 10, .78), rgba(16, 14, 10, .30) 42%, rgba(255, 244, 221, .68)), radial-gradient(circle at 50% 20%, rgba(239, 202, 86, .35), transparent 30%), linear-gradient(135deg, #1d1710, #5b4314 46%, #fff2d4)";
+
+        return response(
+            ".login-page {\n    background: {$background};\n}\n",
+            200,
+            [
+                'Content-Type' => 'text/css; charset=UTF-8',
+                'Cache-Control' => 'private, no-store',
+            ],
+        );
     }
 
     public function loginBackground() { $path = ApplicationSetting::loginBackgroundPath(); abort_unless($path && Storage::disk('public')->exists($path), 404); return Storage::disk('public')->response($path); }
