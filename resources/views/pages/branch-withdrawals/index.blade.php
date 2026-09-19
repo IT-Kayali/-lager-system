@@ -195,22 +195,5 @@
         <div class="erp-list-pagination">{{ $withdrawals->links() }}</div>
     </section>
 
-    <style>
-        .branch-table{min-width:1080px}
-        .branch-number-cell{display:grid;gap:4px;min-width:170px}
-        .branch-number-cell strong{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;font-weight:950}
-        .branch-number-cell span{color:#665f54;font-size:12px;font-weight:750}
-        .branch-name-pill{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:7px 11px;border:1px solid #d8cbb7;border-radius:999px;background:#f8f2e7;font-size:13px;font-weight:900;white-space:nowrap}
-        .branch-status-badge{display:inline-flex;align-items:center;min-height:34px;padding:7px 11px;border-radius:999px;font-size:13px;font-weight:950;white-space:nowrap}
-        .branch-status-badge.open{background:#fff1c2;color:#7a5600}
-        .branch-status-badge.progress{background:#dbeafe;color:#1d4ed8}
-        .branch-status-badge.issued{background:#dcfce7;color:#166534}
-        .branch-status-badge.cancelled{background:#fee2e2;color:#991b1b}
-        .branch-status-form{display:flex;align-items:center;gap:7px;margin:0;min-width:220px}
-        .branch-status-select{min-width:165px;min-height:38px}
-        .branch-role-note{color:#665f54;font-size:12px;font-weight:850;white-space:nowrap}
-        .branch-employee-name{display:inline-block;min-width:120px;color:#111;font-size:13px;font-weight:950}
-        .branch-note-text{display:inline-block;max-width:260px;color:#3a332a;font-weight:750}
-        .branch-actions{gap:8px}
-    </style>
+    
 </x-layouts.premium>
