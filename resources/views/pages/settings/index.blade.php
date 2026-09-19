@@ -304,11 +304,5 @@
         </form>
     </section>
 
-    <style>
-        @media (max-width: 820px) {
-            #login-appearance .premium-form-grid.two {
-                grid-template-columns: 1fr !important;
-            }
-        }
-    </style>
+    {{-- CSP static styles moved to public/css/csp-static-bulk.css: resources/views/pages/settings/index.blade.php --}}
 </x-layouts.premium>
