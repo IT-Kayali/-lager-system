@@ -7,6 +7,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+    <link rel="stylesheet" href="{{ asset('css/unified-status-colors.css') }}">
 
 <!-- PREMIUM_SELECT_STYLE_START -->
 <style>

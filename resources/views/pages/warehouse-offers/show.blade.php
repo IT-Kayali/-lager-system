@@ -15,6 +15,13 @@
             \App\Models\Offer::STATUS_COMPLETED => 'completed',
             default => 'neutral',
         };
+
+        $unifiedStatusClass = match ($offer->status) {
+            \App\Models\Offer::STATUS_IN_PROGRESS => 'status-unified-progress',
+            \App\Models\Offer::STATUS_READY => 'status-unified-ready',
+            \App\Models\Offer::STATUS_COMPLETED => 'status-unified-completed',
+            default => '',
+        };
     @endphp
 
     <div class="warehouse-offer-layout">
@@ -23,7 +30,7 @@
                 <div class="premium-toolbar">
                     <div>
                         <h2 style="font-size:24px;font-weight:950;margin:0;">{{ $offer->offer_number }}</h2>
-                        <div class="premium-muted" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px;"><span>{{ $customer?->company_name ?: '—' }}</span><span>·</span><span class="warehouse-status-badge {{ $statusClass }}">{{ $offer->statusLabel() }}</span></div>
+                        <div class="premium-muted" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px;"><span>{{ $customer?->company_name ?: '—' }}</span><span>·</span><span class="warehouse-status-badge {{ $statusClass }} {{ $unifiedStatusClass }}">{{ $offer->statusLabel() }}</span></div>
                     </div>
                     <div style="display:flex;gap:10px;flex-wrap:wrap;"><a href="{{ route('warehouse.offers.delivery-note', $offer) }}" target="_blank" class="premium-btn gold"><i class="bi bi-truck"></i> Lieferschein PDF</a><a href="{{ route('warehouse.offers.index') }}" class="premium-btn"><i class="bi bi-arrow-left"></i> Zurück</a></div>
                 </div>

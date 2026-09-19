@@ -93,6 +93,16 @@
                             $statusClass = $isCancelled || $isExpired
                                 ? 'critical'
                                 : ($isActiveReservation ? 'reserved' : ($isCompleted ? 'completed' : 'open'));
+
+                            $unifiedStatusClass = match ($offer->status) {
+                                \App\Models\Offer::STATUS_OFFER => 'status-unified-offer',
+                                \App\Models\Offer::STATUS_IN_PROGRESS => 'status-unified-progress',
+                                \App\Models\Offer::STATUS_READY => 'status-unified-ready',
+                                \App\Models\Offer::STATUS_COMPLETED => 'status-unified-completed',
+                                \App\Models\Offer::STATUS_CANCELLED => 'status-unified-cancelled',
+                                \App\Models\Offer::STATUS_RESERVATION_EXPIRED => 'status-unified-expired',
+                                default => '',
+                            };
                         @endphp
 
                         <tr>
@@ -120,7 +130,7 @@
                             </td>
 
                             <td>
-                                <span class="offer-status-pill {{ $statusClass }}">
+                                <span class="offer-status-pill {{ $statusClass }} {{ $unifiedStatusClass }}">
                                     {{ $offer->statusLabel() }}
                                 </span>
                             </td>

@@ -108,6 +108,14 @@
                                 \App\Models\BranchWithdrawal::STATUS_CANCELLED => 'cancelled',
                                 default => '',
                             };
+
+                            $unifiedStatusClass = match ($withdrawal->status) {
+                                \App\Models\BranchWithdrawal::STATUS_OPEN => 'status-unified-open',
+                                \App\Models\BranchWithdrawal::STATUS_IN_PROGRESS => 'status-unified-progress',
+                                \App\Models\BranchWithdrawal::STATUS_ISSUED => 'status-unified-issued',
+                                \App\Models\BranchWithdrawal::STATUS_CANCELLED => 'status-unified-cancelled',
+                                default => '',
+                            };
                         @endphp
 
                         <tr>
@@ -133,7 +141,7 @@
                                         <button type="submit" class="premium-icon-btn" title="Status speichern" aria-label="Status speichern"><i class="bi bi-check-lg"></i></button>
                                     </form>
                                 @else
-                                    <span class="branch-status-badge {{ $statusClass }}">{{ $statusLabel }}</span>
+                                    <span class="branch-status-badge {{ $statusClass }} {{ $unifiedStatusClass }}">{{ $statusLabel }}</span>
                                 @endif
                             </td>
 
