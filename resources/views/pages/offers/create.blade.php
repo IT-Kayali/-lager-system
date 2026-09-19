@@ -94,68 +94,7 @@
     data-required-validation="1"
 ></div>
 
-<style>
-    .offer-category-filter-field {
-        min-width: 220px;
-    }
-
-    .offer-category-select,
-    .offer-category-product-row select,
-    .offer-category-product-row .ts-control {
-        background: #ffffff !important;
-    }
-
-    .offer-category-product-row {
-        display: grid !important;
-        grid-template-columns: 190px 520px 220px 300px !important;
-        gap: 14px !important;
-        align-items: start !important;
-        justify-content: start !important;
-        width: 100% !important;
-    }
-
-    .offer-category-product-row > .premium-form-field {
-        min-width: 0 !important;
-        width: 100% !important;
-    }
-
-    .offer-category-product-row .premium-form-field {
-        margin: 0 !important;
-    }
-
-    .offer-category-product-row select:disabled,
-    .offer-category-product-row .ts-wrapper.disabled .ts-control {
-        opacity: .75 !important;
-        cursor: not-allowed !important;
-        background: #f5f0e7 !important;
-    }
-
-    .offer-category-product-row .ts-wrapper.disabled .ts-control input {
-        cursor: not-allowed !important;
-    }
-
-    @media (max-width: 1350px) {
-        .offer-category-product-row {
-            grid-template-columns: 170px minmax(0, 1fr) 190px 280px !important;
-        }
-    }
-
-    @media (max-width: 1050px) {
-        .offer-category-product-row {
-            grid-template-columns: 1fr 1fr !important;
-        }
-
-        .offer-category-product-row > .premium-form-field:last-child {
-            padding-top: 0 !important;
-        }
-    }
-
-    @media (max-width: 700px) {
-        .offer-category-product-row {
-            grid-template-columns: 1fr !important;
-        }
-    }
-</style>
+{{-- CSP static styles moved to public/css/csp-static-bulk.css: resources/views/pages/offers/create.blade.php --}}
 
 
 {{-- OFFER_CATEGORY_PRODUCT_FILTER_END --}}
@@ -165,52 +104,7 @@
 {{-- OFFER_SHIPPING_MOVE_TOP_END --}}
 
 {{-- OFFER_SHIPPING_FORCE_FULL_WIDTH_START --}}
-<style>
-    #offer-shipping-card {
-        width: 100% !important;
-        max-width: none !important;
-        min-width: 100% !important;
-        flex: 0 0 100% !important;
-        grid-column: 1 / -1 !important;
-        align-self: stretch !important;
-        box-sizing: border-box !important;
-        display: block !important;
-    }
-
-    #offer-shipping-card .premium-form-grid {
-        width: 100% !important;
-        max-width: none !important;
-        display: grid !important;
-        grid-template-columns: minmax(280px, 480px) minmax(220px, 320px) !important;
-        gap: 14px !important;
-    }
-
-    #offer-shipping-card .premium-form-field {
-        width: 100% !important;
-        max-width: none !important;
-    }
-
-    #offer-shipping-card select {
-        width: 100% !important;
-        max-width: 480px !important;
-    }
-
-    #offer-shipping-card input {
-        width: 100% !important;
-        max-width: 320px !important;
-    }
-
-    @media (max-width: 900px) {
-        #offer-shipping-card .premium-form-grid {
-            grid-template-columns: 1fr !important;
-        }
-
-        #offer-shipping-card select,
-        #offer-shipping-card input {
-            max-width: none !important;
-        }
-    }
-</style>
+{{-- CSP static styles moved to public/css/csp-static-bulk.css: resources/views/pages/offers/create.blade.php --}}
 {{-- OFFER_SHIPPING_FORCE_FULL_WIDTH_END --}}
 
 
@@ -219,32 +113,7 @@
 {{-- OFFER_SHIPPING_HIDDEN_SYNC_END --}}
 
 {{-- OFFER_REQUIRED_FIELDS_VALIDATION_START --}}
-<style>
-    #offer-main-form .offer-required-invalid,
-    #offer-shipping-card .offer-required-invalid {
-        border-color: #dc2626 !important;
-        box-shadow: 0 0 0 3px rgba(220, 38, 38, .10) !important;
-    }
-
-    #offer-main-form .ts-wrapper.offer-required-invalid .ts-control,
-    #offer-shipping-card .ts-wrapper.offer-required-invalid .ts-control {
-        border-color: #dc2626 !important;
-        box-shadow: 0 0 0 3px rgba(220, 38, 38, .10) !important;
-    }
-
-    .offer-required-message {
-        margin-top: 6px;
-        color: #b91c1c;
-        font-size: 12px;
-        font-weight: 850;
-        line-height: 1.35;
-    }
-
-    .offer-required-field-invalid > label,
-    .offer-required-field-invalid .offer-line-total-label-row label {
-        color: #b91c1c !important;
-    }
-</style>
+{{-- CSP static styles moved to public/css/csp-static-bulk.css: resources/views/pages/offers/create.blade.php --}}
 
 
 {{-- OFFER_REQUIRED_FIELDS_VALIDATION_END --}}
