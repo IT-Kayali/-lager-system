@@ -320,14 +320,14 @@ Die Produkt- und Chargensortierung unterstützt auch numerisch benannte Produkte
 
 ## Security-Hardening-Status
 
-Stand: **18.09.2026**
+Stand: **19.09.2026**
 
 Die Security-Arbeiten werden bewusst in getrennten Phasen mit Sicherungen, isolierten Tests und Rückfallpunkten durchgeführt. Ziel ist, Sicherheitsverbesserungen ohne unnötige Unterbrechung des Produktionssystems einzuführen.
 
 
 ### Aktueller Produktions- und CSP-Stand
 
-Maßgeblich ist der produktive Stand vom **18.09.2026** bis einschließlich Pull Request **#126**. Die weiter unten aufgeführten Unterphasen dokumentieren teilweise bewusst den jeweiligen historischen Zwischenstand zum damaligen Datum.
+Maßgeblich ist der produktive Stand vom **19.09.2026** einschließlich des erfolgreich browsergetesteten Phase-4G.2C-Feature-Standes; der zugehörige Pull Request wird unmittelbar nach diesem README-Update erstellt. Die weiter unten aufgeführten Unterphasen dokumentieren teilweise bewusst den jeweiligen historischen Zwischenstand zum damaligen Datum.
 
 Aktuell produktiv bestätigt:
 
@@ -674,8 +674,13 @@ Bereits abgeschlossen:
 - ein im ersten Preview entdeckter FOUC wurde dadurch behoben und anschließend im Browser bestätigt
 - **4G.2B / PR #126:** Login-/Browser-Branding-CSS aus `resources/views/partials/browser-branding.blade.php` nach `public/css/browser-branding.css` ausgelagert
 - Login-Branding, Hintergrund, Logo, Favicon und weiße Hilfstexte anschließend im Browser geprüft
+- **4G.2C:** gemeinsame Statusfarben aus `resources/views/partials/unified-status-colors.blade.php` nach `public/css/unified-status-colors.css` ausgelagert und den alten Inline-Partial entfernt
+- die Status-CSS wird jetzt direkt im `<head>` des Premium-Layouts geladen
+- ein im ersten Preview sichtbarer Farbwechsel beim Laden der Angebotsseite wurde behoben: die finalen `status-unified-*`-Klassen werden für Angebote, Lager-Angebote und Filialausgänge bereits serverseitig im ersten HTML ausgegeben
+- `csp-shared-runtime.js` bleibt nur noch als Absicherung für später dynamisch eingefügte Status-Badges zuständig
+- der korrigierte 4G.2C-Preview wurde im Browser mit Hard-Reloads geprüft; der vorher sichtbare kurze Wechsel von gelb auf grau/blau/grün trat danach nicht mehr auf
 
-Nach 4G.2A und 4G.2B verbleiben aus der ursprünglichen Inventur noch **51 `<style>`-Blöcke**. Die `style=""`-Attribute, dynamischen Styles und JavaScript-CSSOM-Mutationen werden danach separat abgearbeitet.
+Nach 4G.2A, 4G.2B und 4G.2C verbleiben **50 produktive `<style>`-Blöcke**. Zusätzlich existiert weiterhin ein `<style>`-Block in der nicht produktiv gerouteten Laravel-`welcome.blade.php`; dieser wird in der produktiven CSP-Inventur bewusst nicht mitgezählt. Die `style=""`-Attribute, dynamischen Styles und JavaScript-CSSOM-Mutationen werden danach separat abgearbeitet.
 
 Wichtig: `style-src 'self'` wird erst dann scharf aktiviert, wenn die produktiven Browser-Views bereinigt sind, ein strenger Report-Only-Test keine relevanten Verstöße zeigt und die zentralen Workflows manuell regressionsgetestet wurden.
 
