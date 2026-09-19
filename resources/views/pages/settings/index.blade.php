@@ -304,11 +304,5 @@
         </form>
     </section>
 
-    <style>
-        @media (max-width: 820px) {
-            #login-appearance .premium-form-grid.two {
-                grid-template-columns: 1fr !important;
-            }
-        }
-    </style>
+    
 </x-layouts.premium>
