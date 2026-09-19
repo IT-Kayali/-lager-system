@@ -1,6 +1,5 @@
 @include('partials.application-theme')
 @include('partials.unified-app-chrome')
-@include('partials.unified-status-colors')
 @include('partials.browser-branding-runtime')
 
 @php
