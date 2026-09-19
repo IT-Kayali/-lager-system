@@ -9,7 +9,7 @@ it('loads the unified app chrome globally through the sidebar', function () {
 });
 
 it('removes the global header quick actions visually on every premium page', function () {
-    $chrome = file_get_contents(resource_path('views/partials/unified-app-chrome.blade.php'));
+    $chrome = file_get_contents(public_path('css/csp-static-bulk.css'));
 
     expect($chrome)
         ->toContain('.premium-topbar > div:last-child:not(:first-child)')
@@ -17,7 +17,7 @@ it('removes the global header quick actions visually on every premium page', fun
 });
 
 it('keeps the page header inset with additional top and right spacing', function () {
-    $chrome = file_get_contents(resource_path('views/partials/unified-app-chrome.blade.php'));
+    $chrome = file_get_contents(public_path('css/csp-static-bulk.css'));
 
     expect($chrome)
         ->toContain('padding: 34px 54px 52px !important;')
@@ -26,7 +26,7 @@ it('keeps the page header inset with additional top and right spacing', function
 });
 
 it('covers the main search and filter toolbars with one shared design', function () {
-    $chrome = file_get_contents(resource_path('views/partials/unified-app-chrome.blade.php'));
+    $chrome = file_get_contents(public_path('css/csp-static-bulk.css'));
 
     foreach ([
         '.products-page-actions',
@@ -65,7 +65,7 @@ it('keeps page specific action buttons available outside the removed global head
 });
 
 it('contains responsive toolbar rules for smaller screens', function () {
-    $chrome = file_get_contents(resource_path('views/partials/unified-app-chrome.blade.php'));
+    $chrome = file_get_contents(public_path('css/csp-static-bulk.css'));
 
     expect($chrome)
         ->toContain('@media (max-width: 1240px)')
@@ -76,14 +76,16 @@ it('contains responsive toolbar rules for smaller screens', function () {
 
 it('keeps all ERP list filters in one desktop row and prices use the shared toolbar', function () {
     $layout = file_get_contents(resource_path('views/components/layouts/premium.blade.php'));
-    $chrome = file_get_contents(resource_path('views/partials/unified-app-chrome.blade.php'));
+    $chrome = file_get_contents(public_path('css/csp-static-bulk.css'));
     $prices = file_get_contents(resource_path('views/pages/prices/index.blade.php'));
 
     expect($layout)
-        ->toContain('flex-wrap:nowrap !important;')
-        ->toContain('flex:0 1 170px !important;');
+        ->toContain("asset('css/csp-static-bulk.css')")
+        ->not->toContain('<style');
 
     expect($chrome)
+        ->toContain('flex-wrap:nowrap !important;')
+        ->toContain('flex:0 1 170px !important;')
         ->toContain('.erp-list-filter-form,')
         ->toContain('section.premium-card > form.premium-toolbar.erp-list-filter-form')
         ->toContain('flex-wrap: nowrap !important;')
