@@ -1,0 +1,26 @@
+/* resources/views/pages/settings/document-templates.blade.php block 1 */
+/* PDF_ASSET_REMOVE_STYLE_START */
+    .pdf-asset-remove-box {
+        margin-top: 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        padding: 10px 12px;
+        border: 1px solid rgba(239,68,68,.25);
+        background: rgba(239,68,68,.07);
+        color: #991b1b;
+        border-radius: 14px;
+        font-weight: 900;
+        cursor: pointer;
+    }
+
+    .pdf-asset-remove-box input {
+        width: 16px;
+        height: 16px;
+        accent-color: #ef4444;
+    }
+
+    .pdf-asset-remove-box:hover {
+        background: rgba(239,68,68,.12);
+    }
+    /* PDF_ASSET_REMOVE_STYLE_END */
