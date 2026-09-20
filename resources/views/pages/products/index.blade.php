@@ -157,5 +157,5 @@
         <div class="products-pagination erp-list-pagination">{{ $products->links() }}</div>
     </section>
 
-    
+
 </x-layouts.premium>
