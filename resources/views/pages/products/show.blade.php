@@ -102,7 +102,7 @@
         <div class="section-head">
             <div>
                 <h2 class="preview-title">Chargen</h2>
-                <p class="premium-muted" style="margin:4px 0 0;">Wareneingang, Ablaufdatum und aktueller Chargenbestand.</p>
+                <p class="premium-muted" data-csp-style="s-3ca59c3a">Wareneingang, Ablaufdatum und aktueller Chargenbestand.</p>
             </div>
 
             @unless($isSales)
