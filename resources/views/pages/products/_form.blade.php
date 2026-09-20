@@ -144,7 +144,7 @@
         </template>
     </div>
 
-    
+
 
     <script src="{{ asset('js/product-initial-batches-runtime.js') }}" defer></script>
 @endif
