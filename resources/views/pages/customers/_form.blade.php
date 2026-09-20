@@ -49,7 +49,7 @@
             <span
                 id="customer-group-preview"
                 class="premium-badge"
-                @if($selectedCustomerGroup) style="{{ $selectedCustomerGroup->badgeStyle() }}" @endif
+                @if($selectedCustomerGroup) data-csp-badge-bg="{{ $selectedCustomerGroup->displayColor() }}" data-csp-badge-fg="{{ $selectedCustomerGroup->textColor() }}" @endif
             >
                 {{ $selectedCustomerGroup?->name }}
             </span>
