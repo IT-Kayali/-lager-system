@@ -79,7 +79,7 @@
                         <tr>
                             <td>
                                 <a class="category-name-link" href="{{ route('product-categories.show', ['product_category' => $categoryUrlName]) }}">
-                                    <span class="category-color-dot" style="background: {{ $category->color ?: '#d4af37' }};"></span>
+                                    <span class="category-color-dot" data-csp-color="{{ $category->color ?: '#d4af37' }}"></span>
                                     <span class="category-name-copy">
                                         <strong>{{ $category->name }}</strong>
                                         <small>{{ $category->color ?: '#d4af37' }}</small>
