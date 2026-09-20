@@ -1,26 +1,26 @@
 @include('pages.settings._batch-expiry')
 
-<section id="button-appearance" class="premium-card" style="margin-top:22px;scroll-margin-top:24px;">
+<section id="button-appearance" class="premium-card" data-csp-style="s-1c4a2677">
     <details @if ($errors->hasAny([
         'primary_button_background',
         'primary_button_text',
         'secondary_button_background',
         'secondary_button_text',
     ])) open @endif>
-        <summary style="display:flex;align-items:center;justify-content:space-between;gap:16px;cursor:pointer;list-style:none;">
-            <span style="display:flex;align-items:center;gap:12px;">
-                <span style="width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:#f3e8be;color:#7b5c00;font-size:20px;">
+        <summary data-csp-style="s-26f3d8ca">
+            <span data-csp-style="s-089bd37d">
+                <span data-csp-style="s-a9cc23e5">
                     <i class="bi bi-palette"></i>
                 </span>
                 <span>
-                    <strong style="display:block;font-size:22px;font-weight:950;">Button-Design</strong>
+                    <strong data-csp-style="s-9bba2dfe">Button-Design</strong>
                     <span class="premium-muted">Farben für Speichern, Weiter, Zurück und andere Standardbuttons.</span>
                 </span>
             </span>
 
-            <span class="premium-muted" style="font-weight:900;">
+            <span class="premium-muted" data-csp-style="s-9b869097">
                 Zum Bearbeiten öffnen
-                <i class="bi bi-chevron-down" style="margin-left:6px;"></i>
+                <i class="bi bi-chevron-down" data-csp-style="s-9b335410"></i>
             </span>
         </summary>
 
@@ -28,16 +28,16 @@
             id="button-appearance-form"
             method="POST"
             action="{{ route('settings.button-appearance.update') }}"
-            style="display:grid;gap:18px;margin-top:20px;padding-top:20px;border-top:1px solid #e7dece;"
+            data-csp-style="s-a24a9e90"
             data-button-appearance-runtime
         >
             @csrf
             @method('PUT')
 
-            <div class="premium-form-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));">
-                <div style="display:grid;gap:14px;padding:16px;border:1px solid #e7dece;border-radius:16px;background:#fffdf8;">
+            <div class="premium-form-grid" data-csp-style="s-f3ddba0f">
+                <div data-csp-style="s-2108331b">
                     <div>
-                        <strong style="display:block;font-size:17px;font-weight:950;">Primäre Buttons</strong>
+                        <strong data-csp-style="s-cf4e872a">Primäre Buttons</strong>
                         <span class="premium-muted">Zum Beispiel Speichern, Weiter und Angebot erstellen.</span>
                     </div>
 
@@ -49,7 +49,7 @@
                                 name="primary_button_background"
                                 type="color"
                                 value="{{ old('primary_button_background', $buttonTheme['primary_button_background']) }}"
-                                style="width:100%;height:50px;padding:4px;border:1px solid #c9b895;border-radius:12px;background:#fff;cursor:pointer;"
+                                data-csp-style="s-0fdab794"
                                 required
                             >
                             @error('primary_button_background')
@@ -64,7 +64,7 @@
                                 name="primary_button_text"
                                 type="color"
                                 value="{{ old('primary_button_text', $buttonTheme['primary_button_text']) }}"
-                                style="width:100%;height:50px;padding:4px;border:1px solid #c9b895;border-radius:12px;background:#fff;cursor:pointer;"
+                                data-csp-style="s-0fdab794"
                                 required
                             >
                             @error('primary_button_text')
@@ -79,9 +79,9 @@
                     </button>
                 </div>
 
-                <div style="display:grid;gap:14px;padding:16px;border:1px solid #e7dece;border-radius:16px;background:#fffdf8;">
+                <div data-csp-style="s-2108331b">
                     <div>
-                        <strong style="display:block;font-size:17px;font-weight:950;">Sekundäre Buttons</strong>
+                        <strong data-csp-style="s-cf4e872a">Sekundäre Buttons</strong>
                         <span class="premium-muted">Zum Beispiel Zurück, Abbrechen und neutrale Aktionen.</span>
                     </div>
 
@@ -93,7 +93,7 @@
                                 name="secondary_button_background"
                                 type="color"
                                 value="{{ old('secondary_button_background', $buttonTheme['secondary_button_background']) }}"
-                                style="width:100%;height:50px;padding:4px;border:1px solid #c9b895;border-radius:12px;background:#fff;cursor:pointer;"
+                                data-csp-style="s-0fdab794"
                                 required
                             >
                             @error('secondary_button_background')
@@ -108,7 +108,7 @@
                                 name="secondary_button_text"
                                 type="color"
                                 value="{{ old('secondary_button_text', $buttonTheme['secondary_button_text']) }}"
-                                style="width:100%;height:50px;padding:4px;border:1px solid #c9b895;border-radius:12px;background:#fff;cursor:pointer;"
+                                data-csp-style="s-0fdab794"
                                 required
                             >
                             @error('secondary_button_text')
@@ -124,7 +124,7 @@
                 </div>
             </div>
 
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div data-csp-style="s-d4c80558">
                 <button class="premium-btn gold" type="submit">
                     <i class="bi bi-save"></i>
                     Button-Design speichern
