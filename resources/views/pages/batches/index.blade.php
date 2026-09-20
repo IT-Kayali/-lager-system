@@ -80,5 +80,5 @@
         <div class="batches-pagination erp-list-pagination">{{ $batches->links() }}</div>
     </section>
 
-    
+
 </x-layouts.premium>
