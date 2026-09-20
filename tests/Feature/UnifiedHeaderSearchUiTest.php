@@ -19,7 +19,7 @@ it('removes the global header quick actions visually on every premium page', fun
 });
 
 it('keeps the page header inset with additional top and right spacing', function () {
-    $chrome = file_get_contents(resource_path('views/partials/unified-app-chrome.blade.php'));
+    $chrome = file_get_contents(public_path('css/csp/unified-app-chrome.css'));
 
     expect($chrome)
         ->toContain('padding: 34px 54px 52px !important;')
@@ -28,7 +28,7 @@ it('keeps the page header inset with additional top and right spacing', function
 });
 
 it('covers the main search and filter toolbars with one shared design', function () {
-    $chrome = file_get_contents(resource_path('views/partials/unified-app-chrome.blade.php'));
+    $chrome = file_get_contents(public_path('css/csp/unified-app-chrome.css'));
 
     foreach ([
         '.products-page-actions',
@@ -67,7 +67,7 @@ it('keeps page specific action buttons available outside the removed global head
 });
 
 it('contains responsive toolbar rules for smaller screens', function () {
-    $chrome = file_get_contents(resource_path('views/partials/unified-app-chrome.blade.php'));
+    $chrome = file_get_contents(public_path('css/csp/unified-app-chrome.css'));
 
     expect($chrome)
         ->toContain('@media (max-width: 1240px)')
