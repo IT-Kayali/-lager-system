@@ -273,7 +273,7 @@
 </aside>
 
 @if ($user?->isWarehouse())
-    
+
 
     <script
         src="{{ asset('js/warehouse-notifications-runtime.js') }}"
