@@ -178,7 +178,7 @@
                     @checked(in_array((string) $category->id, $selectedCategoryIds, true))
                 >
 
-                <span class="category-checkbox-dot" style="background: {{ $category->color ?: '#d4af37' }};"></span>
+                <span class="category-checkbox-dot" data-csp-color="{{ $category->color ?: '#d4af37' }}"></span>
 
                 <span class="category-checkbox-text">
                     {{ $category->name }}
