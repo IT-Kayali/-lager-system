@@ -1,15 +1,17 @@
 <?php
 
-it('loads the unified app chrome globally through the sidebar', function () {
-    $sidebar = file_get_contents(resource_path('views/partials/app-sidebar.blade.php'));
+it('loads the unified app chrome and application theme globally from the premium layout head', function () {
+    $layout = file_get_contents(resource_path('views/components/layouts/premium.blade.php'));
 
-    expect($sidebar)
-        ->toContain("@include('partials.application-theme')")
-        ->toContain("@include('partials.unified-app-chrome')");
+    expect($layout)
+        ->toContain("route('application.theme.css')")
+        ->toContain("asset('css/csp/application-theme.css')")
+        ->toContain("asset('css/csp/unified-app-chrome.css')")
+        ->toContain("asset('css/csp/app-sidebar.css')");
 });
 
 it('removes the global header quick actions visually on every premium page', function () {
-    $chrome = file_get_contents(resource_path('views/partials/unified-app-chrome.blade.php'));
+    $chrome = file_get_contents(public_path('css/csp/unified-app-chrome.css'));
 
     expect($chrome)
         ->toContain('.premium-topbar > div:last-child:not(:first-child)')
@@ -75,8 +77,8 @@ it('contains responsive toolbar rules for smaller screens', function () {
 
 
 it('keeps all ERP list filters in one desktop row and prices use the shared toolbar', function () {
-    $layout = file_get_contents(resource_path('views/components/layouts/premium.blade.php'));
-    $chrome = file_get_contents(resource_path('views/partials/unified-app-chrome.blade.php'));
+    $layout = file_get_contents(public_path('css/csp/premium-layout.css'));
+    $chrome = file_get_contents(public_path('css/csp/unified-app-chrome.css'));
     $prices = file_get_contents(resource_path('views/pages/prices/index.blade.php'));
 
     expect($layout)
