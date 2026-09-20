@@ -123,7 +123,7 @@
                 @php
                     $premiumUser = auth()->user();
                 @endphp
-                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <div data-csp-style="s-f2e269be">
                     @if ($premiumUser?->hasRole([\App\Models\User::ROLE_MANAGER, \App\Models\User::ROLE_SALES]))
                         <a href="{{ route('offers.create') }}" class="premium-btn gold">
                             <i class="bi bi-receipt"></i>
