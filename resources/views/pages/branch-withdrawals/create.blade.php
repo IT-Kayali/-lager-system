@@ -24,5 +24,5 @@
         @include('pages.branch-withdrawals._form', ['submitLabel' => 'Filialausgang speichern'])
     </form>
 
-    
+
 </x-layouts.premium>
