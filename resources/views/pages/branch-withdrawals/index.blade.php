@@ -195,5 +195,5 @@
         <div class="erp-list-pagination">{{ $withdrawals->links() }}</div>
     </section>
 
-    
+
 </x-layouts.premium>
