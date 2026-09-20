@@ -140,5 +140,5 @@
         <div class="erp-list-pagination">{{ $offers->links() }}</div>
     </section>
 
-    
+
 </x-layouts.premium>
