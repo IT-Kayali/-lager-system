@@ -188,5 +188,5 @@
         </div>
     </section>
 
-    
+
 </x-layouts.premium>
