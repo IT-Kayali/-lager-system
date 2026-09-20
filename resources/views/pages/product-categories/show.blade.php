@@ -41,7 +41,7 @@
         <div class="section-head">
             <div>
                 <h2 class="preview-title">Enthaltene Produkte</h2>
-                <p class="premium-muted" style="margin:4px 0 0;">Alle Produkte, die dieser Kategorie zugeordnet sind.</p>
+                <p class="premium-muted" data-csp-style="s-3ca59c3a">Alle Produkte, die dieser Kategorie zugeordnet sind.</p>
             </div>
             <div class="category-products-actions">
                 <div class="category-product-search">
