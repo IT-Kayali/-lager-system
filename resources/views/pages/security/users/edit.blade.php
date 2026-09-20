@@ -74,5 +74,5 @@
         </aside>
     </section>
 
-    
+
 </x-layouts.premium>
