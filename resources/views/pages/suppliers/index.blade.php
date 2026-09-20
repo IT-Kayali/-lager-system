@@ -1,6 +1,6 @@
 <x-layouts.premium title="Lieferanten" subtitle="Verwalte Lieferanten, Kontakte und Produktzuordnungen.">
     @if (session('success'))<div class="premium-alert">{{ session('success') }}</div>@endif
-    @if (session('error'))<div class="premium-alert" style="border-color: rgba(239,68,68,.25); background: rgba(239,68,68,.10); color:#991b1b;">{{ session('error') }}</div>@endif
+    @if (session('error'))<div class="premium-alert" data-csp-style="s-0b92fcc8">{{ session('error') }}</div>@endif
 
     @php
         $hasSupplierFilters = ! empty($search)
