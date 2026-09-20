@@ -77,6 +77,10 @@ it('uploads logo background and favicon and serves the favicon publicly', functi
         ->assertOk()
         ->assertSee(route('site.favicon', [], false), false)
         ->assertSee(route('login.logo', [], false), false)
+        ->assertSee(route('login.styles', [], false), false);
+
+    $this->get(route('login.styles'))
+        ->assertOk()
         ->assertSee(route('login.background', [], false), false);
 });
 
