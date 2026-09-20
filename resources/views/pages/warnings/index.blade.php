@@ -152,5 +152,5 @@
         @endif
     </section>
 
-    
+
 </x-layouts.premium>
