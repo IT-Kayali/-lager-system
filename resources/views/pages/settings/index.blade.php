@@ -137,7 +137,10 @@
             @csrf
             @method('PUT')
 
-            <div style="min-height:180px;display:grid;place-items:center;border:1px dashed #d9c9ae;border-radius:22px;background:linear-gradient(135deg,#fbf6ed,#f3e5cf);background-size:cover;background-position:center;@if (! empty($loginBackgroundUrl)) background-image:linear-gradient(135deg,rgba(18,18,18,.52),rgba(212,173,22,.20)),url('{{ $loginBackgroundUrl }}'); @endif">
+            <div class="csp-login-preview-stage @if (! empty($loginBackgroundUrl)) has-background @endif">
+                @if (! empty($loginBackgroundUrl))
+                    <img src="{{ $loginBackgroundUrl }}" alt="" class="csp-login-preview-background" aria-hidden="true">
+                @endif
                 <div data-csp-style="s-553c8641">
                     @if (! empty($loginLogoUrl))
                         <img src="{{ $loginLogoUrl }}" alt="Login-Logo Vorschau" data-csp-style="s-b532908e">
