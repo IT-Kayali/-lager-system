@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="{{ asset('css/csp/application-theme.css') }}">
     <link rel="stylesheet" href="{{ asset('css/csp/unified-app-chrome.css') }}">
     <link rel="stylesheet" href="{{ asset('css/csp/app-sidebar.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/csp/inline-attributes.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/csp/dynamic-attributes.css') }}">
 
     @if (request()->routeIs('offers.*'))
         <link rel="stylesheet" href="{{ asset('css/csp/offers.css') }}">
