@@ -6,7 +6,7 @@
     $createTextColor = $createHasErrors ? old('text_color', '#FFFFFF') : '#FFFFFF';
 @endphp
 
-<section id="customer-groups" class="premium-card customer-group-settings" style="margin-top:22px;scroll-margin-top:24px;">
+<section id="customer-groups" class="premium-card customer-group-settings" data-csp-style="s-1c4a2677">
     <div class="customer-group-settings-header">
         <div>
             <h2>Kundengruppen</h2>
