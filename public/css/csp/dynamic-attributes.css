@@ -1,0 +1,93 @@
+/* CSP-safe replacements for dynamic inline styles and direct element.style mutations. */
+
+[data-csp-badge-bg] {
+    background-color: attr(data-csp-badge-bg type(<color>), #475569) !important;
+    border-color: attr(data-csp-badge-bg type(<color>), #475569) !important;
+    color: attr(data-csp-badge-fg type(<color>), #ffffff) !important;
+}
+
+[data-csp-color] {
+    background-color: attr(data-csp-color type(<color>), #d4af37) !important;
+}
+
+[data-csp-cat-color] {
+    --cat-color: attr(data-csp-cat-color type(<color>), #d4af37);
+}
+
+[data-csp-delete-button] {
+    background: #991b1b !important;
+}
+
+[data-csp-delete-locked="1"] {
+    opacity: .45 !important;
+    cursor: not-allowed !important;
+}
+
+.csp-qr-dark {
+    filter: invert(1) brightness(1.5) !important;
+}
+
+.csp-login-preview-stage {
+    position: relative !important;
+    min-height: 180px !important;
+    display: grid !important;
+    place-items: center !important;
+    overflow: hidden !important;
+    border: 1px dashed #d9c9ae !important;
+    border-radius: 22px !important;
+    background: linear-gradient(135deg, #fbf6ed, #f3e5cf) !important;
+}
+
+.csp-login-preview-stage.has-background::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(135deg, rgba(18,18,18,.52), rgba(212,173,22,.20));
+    pointer-events: none;
+}
+
+.csp-login-preview-background {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+.csp-login-preview-stage > :not(.csp-login-preview-background) {
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+:root[data-csp-primary-bg] {
+    --premium-primary-button-bg: attr(data-csp-primary-bg type(<color>), #d4ad16);
+    --premium-primary-button-text: attr(data-csp-primary-text type(<color>), #121212);
+    --premium-secondary-button-bg: attr(data-csp-secondary-bg type(<color>), #121212);
+    --premium-secondary-button-text: attr(data-csp-secondary-text type(<color>), #ffffff);
+}
+
+.ts-dropdown.ts-dropdown-fixed {
+    position: fixed !important;
+    left: attr(data-csp-left type(<length>), 0px) !important;
+    top: attr(data-csp-top type(<length>), 0px) !important;
+    width: attr(data-csp-width type(<length>), auto) !important;
+    max-width: attr(data-csp-max-width type(<length>), 100vw) !important;
+    margin: 0 !important;
+}
+
+.ts-dropdown-content[data-csp-max-height] {
+    max-height: attr(data-csp-max-height type(<length>), 320px) !important;
+}
+
+.csp-hidden {
+    display: none !important;
+}
+
+.csp-help-spacing {
+    margin-top: 6px !important;
+}
+
+.csp-toast-out {
+    animation: premiumToastOut .18s ease forwards !important;
+}
