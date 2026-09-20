@@ -216,4 +216,3 @@
 </template>
 
 <script src="{{ asset('js/branch-withdrawal-runtime.js') }}" defer></script>
-
