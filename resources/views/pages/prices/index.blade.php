@@ -201,5 +201,5 @@
         <script src="{{ asset('js/manual-price-rules-runtime.js') }}" defer></script>
     @endif
 
-    
+
 </x-layouts.premium>
