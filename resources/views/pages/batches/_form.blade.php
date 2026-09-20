@@ -116,7 +116,7 @@
                         data-default-months="{{ $defaultBatchExpiryMonths ?? 24 }}"
                         data-auto-expiry="{{ $batch->exists ? '0' : '1' }}"
                     >
-                    <div class="premium-muted" style="margin-top:8px;line-height:1.45;">
+                    <div class="premium-muted" data-csp-style="s-98fb48e9">
                         Wird bei neuen Chargen automatisch {{ $defaultBatchExpiryMonths ?? 24 }} Monate nach dem Wareneingang gesetzt. Du kannst das Datum jederzeit manuell früher oder später wählen. Das Ablaufdatum ist nur eine Information und sperrt den Verkauf nicht.
                     </div>
                     @error('expires_at') <div class="premium-error">{{ $message }}</div> @enderror
