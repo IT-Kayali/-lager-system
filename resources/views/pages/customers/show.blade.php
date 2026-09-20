@@ -27,7 +27,7 @@
         <div class="premium-alert">{{ session('success') }}</div>
     @endif
 
-    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:18px;">
+    <div data-csp-style="s-d93a4dfe">
         <a href="{{ route('customers.index') }}" class="premium-btn">
             <i class="bi bi-arrow-left"></i>
             Zurück
@@ -46,10 +46,10 @@
 
     <div class="premium-grid customer-profile-grid">
         <section class="premium-card">
-            <div class="premium-muted" style="font-weight:900; text-transform:uppercase; letter-spacing:.08em;">Kunde</div>
-            <h2 style="font-size:26px; font-weight:950; margin:8px 0 12px;">{{ $customer->company_name }}</h2>
+            <div class="premium-muted" data-csp-style="s-fc61b41d">Kunde</div>
+            <h2 data-csp-style="s-3bea0fae">{{ $customer->company_name }}</h2>
 
-            <div style="display:grid; gap:10px;">
+            <div data-csp-style="s-5311b8aa">
                 <div>
                     <strong>Kundennummer:</strong><br>
                     <span class="premium-code">{{ $customer->customer_number }}</span>
@@ -70,13 +70,13 @@
         </section>
 
         <section class="premium-card">
-            <div class="premium-muted" style="font-weight:900; text-transform:uppercase; letter-spacing:.08em;">Kontakt</div>
+            <div class="premium-muted" data-csp-style="s-fc61b41d">Kontakt</div>
 
-            <div style="display:grid; gap:12px; margin-top:12px;">
+            <div data-csp-style="s-ff14234e">
                 <div>
                     <strong>E-Mail:</strong><br>
                     @if ($customer->email)
-                        <a href="mailto:{{ $customer->email }}" style="font-weight:900; color:#212121;">{{ $customer->email }}</a>
+                        <a href="mailto:{{ $customer->email }}" data-csp-style="s-6a6caba7">{{ $customer->email }}</a>
                     @else
                         —
                     @endif
@@ -94,7 +94,7 @@
         </section>
 
         <section class="premium-card wallet-card {{ $walletClass }}">
-            <div class="premium-muted" style="font-weight:900; text-transform:uppercase; letter-spacing:.08em;">Kundenkonto</div>
+            <div class="premium-muted" data-csp-style="s-fc61b41d">Kundenkonto</div>
 
             <div class="wallet-balance">
                 {{ $walletBalance >= 0 ? '+' : '' }}{{ \App\Support\GermanNumber::format($walletBalance) }} €
@@ -114,43 +114,43 @@
 
     @include('pages.customers._revenue')
 
-    <div class="premium-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr)); align-items:start; margin-top:18px;">
+    <div class="premium-grid" data-csp-style="s-a555e52a">
         <section class="premium-card">
-            <h2 style="font-size:20px; font-weight:950; margin:0 0 12px;">Rechnungsadresse</h2>
+            <h2 data-csp-style="s-f0db0e9c">Rechnungsadresse</h2>
 
             @if ($billingAddress->isNotEmpty())
-                <div style="line-height:1.8;">
+                <div data-csp-style="s-d0feeb4b">
                     @foreach ($billingAddress as $line)
                         {{ $line }}<br>
                     @endforeach
                 </div>
             @elseif ($customer->billing_address)
-                <div style="white-space:pre-line;">{{ $customer->billing_address }}</div>
+                <div data-csp-style="s-4f5d23fc">{{ $customer->billing_address }}</div>
             @else
                 <div class="premium-muted">Keine Rechnungsadresse hinterlegt.</div>
             @endif
         </section>
 
         <section class="premium-card">
-            <h2 style="font-size:20px; font-weight:950; margin:0 0 12px;">Lieferadresse</h2>
+            <h2 data-csp-style="s-f0db0e9c">Lieferadresse</h2>
 
             @if ($deliveryAddress->isNotEmpty())
-                <div style="line-height:1.8;">
+                <div data-csp-style="s-d0feeb4b">
                     @foreach ($deliveryAddress as $line)
                         {{ $line }}<br>
                     @endforeach
                 </div>
             @elseif ($customer->delivery_address)
-                <div style="white-space:pre-line;">{{ $customer->delivery_address }}</div>
+                <div data-csp-style="s-4f5d23fc">{{ $customer->delivery_address }}</div>
             @else
                 <div class="premium-muted">Keine Lieferadresse hinterlegt.</div>
             @endif
         </section>
     </div>
 
-    <section class="premium-card" style="margin-top:18px;">
-        <h2 style="font-size:22px; font-weight:950; margin:0 0 8px;">Guthaben manuell buchen</h2>
-        <div class="premium-muted" style="margin-bottom:16px;">Notiz ist Pflicht. Der eingeloggte Mitarbeiter wird automatisch gespeichert.</div>
+    <section class="premium-card" data-csp-style="s-e9f7b175">
+        <h2 data-csp-style="s-35e6a173">Guthaben manuell buchen</h2>
+        <div class="premium-muted" data-csp-style="s-3914ce83">Notiz ist Pflicht. Der eingeloggte Mitarbeiter wird automatisch gespeichert.</div>
 
         <form method="POST" action="{{ route('customers.wallet-transactions.store', $customer) }}">
             @csrf
@@ -178,15 +178,15 @@
                 </div>
             </div>
 
-            <button class="premium-btn gold" type="submit" style="margin-top:16px;">
+            <button class="premium-btn gold" type="submit" data-csp-style="s-b15ae76f">
                 <i class="bi bi-wallet2"></i>
                 Buchung speichern
             </button>
         </form>
     </section>
 
-    <section class="premium-card" style="margin-top:18px;">
-        <h2 style="font-size:22px; font-weight:950; margin:0 0 14px;">Guthaben-Historie</h2>
+    <section class="premium-card" data-csp-style="s-e9f7b175">
+        <h2 data-csp-style="s-bf72d880">Guthaben-Historie</h2>
 
         <div class="premium-table-wrap">
             <table class="premium-table premium-wide-table">
@@ -217,7 +217,7 @@
                                     {{ $transaction->balance_after >= 0 ? '+' : '' }}{{ \App\Support\GermanNumber::format($transaction->balance_after) }} €
                                 </strong>
                             </td>
-                            <td style="white-space:normal; min-width:220px;">{{ $transaction->note }}</td>
+                            <td data-csp-style="s-c634306d">{{ $transaction->note }}</td>
                             <td>{{ $transaction->user?->name ?: 'System' }}</td>
                             <td>
                                 @if ($transaction->offer)
@@ -240,13 +240,13 @@
             </table>
         </div>
 
-        <div style="margin-top:18px;">
+        <div data-csp-style="s-e9f7b175">
             {{ $walletTransactions->links() }}
         </div>
     </section>
 
-    <section class="premium-card" style="margin-top:18px;">
-        <h2 style="font-size:22px; font-weight:950; margin:0 0 14px;">Bestellhistorie</h2>
+    <section class="premium-card" data-csp-style="s-e9f7b175">
+        <h2 data-csp-style="s-bf72d880">Bestellhistorie</h2>
 
         <div class="premium-table-wrap">
             <table class="premium-table premium-wide-table">
@@ -310,7 +310,7 @@
             </table>
         </div>
 
-        <div style="margin-top:18px;">
+        <div data-csp-style="s-e9f7b175">
             {{ $offers->links() }}
         </div>
     </section>
