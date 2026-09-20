@@ -126,5 +126,5 @@
         <div class="erp-list-pagination">{{ $categories->links() }}</div>
     </section>
 
-    
+
 </x-layouts.premium>
