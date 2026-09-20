@@ -327,7 +327,7 @@ Die Security-Arbeiten werden bewusst in getrennten Phasen mit Sicherungen, isoli
 
 ### Aktueller Produktions- und CSP-Stand
 
-Maßgeblich ist der produktive Stand vom **20.09.2026** einschließlich des erfolgreich browsergetesteten Phase-4G.2-Sammelstandes; der zugehörige Pull Request wird unmittelbar nach diesem README-Update erstellt. Die weiter unten aufgeführten Unterphasen dokumentieren teilweise bewusst den jeweiligen historischen Zwischenstand zum damaligen Datum.
+Maßgeblich ist der produktive Stand vom **20.09.2026** einschließlich des erfolgreich browsergetesteten Phase-4G.2-Sammelstandes in Pull Request **#130**. Die weiter unten aufgeführten Unterphasen dokumentieren teilweise bewusst den jeweiligen historischen Zwischenstand zum damaligen Datum.
 
 Aktuell produktiv bestätigt:
 
@@ -679,7 +679,7 @@ Bereits abgeschlossen:
 - ein im ersten Preview sichtbarer Farbwechsel beim Laden der Angebotsseite wurde behoben: die finalen `status-unified-*`-Klassen werden für Angebote, Lager-Angebote und Filialausgänge bereits serverseitig im ersten HTML ausgegeben
 - `csp-shared-runtime.js` bleibt nur noch als Absicherung für später dynamisch eingefügte Status-Badges zuständig
 - der korrigierte 4G.2C-Preview wurde im Browser mit Hard-Reloads geprüft; der vorher sichtbare kurze Wechsel von gelb auf grau/blau/grün trat danach nicht mehr auf
-- **4G.2 Sammelpaket:** alle danach noch verbliebenen **50 produktiven `<style>`-Blöcke** in einem gemeinsamen Feature externalisiert
+- **4G.2 Sammelpaket / PR #130:** alle danach noch verbliebenen **50 produktiven `<style>`-Blöcke** in einem gemeinsamen Feature externalisiert
 - statische Styles wurden in same-origin CSS-Dateien unter `public/css/csp/` verschoben und aus dem Premium-Layout abhängig vom jeweiligen Bereich im `<head>` geladen
 - die dynamischen Button-Farben werden jetzt über den same-origin Endpunkt `/application-theme.css` ausgeliefert
 - das dynamische Login-Design einschließlich konfigurierbarem Hintergrund wird jetzt über den same-origin Endpunkt `/login-styles.css` ausgeliefert
