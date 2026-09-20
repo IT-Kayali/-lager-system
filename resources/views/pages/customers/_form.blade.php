@@ -45,7 +45,7 @@
             @endforeach
         </select>
 
-        <div id="customer-group-preview-wrap" style="margin-top:9px;" @unless($selectedCustomerGroup) hidden @endunless>
+        <div id="customer-group-preview-wrap" data-csp-style="s-da44e53d" @unless($selectedCustomerGroup) hidden @endunless>
             <span
                 id="customer-group-preview"
                 class="premium-badge"
@@ -103,8 +103,8 @@
     </div>
 </div>
 
-<div class="premium-card" style="box-shadow:none; margin-top:22px;">
-    <h2 style="font-size:20px; font-weight:900; margin:0 0 14px;">Rechnungsadresse</h2>
+<div class="premium-card" data-csp-style="s-5de67bdf">
+    <h2 data-csp-style="s-ff8f5dcf">Rechnungsadresse</h2>
 
     <div class="premium-form-grid">
         <div class="premium-form-field">
@@ -138,7 +138,7 @@
         </div>
     </div>
 
-    <label for="delivery_address_different" style="display:flex; align-items:center; gap:10px; margin-top:20px; font-weight:900; cursor:pointer;">
+    <label for="delivery_address_different" data-csp-style="s-649d84c0">
         <input
             id="delivery_address_different"
             name="delivery_address_different"
@@ -146,18 +146,18 @@
             value="1"
             data-customer-form-runtime
             @checked($hasDifferentDeliveryAddress)
-            style="width:18px; height:18px; accent-color:#e3ca6e;"
+            data-csp-style="s-9dc36c61"
         >
         <span>Lieferadresse weicht von der Rechnungsadresse ab</span>
     </label>
 
-    <div class="premium-muted" style="margin-top:8px;">
+    <div class="premium-muted" data-csp-style="s-f773241c">
         Ohne Haken wird die Rechnungsadresse automatisch auch als Lieferadresse gespeichert.
     </div>
 </div>
 
-<div id="delivery-address-card" class="premium-card" style="box-shadow:none; margin-top:22px;" @unless($hasDifferentDeliveryAddress) hidden @endunless>
-    <h2 style="font-size:20px; font-weight:900; margin:0 0 14px;">Abweichende Lieferadresse</h2>
+<div id="delivery-address-card" class="premium-card" data-csp-style="s-5de67bdf" @unless($hasDifferentDeliveryAddress) hidden @endunless>
+    <h2 data-csp-style="s-ff8f5dcf">Abweichende Lieferadresse</h2>
 
     <div class="premium-form-grid">
         <div class="premium-form-field">
@@ -192,7 +192,7 @@
     </div>
 </div>
 
-<div class="premium-form-grid" style="margin-top:22px;">
+<div class="premium-form-grid" data-csp-style="s-055aa442">
     <div class="premium-form-field full">
         <label for="delivery_note_instruction">Dauerhafter Lieferschein-Hinweis</label>
         <textarea
@@ -202,7 +202,7 @@
             class="premium-textarea"
             placeholder="z. B. Kunde braucht Karton ohne Logo"
         >{{ old('delivery_note_instruction', $customer->delivery_note_instruction) }}</textarea>
-        <div class="premium-muted" style="margin-top:7px;">
+        <div class="premium-muted" data-csp-style="s-52706827">
             Wird automatisch auf jedem Lieferschein dieses Kunden unter den Versandangaben angezeigt.
         </div>
         @error('delivery_note_instruction') <div class="premium-error">{{ $message }}</div> @enderror
@@ -215,7 +215,7 @@
     </div>
 </div>
 
-<div style="display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;">
+<div data-csp-style="s-617a0f78">
     <button class="premium-btn gold" type="submit">
         <i class="bi bi-check2-circle"></i>
         Speichern
