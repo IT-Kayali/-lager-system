@@ -143,3 +143,26 @@ test('dynamic style state is represented by data attributes and external CSS', f
         ->toContain('csp-qr-dark')
         ->not->toContain(':style=');
 });
+
+test('every extracted static style key has a matching external CSS rule', function () {
+    $styles = File::get(public_path('css/csp/inline-attributes.css'));
+    $missing = [];
+
+    foreach (File::allFiles(resource_path('views')) as $view) {
+        if (! str_ends_with($view->getFilename(), '.blade.php')) {
+            continue;
+        }
+
+        $content = File::get($view->getPathname());
+
+        preg_match_all('/data-csp-style="([^"]+)"/', $content, $matches);
+
+        foreach ($matches[1] as $key) {
+            if (! str_contains($styles, '[data-csp-style="' . $key . '"]')) {
+                $missing[] = $key;
+            }
+        }
+    }
+
+    expect(array_values(array_unique($missing)))->toBe([]);
+});
