@@ -320,14 +320,14 @@ Die Produkt- und Chargensortierung unterstützt auch numerisch benannte Produkte
 
 ## Security-Hardening-Status
 
-Stand: **19.09.2026**
+Stand: **20.09.2026**
 
 Die Security-Arbeiten werden bewusst in getrennten Phasen mit Sicherungen, isolierten Tests und Rückfallpunkten durchgeführt. Ziel ist, Sicherheitsverbesserungen ohne unnötige Unterbrechung des Produktionssystems einzuführen.
 
 
 ### Aktueller Produktions- und CSP-Stand
 
-Maßgeblich ist der produktive Stand vom **19.09.2026** einschließlich des erfolgreich browsergetesteten Phase-4G.2C-Standes in Pull Request **#129**. Die weiter unten aufgeführten Unterphasen dokumentieren teilweise bewusst den jeweiligen historischen Zwischenstand zum damaligen Datum.
+Maßgeblich ist der produktive Stand vom **20.09.2026** einschließlich des erfolgreich browsergetesteten Phase-4G.2-Sammelstandes in Pull Request **#130**. Die weiter unten aufgeführten Unterphasen dokumentieren teilweise bewusst den jeweiligen historischen Zwischenstand zum damaligen Datum.
 
 Aktuell produktiv bestätigt:
 
@@ -679,16 +679,23 @@ Bereits abgeschlossen:
 - ein im ersten Preview sichtbarer Farbwechsel beim Laden der Angebotsseite wurde behoben: die finalen `status-unified-*`-Klassen werden für Angebote, Lager-Angebote und Filialausgänge bereits serverseitig im ersten HTML ausgegeben
 - `csp-shared-runtime.js` bleibt nur noch als Absicherung für später dynamisch eingefügte Status-Badges zuständig
 - der korrigierte 4G.2C-Preview wurde im Browser mit Hard-Reloads geprüft; der vorher sichtbare kurze Wechsel von gelb auf grau/blau/grün trat danach nicht mehr auf
+- **4G.2 Sammelpaket / PR #130:** alle danach noch verbliebenen **50 produktiven `<style>`-Blöcke** in einem gemeinsamen Feature externalisiert
+- statische Styles wurden in same-origin CSS-Dateien unter `public/css/csp/` verschoben und aus dem Premium-Layout abhängig vom jeweiligen Bereich im `<head>` geladen
+- die dynamischen Button-Farben werden jetzt über den same-origin Endpunkt `/application-theme.css` ausgeliefert
+- das dynamische Login-Design einschließlich konfigurierbarem Hintergrund wird jetzt über den same-origin Endpunkt `/login-styles.css` ausgeliefert
+- ein eigener Regressionstest fordert für produktive Browser-Views **0** verbleibende Inline-`<style>`-Blöcke
+- `git diff --check`, PHP-Syntaxprüfungen, Blade-/Route-Cache, Erreichbarkeit aller neuen CSS-Dateien sowie Nginx/PHP-FPM wurden im Produktions-Preview erfolgreich geprüft
+- der gebündelte Browser-Rundgang über die zentralen ERP-Bereiche wurde anschließend manuell als funktionierend bestätigt
 
-Nach 4G.2A, 4G.2B und 4G.2C verbleiben **50 produktive `<style>`-Blöcke**. Zusätzlich existiert weiterhin ein `<style>`-Block in der nicht produktiv gerouteten Laravel-`welcome.blade.php`; dieser wird in der produktiven CSP-Inventur bewusst nicht mitgezählt. Die `style=""`-Attribute, dynamischen Styles und JavaScript-CSSOM-Mutationen werden danach separat abgearbeitet.
+Damit verbleiben in den **produktiven Browser-Views 0 `<style>`-Blöcke**. Ein einzelner `<style>`-Block in der nicht produktiv gerouteten Laravel-`welcome.blade.php` bleibt bewusst außerhalb der produktiven CSP-Inventur. Die ursprünglich inventarisierten `style=""`-Attribute, dynamischen Style-Attribute und JavaScript-CSSOM-Mutationen sind damit noch **nicht** abgeschlossen und werden in den nächsten 4G-Schritten gebündelt bearbeitet.
 
-Wichtig: `style-src 'self'` wird erst dann scharf aktiviert, wenn die produktiven Browser-Views bereinigt sind, ein strenger Report-Only-Test keine relevanten Verstöße zeigt und die zentralen Workflows manuell regressionsgetestet wurden.
+Wichtig: `style-src 'self'` wird noch **nicht** scharf aktiviert. Zuerst müssen die verbliebenen Inline-`style=""`-Attribute und JavaScript-Style-Mutationen bereinigt werden; danach folgt ein strenger Report-Only-Test unter realer Browser-Nutzung und erst bei sauberem Ergebnis das Enforcement.
 
 ### Was noch fehlt – Pflichtreihenfolge
 
 Die folgenden Punkte gelten als **Pflichtprogramm** und werden vor optionalen Zusatzhärtungen abgearbeitet:
 
-1. **Phase 4G vollständig abschließen:** verbleibende `<style>`-Blöcke, statische und dynamische `style=""`-Attribute sowie JavaScript-Style-Mutationen bereinigen; anschließend `style-src 'self'` erst Report-Only testen und bei sauberem Ergebnis in das Enforcement übernehmen.
+1. **Phase 4G vollständig abschließen:** produktive `<style>`-Blöcke sind jetzt bei **0**; als Nächstes statische und dynamische `style=""`-Attribute sowie JavaScript-Style-Mutationen gebündelt bereinigen, anschließend `style-src 'self'` erst Report-Only testen und bei sauberem Ergebnis in das Enforcement übernehmen.
 2. **CSP final konsolidieren:** Enforcement und Report-Only auf Konsistenz prüfen, reale CSP-Reports auswerten und die zugehörigen Regressionstests vervollständigen.
 3. **Login / Session / CSRF / 2FA / Rollen prüfen:** Fortify-/2FA-Konfiguration, CSRF-Schutz, Session-Verhalten, Least-Privilege und negative Zugriffstests für direkte URLs und sensible Aktionen.
 4. **Produktionskonfiguration prüfen:** insbesondere `APP_DEBUG=false`, Secure Cookies, produktive Cache-/Environment-Konfiguration und fehlende Debug-Ausgaben.

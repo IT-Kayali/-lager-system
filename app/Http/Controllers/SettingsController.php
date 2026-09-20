@@ -6,6 +6,7 @@ use App\Models\ApplicationSetting;
 use App\Models\CustomerGroup;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -113,6 +114,39 @@ class SettingsController extends Controller
         $this->updateStoredImage($request, 'login_logo', 'remove_login_logo', ApplicationSetting::loginLogoPath(), 'login-logos', 'login_logo_path', 'Logo der Anmeldeseite');
         $this->updateStoredImage($request, 'site_favicon', 'remove_site_favicon', ApplicationSetting::siteFaviconPath(), 'site-favicons', 'site_favicon_path', 'Favicon der Anwendung');
         return redirect()->to(route('settings.index') . '#login-appearance')->with('success', 'Login- und Browser-Einstellungen wurden gespeichert.');
+    }
+
+    public function loginStyles(): Response
+    {
+        $loginBackgroundPath = ApplicationSetting::loginBackgroundPath();
+        $loginBackgroundUrl = $loginBackgroundPath
+            ? route('login.background', [], false)
+            : null;
+
+        return response()->view('styles.login', [
+            'loginBackgroundUrl' => $loginBackgroundUrl,
+        ], 200, [
+            'Content-Type' => 'text/css; charset=UTF-8',
+            'Cache-Control' => 'no-store, private',
+        ]);
+    }
+
+    public function applicationThemeStyles(): Response
+    {
+        $theme = ApplicationSetting::buttonTheme();
+
+        $css = sprintf(
+            ':root{--premium-primary-button-bg:%s;--premium-primary-button-text:%s;--premium-secondary-button-bg:%s;--premium-secondary-button-text:%s;}',
+            $theme['primary_button_background'],
+            $theme['primary_button_text'],
+            $theme['secondary_button_background'],
+            $theme['secondary_button_text'],
+        );
+
+        return response($css, 200, [
+            'Content-Type' => 'text/css; charset=UTF-8',
+            'Cache-Control' => 'no-store, private',
+        ]);
     }
 
     public function loginBackground() { $path = ApplicationSetting::loginBackgroundPath(); abort_unless($path && Storage::disk('public')->exists($path), 404); return Storage::disk('public')->response($path); }

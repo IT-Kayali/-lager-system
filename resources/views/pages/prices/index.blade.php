@@ -201,7 +201,5 @@
         <script src="{{ asset('js/manual-price-rules-runtime.js') }}" defer></script>
     @endif
 
-    <style>
-        .pricing-mode-info{display:flex;justify-content:space-between;gap:18px;align-items:center;margin:0 0 18px;padding:16px 18px;border:1px solid #d8cbb7;border-radius:18px;background:#fffdf8}.pricing-mode-info>div{display:grid;gap:4px}.pricing-mode-info strong{font-size:18px}.pricing-mode-info small{color:#665f54;font-weight:700;line-height:1.4}.pricing-mode-kicker{color:#8a6a00;font-size:11px;font-weight:950;text-transform:uppercase;letter-spacing:.08em}.manual-rule-head{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:14px}.manual-rule-head h3{margin:0;font-size:20px}.manual-rule-head p{margin:5px 0 0;color:#665f54;font-weight:700}.manual-price-table{min-width:980px}.manual-price-table th:nth-child(1),.manual-price-table th:nth-child(2){width:150px}.manual-price-table th:nth-child(3){width:110px}.manual-price-table th:nth-child(4){width:180px}.manual-price-table th:nth-child(6){width:80px;text-align:center}.manual-price-table td:nth-child(6){text-align:center}.premium-icon-btn{width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #d8cbb7;border-radius:10px;background:#fffdf8;cursor:pointer}.premium-icon-btn.premium-danger{color:#991b1b}@media(max-width:720px){.pricing-mode-info,.manual-rule-head{align-items:stretch;flex-direction:column}.manual-rule-head .premium-btn{width:100%}}
-    </style>
+
 </x-layouts.premium>
