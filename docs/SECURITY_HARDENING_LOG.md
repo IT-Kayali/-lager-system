@@ -328,3 +328,26 @@ Weiterhin Report-Only:
 - `style-src 'self' 'unsafe-inline'`
 
 Die bekannten einfachen Inline-Event-Handler und mehrere isolierte Inline-`<script>`-Blöcke sind damit entfernt. Es bestehen weiterhin größere Inline-Script-Blöcke, unter anderem in Preise, Statistik, Angebote, Sidebar, Produktformular, Filialausgangsformular und Einstellungen. Diese werden weiterhin in kleinen funktionalen Paketen externalisiert. Erst nach erneuter strenger Report-Only-Inventur ohne echte produktive Script-Blocker wird `script-src` für Enforcement bewertet.
+
+## Phase 4G.3 – Inline-Style-Attribute und CSSOM-Mutationen bereinigt ✅ browsergetestet
+
+Am 21.09.2026 wurde Phase 4G.3 nach isoliertem Testlauf und manuellem Live-Preview erfolgreich validiert.
+
+- Pull Request: **#131** (`Security: remove remaining inline style attributes`).
+- Getesteter Code-Commit: `566b6f049ee20b40134e0e74fa13016f4eb586aa`.
+- Die unmittelbare Baseline auf `main` enthielt **302 getrackte `style=`/`:style=`-Treffer** in produktiven Browser-Views.
+- 14 weitere Treffer stammten ausschließlich aus ignorierten lokalen Backup-Kopien und wurden vor dem Test aus dem produktiven View-Baum verschoben; sie waren nicht Bestandteil des Repository-Stands.
+- Nach der Bereinigung enthalten produktive Browser-Views **0 Inline-`style=`/`:style=`-Attribute** und weiterhin **0 Inline-`<style>`-Blöcke**.
+- Statische Style-Zuordnungen liegen in `public/css/csp/inline-attributes.css`.
+- Dynamische Style-Zustände werden über `public/css/csp/dynamic-attributes.css` und deklarative Datenattribute abgebildet.
+- Die geprüften Browser-Runtimes enthalten keine direkten `.style...`-Mutationen, keine `setAttribute('style', ...)`-Aufrufe und keine dynamisch erzeugten `<style>`-Elemente.
+- Die CSP-Testpakete `CspInlineStylesTest` und `CspSharedRuntimeTest` liefen mit **17 bestandenen Tests und 198 Assertions** erfolgreich.
+- Vite-Produktionsbuild, Blade-/Route-Cache, PHP-Syntax, `git diff --check`, Nginx und PHP-FPM wurden erfolgreich geprüft.
+- Die neuen same-origin Stylesheets `/css/csp/inline-attributes.css` und `/css/csp/dynamic-attributes.css` lieferten im Live-Preview HTTP 200.
+- Der manuelle Browser-Rundgang wurde anschließend als vollständig funktionierend bestätigt.
+- CSP-Enforcement blieb unverändert; insbesondere wurde Style-CSP in diesem Schritt noch nicht scharf gestellt.
+
+### Nächster CSP-Schritt
+
+Der Report-Only-Header verwendet derzeit weiterhin `style-src 'self' 'unsafe-inline'`. Als nächstes wird ausschließlich der Report-Only-Style-Schutz auf `style-src 'self'` verschärft und unter realer Browser-Nutzung ausgewertet. Erst bei sauberem Ergebnis wird die Entfernung von `'unsafe-inline'` im Enforcement bewertet.
+
