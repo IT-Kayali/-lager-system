@@ -687,15 +687,30 @@ Bereits abgeschlossen:
 - `git diff --check`, PHP-Syntaxprüfungen, Blade-/Route-Cache, Erreichbarkeit aller neuen CSS-Dateien sowie Nginx/PHP-FPM wurden im Produktions-Preview erfolgreich geprüft
 - der gebündelte Browser-Rundgang über die zentralen ERP-Bereiche wurde anschließend manuell als funktionierend bestätigt
 
-Damit verbleiben in den **produktiven Browser-Views 0 `<style>`-Blöcke**. Ein einzelner `<style>`-Block in der nicht produktiv gerouteten Laravel-`welcome.blade.php` bleibt bewusst außerhalb der produktiven CSP-Inventur. Die ursprünglich inventarisierten `style=""`-Attribute, dynamischen Style-Attribute und JavaScript-CSSOM-Mutationen sind damit noch **nicht** abgeschlossen und werden in den nächsten 4G-Schritten gebündelt bearbeitet.
+Damit verbleiben in den **produktiven Browser-Views 0 `<style>`-Blöcke**. Ein einzelner `<style>`-Block in der nicht produktiv gerouteten Laravel-`welcome.blade.php` bleibt bewusst außerhalb der produktiven CSP-Inventur.
 
-Wichtig: `style-src 'self'` wird noch **nicht** scharf aktiviert. Zuerst müssen die verbliebenen Inline-`style=""`-Attribute und JavaScript-Style-Mutationen bereinigt werden; danach folgt ein strenger Report-Only-Test unter realer Browser-Nutzung und erst bei sauberem Ergebnis das Enforcement.
+#### Phase 4G.3 / PR #131 – Inline-Style-Attribute und CSSOM-Mutationen ✅ browsergetestet
+
+Nach Abschluss von 4G.2 wurden die verbliebenen Style-Attribute und direkten JavaScript-Style-Mutationen gebündelt bereinigt:
+
+- die unmittelbare 4G.3-Baseline bestätigte **302 getrackte `style=`/`:style=`-Treffer** in produktiven Blade-Views
+- zusätzlich vorhandene **14 Treffer in ignorierten lokalen Backup-Kopien** wurden separat aus dem produktiven View-Baum verschoben und gehörten nicht zum Git-Stand
+- nach der Bereinigung enthalten produktive Browser-Views **0 Inline-`style=`/`:style=`-Attribute**
+- produktive Browser-Views enthalten weiterhin **0 Inline-`<style>`-Blöcke**
+- statische Style-Zuordnungen werden über `public/css/csp/inline-attributes.css` bereitgestellt
+- dynamische Style-Zustände werden über `public/css/csp/dynamic-attributes.css` und deklarative Datenattribute abgebildet
+- die geprüften Browser-Runtimes verwenden keine direkten `.style...`-Mutationen, kein `setAttribute('style', ...)` und erzeugen keine dynamischen `<style>`-Elemente
+- die CSP-Regressionstests liefen mit **17 bestandenen Tests und 198 Assertions** erfolgreich
+- Vite-Produktionsbuild, Blade-Cache, Route-Cache, Nginx, PHP-FPM und die neuen CSS-Assets wurden erfolgreich geprüft
+- der Live-Preview auf Commit `566b6f049ee20b40134e0e74fa13016f4eb586aa` wurde anschließend im Browser über die zentralen ERP-Bereiche manuell als vollständig funktionierend bestätigt
+
+Wichtig: `style-src 'self'` wird mit 4G.3 noch **nicht** scharf aktiviert. Der nächste Schritt ist ein strenger **Report-Only-Test mit `style-src 'self'` ohne `'unsafe-inline'`** unter realer Browser-Nutzung. Erst bei sauberem Ergebnis wird Style-CSP für Enforcement bewertet.
 
 ### Was noch fehlt – Pflichtreihenfolge
 
 Die folgenden Punkte gelten als **Pflichtprogramm** und werden vor optionalen Zusatzhärtungen abgearbeitet:
 
-1. **Phase 4G vollständig abschließen:** produktive `<style>`-Blöcke sind jetzt bei **0**; als Nächstes statische und dynamische `style=""`-Attribute sowie JavaScript-Style-Mutationen gebündelt bereinigen, anschließend `style-src 'self'` erst Report-Only testen und bei sauberem Ergebnis in das Enforcement übernehmen.
+1. **Phase 4G vollständig abschließen:** produktive `<style>`-Blöcke, Inline-`style=`/`:style=`-Attribute und die geprüften direkten JavaScript-Style-Mutationen sind jetzt bei **0**; als Nächstes `style-src 'self'` ohne `'unsafe-inline'` streng im Report-Only-Modus testen und bei sauberem Ergebnis in das Enforcement übernehmen.
 2. **CSP final konsolidieren:** Enforcement und Report-Only auf Konsistenz prüfen, reale CSP-Reports auswerten und die zugehörigen Regressionstests vervollständigen.
 3. **Login / Session / CSRF / 2FA / Rollen prüfen:** Fortify-/2FA-Konfiguration, CSRF-Schutz, Session-Verhalten, Least-Privilege und negative Zugriffstests für direkte URLs und sensible Aktionen.
 4. **Produktionskonfiguration prüfen:** insbesondere `APP_DEBUG=false`, Secure Cookies, produktive Cache-/Environment-Konfiguration und fehlende Debug-Ausgaben.
