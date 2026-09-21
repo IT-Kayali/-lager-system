@@ -1,6 +1,6 @@
 <x-layouts.premium title="FIFO-Warenausgang" subtitle="Bestand aus den ältesten Chargen zuerst abbuchen.">
     @if (session('error'))
-        <div class="premium-alert" style="border-color: rgba(239,68,68,.25); background: rgba(239,68,68,.10); color:#991b1b;">
+        <div class="premium-alert" data-csp-style="s-0b92fcc8">
             {{ session('error') }}
         </div>
     @endif
@@ -45,7 +45,7 @@
                 </div>
             </div>
 
-            <div style="display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;">
+            <div data-csp-style="s-617a0f78">
                 <button class="premium-btn gold" type="submit">
                     <i class="bi bi-box-arrow-up"></i>
                     FIFO abbuchen

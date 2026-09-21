@@ -60,8 +60,8 @@
 </div>
 
 <div class="offer-items-header">
-    <h2 style="font-size:20px; font-weight:900; margin:0 0 12px;">Produktpositionen</h2>
-    <p class="premium-muted" style="margin-top:0;">
+    <h2 data-csp-style="s-39ebdb8d">Produktpositionen</h2>
+    <p class="premium-muted" data-csp-style="s-3ab75854">
         Sobald du ein Produkt und eine Menge einträgst, erscheint automatisch die nächste Position.
     </p>
 </div>
@@ -82,8 +82,8 @@
 
 <div id="offer-items" class="offer-items-list">
     @foreach ($itemsForForm as $index => $item)
-        <div class="premium-card offer-item-row" style="padding:14px; box-shadow:none;">
-            <div class="premium-form-grid" style="grid-template-columns: 1.8fr .8fr .8fr auto;">
+        <div class="premium-card offer-item-row" data-csp-style="s-7853b09f">
+            <div class="premium-form-grid" data-csp-style="s-0ff0a633">
                 <div class="premium-form-field">
                     <label>Produkt</label>
                     <select name="items[{{ $index }}][product_id]" class="premium-select">
@@ -160,8 +160,8 @@
 </div>
 
 <template id="offer-item-template">
-    <div class="premium-card offer-item-row" style="padding:14px; box-shadow:none;">
-        <div class="premium-form-grid" style="grid-template-columns: 1.8fr .8fr .8fr auto;">
+    <div class="premium-card offer-item-row" data-csp-style="s-7853b09f">
+        <div class="premium-form-grid" data-csp-style="s-0ff0a633">
             <div class="premium-form-field">
                 <label>Produkt</label>
                 <select data-name="product_id" class="premium-select">

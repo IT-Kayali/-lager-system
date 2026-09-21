@@ -18,9 +18,9 @@
 @endphp
 
 @if ($errors->any())
-    <div class="premium-alert" style="border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.10);color:#991b1b;">
+    <div class="premium-alert" data-csp-style="s-278cc1fe">
         <strong>Bitte prüfe die markierten Angaben.</strong>
-        <ul style="margin:8px 0 0 18px;">
+        <ul data-csp-style="s-aad58e4b">
             @foreach ($errors->all() as $error)
                 <li>{{ $error }}</li>
             @endforeach

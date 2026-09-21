@@ -12,7 +12,7 @@
     $nextTierIndex = ((int) $tierRows->keys()->map(fn ($key) => (int) $key)->max()) + 1;
 @endphp
 
-<section id="price-tiers" class="premium-card price-tier-settings" style="margin-top:22px;scroll-margin-top:24px;">
+<section id="price-tiers" class="premium-card price-tier-settings" data-csp-style="s-1c4a2677">
     <details @if ($errors->has('tiers') || $errors->has('tiers.*')) open @endif>
         <summary class="price-tier-summary">
             <span class="price-tier-summary-title">
@@ -42,12 +42,12 @@
             @csrf
             @method('PUT')
 
-            <div class="premium-alert" style="background:#fff8df;border-color:#e3ca6e;color:#5f4a00;">
+            <div class="premium-alert" data-csp-style="s-778013e7">
                 <strong>Wichtig:</strong> Die Bereiche müssen direkt aneinander anschließen. Bei der letzten Preisstufe darf „Bis Gramm“ leer bleiben; sie gilt dann ohne Obergrenze. Bestehende Preise bleiben beim Bearbeiten erhalten.
             </div>
 
             @error('tiers')
-                <div class="premium-alert" style="border-color:rgba(239,68,68,.25);background:rgba(239,68,68,.10);color:#991b1b;">
+                <div class="premium-alert" data-csp-style="s-b2a82328">
                     {{ $message }}
                 </div>
             @enderror

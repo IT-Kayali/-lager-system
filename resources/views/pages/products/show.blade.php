@@ -70,7 +70,7 @@
             <h2 class="preview-title">Kategorien</h2>
             <div class="category-preview-list">
                 @forelse ($product->categories as $category)
-                    <span class="category-preview-badge" style="--cat-color: {{ $category->color ?: '#d4af37' }};">
+                    <span class="category-preview-badge" data-csp-cat-color="{{ $category->color ?: '#d4af37' }}">
                         <span></span>{{ $category->name }}
                     </span>
                 @empty
@@ -102,7 +102,7 @@
         <div class="section-head">
             <div>
                 <h2 class="preview-title">Chargen</h2>
-                <p class="premium-muted" style="margin:4px 0 0;">Wareneingang, Ablaufdatum und aktueller Chargenbestand.</p>
+                <p class="premium-muted" data-csp-style="s-3ca59c3a">Wareneingang, Ablaufdatum und aktueller Chargenbestand.</p>
             </div>
 
             @unless($isSales)

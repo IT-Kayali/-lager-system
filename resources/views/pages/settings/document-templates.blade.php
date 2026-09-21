@@ -3,18 +3,18 @@
         <div class="premium-alert">{{ session('success') }}</div>
     @endif
 
-    <div class="premium-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+    <div class="premium-grid" data-csp-style="s-bbf48053">
         @foreach ($templates as $template)
             <section class="premium-card">
-                <h2 style="font-size:20px; font-weight:900; margin:0 0 14px;">
+                <h2 data-csp-style="s-ff8f5dcf">
                     {{ $template->name }}
                 </h2>
 
                 @if ($template->logo_path)
-                    <div style="margin-bottom:16px;">
-                        <div class="premium-muted" style="margin-bottom:8px;">Aktuelles Logo</div>
-                        <div style="background:#fffaf1; border:1px solid rgba(227,202,110,.45); border-radius:18px; padding:14px; display:inline-flex;">
-                            <img src="{{ asset('storage/' . $template->logo_path) }}" alt="Logo" style="max-width:180px; max-height:90px; object-fit:contain;">
+                    <div data-csp-style="s-3914ce83">
+                        <div class="premium-muted" data-csp-style="s-3718cd60">Aktuelles Logo</div>
+                        <div data-csp-style="s-687c0397">
+                            <img src="{{ asset('storage/' . $template->logo_path) }}" alt="Logo" data-csp-style="s-9933956c">
                         </div>
                     </div>
                 @endif
@@ -30,7 +30,7 @@
                     @csrf
                     @method('PUT')
 
-                    <div class="premium-form-grid" style="grid-template-columns:1fr;">
+                    <div class="premium-form-grid" data-csp-style="s-98d53286">
                         <div class="premium-form-field">
                             <label>Name der Vorlage *</label>
                             <input name="name" class="premium-input" value="{{ old('name', $template->name) }}" required>
@@ -43,8 +43,8 @@
                             @error('company_name') <div class="premium-error">{{ $message }}</div> @enderror
                         </div>
 
-                        <div class="premium-card" style="box-shadow:none;">
-                            <h3 style="font-size:18px; font-weight:900; margin:0 0 14px;">Firmenadresse</h3>
+                        <div class="premium-card" data-csp-style="s-eb898a5c">
+                            <h3 data-csp-style="s-07abc06a">Firmenadresse</h3>
 
                             <div class="premium-form-grid">
                                 <div class="premium-form-field">
@@ -106,7 +106,7 @@
                         <div class="premium-form-field">
                             <label>Logo Angebot/Rechnung hochladen</label>
                             <input name="logo" type="file" accept="image/png,image/jpeg,image/webp" class="premium-input">
-                            <div class="premium-muted" style="margin-top:6px;">
+                            <div class="premium-muted" data-csp-style="s-4ca4648e">
                                 Empfohlen: PNG oder JPG, transparente Logos funktionieren gut.
                             </div>
                             @error('logo') <div class="premium-error">{{ $message }}</div> @enderror
@@ -117,10 +117,10 @@
                             <input name="background_image" type="file" accept="image/png,image/jpeg,image/webp" class="premium-input">
 
                             @if ($template->background_image_path)
-                                <div style="margin-top:12px;">
-                                    <div class="premium-muted" style="margin-bottom:8px;">Aktueller Hintergrund</div>
-                                    <div style="background:#fffaf1; border:1px solid rgba(227,202,110,.45); border-radius:18px; padding:14px; display:inline-flex;">
-                                        <img src="{{ asset('storage/' . $template->background_image_path) }}" alt="PDF Hintergrund" style="max-width:180px; max-height:120px; object-fit:contain;">
+                                <div data-csp-style="s-6751b8f3">
+                                    <div class="premium-muted" data-csp-style="s-3718cd60">Aktueller Hintergrund</div>
+                                    <div data-csp-style="s-687c0397">
+                                        <img src="{{ asset('storage/' . $template->background_image_path) }}" alt="PDF Hintergrund" data-csp-style="s-bac03404">
                                     </div>
                                 </div>
                             @endif
@@ -132,7 +132,7 @@
                                         @endif
 
 
-                            <div class="premium-muted" style="margin-top:6px;">
+                            <div class="premium-muted" data-csp-style="s-4ca4648e">
                                 Empfohlen: A4 Hochformat als JPG oder PNG. Dieses Bild wird im PDF als fixer Hintergrund verwendet.
                             </div>
 
@@ -154,9 +154,9 @@
 
 
                         {{-- DELIVERY_NOTE_ASSETS_SETTINGS_START --}}
-                        <div class="premium-card" style="box-shadow:none;">
-                            <h3 style="font-size:18px; font-weight:900; margin:0 0 8px;">Lieferschein Logo & Hintergrund</h3>
-                            <div class="premium-muted" style="margin-bottom:14px;">
+                        <div class="premium-card" data-csp-style="s-eb898a5c">
+                            <h3 data-csp-style="s-53ffef61">Lieferschein Logo & Hintergrund</h3>
+                            <div class="premium-muted" data-csp-style="s-a42dc5bd">
                                 Diese Dateien gelten nur für den Lieferschein. Angebot und Rechnung bleiben davon getrennt.
                             </div>
 
@@ -166,10 +166,10 @@
                                     <input name="delivery_logo" type="file" accept="image/png,image/jpeg,image/webp" class="premium-input">
 
                                     @if ($template->delivery_logo_path)
-                                        <div style="margin-top:12px;">
-                                            <div class="premium-muted" style="margin-bottom:8px;">Aktuelles Lieferschein-Logo</div>
-                                            <div style="background:#fffaf1; border:1px solid rgba(227,202,110,.45); border-radius:18px; padding:14px; display:inline-flex;">
-                                                <img src="{{ asset('storage/' . $template->delivery_logo_path) }}" alt="Lieferschein Logo" style="max-width:180px; max-height:90px; object-fit:contain;">
+                                        <div data-csp-style="s-6751b8f3">
+                                            <div class="premium-muted" data-csp-style="s-3718cd60">Aktuelles Lieferschein-Logo</div>
+                                            <div data-csp-style="s-687c0397">
+                                                <img src="{{ asset('storage/' . $template->delivery_logo_path) }}" alt="Lieferschein Logo" data-csp-style="s-9933956c">
                                             </div>
                                         </div>
                                     @endif
@@ -189,10 +189,10 @@
                                     <input name="delivery_background_image" type="file" accept="image/png,image/jpeg,image/webp" class="premium-input">
 
                                     @if ($template->delivery_background_image_path)
-                                        <div style="margin-top:12px;">
-                                            <div class="premium-muted" style="margin-bottom:8px;">Aktueller Lieferschein-Hintergrund</div>
-                                            <div style="background:#fffaf1; border:1px solid rgba(227,202,110,.45); border-radius:18px; padding:14px; display:inline-flex;">
-                                                <img src="{{ asset('storage/' . $template->delivery_background_image_path) }}" alt="Lieferschein Hintergrund" style="max-width:180px; max-height:120px; object-fit:contain;">
+                                        <div data-csp-style="s-6751b8f3">
+                                            <div class="premium-muted" data-csp-style="s-3718cd60">Aktueller Lieferschein-Hintergrund</div>
+                                            <div data-csp-style="s-687c0397">
+                                                <img src="{{ asset('storage/' . $template->delivery_background_image_path) }}" alt="Lieferschein Hintergrund" data-csp-style="s-bac03404">
                                             </div>
                                         </div>
                                     @endif
@@ -204,7 +204,7 @@
                                         @endif
 
 
-                                    <div class="premium-muted" style="margin-top:6px;">
+                                    <div class="premium-muted" data-csp-style="s-4ca4648e">
                                         Empfohlen: A4 Hochformat als JPG oder PNG. Dieser Hintergrund wird nur im Lieferschein verwendet.
                                     </div>
 
@@ -215,9 +215,9 @@
                         {{-- DELIVERY_NOTE_ASSETS_SETTINGS_END --}}
 
                         {{-- DELIVERY_NOTE_TEMPLATE_SETTINGS_START --}}
-                        <div class="premium-card" style="box-shadow:none;">
-                            <h3 style="font-size:18px; font-weight:900; margin:0 0 8px;">Lieferschein</h3>
-                            <div class="premium-muted" style="margin-bottom:14px;">
+                        <div class="premium-card" data-csp-style="s-eb898a5c">
+                            <h3 data-csp-style="s-53ffef61">Lieferschein</h3>
+                            <div class="premium-muted" data-csp-style="s-a42dc5bd">
                                 Texte und Spalten für den Lieferschein dieser Vorlage.
                             </div>
 
@@ -273,7 +273,7 @@
                                 <div class="premium-form-field full">
                                     <label>Einleitungstext</label>
                                     <textarea name="delivery_intro_text" rows="4" class="premium-textarea">{{ old('delivery_intro_text', $template->delivery_intro_text) }}</textarea>
-                                    <div class="premium-muted" style="margin-top:6px;">Mehrere Zeilen sind möglich.</div>
+                                    <div class="premium-muted" data-csp-style="s-4ca4648e">Mehrere Zeilen sind möglich.</div>
                                     @error('delivery_intro_text') <div class="premium-error">{{ $message }}</div> @enderror
                                 </div>
 
@@ -287,21 +287,21 @@
                                 <div class="premium-form-field full">
                                     <label>Lieferschein-Footer links</label>
                                     <textarea name="delivery_footer_left_text" rows="5" class="premium-textarea" placeholder="z. B. Firmenname, Adresse, Land">{{ old('delivery_footer_left_text', $template->delivery_footer_left_text) }}</textarea>
-                                    <div class="premium-muted" style="margin-top:6px;">Leer lassen = automatische Firmendaten verwenden.</div>
+                                    <div class="premium-muted" data-csp-style="s-4ca4648e">Leer lassen = automatische Firmendaten verwenden.</div>
                                     @error('delivery_footer_left_text') <div class="premium-error">{{ $message }}</div> @enderror
                                 </div>
 
                                 <div class="premium-form-field full">
                                     <label>Lieferschein-Footer Mitte</label>
                                     <textarea name="delivery_footer_middle_text" rows="5" class="premium-textarea" placeholder="z. B. Kontakt, Telefon, E-Mail, Website">{{ old('delivery_footer_middle_text', $template->delivery_footer_middle_text) }}</textarea>
-                                    <div class="premium-muted" style="margin-top:6px;">Leer lassen = automatische Kontaktdaten verwenden.</div>
+                                    <div class="premium-muted" data-csp-style="s-4ca4648e">Leer lassen = automatische Kontaktdaten verwenden.</div>
                                     @error('delivery_footer_middle_text') <div class="premium-error">{{ $message }}</div> @enderror
                                 </div>
 
                                 <div class="premium-form-field full">
                                     <label>Lieferschein-Footer rechts</label>
                                     <textarea name="delivery_footer_right_text" rows="5" class="premium-textarea" placeholder="z. B. USt-ID, Finanzamt, zusätzliche Hinweise">{{ old('delivery_footer_right_text', $template->delivery_footer_right_text) }}</textarea>
-                                    <div class="premium-muted" style="margin-top:6px;">Leer lassen = USt-ID und Footer-Hinweis verwenden.</div>
+                                    <div class="premium-muted" data-csp-style="s-4ca4648e">Leer lassen = USt-ID und Footer-Hinweis verwenden.</div>
                                     @error('delivery_footer_right_text') <div class="premium-error">{{ $message }}</div> @enderror
                                 </div>
                                 {{-- DELIVERY_FOOTER_EDIT_SETTINGS_END --}}
@@ -316,18 +316,18 @@
                             @error('footer_note') <div class="premium-error">{{ $message }}</div> @enderror
                         </div>
 
-                        <label style="display:flex; gap:10px; align-items:center; font-weight:800;">
+                        <label data-csp-style="s-3b2abd22">
                             <input type="checkbox" name="show_company_details" value="1" @checked(old('show_company_details', $template->show_company_details))>
                             Firmeninformationen anzeigen
                         </label>
 
-                        <label style="display:flex; gap:10px; align-items:center; font-weight:800;">
+                        <label data-csp-style="s-3b2abd22">
                             <input type="checkbox" name="show_logo" value="1" @checked(old('show_logo', $template->show_logo))>
                             Logo anzeigen
                         </label>
                     </div>
 
-                    <button class="premium-btn gold" type="submit" style="margin-top:18px;">
+                    <button class="premium-btn gold" type="submit" data-csp-style="s-e9f7b175">
                         <i class="bi bi-save"></i>
                         Vorlage speichern
                     </button>

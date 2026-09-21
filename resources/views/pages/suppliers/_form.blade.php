@@ -80,7 +80,7 @@
     </div>
 </div>
 
-<div class="premium-form-grid" style="margin-top:22px;">
+<div class="premium-form-grid" data-csp-style="s-055aa442">
     <div class="premium-form-field full">
         <label>Notizen optional</label>
         <textarea name="notes" rows="5" class="premium-textarea">{{ old('notes', $supplier->notes) }}</textarea>

@@ -1,9 +1,9 @@
 @csrf
 
 @if (($suppliers ?? collect())->isEmpty())
-    <div class="premium-alert" style="border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.10); color:#92400e;">
+    <div class="premium-alert" data-csp-style="s-61cda673">
         Noch keine Lieferanten vorhanden. Du kannst das Produkt trotzdem speichern, aber empfohlen ist zuerst einen Lieferanten anzulegen.
-        <a href="{{ route('suppliers.create') }}" style="font-weight:900; color:#92400e;">Lieferant hinzufügen</a>
+        <a href="{{ route('suppliers.create') }}" data-csp-style="s-9ab008d0">Lieferant hinzufügen</a>
     </div>
 @endif
 
@@ -178,7 +178,7 @@
                     @checked(in_array((string) $category->id, $selectedCategoryIds, true))
                 >
 
-                <span class="category-checkbox-dot" style="background: {{ $category->color ?: '#d4af37' }};"></span>
+                <span class="category-checkbox-dot" data-csp-color="{{ $category->color ?: '#d4af37' }}"></span>
 
                 <span class="category-checkbox-text">
                     {{ $category->name }}
@@ -196,7 +196,7 @@
         @endforelse
     </div>
 
-    <div class="premium-muted" style="margin-top:8px;">
+    <div class="premium-muted" data-csp-style="s-f773241c">
         Du kannst mehrere Kategorien einfach anklicken. Keine Strg-Taste nötig.
     </div>
 

@@ -212,8 +212,9 @@ test('button appearance preview uses the shared CSP runtime', function () {
     expect($runtime)
         ->toContain('initButtonAppearanceRuntime')
         ->toContain('data-button-appearance-runtime')
-        ->toContain('--premium-primary-button-bg')
-        ->toContain('--premium-secondary-button-bg');
+        ->toContain('dataset.cspPrimaryBg')
+        ->toContain('dataset.cspSecondaryBg')
+        ->not->toContain('style.setProperty');
 });
 
 test('price tier settings load their CSP safe runtime externally', function () {
