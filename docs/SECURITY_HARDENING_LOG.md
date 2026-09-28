@@ -334,7 +334,7 @@ Die bekannten einfachen Inline-Event-Handler und mehrere isolierte Inline-`<scri
 Am 21.09.2026 wurde Phase 4G.3 nach isoliertem Testlauf und manuellem Live-Preview erfolgreich validiert.
 
 - Pull Request: **#131** (`Security: remove remaining inline style attributes`).
-- Getesteter Code-Commit: `566b6f049ee20b40134e0e74fa13016f4eb586aa`.
+- Erster Live-Preview-Code-Commit: `566b6f049ee20b40134e0e74fa13016f4eb586aa`.
 - Die unmittelbare Baseline auf `main` enthielt **302 getrackte `style=`/`:style=`-Treffer** in produktiven Browser-Views.
 - 14 weitere Treffer stammten ausschließlich aus ignorierten lokalen Backup-Kopien und wurden vor dem Test aus dem produktiven View-Baum verschoben; sie waren nicht Bestandteil des Repository-Stands.
 - Nach der Bereinigung enthalten produktive Browser-Views **0 Inline-`style=`/`:style=`-Attribute** und weiterhin **0 Inline-`<style>`-Blöcke**.
@@ -344,7 +344,10 @@ Am 21.09.2026 wurde Phase 4G.3 nach isoliertem Testlauf und manuellem Live-Previ
 - Die CSP-Testpakete `CspInlineStylesTest` und `CspSharedRuntimeTest` liefen mit **17 bestandenen Tests und 198 Assertions** erfolgreich.
 - Vite-Produktionsbuild, Blade-/Route-Cache, PHP-Syntax, `git diff --check`, Nginx und PHP-FPM wurden erfolgreich geprüft.
 - Die neuen same-origin Stylesheets `/css/csp/inline-attributes.css` und `/css/csp/dynamic-attributes.css` lieferten im Live-Preview HTTP 200.
-- Der manuelle Browser-Rundgang wurde anschließend als vollständig funktionierend bestätigt.
+- Beim ersten Live-Preview wurde eine abgeschnittene `public/js/offers-editor-runtime.js` erkannt. Dadurch wurden weder automatisch weitere Angebotspositionen erzeugt noch der Versandblock an seine vorgesehene Position verschoben.
+- Der fehlende Runtime-Dateischluss wurde aus dem stabilen Base-Stand wiederhergestellt. Danach war `node --check public/js/offers-editor-runtime.js` erfolgreich; direkte Style-Mutationen blieben weiterhin bei 0.
+- Die beiden konkret betroffenen Angebotsfunktionen – automatische nächste Produktposition und korrekte Versandblock-Positionierung – wurden anschließend erneut im Browser getestet und als funktionierend bestätigt.
+- Ein Regressionstest prüft jetzt die JavaScript-Syntax der Angebots-Runtime sowie die Kernmarker für Auto-Position, Versandpositionierung und Formularvalidierung.
 - CSP-Enforcement blieb unverändert; insbesondere wurde Style-CSP in diesem Schritt noch nicht scharf gestellt.
 
 ### Nächster CSP-Schritt
