@@ -702,7 +702,9 @@ Nach Abschluss von 4G.2 wurden die verbliebenen Style-Attribute und direkten Jav
 - die geprüften Browser-Runtimes verwenden keine direkten `.style...`-Mutationen, kein `setAttribute('style', ...)` und erzeugen keine dynamischen `<style>`-Elemente
 - die CSP-Regressionstests liefen mit **17 bestandenen Tests und 198 Assertions** erfolgreich
 - Vite-Produktionsbuild, Blade-Cache, Route-Cache, Nginx, PHP-FPM und die neuen CSS-Assets wurden erfolgreich geprüft
-- der Live-Preview auf Commit `566b6f049ee20b40134e0e74fa13016f4eb586aa` wurde anschließend im Browser über die zentralen ERP-Bereiche manuell als vollständig funktionierend bestätigt
+- beim ersten Live-Preview auf Commit `566b6f049ee20b40134e0e74fa13016f4eb586aa` wurde eine abgeschnittene `public/js/offers-editor-runtime.js` entdeckt; dadurch funktionierten das automatische Anlegen der nächsten Angebotsposition und die Versandblock-Positionierung nicht
+- der fehlende Runtime-Dateischluss wurde anschließend aus dem stabilen Base-Stand wiederhergestellt; `node --check` ist danach erfolgreich und die beiden betroffenen Angebotsfunktionen wurden im Browser erneut ausdrücklich als funktionierend bestätigt
+- ein zusätzlicher Regressionstest prüft jetzt JavaScript-Syntax sowie die Kernmarker für Auto-Position, Versandblock-Positionierung und Angebotsvalidierung
 
 Wichtig: `style-src 'self'` wird mit 4G.3 noch **nicht** scharf aktiviert. Der nächste Schritt ist ein strenger **Report-Only-Test mit `style-src 'self'` ohne `'unsafe-inline'`** unter realer Browser-Nutzung. Erst bei sauberem Ergebnis wird Style-CSP für Enforcement bewertet.
 
