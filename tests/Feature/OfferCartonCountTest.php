@@ -35,9 +35,9 @@ it('binds carton count to the offer form and delivery-only UI', function () {
 });
 
 it('keeps shipping method price and carton count aligned in three desktop columns', function () {
-    $script = file_get_contents(resource_path('js/app.js'));
+    $styles = file_get_contents(public_path('css/csp/dynamic-attributes.css'));
 
-    expect($script)
+    expect($styles)
         ->toContain('html body #offer-shipping-card.offer-shipping-modern-card .premium-form-grid')
         ->toContain('grid-template-columns: minmax(300px, 1.2fr) minmax(220px, .8fr) minmax(190px, .6fr) !important;')
         ->toContain('@media (max-width: 1150px)')
