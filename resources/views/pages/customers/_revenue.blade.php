@@ -10,15 +10,15 @@
     ];
 @endphp
 
-<section id="customer-revenue" class="premium-card" style="margin-top:18px;">
-    <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:18px; flex-wrap:wrap; margin-bottom:18px;">
+<section id="customer-revenue" class="premium-card" data-csp-style="s-e9f7b175">
+    <div data-csp-style="s-9ed7c9ea">
         <div>
-            <div class="premium-muted" style="font-weight:900; text-transform:uppercase; letter-spacing:.08em;">Kundenumsatz</div>
-            <h2 style="font-size:24px; font-weight:950; margin:5px 0 5px;">Umsatz und gekaufte Produkte</h2>
+            <div class="premium-muted" data-csp-style="s-fc61b41d">Kundenumsatz</div>
+            <h2 data-csp-style="s-56000839">Umsatz und gekaufte Produkte</h2>
             <div class="premium-muted">Es werden nur erledigte Verkäufe berücksichtigt.</div>
         </div>
 
-        <form method="GET" action="{{ route('customers.show', $customer) }}" style="min-width:240px;">
+        <form method="GET" action="{{ route('customers.show', $customer) }}" data-csp-style="s-117b5f53">
             <div class="premium-form-field">
                 <label for="revenue_year">Zeitraum</label>
                 <select
@@ -37,33 +37,33 @@
         </form>
     </div>
 
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:18px;">
-        <div class="premium-card" style="padding:16px; box-shadow:none;">
-            <div class="premium-muted" style="font-weight:900; text-transform:uppercase; letter-spacing:.06em;">Warenwert</div>
-            <div style="font-size:27px; font-weight:950; margin-top:6px;">
+    <div data-csp-style="s-53c071a4">
+        <div class="premium-card" data-csp-style="s-c8488db5">
+            <div class="premium-muted" data-csp-style="s-173123fb">Warenwert</div>
+            <div data-csp-style="s-8f429d68">
                 {{ \App\Support\GermanNumber::format($customerRevenue) }} €
             </div>
         </div>
 
-        <div class="premium-card" style="padding:16px; box-shadow:none;">
-            <div class="premium-muted" style="font-weight:900; text-transform:uppercase; letter-spacing:.06em;">Erledigte Käufe</div>
-            <div style="font-size:27px; font-weight:950; margin-top:6px;">{{ $completedSalesCount }}</div>
+        <div class="premium-card" data-csp-style="s-c8488db5">
+            <div class="premium-muted" data-csp-style="s-173123fb">Erledigte Käufe</div>
+            <div data-csp-style="s-8f429d68">{{ $completedSalesCount }}</div>
         </div>
 
-        <div class="premium-card" style="padding:16px; box-shadow:none;">
-            <div class="premium-muted" style="font-weight:900; text-transform:uppercase; letter-spacing:.06em;">Produkte</div>
-            <div style="font-size:27px; font-weight:950; margin-top:6px;">{{ $revenueProductCount }}</div>
+        <div class="premium-card" data-csp-style="s-c8488db5">
+            <div class="premium-muted" data-csp-style="s-173123fb">Produkte</div>
+            <div data-csp-style="s-8f429d68">{{ $revenueProductCount }}</div>
         </div>
 
-        <div class="premium-card" style="padding:16px; box-shadow:none;">
-            <div class="premium-muted" style="font-weight:900; text-transform:uppercase; letter-spacing:.06em;">Gesamtmenge</div>
-            <div style="font-size:20px; font-weight:950; margin-top:9px; line-height:1.35;">
+        <div class="premium-card" data-csp-style="s-c8488db5">
+            <div class="premium-muted" data-csp-style="s-173123fb">Gesamtmenge</div>
+            <div data-csp-style="s-35bfa37a">
                 @forelse ($revenueQuantitySummary as $quantityGroup)
                     @php
                         $unit = strtolower(trim((string) $quantityGroup['unit']));
                         $unitLabel = $unitLabels[$unit] ?? $quantityGroup['unit'];
                     @endphp
-                    <span style="white-space:nowrap;">
+                    <span data-csp-style="s-1813e65b">
                         {{ \App\Support\GermanNumber::format($quantityGroup['quantity']) }} {{ $unitLabel }}
                     </span>@if (! $loop->last) <span class="premium-muted"> · </span> @endif
                 @empty

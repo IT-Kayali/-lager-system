@@ -189,104 +189,6 @@ function initOfferProductOnlyPositions() {
         });
 }
 
-function ensureOfferProductOnlyStyles() {
-    if (document.getElementById('offer-product-only-position-styles')) {
-        return;
-    }
-
-    const style = document.createElement('style');
-    style.id = 'offer-product-only-position-styles';
-    style.textContent = `
-        body.offer-product-only-positions .offer-category-filter-field {
-            display: none !important;
-        }
-
-        body.offer-product-only-positions .offer-item-row > .premium-form-grid {
-            grid-template-columns: minmax(320px, 1.8fr) minmax(160px, .65fr) auto !important;
-        }
-
-        @media (max-width: 900px) {
-            body.offer-product-only-positions .offer-item-row > .premium-form-grid {
-                grid-template-columns: minmax(0, 1fr) minmax(150px, .55fr) auto !important;
-            }
-        }
-
-        @media (max-width: 700px) {
-            body.offer-product-only-positions .offer-item-row > .premium-form-grid {
-                grid-template-columns: 1fr !important;
-            }
-        }
-    `;
-
-    document.head.appendChild(style);
-}
-
-function ensureOfferShippingCartonStyles() {
-    if (document.getElementById('offer-shipping-carton-styles')) {
-        return;
-    }
-
-    const style = document.createElement('style');
-    style.id = 'offer-shipping-carton-styles';
-    style.textContent = `
-        html body #offer-shipping-card.offer-shipping-modern-card .premium-form-grid {
-            display: grid !important;
-            grid-template-columns: minmax(300px, 1.2fr) minmax(220px, .8fr) minmax(190px, .6fr) !important;
-            gap: 22px !important;
-            align-items: start !important;
-        }
-
-        html body #offer-shipping-card.offer-shipping-modern-card .premium-form-field,
-        html body #offer-shipping-card.offer-shipping-modern-card .premium-form-field.full,
-        html body #offer-shipping-card.offer-shipping-modern-card .offer-shipping-carton-field {
-            grid-column: auto !important;
-            width: 100% !important;
-            max-width: none !important;
-            min-width: 0 !important;
-            margin: 0 !important;
-        }
-
-        html body #offer-shipping-card.offer-shipping-modern-card #shipping_method,
-        html body #offer-shipping-card.offer-shipping-modern-card #shipping_price_gross,
-        html body #offer-shipping-card.offer-shipping-modern-card #shipping_price_net,
-        html body #offer-shipping-card.offer-shipping-modern-card #carton_count {
-            width: 100% !important;
-            max-width: none !important;
-            min-height: 52px !important;
-            box-sizing: border-box !important;
-        }
-
-        html body #offer-shipping-card.offer-shipping-modern-card .premium-muted {
-            margin-top: 8px !important;
-            line-height: 1.4 !important;
-        }
-
-        @media (max-width: 1150px) {
-            html body #offer-shipping-card.offer-shipping-modern-card .premium-form-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-            }
-
-            html body #offer-shipping-card.offer-shipping-modern-card .offer-shipping-carton-field {
-                grid-column: 1 / -1 !important;
-                max-width: 360px !important;
-            }
-        }
-
-        @media (max-width: 760px) {
-            html body #offer-shipping-card.offer-shipping-modern-card .premium-form-grid {
-                grid-template-columns: 1fr !important;
-            }
-
-            html body #offer-shipping-card.offer-shipping-modern-card .offer-shipping-carton-field {
-                grid-column: auto !important;
-                max-width: none !important;
-            }
-        }
-    `;
-
-    document.head.appendChild(style);
-}
-
 function initOfferShippingCartonCount() {
     const form = document.getElementById('offer-main-form');
     const shippingCard = document.getElementById('offer-shipping-card');
@@ -332,8 +234,7 @@ function initOfferShippingCartonCount() {
         cartonInput.value = hiddenCartonCount.value || '';
 
         const help = document.createElement('div');
-        help.className = 'premium-muted';
-        help.style.marginTop = '6px';
+        help.className = 'premium-muted csp-help-spacing';
         help.textContent = 'Nur bei Lieferung. Hat keinen Einfluss auf Preis oder Versandkosten.';
 
         cartonField.append(label, cartonInput, help);
@@ -353,7 +254,7 @@ function initOfferShippingCartonCount() {
     function syncCartonCount() {
         const isDelivery = method.value === 'Lieferung';
 
-        cartonField.style.display = isDelivery ? '' : 'none';
+        cartonField.classList.toggle('csp-hidden', !isDelivery);
         cartonInput.disabled = !isDelivery;
         cartonInput.required = isDelivery;
 
@@ -432,7 +333,7 @@ function initOfferShippingNetPrice() {
     function syncNetToGross() {
         const isDelivery = method.value === 'Lieferung';
 
-        netInput.style.display = isDelivery ? '' : 'none';
+        netInput.classList.toggle('csp-hidden', !isDelivery);
         netInput.disabled = !isDelivery;
 
         if (!isDelivery) {
@@ -471,25 +372,7 @@ function initOfferShippingNetPrice() {
     syncNetToGross();
 }
 
-function ensureExtendedErrorToastStyles() {
-    if (document.getElementById('extended-error-toast-styles')) {
-        return;
-    }
-
-    const style = document.createElement('style');
-    style.id = 'extended-error-toast-styles';
-    style.textContent = `
-        .premium-toast.error[data-extended-lifetime="1"]::after {
-            animation-duration: 15s !important;
-        }
-    `;
-
-    document.head.appendChild(style);
-}
-
 function extendErrorToastLifetime() {
-    ensureExtendedErrorToastStyles();
-
     document.querySelectorAll('.premium-toast.error:not([data-extended-lifetime="1"])').forEach((toast) => {
         const replacement = toast.cloneNode(true);
         replacement.dataset.extendedLifetime = '1';
@@ -504,7 +387,7 @@ function extendErrorToastLifetime() {
             }
 
             removed = true;
-            replacement.style.animation = 'premiumToastOut .18s ease forwards';
+            replacement.classList.add('csp-toast-out');
             window.setTimeout(() => replacement.remove(), 180);
         }
 
@@ -514,22 +397,6 @@ function extendErrorToastLifetime() {
 }
 
 function initClickablePreviewRows() {
-    if (!document.getElementById('clickable-preview-row-styles')) {
-        const style = document.createElement('style');
-        style.id = 'clickable-preview-row-styles';
-        style.textContent = `
-            table tbody tr[data-preview-row="1"] {
-                cursor: pointer;
-            }
-
-            table tbody tr[data-preview-row="1"]:focus-visible {
-                outline: 2px solid #d4aa20;
-                outline-offset: -2px;
-            }
-        `;
-        document.head.appendChild(style);
-    }
-
     document.querySelectorAll('table tbody tr').forEach((row) => {
         if (row.dataset.previewRow === '1') {
             return;
@@ -570,9 +437,7 @@ function initClickablePreviewRows() {
 function initializeDynamicUi() {
     initCleanWarningsPageColors();
     initUnlimitedOfferQuantities();
-    ensureOfferProductOnlyStyles();
     initOfferProductOnlyPositions();
-    ensureOfferShippingCartonStyles();
     initOfferShippingCartonCount();
     initOfferShippingNetPrice();
     extendErrorToastLifetime();

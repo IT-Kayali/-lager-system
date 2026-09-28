@@ -212,8 +212,9 @@ test('button appearance preview uses the shared CSP runtime', function () {
     expect($runtime)
         ->toContain('initButtonAppearanceRuntime')
         ->toContain('data-button-appearance-runtime')
-        ->toContain('--premium-primary-button-bg')
-        ->toContain('--premium-secondary-button-bg');
+        ->toContain('dataset.cspPrimaryBg')
+        ->toContain('dataset.cspSecondaryBg')
+        ->not->toContain('style.setProperty');
 });
 
 test('price tier settings load their CSP safe runtime externally', function () {
@@ -257,3 +258,25 @@ test('customer group preview uses the shared CSP runtime', function () {
         ->toContain('automaticTextColor')
         ->toContain('[data-group-preview]');
 });
+
+test('offers editor runtime stays syntactically complete', function () {
+    $runtimePath = public_path('js/offers-editor-runtime.js');
+    $runtime = file_get_contents($runtimePath);
+
+    expect($runtime)
+        ->toContain('wrapper.appendChild(template.content.cloneNode(true))')
+        ->toContain('mainCard.insertBefore(shippingCard, productHeading)')
+        ->toContain('function validateOfferForm()')
+        ->toMatch('/\\}\\)\\(\\);\\s*$/');
+
+    $process = new Symfony\Component\Process\Process([
+        'node',
+        '--check',
+        $runtimePath,
+    ]);
+
+    $process->run();
+
+    expect($process->isSuccessful())->toBeTrue();
+});
+

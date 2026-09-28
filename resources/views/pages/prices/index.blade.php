@@ -4,9 +4,9 @@
     @endif
 
     @if ($errors->any())
-        <div class="premium-alert" style="border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.10);color:#991b1b;">
+        <div class="premium-alert" data-csp-style="s-278cc1fe">
             <strong>Bitte prüfe die Preisangaben.</strong>
-            <ul style="margin:8px 0 0 18px;">
+            <ul data-csp-style="s-aad58e4b">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -15,7 +15,7 @@
     @endif
 
     <section class="premium-card erp-list-card">
-        <div class="erp-list-filter-card" style="margin:18px;">
+        <div class="erp-list-filter-card" data-csp-style="s-75c7460b">
         <form method="GET" action="{{ route('prices.index') }}" class="premium-toolbar erp-list-filter-form">
             <select name="product_id" class="premium-select erp-list-select" data-auto-submit>
                 @forelse ($products as $product)
@@ -102,7 +102,7 @@
                                                 step="0.01"
                                                 min="0"
                                                 class="premium-input"
-                                                style="max-width:180px;"
+                                                data-csp-style="s-74d516ba"
                                                 value="{{ old('prices.' . $tier->id, $tier->price) }}"
                                             >
                                         </td>
@@ -184,14 +184,14 @@
                 @endif
 
                 @if (auth()->user()?->hasRole([\App\Models\User::ROLE_MANAGER, \App\Models\User::ROLE_SALES]))
-                    <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;">
+                    <div data-csp-style="s-f8051712">
                         <button class="premium-btn gold" type="submit">
                             <i class="bi bi-save"></i>
                             {{ $usesPriceTiers ? 'Alle Preise speichern' : 'Preisregeln speichern' }}
                         </button>
                     </div>
                 @else
-                    <div class="premium-placeholder" style="margin-top:18px;">Du kannst Preise sehen, aber nicht ändern.</div>
+                    <div class="premium-placeholder" data-csp-style="s-e9f7b175">Du kannst Preise sehen, aber nicht ändern.</div>
                 @endif
             </form>
         @endif

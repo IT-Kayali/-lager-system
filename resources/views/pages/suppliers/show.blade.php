@@ -119,7 +119,7 @@
         <div class="section-head">
             <div>
                 <h2 class="preview-title">Zugehörige Produkte</h2>
-                <p class="premium-muted" style="margin:4px 0 0;">
+                <p class="premium-muted" data-csp-style="s-3ca59c3a">
                     Alle Produkte, die diesem Lieferanten zugeordnet sind.
                 </p>
             </div>

@@ -304,7 +304,7 @@
 
                 const isDelivery = method.value === 'Lieferung';
 
-                priceField.style.display = isDelivery ? '' : 'none';
+                priceField.classList.toggle('csp-hidden', !isDelivery);
                 priceInput.disabled = !isDelivery;
 
                 if (!isDelivery) {

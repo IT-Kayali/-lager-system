@@ -6,7 +6,7 @@
     $createTextColor = $createHasErrors ? old('text_color', '#FFFFFF') : '#FFFFFF';
 @endphp
 
-<section id="customer-groups" class="premium-card customer-group-settings" style="margin-top:22px;scroll-margin-top:24px;">
+<section id="customer-groups" class="premium-card customer-group-settings" data-csp-style="s-1c4a2677">
     <div class="customer-group-settings-header">
         <div>
             <h2>Kundengruppen</h2>
@@ -34,7 +34,8 @@
                             <span
                                 class="premium-badge"
                                 data-group-preview
-                                style="background-color:{{ $createBackground }};color:{{ $createAutoText ? '#FFFFFF' : $createTextColor }};border-color:{{ $createBackground }};"
+                                data-csp-badge-bg="{{ $createBackground }}"
+                                data-csp-badge-fg="{{ $createAutoText ? '#FFFFFF' : $createTextColor }}"
                             >Neue Gruppe</span>
                             <span class="premium-muted">Live-Vorschau</span>
                         </div>
@@ -161,18 +162,19 @@
                         <span
                             class="premium-badge"
                             data-group-preview
-                            style="{{ $group->badgeStyle() }}"
+                            data-csp-badge-bg="{{ $group->displayColor() }}"
+                            data-csp-badge-fg="{{ $group->textColor() }}"
                         >{{ $group->name }}</span>
                         <span class="premium-code">{{ $group->slug }}</span>
                     </span>
 
                     <span class="customer-group-summary-colors" role="cell">
                         <span class="customer-group-color-value">
-                            <span class="customer-group-color-dot" style="background:{{ $group->displayColor() }};"></span>
+                            <span class="customer-group-color-dot" data-csp-color="{{ $group->displayColor() }}"></span>
                             {{ $group->displayColor() }}
                         </span>
                         <span class="customer-group-color-value">
-                            <span class="customer-group-color-dot" style="background:{{ $group->textColor() }};"></span>
+                            <span class="customer-group-color-dot" data-csp-color="{{ $group->textColor() }}"></span>
                             {{ $group->usesAutomaticTextColor() ? 'Schrift automatisch' : $group->textColor() }}
                         </span>
                     </span>
@@ -303,7 +305,8 @@
                                 type="submit"
                                 @disabled($deleteLocked)
                                 title="{{ $group->customers_count > 0 ? 'Zuerst alle Kunden einer anderen Gruppe zuweisen.' : ($customerGroups->count() <= 1 ? 'Die letzte Gruppe kann nicht gelöscht werden.' : 'Kundengruppe löschen') }}"
-                                style="background:#991b1b;{{ $deleteLocked ? 'opacity:.45;cursor:not-allowed;' : '' }}"
+                                data-csp-delete-button
+                                data-csp-delete-locked="{{ $deleteLocked ? '1' : '0' }}"
                             >
                                 <i class="bi bi-trash"></i>
                                 Gruppe löschen

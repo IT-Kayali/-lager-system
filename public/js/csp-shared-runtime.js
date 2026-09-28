@@ -268,9 +268,8 @@
             const textColor = option.dataset.textColor || '#FFFFFF';
 
             groupPreview.textContent = option.textContent.trim();
-            groupPreview.style.backgroundColor = color;
-            groupPreview.style.borderColor = color;
-            groupPreview.style.color = textColor;
+            groupPreview.dataset.cspBadgeBg = color;
+            groupPreview.dataset.cspBadgeFg = textColor;
             groupPreviewWrap.hidden = false;
         }
 
@@ -406,22 +405,10 @@
         form.dataset.previewBound = '1';
 
         function updateButtonPreview() {
-            document.documentElement.style.setProperty(
-                '--premium-primary-button-bg',
-                fields.primaryBackground.value
-            );
-            document.documentElement.style.setProperty(
-                '--premium-primary-button-text',
-                fields.primaryText.value
-            );
-            document.documentElement.style.setProperty(
-                '--premium-secondary-button-bg',
-                fields.secondaryBackground.value
-            );
-            document.documentElement.style.setProperty(
-                '--premium-secondary-button-text',
-                fields.secondaryText.value
-            );
+            document.documentElement.dataset.cspPrimaryBg = fields.primaryBackground.value;
+            document.documentElement.dataset.cspPrimaryText = fields.primaryText.value;
+            document.documentElement.dataset.cspSecondaryBg = fields.secondaryBackground.value;
+            document.documentElement.dataset.cspSecondaryText = fields.secondaryText.value;
         }
 
         Object.values(fields).forEach((field) => {
@@ -468,9 +455,8 @@
                     ? automaticTextColor(backgroundColor)
                     : textInput.value;
 
-                preview.style.backgroundColor = backgroundColor;
-                preview.style.borderColor = backgroundColor;
-                preview.style.color = textColor;
+                preview.dataset.cspBadgeBg = backgroundColor;
+                preview.dataset.cspBadgeFg = textColor;
                 textInput.disabled = automaticInput.checked;
 
                 if (nameInput && nameInput.value.trim() !== '') {

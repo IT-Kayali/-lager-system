@@ -4,15 +4,15 @@
     @endif
 
     @if (session('error'))
-        <div class="premium-alert" style="border-color: rgba(239,68,68,.25); background: rgba(239,68,68,.10); color:#991b1b;">
+        <div class="premium-alert" data-csp-style="s-0b92fcc8">
             {{ session('error') }}
         </div>
     @endif
 
     @if (session('import_errors'))
-        <div class="premium-alert" style="border-color: rgba(239,68,68,.25); background: rgba(239,68,68,.10); color:#991b1b;">
+        <div class="premium-alert" data-csp-style="s-0b92fcc8">
             <strong>Import-Fehler:</strong>
-            <ul style="margin:10px 0 0 18px;">
+            <ul data-csp-style="s-1b00d22c">
                 @foreach (session('import_errors') as $importError)
                     <li>{{ $importError }}</li>
                 @endforeach
@@ -39,7 +39,7 @@
                 </div>
             </div>
 
-            <div style="margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;">
+            <div data-csp-style="s-0bc4d184">
                 <button class="premium-btn gold" type="submit">
                     <i class="bi bi-upload"></i>
                     Excel importieren
@@ -58,8 +58,8 @@
         </form>
     </section>
 
-    <section class="premium-card" style="margin-top:18px;">
-        <h2 style="margin-top:0;">Excel-Aufbau</h2>
+    <section class="premium-card" data-csp-style="s-e9f7b175">
+        <h2 data-csp-style="s-3ab75854">Excel-Aufbau</h2>
 
         <p class="premium-muted">
             Die Datei soll zwei Tabellenblätter enthalten:
@@ -68,10 +68,10 @@
         </p>
 
         <h3>Blatt Produkte</h3>
-        <pre style="white-space:pre-wrap;">product_code | name | manufacturer_designation | serial_number | unit | supplier | minimum_stock | description</pre>
+        <pre data-csp-style="s-25aefbb2">product_code | name | manufacturer_designation | serial_number | unit | supplier | minimum_stock | description</pre>
 
         <h3>Blatt Preisstaffeln</h3>
-        <pre style="white-space:pre-wrap;">product_code | customer_group | tier_key | tier_label | min_grams | max_grams | price</pre>
+        <pre data-csp-style="s-25aefbb2">product_code | customer_group | tier_key | tier_label | min_grams | max_grams | price</pre>
 
         <p class="premium-muted">
             Erlaubte Werte für <strong>unit</strong>: gram, liter, piece.

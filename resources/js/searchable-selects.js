@@ -183,14 +183,16 @@ function clearDropdownPosition(instance) {
     if (!instance?.dropdown) return;
 
     instance.dropdown.classList.remove('ts-dropdown-fixed', 'dropdown-above');
+    delete instance.dropdown.dataset.cspTop;
+    delete instance.dropdown.dataset.cspLeft;
+    delete instance.dropdown.dataset.cspWidth;
+    delete instance.dropdown.dataset.cspMaxWidth;
 
-    ['position', 'top', 'left', 'width', 'max-width', 'margin'].forEach((property) => {
-        instance.dropdown.style.removeProperty(property);
-    });
+    const content = instance.dropdown.querySelector('.ts-dropdown-content');
 
-    instance.dropdown
-        .querySelector('.ts-dropdown-content')
-        ?.style.removeProperty('max-height');
+    if (content) {
+        delete content.dataset.cspMaxHeight;
+    }
 }
 
 function positionActiveDropdown() {
@@ -231,11 +233,9 @@ function positionActiveDropdown() {
     dropdown.classList.add('ts-dropdown-fixed');
     dropdown.classList.toggle('dropdown-above', openAbove);
 
-    dropdown.style.setProperty('position', 'fixed', 'important');
-    dropdown.style.setProperty('left', `${Math.round(left)}px`, 'important');
-    dropdown.style.setProperty('width', `${Math.round(width)}px`, 'important');
-    dropdown.style.setProperty('max-width', `${Math.round(viewportWidth)}px`, 'important');
-    dropdown.style.setProperty('margin', '0', 'important');
+    dropdown.dataset.cspLeft = `${Math.round(left)}px`;
+    dropdown.dataset.cspWidth = `${Math.round(width)}px`;
+    dropdown.dataset.cspMaxWidth = `${Math.round(viewportWidth)}px`;
 
     if (content) {
         const dropdownChrome = Math.max(18, dropdown.offsetHeight - content.offsetHeight);
@@ -244,7 +244,7 @@ function positionActiveDropdown() {
             Math.min(DROPDOWN_MAX_CONTENT_HEIGHT, availableSpace - dropdownChrome)
         );
 
-        content.style.setProperty('max-height', `${Math.floor(contentHeight)}px`, 'important');
+        content.dataset.cspMaxHeight = `${Math.floor(contentHeight)}px`;
     }
 
     const dropdownHeight = dropdown.getBoundingClientRect().height;
@@ -256,7 +256,7 @@ function positionActiveDropdown() {
         Math.max(DROPDOWN_VIEWPORT_GAP, window.innerHeight - dropdownHeight - DROPDOWN_VIEWPORT_GAP)
     );
 
-    dropdown.style.setProperty('top', `${Math.round(top)}px`, 'important');
+    dropdown.dataset.cspTop = `${Math.round(top)}px`;
 }
 
 function scheduleDropdownPosition() {

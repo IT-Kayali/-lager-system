@@ -1,6 +1,6 @@
 <x-layouts.premium title="Angebot bearbeiten" subtitle="Positionen, Kunde und Vorlage bearbeiten, solange das Angebot offen ist.">
     @if (session('error'))
-        <div class="premium-alert" style="border-color: rgba(239,68,68,.25); background: rgba(239,68,68,.10); color:#991b1b;">
+        <div class="premium-alert" data-csp-style="s-0b92fcc8">
             {{ session('error') }}
         </div>
     @endif
@@ -25,8 +25,8 @@
     $shippingPriceValue = old('shipping_price_gross', $offer->shipping_price_gross ?? '');
 @endphp
 
-<div id="offer-shipping-card" class="premium-card offer-shipping-modern-card" style="box-shadow:none; margin:28px 0 18px; width:100%; max-width:none; grid-column:1 / -1;">
-    <h3 style="font-size:18px; font-weight:900; margin:0 0 12px;">Versand</h3>
+<div id="offer-shipping-card" class="premium-card offer-shipping-modern-card" data-csp-style="s-95cd68cd">
+    <h3 data-csp-style="s-04ddeef8">Versand</h3>
 
     <div class="premium-form-grid">
         <div class="premium-form-field full offer-shipping-method-field">
@@ -51,7 +51,7 @@
                 value="{{ $shippingPriceValue }}"
                 placeholder="z. B. 6.90"
             >
-            <div class="premium-muted" style="margin-top:6px;">
+            <div class="premium-muted" data-csp-style="s-4ca4648e">
                 Nur bei Lieferung. Wird in Angebot und Rechnung angezeigt, nicht im Lieferschein.
             </div>
             @error('shipping_price_gross') <div class="premium-error">{{ $message }}</div> @enderror

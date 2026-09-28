@@ -1,24 +1,24 @@
 <x-layouts.premium title="Warnungen" subtitle="Bestandswarnungen mit Suche, Statusfilter und Excel-Export.">
-    <section class="premium-grid premium-grid-4" style="margin-bottom:22px;">
-        <a href="{{ route('products.index') }}" class="premium-stat-card" style="text-decoration:none;color:inherit;">
+    <section class="premium-grid premium-grid-4" data-csp-style="s-5a64b1be">
+        <a href="{{ route('products.index') }}" class="premium-stat-card" data-csp-style="s-dc95e3fd">
             <div class="premium-stat-icon"><i class="bi bi-box-seam"></i></div>
             <div class="premium-stat-value">{{ $summary['all'] }}</div>
             <div class="premium-stat-label">Alle Produkte</div>
         </a>
 
-        <a href="{{ route('warnings.index', ['filter' => 'warning']) }}" class="premium-stat-card warning-card-total" style="text-decoration:none;color:inherit;">
+        <a href="{{ route('warnings.index', ['filter' => 'warning']) }}" class="premium-stat-card warning-card-total" data-csp-style="s-dc95e3fd">
             <div class="premium-stat-icon"><i class="bi bi-exclamation-lg"></i></div>
             <div class="premium-stat-value">{{ $summary['warning'] }}</div>
             <div class="premium-stat-label">Warnungen gesamt</div>
         </a>
 
-        <a href="{{ route('warnings.index', ['filter' => 'low']) }}" class="premium-stat-card warning-card-low" style="text-decoration:none;color:inherit;">
+        <a href="{{ route('warnings.index', ['filter' => 'low']) }}" class="premium-stat-card warning-card-low" data-csp-style="s-dc95e3fd">
             <div class="premium-stat-icon"><i class="bi bi-arrow-down-circle"></i></div>
             <div class="premium-stat-value">{{ $summary['low'] }}</div>
             <div class="premium-stat-label">Niedrig</div>
         </a>
 
-        <a href="{{ route('warnings.index', ['filter' => 'critical']) }}" class="premium-stat-card warning-card-critical" style="text-decoration:none;color:inherit;">
+        <a href="{{ route('warnings.index', ['filter' => 'critical']) }}" class="premium-stat-card warning-card-critical" data-csp-style="s-dc95e3fd">
             <div class="premium-stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
             <div class="premium-stat-value">{{ $summary['critical'] }}</div>
             <div class="premium-stat-label">Kritisch</div>
@@ -95,17 +95,17 @@
             <div class="premium-table-wrap erp-list-table-shell warnings-table-wrap">
                 <table class="premium-table warnings-table">
                     <colgroup>
-                        <col style="width:13%;">
-                        <col style="width:15%;">
-                        <col style="width:10%;">
-                        <col style="width:7%;">
-                        <col style="width:12%;">
-                        <col style="width:8%;">
-                        <col style="width:8%;">
-                        <col style="width:8%;">
-                        <col style="width:9%;">
-                        <col style="width:9%;">
-                        <col style="width:7%;">
+                        <col data-csp-style="s-1a72ca13">
+                        <col data-csp-style="s-a7c79599">
+                        <col data-csp-style="s-07e9557e">
+                        <col data-csp-style="s-f040eaf4">
+                        <col data-csp-style="s-359121a4">
+                        <col data-csp-style="s-fb411441">
+                        <col data-csp-style="s-fb411441">
+                        <col data-csp-style="s-fb411441">
+                        <col data-csp-style="s-95d4594a">
+                        <col data-csp-style="s-95d4594a">
+                        <col data-csp-style="s-f040eaf4">
                     </colgroup>
 
                     <thead>

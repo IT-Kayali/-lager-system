@@ -4,12 +4,12 @@
     @endif
 
     @if (session('error'))
-        <div class="premium-alert" style="border-color: rgba(239,68,68,.25); background: rgba(239,68,68,.10); color:#991b1b;">
+        <div class="premium-alert" data-csp-style="s-0b92fcc8">
             {{ session('error') }}
         </div>
     @endif
 
-    <div class="premium-alert" style="margin-bottom:18px;">
+    <div class="premium-alert" data-csp-style="s-d9fcbe51">
         <strong>Lager-Arbeitsansicht:</strong>
         Hier werden nur Bestellungen ab „In Bearbeitung“ angezeigt. Du kannst die Bestellung ansehen, den Status im Lagerprozess weiterführen und den Lieferschein öffnen.
     </div>

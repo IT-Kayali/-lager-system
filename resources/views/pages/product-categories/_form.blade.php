@@ -78,7 +78,7 @@
                     >
 
                     <div class="category-color-preview">
-                        <span style="background: {{ old('color', $category->color ?: '#d4af37') }};"></span>
+                        <span data-csp-color="{{ old('color', $category->color ?: '#d4af37') }}"></span>
                         <strong>{{ old('color', $category->color ?: '#d4af37') }}</strong>
                     </div>
                 </div>
@@ -123,7 +123,7 @@
                 <div class="category-preview-kicker">Vorschau</div>
 
                 <div class="category-preview-name">
-                    <span style="background: {{ old('color', $category->color ?: '#d4af37') }};"></span>
+                    <span data-csp-color="{{ old('color', $category->color ?: '#d4af37') }}"></span>
                     {{ old('name', $category->name ?: 'Neue Kategorie') }}
                 </div>
 

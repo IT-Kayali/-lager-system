@@ -4,7 +4,7 @@
     @endif
 
     @if (session('error'))
-        <div class="premium-alert" style="border-color:rgba(239,68,68,.25);background:rgba(239,68,68,.10);color:#991b1b;">
+        <div class="premium-alert" data-csp-style="s-b2a82328">
             {{ session('error') }}
         </div>
     @endif

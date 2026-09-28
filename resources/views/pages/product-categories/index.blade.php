@@ -4,7 +4,7 @@
     @endif
 
     @if (session('error'))
-        <div class="premium-alert" style="border-color: rgba(239,68,68,.25); background: rgba(239,68,68,.10); color:#991b1b;">
+        <div class="premium-alert" data-csp-style="s-0b92fcc8">
             {{ session('error') }}
         </div>
     @endif
@@ -79,7 +79,7 @@
                         <tr>
                             <td>
                                 <a class="category-name-link" href="{{ route('product-categories.show', ['product_category' => $categoryUrlName]) }}">
-                                    <span class="category-color-dot" style="background: {{ $category->color ?: '#d4af37' }};"></span>
+                                    <span class="category-color-dot" data-csp-color="{{ $category->color ?: '#d4af37' }}"></span>
                                     <span class="category-name-copy">
                                         <strong>{{ $category->name }}</strong>
                                         <small>{{ $category->color ?: '#d4af37' }}</small>

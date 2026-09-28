@@ -5,7 +5,7 @@
         $statusLabels = ['ok' => 'OK', 'low' => 'Niedrig', 'critical' => 'Kritisch'];
     @endphp
 
-    <section class="category-preview-hero" style="--cat-color: {{ $category->color ?: '#d4af37' }};">
+    <section class="category-preview-hero" data-csp-cat-color="{{ $category->color ?: '#d4af37' }}">
         <div>
             <div class="category-preview-kicker">Kategorie</div>
             <h1><span></span>{{ $category->name }}</h1>
@@ -26,7 +26,7 @@
                 <div><span>Name</span><strong>{{ $category->name }}</strong></div>
                 <div><span>Status</span><strong>{{ $statusLabel }}</strong></div>
                 <div><span>Produkte</span><strong>{{ $category->products->count() }}</strong></div>
-                <div><span>Farbe</span><strong class="color-value"><i style="background: {{ $category->color ?: '#d4af37' }};"></i>{{ $category->color ?: '#d4af37' }}</strong></div>
+                <div><span>Farbe</span><strong class="color-value"><i data-csp-color="{{ $category->color ?: '#d4af37' }}"></i>{{ $category->color ?: '#d4af37' }}</strong></div>
                 <div><span>Erstellt</span><strong>{{ $category->created_at ? $category->created_at->format('d.m.Y H:i') : '—' }}</strong></div>
                 <div><span>Aktualisiert</span><strong>{{ $category->updated_at ? $category->updated_at->format('d.m.Y H:i') : '—' }}</strong></div>
             </div>
@@ -41,7 +41,7 @@
         <div class="section-head">
             <div>
                 <h2 class="preview-title">Enthaltene Produkte</h2>
-                <p class="premium-muted" style="margin:4px 0 0;">Alle Produkte, die dieser Kategorie zugeordnet sind.</p>
+                <p class="premium-muted" data-csp-style="s-3ca59c3a">Alle Produkte, die dieser Kategorie zugeordnet sind.</p>
             </div>
             <div class="category-products-actions">
                 <div class="category-product-search">

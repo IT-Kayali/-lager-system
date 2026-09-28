@@ -90,7 +90,7 @@
                 stack.appendChild(toast);
 
                 function removeToast() {
-                    toast.style.animation = 'premiumToastOut .18s ease forwards';
+                    toast.classList.add('csp-toast-out');
                     window.setTimeout(function () {
                         toast.remove();
                     }, 180);

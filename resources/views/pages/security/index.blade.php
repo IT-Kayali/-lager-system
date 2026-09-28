@@ -4,16 +4,16 @@
     @endif
 
     @if (session('error'))
-        <div class="premium-alert" style="border-color: rgba(239,68,68,.25); background: rgba(239,68,68,.10); color:#991b1b;">
+        <div class="premium-alert" data-csp-style="s-0b92fcc8">
             {{ session('error') }}
         </div>
     @endif
 
-    <section class="premium-card" style="margin-bottom:22px;">
+    <section class="premium-card" data-csp-style="s-5a64b1be">
         <div class="premium-toolbar">
             <div>
-                <h2 style="font-size:20px; font-weight:900; margin:0;">Benutzer & Rollen</h2>
-                <p class="premium-muted" style="margin:4px 0 0;">
+                <h2 data-csp-style="s-0a51f0a6">Benutzer & Rollen</h2>
+                <p class="premium-muted" data-csp-style="s-3ca59c3a">
                     Admin hat Vollzugriff. Manager, Lager und Verkauf sehen nur die für ihre Rolle freigegebenen Bereiche.
                 </p>
             </div>
@@ -77,23 +77,23 @@
     <section class="premium-card">
         <div class="premium-toolbar">
             <div>
-                <h2 style="font-size:20px; font-weight:900; margin:0;">Aktivitätsprotokoll</h2>
-                <p class="premium-muted" style="margin:4px 0 0;">
+                <h2 data-csp-style="s-0a51f0a6">Aktivitätsprotokoll</h2>
+                <p class="premium-muted" data-csp-style="s-3ca59c3a">
                     Benutzeraktionen, Preisänderungen, PDF-Erzeugungen, Angebote und Lagerereignisse.
                 </p>
             </div>
         </div>
 
-        <form method="GET" action="{{ route('security.index') }}" class="premium-search" style="margin-bottom:18px;">
+        <form method="GET" action="{{ route('security.index') }}" class="premium-search" data-csp-style="s-d9fcbe51">
             <input
                 name="action"
                 value="{{ $filters['action'] }}"
                 class="premium-input"
-                style="max-width:260px;"
+                data-csp-style="s-196e5ceb"
                 placeholder="Aktion suchen, z. B. offer"
             >
 
-            <select name="entity" class="premium-select" style="max-width:220px;">
+            <select name="entity" class="premium-select" data-csp-style="s-fd551037">
                 <option value="">Alle Entities</option>
                 @foreach ($entities as $entity)
                     <option value="{{ $entity }}" @selected($filters['entity'] === $entity)>
@@ -102,7 +102,7 @@
                 @endforeach
             </select>
 
-            <select name="user_id" class="premium-select" style="max-width:220px;">
+            <select name="user_id" class="premium-select" data-csp-style="s-fd551037">
                 <option value="">Alle Benutzer</option>
                 @foreach ($users as $user)
                     <option value="{{ $user->id }}" @selected((string) $filters['user_id'] === (string) $user->id)>
@@ -148,7 +148,7 @@
                                 @if ($log->properties)
                                     <details>
                                         <summary>anzeigen</summary>
-                                        <pre style="white-space:pre-wrap; max-width:420px;">{{ json_encode($log->properties, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                        <pre data-csp-style="s-fcccb10a">{{ json_encode($log->properties, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                                     </details>
                                 @else
                                     —
@@ -166,7 +166,7 @@
             </table>
         </div>
 
-        <div style="margin-top:18px;">
+        <div data-csp-style="s-e9f7b175">
             {{ $logs->links() }}
         </div>
     </section>
