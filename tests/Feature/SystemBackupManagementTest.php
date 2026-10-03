@@ -1,8 +1,10 @@
 <?php
 
+use App\Models\ActivityLog;
 use App\Models\ApplicationSetting;
 use App\Models\User;
 use App\Services\SystemBackupService;
+use App\Services\SystemWriteLock;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -22,13 +24,28 @@ beforeEach(function () {
 
     config([
         'system-backup.directory' => $directory,
+        'system-backup.write_lock_path' => storage_path(
+            'framework/testing/system-write.lock'
+        ),
     ]);
+
+    File::delete(
+        storage_path(
+            'framework/testing/system-write.lock'
+        )
+    );
 });
 
 afterEach(function () {
     File::deleteDirectory(
         storage_path(
             'framework/testing/system-backups'
+        )
+    );
+
+    File::delete(
+        storage_path(
+            'framework/testing/system-write.lock'
         )
     );
 });
@@ -807,4 +824,145 @@ it('keeps settings available when backup storage listing fails', function () {
         ->assertSee(
             'Die übrigen Einstellungen können weiterhin verwendet werden.'
         );
+});
+
+it('disables gtid purged statements in mysql dumps', function () {
+    $service = app(
+        SystemBackupService::class
+    );
+
+    $method = new ReflectionMethod(
+        $service,
+        'dumpCommand'
+    );
+
+    $command = $method->invoke(
+        $service,
+        '/usr/bin/mysqldump',
+        '/tmp/mysql-options.cnf',
+        'lager_test'
+    );
+
+    expect($command)
+        ->toContain(
+            '--set-gtid-purged=OFF'
+        );
+});
+
+it('waits for active writers before an exclusive restore lock', function () {
+    $writeLock = app(
+        SystemWriteLock::class
+    );
+
+    $sharedHandle =
+        $writeLock->acquireShared();
+
+    try {
+        expect(
+            fn () => $writeLock->acquireExclusive(
+                true
+            )
+        )->toThrow(
+            RuntimeException::class,
+            'Die System-Schreibsperre konnte nicht erhalten werden.'
+        );
+    } finally {
+        $writeLock->release(
+            $sharedHandle
+        );
+    }
+
+    $exclusiveHandle =
+        $writeLock->acquireExclusive(
+            true
+        );
+
+    expect(
+        is_resource(
+            $exclusiveHandle
+        )
+    )->toBeTrue();
+
+    $writeLock->release(
+        $exclusiveHandle
+    );
+});
+
+it('keeps the admin logged out when restore audit logging fails', function () {
+    $admin = User::factory()->create([
+        'role' => User::ROLE_ADMIN,
+        'is_active' => true,
+    ]);
+
+    $filename =
+        'lager-manual-20261003-130000-abcdef12.sql.gz';
+
+    $this->mock(
+        SystemBackupService::class,
+        function (
+            MockInterface $mock
+        ) use (
+            $admin,
+            $filename
+        ): void {
+            $mock
+                ->shouldReceive('restore')
+                ->once()
+                ->with(
+                    $filename,
+                    $admin->id,
+                    Mockery::type('string')
+                )
+                ->andReturn([
+                    'restored' => [
+                        'filename' => $filename,
+                        'sha256' => str_repeat(
+                            'a',
+                            64
+                        ),
+                    ],
+                    'safety_backup' => [
+                        'filename' => 'lager-pre_restore-20261003-140000-12345678.sql.gz',
+                        'sha256' => str_repeat(
+                            'b',
+                            64
+                        ),
+                    ],
+                ]);
+        }
+    );
+
+    ActivityLog::creating(
+        static function (): void {
+            throw new RuntimeException(
+                'AUDIT FAILURE TEST'
+            );
+        }
+    );
+
+    try {
+        $response = $this
+            ->actingAs($admin)
+            ->post(
+                route(
+                    'settings.backups.restore',
+                    [
+                        'filename' => $filename,
+                    ]
+                ),
+                [
+                    'current_password' => 'password',
+                    'confirmation' => 'BACKUP WIEDERHERSTELLEN',
+                    'acknowledge' => '1',
+                ]
+            );
+
+        $response->assertRedirect(
+            route('login')
+        );
+
+        $this->assertGuest();
+    } finally {
+        ActivityLog::flushEventListeners();
+    }
 });

@@ -137,7 +137,38 @@ class SystemBackupController extends Controller
                 $adminId,
                 $request->ip()
             );
+        } catch (Throwable $exception) {
+            report($exception);
 
+            return redirect()
+                ->back()
+                ->withInput(
+                    $request->except(
+                        'current_password'
+                    )
+                )
+                ->with(
+                    'error',
+                    'Die Wiederherstellung konnte nicht abgeschlossen werden. Bitte Serverprotokoll prüfen.'
+                );
+        }
+
+        /*
+         * Ab hier ist der Restore erfolgreich.
+         * Die wiederhergestellte Session darf unter keinen
+         * Umständen am Request-Ende erneut gespeichert werden.
+         */
+        Auth::guard()->logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        /*
+         * Ein Audit-Fehler darf einen bereits erfolgreichen
+         * Restore weder als fehlgeschlagen melden noch die
+         * alte Admin-Session wiederherstellen.
+         */
+        try {
             $auditUserId = User::query()
                 ->whereKey($adminId)
                 ->exists()
@@ -159,36 +190,12 @@ class SystemBackupController extends Controller
                     'requested_by_email' => $adminEmail,
                 ],
             ]);
-
-            /*
-             * Das Restore kann eine ältere sessions-Tabelle enthalten.
-             * Die Service-Schicht hat sämtliche persistierten
-             * Datenbank-Sessions entfernt. Zusätzlich darf auch die
-             * aktuell laufende Admin-Session nicht am Request-Ende
-             * erneut gespeichert werden.
-             */
-            Auth::guard()->logout();
-
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            return redirect()
-                ->route('login');
-        } catch (Throwable $exception) {
-            report($exception);
-
-            return redirect()
-                ->back()
-                ->withInput(
-                    $request->except(
-                        'current_password'
-                    )
-                )
-                ->with(
-                    'error',
-                    'Die Wiederherstellung konnte nicht abgeschlossen werden. Bitte Serverprotokoll prüfen.'
-                );
+        } catch (Throwable $auditException) {
+            report($auditException);
         }
+
+        return redirect()
+            ->route('login');
     }
 
     public function download(

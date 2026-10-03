@@ -19,7 +19,11 @@ class SystemBackupService
     public const TYPE_PRE_RESTORE = 'pre_restore';
 
     private const FILE_PATTERN =
-        '/\Alager-(manual|automatic|pre_restore)-\d{8}-\d{6}-[a-f0-9]{8}\.sql\.gz\z/';
+        '/\\Alager-(manual|automatic|pre_restore)-\\d{8}-\\d{6}-[a-f0-9]{8}\\.sql\\.gz\\z/';
+
+    public function __construct(
+        private SystemWriteLock $systemWriteLock
+    ) {}
 
     /**
      * @return array<string, mixed>
@@ -79,6 +83,7 @@ class SystemBackupService
             $leaveMaintenanceMode = false;
             $maintenanceUpFailed = false;
             $operationException = null;
+            $writeLockHandle = null;
 
             $downExitCode = Artisan::call(
                 'down',
@@ -97,6 +102,16 @@ class SystemBackupService
             $maintenanceStarted = true;
 
             try {
+                /*
+                 * Wartungsmodus verhindert neue HTTP-Writer.
+                 * Der exklusive System-Lock wartet zusätzlich,
+                 * bis bereits laufende HTTP-/Scheduler-Writer
+                 * ihren vollständigen Datenbankzugriff beendet haben.
+                 */
+                $writeLockHandle =
+                    $this->systemWriteLock
+                        ->acquireExclusive();
+
                 try {
                     $safetyBackup = $this->createLocked(
                         self::TYPE_PRE_RESTORE,
@@ -161,12 +176,25 @@ class SystemBackupService
             } catch (Throwable $exception) {
                 $operationException = $exception;
             } finally {
-                if (
-                    $maintenanceStarted
-                    && ! $leaveMaintenanceMode
-                ) {
-                    $maintenanceUpFailed =
-                        Artisan::call('up') !== 0;
+                try {
+                    if (
+                        $maintenanceStarted
+                        && ! $leaveMaintenanceMode
+                    ) {
+                        $maintenanceUpFailed =
+                            Artisan::call('up') !== 0;
+                    }
+                } finally {
+                    if (
+                        is_resource(
+                            $writeLockHandle
+                        )
+                    ) {
+                        $this->systemWriteLock
+                            ->release(
+                                $writeLockHandle
+                            );
+                    }
                 }
             }
 
@@ -760,20 +788,11 @@ class SystemBackupService
         }
 
         $process = new Process(
-            [
+            $this->dumpCommand(
                 $binary,
-                '--defaults-extra-file='
-                    .$credentialsFile,
-                '--single-transaction',
-                '--quick',
-                '--routines',
-                '--triggers',
-                '--events',
-                '--hex-blob',
-                '--default-character-set=utf8mb4',
-                '--no-tablespaces',
-                $database,
-            ],
+                $credentialsFile,
+                $database
+            ),
             base_path()
         );
 
@@ -837,6 +856,38 @@ class SystemBackupService
                 .trim($stderr)
             );
         }
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function dumpCommand(
+        string $binary,
+        string $credentialsFile,
+        string $database
+    ): array {
+        return [
+            $binary,
+            '--defaults-extra-file='
+                .$credentialsFile,
+            '--single-transaction',
+            '--quick',
+            '--routines',
+            '--triggers',
+            '--events',
+            '--hex-blob',
+            '--default-character-set=utf8mb4',
+            '--no-tablespaces',
+
+            /*
+             * Backups werden auf denselben Server zurückgespielt.
+             * GTID-PURGED-Statements würden bei überlappenden,
+             * bereits ausgeführten GTIDs den Restore verhindern.
+             */
+            '--set-gtid-purged=OFF',
+
+            $database,
+        ];
     }
 
     private function runRestore(
