@@ -32,27 +32,6 @@ class SystemBackupController extends Controller
                 (int) $request->user()->id,
                 $request->ip()
             );
-
-            ActivityLog::record(
-                'system.backup_created',
-                null,
-                [
-                    'filename' => $backup['filename'],
-                    'type' => SystemBackupService::TYPE_MANUAL,
-                    'size' => $backup['size'],
-                    'sha256' => $backup['sha256'],
-                ]
-            );
-
-            return redirect()
-                ->to(
-                    route('settings.index')
-                    .'#system-backups'
-                )
-                ->with(
-                    'success',
-                    'Datenbank-Backup wurde erfolgreich erstellt.'
-                );
         } catch (Throwable $exception) {
             report($exception);
 
@@ -66,6 +45,36 @@ class SystemBackupController extends Controller
                     'Backup konnte nicht erstellt werden. Bitte Serverprotokoll prüfen.'
                 );
         }
+
+        /*
+         * Ab hier ist das Backup vollständig erstellt.
+         * Ein Audit-Fehler darf diesen erfolgreichen Zustand
+         * nicht gegenüber dem Administrator als Fehler melden.
+         */
+        try {
+            ActivityLog::record(
+                'system.backup_created',
+                null,
+                [
+                    'filename' => $backup['filename'],
+                    'type' => SystemBackupService::TYPE_MANUAL,
+                    'size' => $backup['size'],
+                    'sha256' => $backup['sha256'],
+                ]
+            );
+        } catch (Throwable $auditException) {
+            report($auditException);
+        }
+
+        return redirect()
+            ->to(
+                route('settings.index')
+                .'#system-backups'
+            )
+            ->with(
+                'success',
+                'Datenbank-Backup wurde erfolgreich erstellt.'
+            );
     }
 
     public function showRestore(

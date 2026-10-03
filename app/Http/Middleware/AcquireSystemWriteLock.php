@@ -18,12 +18,15 @@ class AcquireSystemWriteLock
         Closure $next
     ): Response {
         /*
-         * Reine Lesezugriffe benötigen keine Schreibsperre.
+         * Auch vermeintlich sichere GET-Requests können in dieser
+         * Anwendung Datenbankänderungen auslösen, z. B. durch
+         * ReservationReleaseService oder markAsRead().
+         *
+         * Deshalb schützt der Shared-Lock grundsätzlich den
+         * vollständigen HTTP-Request.
+         *
+         * Der Restore selbst ist die einzige Ausnahme.
          */
-        if ($request->isMethodSafe()) {
-            return $next($request);
-        }
-
         /*
          * Der Restore selbst darf keinen Shared-Lock halten,
          * weil SystemBackupService nach Aktivierung des

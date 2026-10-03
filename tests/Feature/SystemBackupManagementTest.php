@@ -1,11 +1,13 @@
 <?php
 
+use App\Http\Middleware\AcquireSystemWriteLock;
 use App\Models\ActivityLog;
 use App\Models\ApplicationSetting;
 use App\Models\User;
 use App\Services\SystemBackupService;
 use App\Services\SystemWriteLock;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -962,6 +964,132 @@ it('keeps the admin logged out when restore audit logging fails', function () {
         );
 
         $this->assertGuest();
+    } finally {
+        ActivityLog::flushEventListeners();
+    }
+});
+
+it('protects safe http requests with the shared system write lock', function () {
+    $handle = fopen(
+        'php://temp',
+        'w+'
+    );
+
+    expect(
+        is_resource($handle)
+    )->toBeTrue();
+
+    $writeLock = Mockery::mock(
+        SystemWriteLock::class
+    );
+
+    $writeLock
+        ->shouldReceive('acquireShared')
+        ->once()
+        ->andReturn($handle);
+
+    $writeLock
+        ->shouldReceive('release')
+        ->once()
+        ->with($handle)
+        ->andReturnUsing(
+            static function ($resource): void {
+                if (is_resource($resource)) {
+                    fclose($resource);
+                }
+            }
+        );
+
+    $middleware =
+        new AcquireSystemWriteLock(
+            $writeLock
+        );
+
+    $request = Request::create(
+        '/dashboard',
+        'GET'
+    );
+
+    $response = $middleware->handle(
+        $request,
+        static fn () => response(
+            'SAFE GET LOCKED'
+        )
+    );
+
+    expect(
+        $response->getContent()
+    )->toBe(
+        'SAFE GET LOCKED'
+    );
+});
+
+it('reports manual backup success even when audit logging fails', function () {
+    $admin = User::factory()->create([
+        'role' => User::ROLE_ADMIN,
+        'is_active' => true,
+    ]);
+
+    $filename =
+        'lager-manual-20261004-010000-abcdef12.sql.gz';
+
+    $this->mock(
+        SystemBackupService::class,
+        function (
+            MockInterface $mock
+        ) use (
+            $admin,
+            $filename
+        ): void {
+            $mock
+                ->shouldReceive('create')
+                ->once()
+                ->with(
+                    SystemBackupService::TYPE_MANUAL,
+                    $admin->id,
+                    Mockery::type('string')
+                )
+                ->andReturn([
+                    'filename' => $filename,
+                    'type' => SystemBackupService::TYPE_MANUAL,
+                    'size' => 12345,
+                    'sha256' => str_repeat(
+                        'a',
+                        64
+                    ),
+                ]);
+        }
+    );
+
+    ActivityLog::creating(
+        static function (): void {
+            throw new RuntimeException(
+                'BACKUP AUDIT FAILURE TEST'
+            );
+        }
+    );
+
+    try {
+        $response = $this
+            ->actingAs($admin)
+            ->post(
+                route(
+                    'settings.backups.store'
+                )
+            );
+
+        $response
+            ->assertRedirect(
+                route('settings.index')
+                .'#system-backups'
+            )
+            ->assertSessionHas(
+                'success',
+                'Datenbank-Backup wurde erfolgreich erstellt.'
+            )
+            ->assertSessionMissing(
+                'error'
+            );
     } finally {
         ActivityLog::flushEventListeners();
     }
