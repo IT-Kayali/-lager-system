@@ -6,6 +6,7 @@ use App\Models\ApplicationSetting;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Symfony\Component\Process\Process;
 use Throwable;
@@ -83,6 +84,10 @@ class SystemBackupService
             $target = $this->findBackup($filename);
 
             $this->verifyBackup($target);
+
+            $this->assertSchemaCompatible(
+                $target
+            );
 
             $safetyBackup = null;
             $maintenanceStarted = false;
@@ -287,6 +292,10 @@ class SystemBackupService
                     ?? null,
                 'ip_address' => $manifest['ip_address']
                     ?? null,
+                'schema_fingerprint' => (string) (
+                    $manifest['schema_fingerprint']
+                    ?? ''
+                ),
             ];
         }
 
@@ -635,6 +644,9 @@ class SystemBackupService
 
         $directory = $this->backupDirectory();
 
+        $schemaFingerprint =
+            $this->currentSchemaFingerprint();
+
         $timestamp = now()->format(
             'Ymd-His'
         );
@@ -704,6 +716,7 @@ class SystemBackupService
                 'created_by_user_id' => $userId,
                 'ip_address' => $ipAddress,
                 'database' => $database,
+                'schema_fingerprint' => $schemaFingerprint,
             ];
 
             $manifestPath = $finalPath
@@ -1113,6 +1126,78 @@ class SystemBackupService
                 $value
             )
             .'"';
+    }
+
+    /**
+     * @param  array<string, mixed>  $backup
+     */
+    private function assertSchemaCompatible(
+        array $backup
+    ): void {
+        $backupFingerprint = trim(
+            (string) (
+                $backup['schema_fingerprint']
+                ?? ''
+            )
+        );
+
+        if ($backupFingerprint === '') {
+            throw new RuntimeException(
+                'Dieses Backup enthält keine '
+                .'Schema-Kompatibilitätskennung und wird '
+                .'aus Sicherheitsgründen nicht wiederhergestellt.'
+            );
+        }
+
+        $currentFingerprint =
+            $this->currentSchemaFingerprint();
+
+        if (! hash_equals(
+            $currentFingerprint,
+            $backupFingerprint
+        )) {
+            throw new RuntimeException(
+                'Der Datenbankschema-Stand dieses Backups '
+                .'passt nicht zum aktuell installierten '
+                .'Anwendungsstand. Die Wiederherstellung '
+                .'wurde vor jeder Datenbankänderung abgebrochen.'
+            );
+        }
+    }
+
+    private function currentSchemaFingerprint(): string
+    {
+        try {
+            $migrations = DB::table('migrations')
+                ->orderBy('migration')
+                ->pluck('migration')
+                ->map(
+                    static fn ($migration): string => (string) $migration
+                )
+                ->values()
+                ->all();
+        } catch (Throwable $exception) {
+            throw new RuntimeException(
+                'Der aktuelle Datenbankschema-Stand '
+                .'konnte nicht bestimmt werden.',
+                0,
+                $exception
+            );
+        }
+
+        if ($migrations === []) {
+            throw new RuntimeException(
+                'Es wurden keine Laravel-Migrationen gefunden.'
+            );
+        }
+
+        return hash(
+            'sha256',
+            implode(
+                "\n",
+                $migrations
+            )
+        );
     }
 
     private function backupDirectory(): string

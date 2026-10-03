@@ -4,6 +4,7 @@ use App\Models\ApplicationSetting;
 use App\Models\User;
 use App\Services\SystemBackupService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ViewErrorBag;
 use Mockery\MockInterface;
@@ -503,5 +504,54 @@ it('does not expose restore engine errors to the browser', function () {
         (string) session('error')
     )->not->toContain(
         'SECRET MYSQL RESTORE DETAIL'
+    );
+});
+
+it('rejects a backup from a different schema before maintenance mode', function () {
+    $directory = config(
+        'system-backup.directory'
+    );
+
+    $filename =
+        'lager-manual-20261003-180000-deadbeef.sql.gz';
+
+    $path = $directory
+        .DIRECTORY_SEPARATOR
+        .$filename;
+
+    $content =
+        "-- Schema mismatch test\n"
+        ."-- Dump completed on 2026-10-03\n";
+
+    file_put_contents(
+        $path,
+        gzencode(
+            $content,
+            9
+        )
+    );
+
+    file_put_contents(
+        $path.'.json',
+        json_encode([
+            'filename' => $filename,
+            'type' => SystemBackupService::TYPE_MANUAL,
+            'created_at' => now()->toIso8601String(),
+            'size' => filesize($path),
+            'sha256' => hash_file('sha256', $path),
+            'schema_fingerprint' => str_repeat('f', 64),
+        ])
+    );
+
+    Artisan::shouldReceive('call')
+        ->never();
+
+    expect(
+        fn () => app(
+            SystemBackupService::class
+        )->restore($filename)
+    )->toThrow(
+        RuntimeException::class,
+        'Datenbankschema-Stand'
     );
 });
