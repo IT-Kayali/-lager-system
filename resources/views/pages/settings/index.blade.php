@@ -308,4 +308,6 @@
     </section>
 
 
+    @include('pages.settings._system-data-reset')
+
 </x-layouts.premium>
