@@ -84,15 +84,11 @@ class SystemBackupService
 
             $this->verifyBackup($target);
 
-            $safetyBackup = $this->createLocked(
-                self::TYPE_PRE_RESTORE,
-                $userId,
-                $ipAddress
-            );
-
+            $safetyBackup = null;
             $maintenanceStarted = false;
             $leaveMaintenanceMode = false;
             $maintenanceUpFailed = false;
+            $operationException = null;
 
             $downExitCode = Artisan::call(
                 'down',
@@ -111,47 +107,67 @@ class SystemBackupService
             $maintenanceStarted = true;
 
             try {
-                $this->runRestore(
-                    $this->backupPath(
-                        $target['filename']
-                    )
-                );
+                try {
+                    $safetyBackup = $this->createLocked(
+                        self::TYPE_PRE_RESTORE,
+                        $userId,
+                        $ipAddress
+                    );
+                } catch (Throwable $safetyException) {
+                    throw new RuntimeException(
+                        'Das Sicherheitsbackup vor der Wiederherstellung '
+                        .'konnte nicht erstellt werden. '
+                        .'Die Datenbank wurde nicht verändert.',
+                        0,
+                        $safetyException
+                    );
+                }
 
-                $this->verifyMysqlConnectivity();
-            } catch (Throwable $restoreException) {
                 try {
                     $this->runRestore(
                         $this->backupPath(
-                            $safetyBackup['filename']
+                            $target['filename']
                         )
                     );
 
                     $this->verifyMysqlConnectivity();
-                } catch (Throwable $rollbackException) {
-                    $leaveMaintenanceMode = true;
+                } catch (Throwable $restoreException) {
+                    try {
+                        $this->runRestore(
+                            $this->backupPath(
+                                $safetyBackup['filename']
+                            )
+                        );
+
+                        $this->verifyMysqlConnectivity();
+                    } catch (Throwable $rollbackException) {
+                        $leaveMaintenanceMode = true;
+
+                        throw new RuntimeException(
+                            'Wiederherstellung fehlgeschlagen und auch die '
+                            .'automatische Rücksicherung des Sicherheitsbackups '
+                            .'ist fehlgeschlagen. Das System bleibt aus '
+                            .'Sicherheitsgründen im Wartungsmodus. '
+                            .'Restore-Fehler: '
+                            .$restoreException->getMessage()
+                            .' | Rücksicherungsfehler: '
+                            .$rollbackException->getMessage(),
+                            0,
+                            $restoreException
+                        );
+                    }
 
                     throw new RuntimeException(
-                        'Wiederherstellung fehlgeschlagen und auch die '
-                        .'automatische Rücksicherung des Sicherheitsbackups '
-                        .'ist fehlgeschlagen. Das System bleibt aus '
-                        .'Sicherheitsgründen im Wartungsmodus. '
-                        .'Restore-Fehler: '
-                        .$restoreException->getMessage()
-                        .' | Rücksicherungsfehler: '
-                        .$rollbackException->getMessage(),
+                        'Das gewünschte Backup konnte nicht wiederhergestellt '
+                        .'werden. Das automatisch erzeugte Sicherheitsbackup '
+                        .'wurde erfolgreich zurückgespielt. Ursache: '
+                        .$restoreException->getMessage(),
                         0,
                         $restoreException
                     );
                 }
-
-                throw new RuntimeException(
-                    'Das gewünschte Backup konnte nicht wiederhergestellt '
-                    .'werden. Das automatisch erzeugte Sicherheitsbackup '
-                    .'wurde erfolgreich zurückgespielt. Ursache: '
-                    .$restoreException->getMessage(),
-                    0,
-                    $restoreException
-                );
+            } catch (Throwable $exception) {
+                $operationException = $exception;
             } finally {
                 if (
                     $maintenanceStarted
@@ -164,8 +180,21 @@ class SystemBackupService
 
             if ($maintenanceUpFailed) {
                 throw new RuntimeException(
-                    'Die Datenbank wurde wiederhergestellt, aber der '
-                    .'Wartungsmodus konnte nicht automatisch beendet werden.'
+                    'Der Wartungsmodus konnte nach der '
+                    .'Wiederherstellungsaktion nicht automatisch '
+                    .'beendet werden.',
+                    0,
+                    $operationException
+                );
+            }
+
+            if ($operationException !== null) {
+                throw $operationException;
+            }
+
+            if ($safetyBackup === null) {
+                throw new RuntimeException(
+                    'Das Sicherheitsbackup der Wiederherstellung fehlt.'
                 );
             }
 
