@@ -6,6 +6,7 @@ use App\Http\Controllers\OfferInternalNoteController;
 use App\Http\Controllers\PriceTierDefinitionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SystemDataResetController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +26,16 @@ Route::middleware(['auth'])->group(function () {
     Route::put('settings/batch-expiry', [SettingsController::class, 'updateBatchExpiry'])
         ->name('settings.batch-expiry.update')
         ->middleware('role:' . User::ROLE_ADMIN);
+
+    Route::post(
+        'settings/system-data-reset',
+        [SystemDataResetController::class, 'store']
+    )
+        ->name('settings.system-data-reset')
+        ->middleware([
+            'role:' . User::ROLE_ADMIN,
+            'throttle:3,10',
+        ]);
 
     Route::post('offer-notes/{offer}', [OfferInternalNoteController::class, 'store'])
         ->name('offer-notes.store')
