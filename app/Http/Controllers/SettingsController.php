@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ApplicationSetting;
 use App\Models\CustomerGroup;
+use App\Services\SystemBackupService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -12,7 +13,7 @@ use Illuminate\View\View;
 
 class SettingsController extends Controller
 {
-    public function index(): View
+    public function index(SystemBackupService $backupService): View
     {
         $loginBackgroundPath = ApplicationSetting::loginBackgroundPath();
         $loginLogoPath = ApplicationSetting::loginLogoPath();
@@ -36,6 +37,10 @@ class SettingsController extends Controller
             'loginTitle' => ApplicationSetting::loginTitle(),
             'loginSubtitle' => ApplicationSetting::loginSubtitle(),
             'customerGroups' => CustomerGroup::query()->withCount('customers')->ordered()->get(),
+            'systemBackups' => $backupService->listBackups(),
+            'backupAutomaticEnabled' => ApplicationSetting::backupAutomaticEnabled(),
+            'backupAutomaticInterval' => ApplicationSetting::backupAutomaticInterval(),
+            'backupAutomaticRetention' => ApplicationSetting::backupAutomaticRetention(),
         ]);
     }
 
@@ -43,6 +48,7 @@ class SettingsController extends Controller
     {
         $data = $request->validate(['reservation_hours' => ['required', 'integer', 'min:1', 'max:720']]);
         ApplicationSetting::putValue('reservation_hours', $data['reservation_hours'], 'integer', 'Standard-Reservierungsdauer für neue Angebote in Stunden');
+
         return redirect()->route('settings.index')->with('success', 'Reservierungsdauer wurde gespeichert.');
     }
 
@@ -63,7 +69,7 @@ class SettingsController extends Controller
             'Startwert und optionales Präfix für fortlaufende Angebotsnummern'
         );
 
-        return redirect()->to(route('settings.index') . '#offer-numbering')
+        return redirect()->to(route('settings.index').'#offer-numbering')
             ->with('success', 'Nummerierung für Angebote wurde gespeichert.');
     }
 
@@ -71,14 +77,16 @@ class SettingsController extends Controller
     {
         $data = $request->validate(['low_stock_warning_percentage' => ['required', 'numeric', 'min:0', 'max:1000']]);
         ApplicationSetting::putValue('low_stock_warning_percentage', $data['low_stock_warning_percentage'], 'decimal', 'Prozentualer Zuschlag auf den Mindestbestand für die Warnung Niedriger Bestand');
-        return redirect()->to(route('settings.index') . '#low-stock-warning')->with('success', 'Warnschwelle für niedrigen Bestand wurde gespeichert.');
+
+        return redirect()->to(route('settings.index').'#low-stock-warning')->with('success', 'Warnschwelle für niedrigen Bestand wurde gespeichert.');
     }
 
     public function updateBatchExpiry(Request $request): RedirectResponse
     {
         $data = $request->validate(['default_batch_expiry_months' => ['required', 'integer', 'min:1', 'max:240']]);
         ApplicationSetting::putValue('default_batch_expiry_months', $data['default_batch_expiry_months'], 'integer', 'Standard-Ablaufzeit für neu angelegte Chargen in Monaten');
-        return redirect()->to(route('settings.index') . '#batch-expiry')->with('success', 'Standard-Ablaufzeit für Chargen wurde gespeichert.');
+
+        return redirect()->to(route('settings.index').'#batch-expiry')->with('success', 'Standard-Ablaufzeit für Chargen wurde gespeichert.');
     }
 
     public function updateButtonAppearance(Request $request): RedirectResponse
@@ -95,8 +103,11 @@ class SettingsController extends Controller
             'secondary_button_background' => strtoupper($data['secondary_button_background']), 'secondary_button_text' => strtoupper($data['secondary_button_text']),
         ];
         $descriptions = ['primary_button_background' => 'Hintergrundfarbe für primäre Standardbuttons', 'primary_button_text' => 'Schriftfarbe für primäre Standardbuttons', 'secondary_button_background' => 'Hintergrundfarbe für sekundäre Standardbuttons', 'secondary_button_text' => 'Schriftfarbe für sekundäre Standardbuttons'];
-        foreach ($theme as $key => $value) ApplicationSetting::putValue($key, $value, 'color', $descriptions[$key]);
-        return redirect()->to(route('settings.index') . '#button-appearance')->with('success', $request->boolean('reset_button_appearance') ? 'Die Standardfarben der Buttons wurden wiederhergestellt.' : 'Das Button-Design wurde gespeichert.');
+        foreach ($theme as $key => $value) {
+            ApplicationSetting::putValue($key, $value, 'color', $descriptions[$key]);
+        }
+
+        return redirect()->to(route('settings.index').'#button-appearance')->with('success', $request->boolean('reset_button_appearance') ? 'Die Standardfarben der Buttons wurden wiederhergestellt.' : 'Das Button-Design wurde gespeichert.');
     }
 
     public function updateLoginAppearance(Request $request): RedirectResponse
@@ -113,7 +124,8 @@ class SettingsController extends Controller
         $this->updateStoredImage($request, 'login_background', 'remove_login_background', ApplicationSetting::loginBackgroundPath(), 'login-backgrounds', 'login_background_path', 'Hintergrundbild der Anmeldeseite');
         $this->updateStoredImage($request, 'login_logo', 'remove_login_logo', ApplicationSetting::loginLogoPath(), 'login-logos', 'login_logo_path', 'Logo der Anmeldeseite');
         $this->updateStoredImage($request, 'site_favicon', 'remove_site_favicon', ApplicationSetting::siteFaviconPath(), 'site-favicons', 'site_favicon_path', 'Favicon der Anwendung');
-        return redirect()->to(route('settings.index') . '#login-appearance')->with('success', 'Login- und Browser-Einstellungen wurden gespeichert.');
+
+        return redirect()->to(route('settings.index').'#login-appearance')->with('success', 'Login- und Browser-Einstellungen wurden gespeichert.');
     }
 
     public function loginStyles(): Response
@@ -149,16 +161,46 @@ class SettingsController extends Controller
         ]);
     }
 
-    public function loginBackground() { $path = ApplicationSetting::loginBackgroundPath(); abort_unless($path && Storage::disk('public')->exists($path), 404); return Storage::disk('public')->response($path); }
-    public function loginLogo() { $path = ApplicationSetting::loginLogoPath(); abort_unless($path && Storage::disk('public')->exists($path), 404); return Storage::disk('public')->response($path); }
-    public function siteFavicon() { $path = ApplicationSetting::siteFaviconPath(); abort_unless($path && Storage::disk('public')->exists($path), 404); return Storage::disk('public')->response($path); }
+    public function loginBackground()
+    {
+        $path = ApplicationSetting::loginBackgroundPath();
+        abort_unless($path && Storage::disk('public')->exists($path), 404);
+
+        return Storage::disk('public')->response($path);
+    }
+
+    public function loginLogo()
+    {
+        $path = ApplicationSetting::loginLogoPath();
+        abort_unless($path && Storage::disk('public')->exists($path), 404);
+
+        return Storage::disk('public')->response($path);
+    }
+
+    public function siteFavicon()
+    {
+        $path = ApplicationSetting::siteFaviconPath();
+        abort_unless($path && Storage::disk('public')->exists($path), 404);
+
+        return Storage::disk('public')->response($path);
+    }
 
     private function updateStoredImage(Request $request, string $fileField, string $removeField, ?string $currentPath, string $directory, string $settingKey, string $description): void
     {
-        if ($request->boolean($removeField)) { if ($currentPath) Storage::disk('public')->delete($currentPath); ApplicationSetting::putValue($settingKey, '', 'string', $description); return; }
-        if (! $request->hasFile($fileField)) return;
+        if ($request->boolean($removeField)) {
+            if ($currentPath) {
+                Storage::disk('public')->delete($currentPath);
+            } ApplicationSetting::putValue($settingKey, '', 'string', $description);
+
+            return;
+        }
+        if (! $request->hasFile($fileField)) {
+            return;
+        }
         $newPath = $request->file($fileField)->store($directory, 'public');
-        if ($currentPath) Storage::disk('public')->delete($currentPath);
+        if ($currentPath) {
+            Storage::disk('public')->delete($currentPath);
+        }
         ApplicationSetting::putValue($settingKey, $newPath, 'string', $description);
     }
 }

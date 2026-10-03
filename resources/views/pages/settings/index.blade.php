@@ -308,6 +308,8 @@
     </section>
 
 
+    @include('pages.settings._system-backups')
+
     @include('pages.settings._system-data-reset')
 
 </x-layouts.premium>
