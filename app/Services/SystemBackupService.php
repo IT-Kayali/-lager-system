@@ -1220,6 +1220,44 @@ class SystemBackupService
             )
         );
 
+        $options = $connection['options']
+            ?? [];
+
+        if (is_array($options)) {
+            foreach ([
+                'Pdo\\Mysql::ATTR_SSL_CA',
+                'PDO::MYSQL_ATTR_SSL_CA',
+            ] as $constantName) {
+                if (! defined($constantName)) {
+                    continue;
+                }
+
+                $optionKey = constant(
+                    $constantName
+                );
+
+                if (! array_key_exists(
+                    $optionKey,
+                    $options
+                )) {
+                    continue;
+                }
+
+                $sslCa = trim(
+                    (string) $options[$optionKey]
+                );
+
+                if ($sslCa !== '') {
+                    $lines[] = 'ssl-ca='
+                        .$this->quoteOption(
+                            $sslCa
+                        );
+                }
+
+                break;
+            }
+        }
+
         if ($socket !== '') {
             $lines[] = 'socket='
                 .$this->quoteOption(

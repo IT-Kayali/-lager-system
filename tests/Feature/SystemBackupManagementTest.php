@@ -725,3 +725,86 @@ it('prevents concurrent backup operations with the direct file lock', function (
         is_file($lockPath)
     )->toBeTrue();
 });
+
+it('passes the configured mysql ssl ca to backup clients', function () {
+    $sslCaKey = null;
+
+    foreach ([
+        'Pdo\\Mysql::ATTR_SSL_CA',
+        'PDO::MYSQL_ATTR_SSL_CA',
+    ] as $constantName) {
+        if (defined($constantName)) {
+            $sslCaKey = constant(
+                $constantName
+            );
+
+            break;
+        }
+    }
+
+    expect($sslCaKey)->not->toBeNull();
+
+    $service = app(
+        SystemBackupService::class
+    );
+
+    $method = new ReflectionMethod(
+        $service,
+        'mysqlCredentials'
+    );
+
+    $credentials = $method->invoke(
+        $service,
+        [
+            'username' => 'backup-user',
+            'password' => 'backup-password',
+            'host' => 'db.example.test',
+            'port' => 3306,
+            'unix_socket' => '',
+            'options' => [
+                $sslCaKey => '/etc/mysql/certs/ca.pem',
+            ],
+        ]
+    );
+
+    expect($credentials)
+        ->toContain(
+            'ssl-ca="/etc/mysql/certs/ca.pem"'
+        );
+});
+
+it('keeps settings available when backup storage listing fails', function () {
+    $admin = User::factory()->create([
+        'role' => User::ROLE_ADMIN,
+        'is_active' => true,
+    ]);
+
+    $this->mock(
+        SystemBackupService::class,
+        function (
+            MockInterface $mock
+        ): void {
+            $mock
+                ->shouldReceive('listBackups')
+                ->once()
+                ->andThrow(
+                    new RuntimeException(
+                        'BACKUP STORAGE TEST FAILURE'
+                    )
+                );
+        }
+    );
+
+    $this
+        ->actingAs($admin)
+        ->get(
+            route('settings.index')
+        )
+        ->assertOk()
+        ->assertSee(
+            'Backup-Speicher nicht verfügbar'
+        )
+        ->assertSee(
+            'Die übrigen Einstellungen können weiterhin verwendet werden.'
+        );
+});

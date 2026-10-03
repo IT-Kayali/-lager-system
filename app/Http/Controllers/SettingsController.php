@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Throwable;
 
 class SettingsController extends Controller
 {
@@ -18,6 +19,18 @@ class SettingsController extends Controller
         $loginBackgroundPath = ApplicationSetting::loginBackgroundPath();
         $loginLogoPath = ApplicationSetting::loginLogoPath();
         $siteFaviconPath = ApplicationSetting::siteFaviconPath();
+
+        $systemBackups = [];
+        $backupStorageError = false;
+
+        try {
+            $systemBackups =
+                $backupService->listBackups();
+        } catch (Throwable $exception) {
+            report($exception);
+
+            $backupStorageError = true;
+        }
 
         return view('pages.settings.index', [
             'reservationHours' => ApplicationSetting::reservationHours(),
@@ -37,7 +50,8 @@ class SettingsController extends Controller
             'loginTitle' => ApplicationSetting::loginTitle(),
             'loginSubtitle' => ApplicationSetting::loginSubtitle(),
             'customerGroups' => CustomerGroup::query()->withCount('customers')->ordered()->get(),
-            'systemBackups' => $backupService->listBackups(),
+            'systemBackups' => $systemBackups,
+            'backupStorageError' => $backupStorageError,
             'backupAutomaticEnabled' => ApplicationSetting::backupAutomaticEnabled(),
             'backupAutomaticInterval' => ApplicationSetting::backupAutomaticInterval(),
             'backupAutomaticRetention' => ApplicationSetting::backupAutomaticRetention(),

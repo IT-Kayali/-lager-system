@@ -35,6 +35,15 @@
         nicht enthalten.
     </div>
 
+    @if (! empty($backupStorageError))
+        <div class="premium-alert">
+            <strong>Backup-Speicher nicht verfügbar:</strong>
+            Die Backupliste konnte aktuell nicht geladen werden.
+            Die übrigen Einstellungen können weiterhin verwendet werden.
+            Bitte Serverprotokoll und Speicherberechtigungen prüfen.
+        </div>
+    @endif
+
     <div class="premium-form-grid two">
         <div>
             <h3>Manuelles Backup</h3>
