@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\ApplicationSetting;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Symfony\Component\Process\Process;
@@ -39,16 +38,8 @@ class SystemBackupService
             );
         }
 
-        $lock = Cache::store('file')->lock(
-            'system-backup:operation',
-            1800
-        );
-
-        if (! $lock->get()) {
-            throw new RuntimeException(
-                'Es läuft bereits eine Backup- oder Wiederherstellungsaktion.'
-            );
-        }
+        $lockHandle =
+            $this->acquireOperationLock();
 
         try {
             return $this->createLocked(
@@ -57,7 +48,9 @@ class SystemBackupService
                 $ipAddress
             );
         } finally {
-            $lock->release();
+            $this->releaseOperationLock(
+                $lockHandle
+            );
         }
     }
 
@@ -69,16 +62,8 @@ class SystemBackupService
         ?int $userId = null,
         ?string $ipAddress = null
     ): array {
-        $lock = Cache::store('file')->lock(
-            'system-backup:operation',
-            1800
-        );
-
-        if (! $lock->get()) {
-            throw new RuntimeException(
-                'Es läuft bereits eine Backup- oder Wiederherstellungsaktion.'
-            );
-        }
+        $lockHandle =
+            $this->acquireOperationLock();
 
         try {
             $target = $this->findBackup($filename);
@@ -210,7 +195,9 @@ class SystemBackupService
                 'safety_backup' => $safetyBackup,
             ];
         } finally {
-            $lock->release();
+            $this->releaseOperationLock(
+                $lockHandle
+            );
         }
     }
 
@@ -989,6 +976,74 @@ class SystemBackupService
         } finally {
             @unlink($credentialsFile);
         }
+    }
+
+    /**
+     * @return resource
+     */
+    private function acquireOperationLock()
+    {
+        $path = $this->backupDirectory()
+            .DIRECTORY_SEPARATOR
+            .'.operation.lock';
+
+        /*
+         * Das Produktionsverzeichnis verwendet setgid und die
+         * gemeinsame Gruppe www-data. Mit umask 0007 entsteht
+         * eine neue Lock-Datei als 0660, sodass sowohl der
+         * Scheduler-Benutzer lager als auch PHP-FPM/www-data
+         * dieselbe Datei öffnen können.
+         */
+        $previousUmask = umask(0007);
+
+        try {
+            $handle = @fopen(
+                $path,
+                'c+'
+            );
+        } finally {
+            umask($previousUmask);
+        }
+
+        if ($handle === false) {
+            throw new RuntimeException(
+                'Die Sperrdatei für Backup- und '
+                .'Wiederherstellungsaktionen konnte '
+                .'nicht geöffnet werden.'
+            );
+        }
+
+        if (! flock(
+            $handle,
+            LOCK_EX | LOCK_NB
+        )) {
+            fclose($handle);
+
+            throw new RuntimeException(
+                'Es läuft bereits eine Backup- oder '
+                .'Wiederherstellungsaktion.'
+            );
+        }
+
+        return $handle;
+    }
+
+    /**
+     * @param  resource  $handle
+     */
+    private function releaseOperationLock(
+        $handle
+    ): void {
+        if (! is_resource($handle)) {
+            return;
+        }
+
+        flock(
+            $handle,
+            LOCK_UN
+        );
+
+        fclose($handle);
     }
 
     /**

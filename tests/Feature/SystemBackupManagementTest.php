@@ -664,3 +664,64 @@ it('purges restored database sessions', function () {
         DB::table('sessions')->count()
     )->toBe(0);
 });
+
+it('prevents concurrent backup operations with the direct file lock', function () {
+    $service = app(
+        SystemBackupService::class
+    );
+
+    $acquire = new ReflectionMethod(
+        $service,
+        'acquireOperationLock'
+    );
+
+    $release = new ReflectionMethod(
+        $service,
+        'releaseOperationLock'
+    );
+
+    $firstHandle =
+        $acquire->invoke($service);
+
+    expect(
+        is_resource($firstHandle)
+    )->toBeTrue();
+
+    try {
+        expect(
+            fn () => $acquire->invoke(
+                $service
+            )
+        )->toThrow(
+            RuntimeException::class,
+            'Es läuft bereits eine Backup- oder Wiederherstellungsaktion.'
+        );
+    } finally {
+        $release->invoke(
+            $service,
+            $firstHandle
+        );
+    }
+
+    $secondHandle =
+        $acquire->invoke($service);
+
+    expect(
+        is_resource($secondHandle)
+    )->toBeTrue();
+
+    $release->invoke(
+        $service,
+        $secondHandle
+    );
+
+    $lockPath = config(
+        'system-backup.directory'
+    )
+        .DIRECTORY_SEPARATOR
+        .'.operation.lock';
+
+    expect(
+        is_file($lockPath)
+    )->toBeTrue();
+});
