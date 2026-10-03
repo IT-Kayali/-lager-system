@@ -5,6 +5,7 @@ use App\Models\User;
 use App\Services\SystemBackupService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ViewErrorBag;
 use Mockery\MockInterface;
@@ -358,10 +359,10 @@ it('allows an admin to restore a backup after confirmation', function () {
 
     $response
         ->assertRedirect(
-            route('settings.index')
-            .'#system-backups'
-        )
-        ->assertSessionHas('success');
+            route('login')
+        );
+
+    $this->assertGuest();
 
     $this->assertDatabaseHas(
         'activity_logs',
@@ -554,4 +555,112 @@ it('rejects a backup from a different schema before maintenance mode', function 
         RuntimeException::class,
         'Datenbankschema-Stand'
     );
+});
+
+it('uses Laravel parsed DB URL values for backup clients', function () {
+    $original = config(
+        'database.connections.mysql'
+    );
+
+    try {
+        config([
+            'database.connections.mysql' => [
+                ...$original,
+                'url' => 'mysql://db_url_user:db_url_pass@db-url.example.test:3307/db_url_database',
+                'host' => 'fallback.invalid',
+                'port' => '3306',
+                'database' => 'fallback_database',
+                'username' => 'fallback_user',
+                'password' => 'fallback_password',
+            ],
+        ]);
+
+        DB::purge('mysql');
+
+        $service = app(
+            SystemBackupService::class
+        );
+
+        $method = new ReflectionMethod(
+            $service,
+            'mysqlConnectionConfig'
+        );
+
+        $connection =
+            $method->invoke($service);
+
+        expect(
+            $connection['host']
+        )->toBe('db-url.example.test');
+
+        expect(
+            (string) $connection['port']
+        )->toBe('3307');
+
+        expect(
+            $connection['database']
+        )->toBe('db_url_database');
+
+        expect(
+            $connection['username']
+        )->toBe('db_url_user');
+
+        expect(
+            $connection['password']
+        )->toBe('db_url_pass');
+    } finally {
+        DB::purge('mysql');
+
+        config([
+            'database.connections.mysql' => $original,
+        ]);
+
+        DB::purge('mysql');
+    }
+});
+
+it('purges restored database sessions', function () {
+    config([
+        'session.driver' => 'database',
+        'session.connection' => config('database.default'),
+        'session.table' => 'sessions',
+    ]);
+
+    DB::table('sessions')->insert([
+        [
+            'id' => 'restore-session-test-1',
+            'user_id' => null,
+            'ip_address' => '127.0.0.1',
+            'user_agent' => 'restore-test',
+            'payload' => 'test',
+            'last_activity' => time(),
+        ],
+        [
+            'id' => 'restore-session-test-2',
+            'user_id' => null,
+            'ip_address' => '127.0.0.1',
+            'user_agent' => 'restore-test',
+            'payload' => 'test',
+            'last_activity' => time(),
+        ],
+    ]);
+
+    expect(
+        DB::table('sessions')->count()
+    )->toBeGreaterThanOrEqual(2);
+
+    $service = app(
+        SystemBackupService::class
+    );
+
+    $method = new ReflectionMethod(
+        $service,
+        'purgeRestoredDatabaseSessions'
+    );
+
+    $method->invoke($service);
+
+    expect(
+        DB::table('sessions')->count()
+    )->toBe(0);
 });

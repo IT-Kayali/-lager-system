@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\SystemBackupService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use RuntimeException;
@@ -159,16 +160,20 @@ class SystemBackupController extends Controller
                 ],
             ]);
 
+            /*
+             * Das Restore kann eine ältere sessions-Tabelle enthalten.
+             * Die Service-Schicht hat sämtliche persistierten
+             * Datenbank-Sessions entfernt. Zusätzlich darf auch die
+             * aktuell laufende Admin-Session nicht am Request-Ende
+             * erneut gespeichert werden.
+             */
+            Auth::guard()->logout();
+
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
             return redirect()
-                ->to(
-                    route('settings.index')
-                    .'#system-backups'
-                )
-                ->with(
-                    'success',
-                    'Backup wurde erfolgreich wiederhergestellt. '
-                    .'Vorher wurde automatisch eine Sicherheitskopie erstellt.'
-                );
+                ->route('login');
         } catch (Throwable $exception) {
             report($exception);
 

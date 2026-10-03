@@ -136,6 +136,8 @@ class SystemBackupService
                     );
 
                     $this->verifyMysqlConnectivity();
+
+                    $this->purgeRestoredDatabaseSessions();
                 } catch (Throwable $restoreException) {
                     try {
                         $this->runRestore(
@@ -615,15 +617,8 @@ class SystemBackupService
             );
         }
 
-        $connection = config(
-            'database.connections.mysql'
-        );
-
-        if (! is_array($connection)) {
-            throw new RuntimeException(
-                'MySQL-Konfiguration fehlt.'
-            );
-        }
+        $connection =
+            $this->mysqlConnectionConfig();
 
         $database = trim(
             (string) ($connection['database'] ?? '')
@@ -860,15 +855,8 @@ class SystemBackupService
     private function runRestore(
         string $backupPath
     ): void {
-        $connection = config(
-            'database.connections.mysql'
-        );
-
-        if (! is_array($connection)) {
-            throw new RuntimeException(
-                'MySQL-Konfiguration fehlt.'
-            );
-        }
+        $connection =
+            $this->mysqlConnectionConfig();
 
         $database = trim(
             (string) ($connection['database'] ?? '')
@@ -955,15 +943,8 @@ class SystemBackupService
 
     private function verifyMysqlConnectivity(): void
     {
-        $connection = config(
-            'database.connections.mysql'
-        );
-
-        if (! is_array($connection)) {
-            throw new RuntimeException(
-                'MySQL-Konfiguration fehlt.'
-            );
-        }
+        $connection =
+            $this->mysqlConnectionConfig();
 
         $database = trim(
             (string) ($connection['database'] ?? '')
@@ -1007,6 +988,111 @@ class SystemBackupService
             }
         } finally {
             @unlink($credentialsFile);
+        }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function mysqlConnectionConfig(): array
+    {
+        try {
+            $databaseConnection =
+                DB::connection('mysql');
+
+            $connection =
+                $databaseConnection->getConfig();
+        } catch (Throwable $exception) {
+            throw new RuntimeException(
+                'Die effektive MySQL-Konfiguration '
+                .'konnte nicht ermittelt werden.',
+                0,
+                $exception
+            );
+        }
+
+        if (! is_array($connection)) {
+            throw new RuntimeException(
+                'MySQL-Konfiguration fehlt.'
+            );
+        }
+
+        $database = trim(
+            (string) $databaseConnection
+                ->getDatabaseName()
+        );
+
+        $username = trim(
+            (string) (
+                $connection['username']
+                ?? ''
+            )
+        );
+
+        if (
+            $database === ''
+            || $username === ''
+        ) {
+            throw new RuntimeException(
+                'MySQL-Konfiguration ist unvollständig.'
+            );
+        }
+
+        /*
+         * getConfig() stammt von der von Laravel bereits
+         * erzeugten Connection. Dadurch sind Werte aus
+         * DB_URL bereits geparst und überschreiben keine
+         * falschen DB_* Fallback-Werte.
+         */
+        $connection['database'] =
+            $database;
+
+        return $connection;
+    }
+
+    private function purgeRestoredDatabaseSessions(): void
+    {
+        if (
+            (string) config(
+                'session.driver'
+            ) !== 'database'
+        ) {
+            return;
+        }
+
+        $table = trim(
+            (string) config(
+                'session.table',
+                'sessions'
+            )
+        );
+
+        if ($table === '') {
+            throw new RuntimeException(
+                'Die Session-Tabelle ist nicht konfiguriert.'
+            );
+        }
+
+        $configuredConnection =
+            config('session.connection');
+
+        $connectionName =
+            is_string($configuredConnection)
+            && trim($configuredConnection) !== ''
+                ? trim($configuredConnection)
+                : null;
+
+        try {
+            DB::connection($connectionName)
+                ->table($table)
+                ->delete();
+        } catch (Throwable $exception) {
+            throw new RuntimeException(
+                'Die wiederhergestellten Sitzungen '
+                .'konnten nicht sicher ungültig gemacht werden.',
+                0,
+                $exception
+            );
         }
     }
 
@@ -1168,7 +1254,8 @@ class SystemBackupService
     private function currentSchemaFingerprint(): string
     {
         try {
-            $migrations = DB::table('migrations')
+            $migrations = DB::connection('mysql')
+                ->table('migrations')
                 ->orderBy('migration')
                 ->pluck('migration')
                 ->map(
