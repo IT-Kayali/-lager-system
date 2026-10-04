@@ -12,6 +12,29 @@ use Throwable;
 
 class SystemBackupService
 {
+    private int $migrationLockDepth = 0;
+
+    /**
+     * Keep schema changes outside the fingerprint/dump and restore windows.
+     * Nested migrate:refresh / migrate:fresh commands share the outer lock.
+     */
+    public function withMigrationLock(callable $callback): mixed
+    {
+        if ($this->migrationLockDepth > 0) {
+            return $callback();
+        }
+
+        $handle = $this->acquireOperationLock();
+        $this->migrationLockDepth++;
+
+        try {
+            return $callback();
+        } finally {
+            $this->migrationLockDepth--;
+            $this->releaseOperationLock($handle);
+        }
+    }
+
     public const TYPE_MANUAL = 'manual';
 
     public const TYPE_AUTOMATIC = 'automatic';
@@ -455,6 +478,17 @@ class SystemBackupService
     public function delete(
         string $filename
     ): bool {
+        $lockHandle = $this->acquireOperationLock();
+
+        try {
+            return $this->deleteLocked($filename);
+        } finally {
+            $this->releaseOperationLock($lockHandle);
+        }
+    }
+
+    private function deleteLocked(string $filename): bool
+    {
         $path = $this->backupPath($filename);
 
         $manifest = $path.'.json';
@@ -494,6 +528,12 @@ class SystemBackupService
         $path = $this->backupPath(
             $filename
         );
+
+        $this->verifyBackupFile($path, $backup);
+    }
+
+    private function verifyBackupFile(string $path, array $backup): void
+    {
 
         $expectedSha = trim(
             (string) (
@@ -700,6 +740,10 @@ class SystemBackupService
                 );
             }
 
+            $this->verifyBackupFile($temporaryPath, [
+                'sha256' => hash_file('sha256', $temporaryPath),
+            ]);
+
             if (! rename(
                 $temporaryPath,
                 $finalPath
@@ -833,7 +877,7 @@ class SystemBackupService
                             gzwrite(
                                 $gzip,
                                 $buffer
-                            ) === false
+                            ) !== strlen($buffer)
                         ) {
                             throw new RuntimeException(
                                 'Backup-Datei konnte nicht geschrieben werden.'
@@ -847,7 +891,11 @@ class SystemBackupService
                 }
             );
         } finally {
-            gzclose($gzip);
+            if (! gzclose($gzip)) {
+                throw new RuntimeException(
+                    'Komprimierte Backup-Datei konnte nicht abgeschlossen werden.'
+                );
+            }
         }
 
         if ($exitCode !== 0) {

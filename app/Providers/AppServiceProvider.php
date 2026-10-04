@@ -2,10 +2,19 @@
 
 namespace App\Providers;
 
+use App\Console\LockedSchemaCommand;
 use App\Models\Offer;
 use App\Observers\OfferWalletObserver;
+use App\Services\SystemBackupService;
 use App\Support\SortableTables;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Console\Migrations\FreshCommand;
+use Illuminate\Database\Console\Migrations\InstallCommand;
+use Illuminate\Database\Console\Migrations\MigrateCommand;
+use Illuminate\Database\Console\Migrations\RefreshCommand;
+use Illuminate\Database\Console\Migrations\ResetCommand;
+use Illuminate\Database\Console\Migrations\RollbackCommand;
+use Illuminate\Database\Console\WipeCommand;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
@@ -18,7 +27,22 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(SystemBackupService::class);
+
+        foreach ([
+            MigrateCommand::class,
+            RollbackCommand::class,
+            ResetCommand::class,
+            RefreshCommand::class,
+            FreshCommand::class,
+            InstallCommand::class,
+            WipeCommand::class,
+        ] as $command) {
+            $this->app->extend($command, fn ($instance, $app) => new LockedSchemaCommand(
+                $instance,
+                $app->make(SystemBackupService::class)
+            ));
+        }
     }
 
     /**
