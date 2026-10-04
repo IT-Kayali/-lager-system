@@ -72,7 +72,56 @@ class ApplicationSetting extends Model
         return max(1, min(240, (int) static::getValue('default_batch_expiry_months', 24)));
     }
 
-    public static function buttonThemeDefaults(): array { return self::DEFAULT_BUTTON_THEME; }
+    public static function backupAutomaticEnabled(): bool
+    {
+        return filter_var(
+            static::getValue('backup_automatic_enabled', false),
+            FILTER_VALIDATE_BOOL
+        );
+    }
+
+    public static function backupAutomaticInterval(): string
+    {
+        $value = (string) static::getValue(
+            'backup_automatic_interval',
+            'daily'
+        );
+
+        return in_array(
+            $value,
+            ['6_hours', '12_hours', 'daily', 'weekly'],
+            true
+        ) ? $value : 'daily';
+    }
+
+    public static function backupAutomaticIntervalHours(): int
+    {
+        return match (static::backupAutomaticInterval()) {
+            '6_hours' => 6,
+            '12_hours' => 12,
+            'weekly' => 168,
+            default => 24,
+        };
+    }
+
+    public static function backupAutomaticRetention(): int
+    {
+        return max(
+            1,
+            min(
+                90,
+                (int) static::getValue(
+                    'backup_automatic_retention',
+                    14
+                )
+            )
+        );
+    }
+
+    public static function buttonThemeDefaults(): array
+    {
+        return self::DEFAULT_BUTTON_THEME;
+    }
 
     public static function buttonTheme(): array
     {
@@ -81,25 +130,57 @@ class ApplicationSetting extends Model
         foreach (self::DEFAULT_BUTTON_THEME as $key => $default) {
             $theme[$key] = static::normalizeHexColor($stored->get($key), $default);
         }
+
         return $theme;
     }
 
     public static function siteName(): string
     {
         $fallback = (string) config('app.name', 'Lagerverwaltung');
+
         return trim((string) static::getValue('site_name', $fallback)) ?: $fallback;
     }
 
-    public static function siteFaviconPath(): ?string { $path = trim((string) static::getValue('site_favicon_path', '')); return $path !== '' ? $path : null; }
-    public static function loginBackgroundPath(): ?string { $path = trim((string) static::getValue('login_background_path', '')); return $path !== '' ? $path : null; }
-    public static function loginLogoPath(): ?string { $path = trim((string) static::getValue('login_logo_path', '')); return $path !== '' ? $path : null; }
-    public static function loginEyebrow(): string { return trim((string) static::getValue('login_eyebrow', 'Sicherer Zugriff')) ?: 'Sicherer Zugriff'; }
-    public static function loginTitle(): string { return trim((string) static::getValue('login_title', 'Alles im Lager sofort im Blick.')) ?: 'Alles im Lager sofort im Blick.'; }
-    public static function loginSubtitle(): string { return trim((string) static::getValue('login_subtitle', 'Modernes Dashboard für Bestände, Angebote, Rechnungen und Warnungen — schnell, klar und sicher.')) ?: 'Modernes Dashboard für Bestände, Angebote, Rechnungen und Warnungen — schnell, klar und sicher.'; }
+    public static function siteFaviconPath(): ?string
+    {
+        $path = trim((string) static::getValue('site_favicon_path', ''));
+
+        return $path !== '' ? $path : null;
+    }
+
+    public static function loginBackgroundPath(): ?string
+    {
+        $path = trim((string) static::getValue('login_background_path', ''));
+
+        return $path !== '' ? $path : null;
+    }
+
+    public static function loginLogoPath(): ?string
+    {
+        $path = trim((string) static::getValue('login_logo_path', ''));
+
+        return $path !== '' ? $path : null;
+    }
+
+    public static function loginEyebrow(): string
+    {
+        return trim((string) static::getValue('login_eyebrow', 'Sicherer Zugriff')) ?: 'Sicherer Zugriff';
+    }
+
+    public static function loginTitle(): string
+    {
+        return trim((string) static::getValue('login_title', 'Alles im Lager sofort im Blick.')) ?: 'Alles im Lager sofort im Blick.';
+    }
+
+    public static function loginSubtitle(): string
+    {
+        return trim((string) static::getValue('login_subtitle', 'Modernes Dashboard für Bestände, Angebote, Rechnungen und Warnungen — schnell, klar und sicher.')) ?: 'Modernes Dashboard für Bestände, Angebote, Rechnungen und Warnungen — schnell, klar und sicher.';
+    }
 
     private static function normalizeHexColor(mixed $value, string $default): string
     {
         $color = strtoupper(trim((string) $value));
+
         return preg_match('/^#[0-9A-F]{6}$/', $color) === 1 ? $color : strtoupper($default);
     }
 }

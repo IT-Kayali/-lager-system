@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Middleware\AcquireSystemWriteLock;
+use App\Http\Middleware\EnsureActiveUser;
+use App\Http\Middleware\EnsureUserHasRole;
+use App\Http\Middleware\NormalizeGermanNumbers;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,12 +17,25 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'role' => \App\Http\Middleware\EnsureUserHasRole::class,
+            'role' => EnsureUserHasRole::class,
+        ]);
+
+        /*
+         * Muss den kompletten Request inklusive Session-Persistierung
+         * umschließen, damit Restore zuverlässig auf bereits laufende
+         * Datenbank-Schreiber warten kann.
+         */
+        $middleware->web(prepend: [
+            AcquireSystemWriteLock::class,
+        ]);
+
+        $middleware->api(prepend: [
+            AcquireSystemWriteLock::class,
         ]);
 
         $middleware->web(append: [
-            \App\Http\Middleware\EnsureActiveUser::class,
-            \App\Http\Middleware\NormalizeGermanNumbers::class,
+            EnsureActiveUser::class,
+            NormalizeGermanNumbers::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
