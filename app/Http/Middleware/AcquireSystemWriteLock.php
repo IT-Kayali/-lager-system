@@ -18,40 +18,17 @@ class AcquireSystemWriteLock
         Closure $next
     ): Response {
         /*
-         * Auch vermeintlich sichere GET-Requests können in dieser
-         * Anwendung Datenbankänderungen auslösen, z. B. durch
-         * ReservationReleaseService oder markAsRead().
-         *
-         * Deshalb schützt der Shared-Lock grundsätzlich den
-         * vollständigen HTTP-Request.
-         *
-         * Der Restore selbst ist die einzige Ausnahme.
+         * Auch Restore-POSTs bleiben außerhalb des exklusiven
+         * Restore-Fensters durch den Shared-Lock geschützt.
          */
-        /*
-         * Der Restore selbst darf keinen Shared-Lock halten,
-         * weil SystemBackupService nach Aktivierung des
-         * Wartungsmodus einen exklusiven Lock benötigt.
-         */
-        if (
-            $request->isMethod('POST')
-            && $request->routeIs(
-                'settings.backups.restore'
-            )
-        ) {
-            return $next($request);
-        }
-
-        $handle =
-            $this->writeLock
-                ->acquireShared();
+        $this->writeLock
+            ->acquireRequestShared();
 
         try {
             return $next($request);
         } finally {
             $this->writeLock
-                ->release(
-                    $handle
-                );
+                ->releaseRequestShared();
         }
     }
 }

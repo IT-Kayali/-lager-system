@@ -108,21 +108,29 @@ class SystemBackupService
             $operationException = null;
             $writeLockHandle = null;
 
-            $downExitCode = Artisan::call(
-                'down',
-                [
-                    '--retry' => 60,
-                ]
-            );
+            $maintenanceMode =
+                app()->maintenanceMode();
 
-            if ($downExitCode !== 0) {
-                throw new RuntimeException(
-                    'Der Wartungsmodus konnte nicht aktiviert werden. '
-                    .'Die Datenbank wurde nicht verändert.'
+            $maintenanceWasActive =
+                $maintenanceMode->active();
+
+            if (! $maintenanceWasActive) {
+                $downExitCode = Artisan::call(
+                    'down',
+                    [
+                        '--retry' => 60,
+                    ]
                 );
-            }
 
-            $maintenanceStarted = true;
+                if ($downExitCode !== 0) {
+                    throw new RuntimeException(
+                        'Der Wartungsmodus konnte nicht aktiviert werden. '
+                        .'Die Datenbank wurde nicht verändert.'
+                    );
+                }
+
+                $maintenanceStarted = true;
+            }
 
             try {
                 /*
@@ -131,6 +139,10 @@ class SystemBackupService
                  * bis bereits laufende HTTP-/Scheduler-Writer
                  * ihren vollständigen Datenbankzugriff beendet haben.
                  */
+                $requestSharedSuspended =
+                    $this->systemWriteLock
+                        ->suspendRequestShared();
+
                 $writeLockHandle =
                     $this->systemWriteLock
                         ->acquireExclusive();
@@ -201,14 +213,6 @@ class SystemBackupService
             } finally {
                 try {
                     if (
-                        $maintenanceStarted
-                        && ! $leaveMaintenanceMode
-                    ) {
-                        $maintenanceUpFailed =
-                            Artisan::call('up') !== 0;
-                    }
-                } finally {
-                    if (
                         is_resource(
                             $writeLockHandle
                         )
@@ -218,6 +222,19 @@ class SystemBackupService
                                 $writeLockHandle
                             );
                     }
+                } finally {
+                    if ($requestSharedSuspended) {
+                        $this->systemWriteLock
+                            ->resumeRequestShared();
+                    }
+                }
+
+                if (
+                    $maintenanceStarted
+                    && ! $leaveMaintenanceMode
+                ) {
+                    $maintenanceUpFailed =
+                        Artisan::call('up') !== 0;
                 }
             }
 
@@ -776,22 +793,29 @@ class SystemBackupService
             $manifestPath = $finalPath
                 .'.json';
 
+            $manifestPayload = json_encode(
+                $manifest,
+                JSON_PRETTY_PRINT
+                | JSON_UNESCAPED_SLASHES
+                | JSON_THROW_ON_ERROR
+            )
+                .PHP_EOL;
+
             $written = file_put_contents(
                 $manifestPath,
-                json_encode(
-                    $manifest,
-                    JSON_PRETTY_PRINT
-                    | JSON_UNESCAPED_SLASHES
-                    | JSON_THROW_ON_ERROR
-                )
-                .PHP_EOL
+                $manifestPayload
             );
 
-            if ($written === false) {
+            if (
+                $written !== strlen(
+                    $manifestPayload
+                )
+            ) {
+                @unlink($manifestPath);
                 @unlink($finalPath);
 
                 throw new RuntimeException(
-                    'Backup-Metadaten konnten nicht gespeichert werden.'
+                    'Backup-Metadaten konnten nicht vollständig gespeichert werden.'
                 );
             }
 

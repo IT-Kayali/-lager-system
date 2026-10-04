@@ -970,35 +970,21 @@ it('keeps the admin logged out when restore audit logging fails', function () {
 });
 
 it('protects safe http requests with the shared system write lock', function () {
-    $handle = fopen(
-        'php://temp',
-        'w+'
-    );
-
-    expect(
-        is_resource($handle)
-    )->toBeTrue();
-
     $writeLock = Mockery::mock(
         SystemWriteLock::class
     );
 
     $writeLock
-        ->shouldReceive('acquireShared')
-        ->once()
-        ->andReturn($handle);
+        ->shouldReceive(
+            'acquireRequestShared'
+        )
+        ->once();
 
     $writeLock
-        ->shouldReceive('release')
-        ->once()
-        ->with($handle)
-        ->andReturnUsing(
-            static function ($resource): void {
-                if (is_resource($resource)) {
-                    fclose($resource);
-                }
-            }
-        );
+        ->shouldReceive(
+            'releaseRequestShared'
+        )
+        ->once();
 
     $middleware =
         new AcquireSystemWriteLock(
@@ -1086,6 +1072,172 @@ it('reports manual backup success even when audit logging fails', function () {
             ->assertSessionHas(
                 'success',
                 'Datenbank-Backup wurde erfolgreich erstellt.'
+            )
+            ->assertSessionMissing(
+                'error'
+            );
+    } finally {
+        ActivityLog::flushEventListeners();
+    }
+});
+
+it('temporarily hands the request shared lock to an exclusive restore lock', function () {
+    $writeLock = app(
+        SystemWriteLock::class
+    );
+
+    $writeLock->acquireRequestShared();
+
+    try {
+        expect(
+            fn () => $writeLock
+                ->acquireExclusive(true)
+        )->toThrow(
+            RuntimeException::class,
+            'Die System-Schreibsperre konnte nicht erhalten werden.'
+        );
+
+        expect(
+            $writeLock
+                ->suspendRequestShared()
+        )->toBeTrue();
+
+        $exclusive =
+            $writeLock->acquireExclusive(
+                true
+            );
+
+        expect(
+            is_resource($exclusive)
+        )->toBeTrue();
+
+        $writeLock->release(
+            $exclusive
+        );
+
+        $writeLock
+            ->resumeRequestShared();
+
+        expect(
+            fn () => $writeLock
+                ->acquireExclusive(true)
+        )->toThrow(
+            RuntimeException::class,
+            'Die System-Schreibsperre konnte nicht erhalten werden.'
+        );
+    } finally {
+        $writeLock
+            ->releaseRequestShared();
+    }
+});
+
+it('reports cli backup success even when audit logging fails', function () {
+    $filename =
+        'lager-manual-20261004-153000-abcdef12.sql.gz';
+
+    $this->mock(
+        SystemBackupService::class,
+        function (
+            MockInterface $mock
+        ) use (
+            $filename
+        ): void {
+            $mock
+                ->shouldReceive('create')
+                ->once()
+                ->with(
+                    SystemBackupService::TYPE_MANUAL
+                )
+                ->andReturn([
+                    'filename' => $filename,
+                    'type' => SystemBackupService::TYPE_MANUAL,
+                    'size' => 12345,
+                    'sha256' => str_repeat(
+                        'a',
+                        64
+                    ),
+                ]);
+        }
+    );
+
+    ActivityLog::creating(
+        static function (): void {
+            throw new RuntimeException(
+                'CLI BACKUP AUDIT FAILURE TEST'
+            );
+        }
+    );
+
+    try {
+        $exitCode = Artisan::call(
+            'system:backup'
+        );
+
+        expect($exitCode)->toBe(0);
+
+        expect(
+            Artisan::output()
+        )->toContain(
+            'Backup erstellt: '
+            .$filename
+        );
+    } finally {
+        ActivityLog::flushEventListeners();
+    }
+});
+
+it('reports deletion success even when audit logging fails', function () {
+    $admin = User::factory()->create([
+        'role' => User::ROLE_ADMIN,
+        'is_active' => true,
+    ]);
+
+    $filename =
+        'lager-manual-20261004-153100-abcdef12.sql.gz';
+
+    $this->mock(
+        SystemBackupService::class,
+        function (
+            MockInterface $mock
+        ) use (
+            $filename
+        ): void {
+            $mock
+                ->shouldReceive('delete')
+                ->once()
+                ->with($filename)
+                ->andReturnTrue();
+        }
+    );
+
+    ActivityLog::creating(
+        static function (): void {
+            throw new RuntimeException(
+                'DELETE AUDIT FAILURE TEST'
+            );
+        }
+    );
+
+    try {
+        $response = $this
+            ->actingAs($admin)
+            ->delete(
+                route(
+                    'settings.backups.destroy',
+                    [
+                        'filename' => $filename,
+                    ]
+                )
+            );
+
+        $response
+            ->assertRedirect(
+                route('settings.index')
+                .'#system-backups'
+            )
+            ->assertSessionHas(
+                'success',
+                'Backup wurde gelöscht.'
             )
             ->assertSessionMissing(
                 'error'

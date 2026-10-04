@@ -9,11 +9,12 @@ class BackupIo
     public static bool $closeResult = true;
 
     public static ?\Closure $afterClose = null;
+
+    public static int|false|null $manifestWriteResult = null;
 }
 
 function is_executable(string $path): bool
 {
-    // PHP's Windows check excludes .bat, although Symfony Process can run it.
     return \is_executable($path)
         || (PHP_OS_FAMILY === 'Windows' && basename($path) === 'dump.bat' && is_file($path));
 }
@@ -35,4 +36,36 @@ function gzclose($stream): bool
     $callback?->__invoke();
 
     return $result && BackupIo::$closeResult;
+}
+
+function file_put_contents(
+    string $filename,
+    mixed $data,
+    int $flags = 0,
+    $context = null
+): int|false {
+    if (
+        BackupIo::$manifestWriteResult !== null
+        && str_ends_with(
+            $filename,
+            '.sql.gz.json'
+        )
+    ) {
+        return BackupIo::$manifestWriteResult;
+    }
+
+    if ($context !== null) {
+        return \file_put_contents(
+            $filename,
+            $data,
+            $flags,
+            $context
+        );
+    }
+
+    return \file_put_contents(
+        $filename,
+        $data,
+        $flags
+    );
 }

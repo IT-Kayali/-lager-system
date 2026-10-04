@@ -61,7 +61,17 @@ class CreateSystemBackup extends Command
                 $removed = $backupService
                     ->pruneAutomaticBackups();
             }
+        } catch (Throwable $exception) {
+            report($exception);
 
+            $this->components->error(
+                $exception->getMessage()
+            );
+
+            return self::FAILURE;
+        }
+
+        try {
             ActivityLog::query()->create([
                 'user_id' => null,
                 'action' => 'system.backup_created',
@@ -76,28 +86,22 @@ class CreateSystemBackup extends Command
                     'pruned_automatic_backups' => $removed,
                 ],
             ]);
-
-            $this->components->info(
-                'Backup erstellt: '
-                .$backup['filename']
-            );
-
-            if ($removed > 0) {
-                $this->components->info(
-                    $removed
-                    .' alte automatische Backups entfernt.'
-                );
-            }
-
-            return self::SUCCESS;
-        } catch (Throwable $exception) {
-            report($exception);
-
-            $this->components->error(
-                $exception->getMessage()
-            );
-
-            return self::FAILURE;
+        } catch (Throwable $auditException) {
+            report($auditException);
         }
+
+        $this->components->info(
+            'Backup erstellt: '
+            .$backup['filename']
+        );
+
+        if ($removed > 0) {
+            $this->components->info(
+                $removed
+                .' alte automatische Backups entfernt.'
+            );
+        }
+
+        return self::SUCCESS;
     }
 }

@@ -250,24 +250,6 @@ class SystemBackupController extends Controller
             $backupService->delete(
                 $filename
             );
-
-            ActivityLog::record(
-                'system.backup_deleted',
-                null,
-                [
-                    'filename' => basename($filename),
-                ]
-            );
-
-            return redirect()
-                ->to(
-                    route('settings.index')
-                    .'#system-backups'
-                )
-                ->with(
-                    'success',
-                    'Backup wurde gelöscht.'
-                );
         } catch (RuntimeException $exception) {
             report($exception);
 
@@ -281,6 +263,28 @@ class SystemBackupController extends Controller
                     'Backup konnte nicht gelöscht werden. Bitte Serverprotokoll prüfen.'
                 );
         }
+
+        try {
+            ActivityLog::record(
+                'system.backup_deleted',
+                null,
+                [
+                    'filename' => basename($filename),
+                ]
+            );
+        } catch (Throwable $auditException) {
+            report($auditException);
+        }
+
+        return redirect()
+            ->to(
+                route('settings.index')
+                .'#system-backups'
+            )
+            ->with(
+                'success',
+                'Backup wurde gelöscht.'
+            );
     }
 
     public function updateSettings(

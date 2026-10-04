@@ -38,6 +38,7 @@ afterEach(function () {
     BackupIo::$writeResult = null;
     BackupIo::$closeResult = true;
     BackupIo::$afterClose = null;
+    BackupIo::$manifestWriteResult = null;
     DB::purge('mysql');
     File::deleteDirectory(config('system-backup.directory'));
 });
@@ -184,4 +185,72 @@ PHP);
     $backup = $service->create(SystemBackupService::TYPE_AUTOMATIC);
     expect($backup['schema_fingerprint'])->toBe($fingerprint->invoke($service))
         ->not->toBe(hash('sha256', 'test_schema'));
+});
+
+it('rejects partial manifest writes and removes the published dump', function () {
+    BackupIo::$manifestWriteResult = 1;
+
+    expect(
+        fn () => app(SystemBackupService::class)
+            ->create(SystemBackupService::TYPE_MANUAL)
+    )->toThrow(
+        RuntimeException::class,
+        'Backup-Metadaten konnten nicht vollständig gespeichert werden.'
+    );
+
+    expect(
+        glob(
+            config('system-backup.directory')
+            .'/*.sql.gz*'
+        )
+    )->toBe([]);
+});
+
+it('preserves a maintenance mode that restore did not start', function () {
+    $service = app(SystemBackupService::class);
+
+    $backup = $service->create(
+        SystemBackupService::TYPE_MANUAL
+    );
+
+    $maintenanceMode =
+        app()->maintenanceMode();
+
+    $existingPayload = [
+        'time' => time(),
+        'retry' => 321,
+        'secret' => 'existing-maintenance-secret',
+    ];
+
+    $maintenanceMode->activate(
+        $existingPayload
+    );
+
+    BackupIo::$writeResult = 0;
+
+    Artisan::shouldReceive('call')
+        ->never();
+
+    try {
+        expect(
+            fn () => $service->restore(
+                $backup['filename']
+            )
+        )->toThrow(
+            RuntimeException::class,
+            'Die Datenbank wurde nicht verändert.'
+        );
+
+        expect(
+            $maintenanceMode->active()
+        )->toBeTrue();
+
+        expect(
+            $maintenanceMode->data()
+        )->toMatchArray(
+            $existingPayload
+        );
+    } finally {
+        $maintenanceMode->deactivate();
+    }
 });

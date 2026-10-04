@@ -7,6 +7,11 @@ use RuntimeException;
 class SystemWriteLock
 {
     /**
+     * @var resource|null
+     */
+    private $requestSharedHandle = null;
+
+    /**
      * @return resource
      */
     public function acquireShared(
@@ -30,8 +35,66 @@ class SystemWriteLock
         );
     }
 
+    public function acquireRequestShared(): void
+    {
+        if (is_resource($this->requestSharedHandle)) {
+            throw new RuntimeException(
+                'Die Request-Schreibsperre ist bereits aktiv.'
+            );
+        }
+
+        $this->requestSharedHandle =
+            $this->acquireShared();
+    }
+
+    public function suspendRequestShared(): bool
+    {
+        if (! is_resource($this->requestSharedHandle)) {
+            return false;
+        }
+
+        if (! flock(
+            $this->requestSharedHandle,
+            LOCK_UN
+        )) {
+            throw new RuntimeException(
+                'Die Request-Schreibsperre konnte nicht '
+                .'vorübergehend freigegeben werden.'
+            );
+        }
+
+        return true;
+    }
+
+    public function resumeRequestShared(): void
+    {
+        if (! is_resource($this->requestSharedHandle)) {
+            throw new RuntimeException(
+                'Die Request-Schreibsperre kann nicht '
+                .'wiederhergestellt werden.'
+            );
+        }
+
+        if (! flock(
+            $this->requestSharedHandle,
+            LOCK_SH
+        )) {
+            throw new RuntimeException(
+                'Die Request-Schreibsperre konnte nicht '
+                .'wiederhergestellt werden.'
+            );
+        }
+    }
+
+    public function releaseRequestShared(): void
+    {
+        $handle = $this->requestSharedHandle;
+        $this->requestSharedHandle = null;
+        $this->release($handle);
+    }
+
     /**
-     * @param  resource  $handle
+     * @param  resource|null  $handle
      */
     public function release(
         $handle

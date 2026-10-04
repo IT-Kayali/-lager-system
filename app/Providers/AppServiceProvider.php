@@ -6,6 +6,7 @@ use App\Console\LockedSchemaCommand;
 use App\Models\Offer;
 use App\Observers\OfferWalletObserver;
 use App\Services\SystemBackupService;
+use App\Services\SystemWriteLock;
 use App\Support\SortableTables;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Console\Migrations\FreshCommand;
@@ -27,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->singleton(SystemWriteLock::class);
         $this->app->singleton(SystemBackupService::class);
 
         foreach ([
