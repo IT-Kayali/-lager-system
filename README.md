@@ -4,6 +4,10 @@ Internes Lagerverwaltungs-, Vertriebs- und Dokumentensystem auf Basis von Larave
 
 Das System verbindet Produkt- und Chargenverwaltung, FIFO-Lagerlogik, Kunden und Lieferanten, Filialausgänge, Angebote/Rechnungen, PDF-Dokumente, Preislogik, Reservierungen, Warnungen, Statistik sowie rollenbasierte Arbeitsabläufe.
 
+> **Verbindlicher Dokumentationshinweis:** Nach jeder erfolgreich getesteten und übernommenen Änderung muss diese `README.md` im selben Arbeitsablauf geprüft und – sobald der dokumentierte Funktions-, Security-, Betriebs- oder Produktionsstand betroffen ist – aktualisiert werden. Ein Arbeitspaket gilt erst als abgeschlossen, wenn Implementierung/Produktion und README auf demselben Stand sind.
+
+**Repository:** `IT-Kayali/Lager-System`
+
 ## Aktueller Funktionsumfang
 
 ### Produkte
@@ -219,6 +223,70 @@ Administrativ konfigurierbar sind unter anderem:
 - Login-Darstellung
 - Button-/UI-Darstellung
 - Dokumentvorlagen
+- Datenbank-Backup-Konfiguration für automatische Intervalle und Aufbewahrung
+
+### Datenbank-Backups & Wiederherstellung
+
+Seit **04.10.2026** ist die Admin-Backupverwaltung aus Pull Request **#133** produktiv. Der Funktions-Deploy wurde über Merge-Commit `bcb9f1642768012ea598415135a0ce446aa01a50` ausgerollt und anschließend auf Produktion geprüft.
+
+Umgesetzt:
+
+- ausschließlich **Admins** dürfen Backup- und Restore-Aktionen ausführen
+- manuelle vollständige MySQL-Datenbank-Backups über die Einstellungen
+- automatische Backups über den Laravel-Scheduler
+- unterstützte Intervalle:
+  - alle **6 Stunden**
+  - alle **12 Stunden**
+  - **täglich**
+  - **wöchentlich**
+- konfigurierbare Aufbewahrung automatischer Backups von **1 bis 90**
+- manuelle Backups und Vor-Restore-Sicherheitskopien werden von der automatischen Retention nicht entfernt
+- private Ablage unter `storage/app/private/system-backups/`
+- vorhandene Backups können im Admin-Bereich aufgelistet, heruntergeladen und gelöscht werden
+- Backup-Löschen und Retention sind mit Backup-/Restore-Operationen serialisiert
+- Wiederherstellung im Browser nur nach:
+  - aktuellem Admin-Passwort
+  - exakter Bestätigungsphrase
+  - ausdrücklicher Sicherheitsbestätigung
+- vor jedem Restore wird automatisch ein **Pre-Restore-Sicherheitsbackup** des aktuellen Datenbankzustands erzeugt
+- Restore läuft im Wartungsmodus; ein bereits vorher aktiver Wartungsmodus wird erhalten und nicht versehentlich beendet
+- bei Restore-Fehlern wird automatisch versucht, das unmittelbar zuvor erzeugte Sicherheitsbackup zurückzuspielen
+- bei fehlgeschlagenem Restore **und** fehlgeschlagenem Rollback bleibt das System aus Sicherheitsgründen im Wartungsmodus
+- Backup-Dateien werden vor Veröffentlichung bzw. Restore auf Integrität geprüft:
+  - vollständige gzip-Schreibvorgänge
+  - erfolgreicher gzip-Abschluss
+  - gzip-Integrität
+  - Dump-Endemarkierung
+  - SHA256
+  - vollständiges Manifest
+- jedes neue Backup enthält einen Fingerprint des Laravel-Migrationsstands
+- Backups ohne passenden Schema-Fingerprint werden vor Wartungsmodus und Datenbankänderung abgelehnt
+- schemaändernde Artisan-Kommandos wie `migrate`, `migrate:rollback`, `migrate:reset`, `migrate:refresh`, `migrate:fresh`, `migrate:install` und `db:wipe` verwenden denselben Operations-Lock wie Backup/Restore
+- HTTP-Requests und Scheduler-Schreibvorgänge werden über einen Shared/Exclusive-System-Write-Lock koordiniert
+- Restore-Requests bleiben außerhalb des exklusiven Restore-Fensters durch den Shared-Lock geschützt
+- MySQL-Client-Konfiguration berücksichtigt die effektive Laravel-Verbindung einschließlich `DB_URL`
+- konfigurierte MySQL-SSL-CA wird an `mysqldump` und `mysql` weitergegeben
+- Dumps werden mit `--set-gtid-purged=OFF` erzeugt
+- Datenbank-Sessions werden nach erfolgreichem Restore verworfen; der ausführende Admin wird ausgeloggt
+- Audit-Fehler können einen bereits erfolgreich erstellten Backup-, Restore- oder Löschvorgang nicht nachträglich als fehlgeschlagen darstellen
+- der Scheduler enthält produktiv:
+  - `*/5 * * * * php artisan reservations:release-expired`
+  - `* * * * * php artisan system:backup --automatic`
+
+Produktiv bestätigt am **04.10.2026**:
+
+- Pre-Deployment-Datenbanksicherung erfolgreich erstellt und per gzip-Endetest geprüft
+- Deployment auf PR #133 erfolgreich
+- `php artisan migrate --force`: **Nothing to migrate**
+- Route-, Config- und Blade-Cache erfolgreich aufgebaut
+- erstes verwaltetes Produktionsbackup erfolgreich erstellt und verifiziert:
+  - `lager-manual-20261004-155731-7ce5fe76.sql.gz`
+  - Größe: **30,3 KB**
+  - SHA256: `aa6b5a2b5da8f9994d40173159f896e97aabf391fac5ccea8372d6f0cca2ffb8`
+- Anwendung nach Deployment wieder live
+- HTTP antwortet erwartungsgemäß mit **308** auf HTTPS
+- Login-Seite ist nach Redirect mit **HTTP 200** erreichbar
+- finaler Produktionscheck: **PR #133 PRODUKTIV UND FUNKTIONSFÄHIG**
 
 ## Rollen & Rechte
 
@@ -320,14 +388,14 @@ Die Produkt- und Chargensortierung unterstützt auch numerisch benannte Produkte
 
 ## Security-Hardening-Status
 
-Stand: **20.09.2026**
+Stand: **04.10.2026**
 
 Die Security-Arbeiten werden bewusst in getrennten Phasen mit Sicherungen, isolierten Tests und Rückfallpunkten durchgeführt. Ziel ist, Sicherheitsverbesserungen ohne unnötige Unterbrechung des Produktionssystems einzuführen.
 
 
 ### Aktueller Produktions- und CSP-Stand
 
-Maßgeblich ist der produktive Stand vom **20.09.2026** einschließlich des erfolgreich browsergetesteten Phase-4G.2-Sammelstandes in Pull Request **#130**. Die weiter unten aufgeführten Unterphasen dokumentieren teilweise bewusst den jeweiligen historischen Zwischenstand zum damaligen Datum.
+Maßgeblich ist der produktive Stand vom **04.10.2026** im Repository **`IT-Kayali/Lager-System`**. Zusätzlich zum weiterhin gültigen CSP-/Security-Stand ist die vollständige Admin-Backupverwaltung aus Pull Request **#133** produktiv ausgerollt und technisch geprüft. Die weiter unten aufgeführten Unterphasen dokumentieren teilweise bewusst den jeweiligen historischen Zwischenstand zum damaligen Datum.
 
 Aktuell produktiv bestätigt:
 
@@ -339,6 +407,10 @@ Aktuell produktiv bestätigt:
 - JavaScript-CSP ist vollständig verschärft: `script-src 'self'` wird im echten Enforcement erzwungen
 - in den getrackten produktiven Browser-Views wurden echte Inline-Scripts, Inline-Event-Handler und `javascript:`-URLs auf **0** reduziert
 - Style-CSP ist noch in Arbeit; `style-src` wird noch **nicht** scharf erzwungen
+- Admin-Backupverwaltung mit manuellen und automatischen MySQL-Backups ist produktiv
+- Browser-Restore mit Pre-Restore-Sicherheitsbackup, Integritätsprüfung, Schema-Fingerprint, Locking und automatischem Rollback ist produktiv
+- Scheduler für automatische Backups ist produktiv aktiv
+- echter Produktions-Backup-/Restore-E2E wurde vor Merge erfolgreich geprüft; nach Deployment wurde zusätzlich ein echtes Produktionsbackup erstellt und verifiziert
 
 Aktueller Enforcement-Header:
 
@@ -719,7 +791,7 @@ Die folgenden Punkte gelten als **Pflichtprogramm** und werden vor optionalen Zu
 5. **Dateisystem und `.env` prüfen:** Owner, Rechte, Webroot, `storage`, `bootstrap/cache` und Schutz sensibler Konfigurationsdateien.
 6. **Upload-Sicherheit prüfen:** Logos, Hintergründe und weitere Uploads auf Dateityp, MIME, Größe, Ablageort und öffentliche Erreichbarkeit prüfen.
 7. **Dependency-Sicherheit prüfen:** `composer audit` und `npm audit`; Updates nur kontrolliert und mit Regressionstests übernehmen.
-8. **Backup und echten Restore testen:** nicht nur Sicherungen erzeugen, sondern Datenbank- und Dateiwiederherstellung praktisch verifizieren.
+8. **Backup-Betrieb überwachen:** automatische Sicherungen, Retention, Speicherverbrauch, Audit-Logs und Wiederherstellbarkeit im laufenden Betrieb regelmäßig kontrollieren.
 9. **Logs und Datenschutz prüfen:** Logs auf Secrets, Tokens, personenbezogene oder unnötig sensible Daten untersuchen und Aufbewahrung bewerten.
 10. **Security-Header final prüfen:** aktive Header, CSP und TLS-Konfiguration noch einmal als Gesamtpaket validieren.
 11. **Vollständigen Regressionstest durchführen:** Produkte, Chargen/FIFO, Kunden, Lieferanten, Angebote, PDFs, Filialausgänge, Rollen, Statistik, Warnungen, Einstellungen und Benachrichtigungen.
@@ -901,6 +973,8 @@ Die Datei `.env.example` darf und soll als Vorlage im Repository bleiben.
 ### Verbindliche README-Pflege
 
 Die `README.md` ist Bestandteil jeder erfolgreich abgeschlossenen Änderung und muss den tatsächlichen Stand von `main` widerspiegeln.
+
+> **Hinweis – verpflichtend:** Nach **jeder erfolgreichen Änderung** muss die README im Closeout geprüft werden. Sobald sich Funktionen, Security, Betrieb, Deployment, offene Punkte oder Produktionsstatus geändert haben, muss die README **direkt mit aktualisiert** werden. Erfolgreich umgesetzt, aber nicht dokumentiert, gilt als **nicht vollständig abgeschlossen**.
 
 Ab sofort gilt verbindlich:
 
